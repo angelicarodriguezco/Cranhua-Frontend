@@ -19,4 +19,7 @@ const contenido = `export const environment = {
 };
 `;
 
-fs.writeFileSync(path.join(raiz, 'src/environments/environment.ts'), contenido);
+// La carpeta no está en el repo porque solo tiene el archivo generado
+const carpeta = path.join(raiz, 'src/environments');
+fs.mkdirSync(carpeta, { recursive: true });
+fs.writeFileSync(path.join(carpeta, 'environment.ts'), contenido);
