@@ -6,10 +6,10 @@ Angular 19 con @angular/google-maps. Requiere Node 20.11.1.
 
 ```bash
 npm install
-cp src/environments/environment.example.ts src/environments/environment.ts
+cp .env.example .env
 ```
 
-En `environment.ts` poner la API key de Google Maps. Ese archivo está en `.gitignore` y no se sube.
+En `.env` poner la API key de Google Maps en `GOOGLE_MAPS_API_KEY`. El `.env` no se sube. `npm start`, `npm run build` y `npm test` generan `src/environments/environment.ts` a partir de ese valor.
 
 ## Correr
 

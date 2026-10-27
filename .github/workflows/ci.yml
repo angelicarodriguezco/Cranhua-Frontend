@@ -76,9 +76,6 @@ jobs:
             npm install
           fi
 
-      - name: Create environment
-        run: cp src/environments/environment.example.ts src/environments/environment.ts
-
       - name: Test
         run: npm run test:ci
 
@@ -102,9 +99,6 @@ jobs:
           else
             npm install
           fi
-
-      - name: Create environment
-        run: cp src/environments/environment.example.ts src/environments/environment.ts
 
       - name: Build
         run: npm run build

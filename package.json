@@ -6,11 +6,15 @@
   },
   "scripts": {
     "ng": "ng",
+    "prestart": "node scripts/generar-environment.js",
     "start": "ng serve",
+    "prebuild": "node scripts/generar-environment.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
+    "pretest": "node scripts/generar-environment.js",
     "test": "ng test",
     "lint": "ng lint",
+    "pretest:ci": "node scripts/generar-environment.js",
     "test:ci": "ng test --watch=false --browsers=ChromeHeadless",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

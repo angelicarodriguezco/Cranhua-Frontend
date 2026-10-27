@@ -41,5 +41,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# API key de Google Maps (copiar desde environment.example.ts)
+# API key de Google Maps y environment generado desde .env
+/.env
 /src/environments/environment.ts
