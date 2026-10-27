@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.11.1'
           cache: npm
 
       - name: Install dependencies
@@ -41,7 +41,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.11.1'
           cache: npm
 
       - name: Install dependencies
@@ -65,7 +65,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.11.1'
           cache: npm
 
       - name: Install dependencies
@@ -76,8 +76,11 @@ jobs:
             npm install
           fi
 
+      - name: Create environment
+        run: cp src/environments/environment.example.ts src/environments/environment.ts
+
       - name: Test
-        run: npm test
+        run: npm run test:ci
 
   build:
     name: Build
@@ -89,7 +92,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.11.1'
           cache: npm
 
       - name: Install dependencies
@@ -99,6 +102,9 @@ jobs:
           else
             npm install
           fi
+
+      - name: Create environment
+        run: cp src/environments/environment.example.ts src/environments/environment.ts
 
       - name: Build
         run: npm run build
