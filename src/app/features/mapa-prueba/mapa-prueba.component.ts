@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { GoogleMap } from '@angular/google-maps';
 import { catchError, map, of } from 'rxjs';
 
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-mapa-prueba',

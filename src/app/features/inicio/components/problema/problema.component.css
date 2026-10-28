@@ -1,0 +1,89 @@
+.problema {
+  padding: 6rem 1.5rem;
+  text-align: center;
+}
+
+.problema__titulo {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-headline-large-size);
+  font-weight: var(--md-sys-typescale-headline-large-weight);
+  line-height: var(--md-sys-typescale-headline-large-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-large-tracking);
+  color: var(--color-gold);
+}
+
+.problema__subtitulo {
+  margin: 1.25rem auto 0;
+  max-width: 28rem;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: var(--md-sys-typescale-headline-medium-weight);
+  line-height: var(--md-sys-typescale-headline-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
+  color: var(--color-text);
+}
+
+.problema__intro {
+  margin: 1.25rem auto 0;
+  max-width: 40rem;
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  letter-spacing: var(--md-sys-typescale-body-large-tracking);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.problema__rejilla {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+  list-style: none;
+  margin: 3.5rem auto 0;
+  padding: 0;
+  max-width: 56rem;
+}
+
+.problema__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.problema__marcador {
+  display: block;
+  width: 0.65rem;
+  height: 0.65rem;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  background: var(--color-gold);
+  box-shadow: 0 0 0 6px rgba(201, 162, 39, 0.2);
+}
+
+.problema__item-titulo {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: var(--md-sys-typescale-headline-small-weight);
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+  letter-spacing: var(--md-sys-typescale-headline-small-tracking);
+  color: var(--color-text);
+}
+
+.problema__item-texto {
+  margin: 0.75rem 0 0;
+  max-width: 16rem;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-sys-typescale-body-medium-weight);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+  .problema__rejilla {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    max-width: 22rem;
+  }
+}
