@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
+import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 
 export const routes: Routes = [
@@ -13,5 +14,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Iniciar Sesión' },
   },
+  { path: 'onboarding-finca', component: OnboardingFincaComponent },
+  { path: 'dashboard', component: PaginaMockComponent, data: { title: 'Dashboard' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
 ];

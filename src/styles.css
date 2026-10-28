@@ -3,6 +3,14 @@
   --color-gold-light: #d4af37;
   --color-text: #ffffff;
   --color-overlay: rgba(8, 50, 62, 0.6);
+  --color-text-muted: rgba(255, 255, 255, 0.7);
+  --color-surface: rgba(255, 255, 255, 0.05);
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-control: #0e3b47;
+  --color-field: #a9b3ae;
+  --color-field-text: #142320;
+  --color-error: #f2a7b5;
+  --color-error-bg: #4b0311;
   --font-family: 'Roboto', system-ui, sans-serif;
 
   --md-sys-typescale-headline-large-size: 2rem;
