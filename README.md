@@ -17,7 +17,7 @@ En `.env` poner la API key de Google Maps en `GOOGLE_MAPS_API_KEY`. El `.env` no
 npm start
 ```
 
-Abrir http://localhost:4200. La ruta `/mapa-prueba` muestra un mapa de prueba.
+Abrir http://localhost:4200. La ruta `/mapa-prueba` muestra un mapa de prueba y `/onboarding-finca` el registro de la primera finca del cafetalero, con datos de ejemplo de `src/app/core/mocks/finca.mock.ts`.
 
 ## Probar
 
