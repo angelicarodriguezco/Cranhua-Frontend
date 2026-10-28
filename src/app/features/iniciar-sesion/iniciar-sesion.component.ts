@@ -38,8 +38,7 @@ export class IniciarSesionComponent {
     }
 
     const correo = this.form.controls.correo.value.trim().toLowerCase();
-    const usuario =
-      USUARIOS.find((u) => u.correo.toLowerCase() === correo) ?? USUARIO_ACTUAL;
+    const usuario = USUARIOS.find((u) => u.correo.toLowerCase() === correo) ?? USUARIO_ACTUAL;
 
     this.sesion.iniciarSesion(usuario);
     void this.router.navigateByUrl('/dashboard');
