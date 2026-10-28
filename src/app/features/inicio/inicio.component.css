@@ -1,0 +1,22 @@
+.inicio {
+  position: relative;
+  min-height: 100vh;
+  background-image: url('/images/landing-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.inicio__overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-overlay);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.inicio__contenido {
+  position: relative;
+  z-index: 1;
+}

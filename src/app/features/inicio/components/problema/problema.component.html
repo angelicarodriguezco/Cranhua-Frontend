@@ -1,0 +1,19 @@
+<section id="el-problema" class="problema" aria-labelledby="problema-titulo">
+  <h2 id="problema-titulo" class="problema__titulo">El problema</h2>
+  <p class="problema__subtitulo">La trazabilidad se pierde entre la finca y la taza</p>
+  <p class="problema__intro">
+    Hoy es difícil saber con certeza de dónde viene el café que consumimos, quién lo cosechó y cómo
+    se procesó. Esa información se pierde en el camino, y con ella el valor del trabajo de quienes
+    lo producen.
+  </p>
+
+  <ul class="problema__rejilla">
+    @for (punto of puntos; track punto.titulo) {
+      <li class="problema__item">
+        <span class="problema__marcador" aria-hidden="true"></span>
+        <h3 class="problema__item-titulo">{{ punto.titulo }}</h3>
+        <p class="problema__item-texto">{{ punto.texto }}</p>
+      </li>
+    }
+  </ul>
+</section>

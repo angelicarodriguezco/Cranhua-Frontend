@@ -1,0 +1,16 @@
+<section id="equipo" class="equipo" aria-labelledby="equipo-titulo">
+  <h2 id="equipo-titulo" class="equipo__titulo">Conoce al equipo</h2>
+  <p class="equipo__intro">Las personas detrás de Crán̈hua</p>
+
+  <ul class="equipo__rejilla">
+    @for (miembro of miembros; track miembro.iniciales) {
+      <li class="equipo__tarjeta">
+        <div class="equipo__foto" aria-hidden="true">
+          <span class="equipo__iniciales">{{ miembro.iniciales }}</span>
+        </div>
+        <h3 class="equipo__nombre">{{ miembro.nombre }}</h3>
+        <p class="equipo__rol">{{ miembro.rol }}</p>
+      </li>
+    }
+  </ul>
+</section>
