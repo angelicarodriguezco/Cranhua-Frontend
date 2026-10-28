@@ -3,7 +3,7 @@
   --color-gold-light: #d4af37;
   --color-text: #ffffff;
   --color-overlay: rgba(8, 50, 62, 0.6);
-  --font-family: "Roboto", system-ui, sans-serif;
+  --font-family: 'Roboto', system-ui, sans-serif;
 
   --md-sys-typescale-headline-large-size: 2rem;
   --md-sys-typescale-headline-large-line-height: 2.5rem;

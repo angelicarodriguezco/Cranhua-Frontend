@@ -21,8 +21,7 @@ export class ComoFuncionaComponent {
     {
       num: '03',
       titulo: 'Servir',
-      texto:
-        'La cafetería publica ese código junto al café que sirve a sus clientes.',
+      texto: 'La cafetería publica ese código junto al café que sirve a sus clientes.',
     },
     {
       num: '04',

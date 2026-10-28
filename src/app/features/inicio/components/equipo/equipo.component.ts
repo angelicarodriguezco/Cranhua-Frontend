@@ -10,7 +10,7 @@ export class EquipoComponent {
     {
       iniciales: 'CH',
       nombre: 'Chris Andy Huang Ramírez',
-      rol: 'Coordinador de Desarrollo'
+      rol: 'Coordinador de Desarrollo',
     },
     {
       iniciales: 'JC',
