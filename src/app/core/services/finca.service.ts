@@ -2,7 +2,14 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { CANTONES, FINCAS_REGISTRADAS, USUARIOS } from '../mocks/finca.mock';
-import { Canton, Coordenada, NuevaFinca, ResultadoRegistro, Usuario } from '../models/finca.model';
+import {
+  Canton,
+  Coordenada,
+  Finca,
+  NuevaFinca,
+  ResultadoRegistro,
+  Usuario,
+} from '../models/finca.model';
 import { distanciaKm, seSuperponen } from '../../shared/utils/geo';
 
 // Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
@@ -54,5 +61,17 @@ export class FincaService {
       CANTONES.find((c) => normalizar(c.nombre) === buscado) ??
       CANTONES.find((c) => normalizar(c.nombre).startsWith(buscado))
     );
+  }
+
+  misFincas(usuarioId: string): Observable<Finca[]> {
+    return of(
+      this.fincas.filter(
+        (f) => f.propietarioId === usuarioId || f.duenosAdicionales.some((u) => u.id === usuarioId),
+      ),
+    );
+  }
+
+  obtener(id: string): Observable<Finca | undefined> {
+    return of(this.fincas.find((f) => f.id === id));
   }
 }

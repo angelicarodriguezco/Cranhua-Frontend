@@ -1,0 +1,11 @@
+<a class="tarjeta" [routerLink]="['/cafetalero/fincas', finca().id]">
+  <h2 class="tarjeta__nombre">{{ finca().nombre }}</h2>
+  <p class="tarjeta__dato">
+    @if (finca().canton; as canton) {
+      {{ canton.nombre }}, {{ canton.provincia }}
+    } @else {
+      Sin cantón de referencia
+    }
+  </p>
+  <p class="tarjeta__dato">{{ finca().zona ?? 'Zona sin especificar' }} · {{ area() }}</p>
+</a>
