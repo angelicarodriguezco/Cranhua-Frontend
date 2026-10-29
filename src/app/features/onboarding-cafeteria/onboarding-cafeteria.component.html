@@ -1,0 +1,54 @@
+<div class="onboarding">
+  <header>
+    <img
+      class="onboarding__logo"
+      src="/images/logo-cranhua.png"
+      alt="Crán̈hua"
+      width="647"
+      height="117"
+    />
+  </header>
+
+  <main class="onboarding__contenido">
+    <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
+      @for (p of pasos; track p) {
+        <li
+          class="pasos__punto"
+          [class.pasos__punto--activo]="$index === indicePaso()"
+          [attr.aria-current]="$index === indicePaso() ? 'step' : null"
+        ></li>
+      }
+    </ol>
+
+    @switch (paso()) {
+      @case ('bienvenida') {
+        <app-bienvenida-cafeteria [nombre]="usuario().nombre" (empezar)="paso.set('datos')" />
+      }
+      @case ('datos') {
+        <app-datos-cafeteria
+          [formulario]="formularioDatos"
+          [(pin)]="pin"
+          [canton]="canton()"
+          [intentoContinuar]="intentoContinuar()"
+          (continuar)="continuar()"
+          (atras)="paso.set('bienvenida')"
+        />
+      }
+      @case ('preferencias') {
+        <app-preferencias-cafeteria
+          [formulario]="formularioPreferencias"
+          [editando]="registrada() !== null"
+          (guardar)="guardar()"
+          (atras)="paso.set('datos')"
+        />
+      }
+      @case ('confirmacion') {
+        <app-confirmacion-cafeteria
+          [cafeteria]="registrada()!"
+          (irAlDashboard)="irAlDashboard()"
+          (editar)="paso.set('datos')"
+        />
+      }
+    }
+  </main>
+</div>
