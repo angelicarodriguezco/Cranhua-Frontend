@@ -1,0 +1,65 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 33rem;
+  text-align: center;
+}
+
+.icono {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 1.25rem;
+  border-radius: 50%;
+  background: rgba(201, 162, 39, 0.18);
+}
+
+.icono svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.texto {
+  margin-top: 0.75rem;
+}
+
+.instrucciones {
+  counter-reset: paso;
+  display: grid;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 1.75rem 0 2.25rem;
+  padding: 0 0.5rem;
+  list-style: none;
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  text-align: left;
+}
+
+.instrucciones li {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.instrucciones li::before {
+  counter-increment: paso;
+  content: counter(paso);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.125rem;
+  height: 1.125rem;
+  border-radius: 50%;
+  background: rgba(201, 162, 39, 0.25);
+  color: var(--color-gold-light);
+  font-size: 0.625rem;
+  font-weight: 500;
+}
