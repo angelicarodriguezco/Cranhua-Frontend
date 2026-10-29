@@ -1,0 +1,229 @@
+/* Tema claro (prototipo de día). El oscuro solo cambia estos valores. */
+:host {
+  --fondo: url('/images/registrar-finca-dia.jpg') center / cover #6f8fa8;
+  --vidrio-fondo: rgba(255, 255, 255, 0.55);
+  --vidrio-borde: rgba(255, 255, 255, 0.7);
+  --vidrio-texto: #1c2a26;
+  --vidrio-texto-suave: rgba(28, 42, 38, 0.72);
+  --vidrio-campo: rgba(255, 255, 255, 0.8);
+  --vidrio-error: #a3243b;
+  --vidrio-dorado: #946c00;
+  --vidrio-esquema: light;
+  --aviso-fondo: rgba(255, 255, 255, 0.55);
+
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+@media (prefers-color-scheme: dark) {
+  :host {
+    --fondo: url('/images/registrar-finca-noche.jpg') center / cover #1d1b45;
+    --vidrio-fondo: rgba(10, 32, 42, 0.72);
+    --vidrio-borde: rgba(255, 255, 255, 0.12);
+    --vidrio-texto: #ffffff;
+    --vidrio-texto-suave: rgba(255, 255, 255, 0.7);
+    --vidrio-campo: rgba(255, 255, 255, 0.08);
+    --vidrio-error: #f2a7b5;
+    --vidrio-dorado: var(--color-gold-light);
+    --vidrio-esquema: dark;
+    --aviso-fondo: rgba(75, 3, 17, 0.55);
+  }
+}
+
+.menu {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.contenido {
+  padding: 2rem 2.5rem 2.5rem;
+  background: var(--fondo);
+}
+
+/* Las piezas del onboarding leen estas variables, así que se redefinen sobre el vidrio */
+.vidrio {
+  --color-text: var(--vidrio-texto);
+  --color-text-muted: var(--vidrio-texto-suave);
+  --color-surface: var(--vidrio-fondo);
+  --color-border: var(--vidrio-borde);
+  --color-field: var(--vidrio-campo);
+  --color-field-text: var(--vidrio-texto);
+  --color-field-placeholder: var(--vidrio-texto-suave);
+  --color-error: var(--vidrio-error);
+  --color-gold-light: var(--vidrio-dorado);
+
+  border-radius: 14px;
+  color: var(--color-text);
+  color-scheme: var(--vidrio-esquema);
+  backdrop-filter: blur(18px);
+}
+
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.encabezado__titulo {
+  margin: 0;
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: 400;
+  line-height: var(--md-sys-typescale-headline-small-line-height);
+}
+
+.encabezado__texto {
+  margin: 0.25rem 0 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--color-text-muted);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.volver:hover {
+  color: var(--color-gold-light);
+}
+
+.volver svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icono-alerta {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: currentColor;
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
+  border: 1px solid var(--vidrio-borde);
+  background: var(--aviso-fondo);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.aviso__texto {
+  flex: 1;
+}
+
+.aviso__cerrar {
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.aviso__cerrar:hover,
+.conflicto__corregir:hover {
+  background: rgba(127, 127, 127, 0.2);
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  gap: 1.25rem;
+}
+
+.editor__mapa {
+  min-height: 36rem;
+}
+
+.conflicto {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: 1.4rem 1.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+}
+
+.conflicto p {
+  margin: 0;
+}
+
+.conflicto__titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: 400;
+  color: var(--color-error);
+}
+
+.conflicto__corregir {
+  padding: 0.7rem 1.6rem;
+  border: 1.5px solid var(--color-text-muted);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+}
+
+.confirmacion {
+  max-width: 28rem;
+  margin: 1rem auto 0;
+  padding: 2rem 2.25rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+@media (max-width: 900px) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .menu {
+    position: static;
+    height: auto;
+  }
+
+  .contenido {
+    padding: 1.25rem 1rem 2rem;
+  }
+
+  .editor {
+    grid-template-columns: 1fr;
+  }
+
+  .editor__mapa {
+    min-height: 26rem;
+  }
+}
