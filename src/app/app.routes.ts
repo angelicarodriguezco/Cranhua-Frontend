@@ -5,6 +5,7 @@ import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
+import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 
@@ -26,4 +27,10 @@ export const routes: Routes = [
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'dashboard', component: PaginaMockComponent, data: { title: 'Dashboard' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
+  { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
+  {
+    path: 'tostador/dashboard',
+    component: PaginaMockComponent,
+    data: { title: 'Dashboard del tostador' },
+  },
 ];

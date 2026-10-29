@@ -1,0 +1,147 @@
+<form class="formulario" [formGroup]="formulario()" (ngSubmit)="enviar()" novalidate>
+  <h1 class="formulario__titulo">Registrá tu negocio de tueste</h1>
+  <p class="formulario__texto">
+    Contanos sobre tu tostaduría para que los cafetaleros puedan encontrarte al explorar cosechas.
+  </p>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="nombre-negocio">Nombre del negocio</label>
+    <input
+      id="nombre-negocio"
+      class="campo__control"
+      formControlName="nombre"
+      placeholder="Ej. Tostaduría Volcán"
+      maxlength="80"
+      autocomplete="organization"
+      [attr.aria-invalid]="invalido('nombre')"
+      [attr.aria-describedby]="invalido('nombre') ? 'error-nombre' : null"
+    />
+    @if (invalido('nombre')) {
+      <p id="error-nombre" class="campo__error">Poné el nombre de tu negocio.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="descripcion-negocio">
+      Descripción <span class="campo__opcional">(opcional)</span>
+    </label>
+    <textarea
+      id="descripcion-negocio"
+      class="campo__control"
+      formControlName="descripcion"
+      rows="3"
+      maxlength="300"
+      placeholder="Tu historia, qué tipo de cafés buscás, capacidad de compra…"
+      aria-describedby="contador-descripcion"
+    ></textarea>
+    <p id="contador-descripcion" class="campo__ayuda campo__ayuda--derecha">
+      {{ formulario().controls.descripcion.value.length }}/300
+    </p>
+  </div>
+
+  <div class="fila">
+    <div class="campo">
+      <label class="campo__etiqueta" for="contacto-negocio">Nombre de contacto</label>
+      <input
+        id="contacto-negocio"
+        class="campo__control"
+        formControlName="contacto"
+        placeholder="Ej. Mariana Castro"
+        maxlength="80"
+        autocomplete="name"
+        [attr.aria-invalid]="invalido('contacto')"
+        [attr.aria-describedby]="invalido('contacto') ? 'error-contacto' : null"
+      />
+      @if (invalido('contacto')) {
+        <p id="error-contacto" class="campo__error">Poné quién atiende a los cafetaleros.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="telefono-negocio">Teléfono</label>
+      <input
+        id="telefono-negocio"
+        class="campo__control"
+        type="tel"
+        formControlName="telefono"
+        placeholder="+506 0000-0000"
+        autocomplete="tel"
+        [attr.aria-invalid]="invalido('telefono')"
+        [attr.aria-describedby]="invalido('telefono') ? 'error-telefono' : null"
+      />
+      @if (tieneError('telefono', 'required')) {
+        <p id="error-telefono" class="campo__error">Poné un teléfono de contacto.</p>
+      } @else if (invalido('telefono')) {
+        <p id="error-telefono" class="campo__error">Debe tener 8 dígitos, ej. 8888-8888.</p>
+      }
+    </div>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="correo-negocio">Correo electrónico</label>
+    <input
+      id="correo-negocio"
+      class="campo__control"
+      type="email"
+      formControlName="correo"
+      placeholder="contacto@tunegocio.cr"
+      autocomplete="email"
+      [attr.aria-invalid]="invalido('correo')"
+      [attr.aria-describedby]="invalido('correo') ? 'error-correo' : null"
+    />
+    @if (tieneError('correo', 'required')) {
+      <p id="error-correo" class="campo__error">Poné un correo de contacto.</p>
+    } @else if (invalido('correo')) {
+      <p id="error-correo" class="campo__error">Ese correo no es válido.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <span class="campo__etiqueta">Ubicación</span>
+    <app-mapa-ubicacion [(pin)]="pin" />
+    <p
+      class="ubicacion"
+      [class.ubicacion--vacia]="!canton()"
+      [class.ubicacion--error]="ubicacionInvalida()"
+      aria-live="polite"
+    >
+      @if (canton(); as c) {
+        {{ c.nombre }}, {{ c.provincia }}
+      } @else if (pin()) {
+        El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu tostaduría.
+      } @else {
+        Hacé clic en el mapa para marcar dónde está tu tostaduría.
+      }
+    </p>
+  </div>
+
+  <div class="campo">
+    <span class="campo__etiqueta" id="etiqueta-estilos">Estilos de tueste que ofrecés</span>
+    <div class="estilos" role="group" aria-labelledby="etiqueta-estilos">
+      @for (estilo of estilos; track estilo) {
+        <button
+          type="button"
+          class="estilo"
+          [class.estilo--activo]="seleccionado(estilo)"
+          [attr.aria-pressed]="seleccionado(estilo)"
+          (click)="alternarEstilo(estilo)"
+        >
+          {{ estilo }}
+          @if (seleccionado(estilo)) {
+            <span class="estilo__quitar" aria-hidden="true">×</span>
+          }
+        </button>
+      }
+    </div>
+    @if (invalido('estilos')) {
+      <p class="campo__error">Elegí al menos un estilo de tueste.</p>
+    }
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="cancelar.emit()">Cancelar</button>
+    <button type="submit" class="btn btn--filled">
+      {{ editando() ? 'Guardar cambios' : 'Crear cuenta de tostador' }}
+    </button>
+  </div>
+</form>
