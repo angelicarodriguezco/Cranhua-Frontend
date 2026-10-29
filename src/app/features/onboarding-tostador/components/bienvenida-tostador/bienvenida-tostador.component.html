@@ -1,0 +1,16 @@
+<div class="avatar" aria-hidden="true">{{ inicial() }}</div>
+
+<h1 class="titulo">¡Te damos la bienvenida, {{ nombre().trim() }}!</h1>
+<p class="texto">
+  Antes de explorar las cosechas disponibles, registremos tu negocio de tueste. Esto le da a tu
+  tostaduría un perfil verificable dentro de Crán̈hua para que los cafetaleros puedan encontrarte y
+  vender directamente contigo.
+</p>
+
+<ol class="instrucciones">
+  <li>Contanos el nombre de tu negocio y cómo podemos contactarte.</li>
+  <li>Marcá en el mapa dónde está tu tostaduría para conectarte con cafetaleros cercanos.</li>
+  <li>Elegí los estilos de tueste que ofrecés.</li>
+</ol>
+
+<button type="button" class="btn btn--filled" (click)="empezar.emit()">Empezar a registrar</button>

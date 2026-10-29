@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
+import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 
 export const routes: Routes = [
@@ -14,4 +15,10 @@ export const routes: Routes = [
     data: { title: 'Iniciar Sesión' },
   },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
+  { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
+  {
+    path: 'tostador/dashboard',
+    component: PaginaMockComponent,
+    data: { title: 'Dashboard del tostador' },
+  },
 ];
