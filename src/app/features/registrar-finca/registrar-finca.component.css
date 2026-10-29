@@ -1,6 +1,6 @@
 /* Tema claro (prototipo de día). El oscuro solo cambia estos valores. */
 :host {
-  --fondo: url('/images/registrar-finca-dia.jpg') center / cover #6f8fa8;
+  --fondo: url('/images/dashboard-cafetalero-bg-claro.jpg') center / cover #6f8fa8;
   --vidrio-fondo: rgba(255, 255, 255, 0.55);
   --vidrio-borde: rgba(255, 255, 255, 0.7);
   --vidrio-texto: #1c2a26;
@@ -11,33 +11,28 @@
   --vidrio-esquema: light;
   --aviso-fondo: rgba(255, 255, 255, 0.55);
 
+  /* Mismo armado que el dashboard: el menú queda fijo y solo el contenido hace scroll */
   display: grid;
-  grid-template-columns: 15rem minmax(0, 1fr);
-  min-height: 100vh;
+  grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  :host {
-    --fondo: url('/images/registrar-finca-noche.jpg') center / cover #1d1b45;
-    --vidrio-fondo: rgba(10, 32, 42, 0.72);
-    --vidrio-borde: rgba(255, 255, 255, 0.12);
-    --vidrio-texto: #ffffff;
-    --vidrio-texto-suave: rgba(255, 255, 255, 0.7);
-    --vidrio-campo: rgba(255, 255, 255, 0.08);
-    --vidrio-error: #f2a7b5;
-    --vidrio-dorado: var(--color-gold-light);
-    --vidrio-esquema: dark;
-    --aviso-fondo: rgba(75, 3, 17, 0.55);
-  }
-}
-
-.menu {
-  position: sticky;
-  top: 0;
-  height: 100vh;
+:host([data-theme='oscuro']) {
+  --fondo: url('/images/dashboard-cafetalero-bg-oscuro.jpg') center / cover #1d1b45;
+  --vidrio-fondo: rgba(10, 32, 42, 0.72);
+  --vidrio-borde: rgba(255, 255, 255, 0.12);
+  --vidrio-texto: #ffffff;
+  --vidrio-texto-suave: rgba(255, 255, 255, 0.7);
+  --vidrio-campo: rgba(255, 255, 255, 0.08);
+  --vidrio-error: #f2a7b5;
+  --vidrio-dorado: var(--color-gold-light);
+  --vidrio-esquema: dark;
+  --aviso-fondo: rgba(75, 3, 17, 0.55);
 }
 
 .contenido {
+  overflow-y: auto;
   padding: 2rem 2.5rem 2.5rem;
   background: var(--fondo);
 }
@@ -208,14 +203,13 @@
 @media (max-width: 900px) {
   :host {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .menu {
-    position: static;
     height: auto;
+    min-height: 100dvh;
+    overflow: visible;
   }
 
   .contenido {
+    overflow: visible;
     padding: 1.25rem 1rem 2rem;
   }
 

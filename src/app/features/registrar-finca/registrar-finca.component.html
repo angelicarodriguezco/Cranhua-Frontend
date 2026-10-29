@@ -1,4 +1,8 @@
-<app-menu-cafetalero class="menu" />
+<app-menu-lateral-cafetalero
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
 
 <main class="contenido">
   <header class="encabezado">

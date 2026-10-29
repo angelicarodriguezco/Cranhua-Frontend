@@ -3,10 +3,11 @@ import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { Coordenada, Finca, Usuario } from '../../core/models/finca.model';
+import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
-import { MenuCafetaleroComponent } from '../../shared/components/menu-cafetalero/menu-cafetalero.component';
 import { areaHectareas, centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
+import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import {
   DetallesFincaComponent,
   crearFormularioFinca,
@@ -23,18 +24,23 @@ type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
   imports: [
     DetallesFincaComponent,
     MapaFincaComponent,
-    MenuCafetaleroComponent,
+    MenuLateralCafetaleroComponent,
     PasoConfirmacionComponent,
   ],
   templateUrl: './registrar-finca.component.html',
   styleUrl: './registrar-finca.component.css',
+  host: { '[attr.data-theme]': 'tema()' },
 })
 export class RegistrarFincaComponent {
   private fincaService = inject(FincaService);
+  private dashboard = inject(DashboardCafetaleroService);
   private router = inject(Router);
   private location = inject(Location);
 
   protected readonly usuario = inject(SesionService).usuario;
+  // El menú y el tema son los del dashboard, así el tema elegido se mantiene al navegar
+  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
+  protected readonly tema = this.dashboard.tema;
 
   protected readonly paso = signal<Paso>('dibujo');
 
@@ -72,6 +78,10 @@ export class RegistrarFincaComponent {
         zona.setValue(canton.zona);
       }
     });
+  }
+
+  protected alternarTema(): void {
+    this.dashboard.alternarTema();
   }
 
   protected volver(): void {
