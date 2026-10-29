@@ -70,12 +70,7 @@
           Ingresá tu correo y te enviaremos un código para restablecer tu contraseña.
         </p>
 
-        <form
-          class="recuperar__form"
-          [formGroup]="formCorreo"
-          (ngSubmit)="mandarOtp()"
-          novalidate
-        >
+        <form class="recuperar__form" [formGroup]="formCorreo" (ngSubmit)="mandarOtp()" novalidate>
           <div class="campo">
             <label class="campo__etiqueta" for="correo-recuperar">Correo electrónico</label>
             <input
@@ -99,7 +94,8 @@
         <h1 class="recuperar__titulo">Ingresá el código</h1>
         <p class="recuperar__descripcion">
           Te enviamos un código a
-          <strong class="recuperar__correo">{{ formCorreo.controls.correo.value }}</strong>.
+          <strong class="recuperar__correo">{{ formCorreo.controls.correo.value }}</strong
+          >.
         </p>
 
         <form
@@ -187,7 +183,9 @@
               formControlName="confirmacion"
               placeholder="••••••••"
               autocomplete="new-password"
-              [attr.aria-invalid]="campoContrasenaInvalido('confirmacion') || contrasenasNoCoinciden()"
+              [attr.aria-invalid]="
+                campoContrasenaInvalido('confirmacion') || contrasenasNoCoinciden()
+              "
               [attr.aria-describedby]="
                 campoContrasenaInvalido('confirmacion') || contrasenasNoCoinciden()
                   ? 'error-confirmacion'
