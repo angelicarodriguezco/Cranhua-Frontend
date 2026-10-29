@@ -1,0 +1,95 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding-top: 2rem;
+  text-align: center;
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 18px;
+  background: var(--color-gold);
+  font-size: var(--md-sys-typescale-title-large-size);
+}
+
+.titulo {
+  margin: 2.25rem 0 0;
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+}
+
+.texto {
+  max-width: 21.25rem;
+  margin: 1.25rem 0 0;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  color: var(--color-text-muted);
+}
+
+.instrucciones {
+  counter-reset: paso;
+  display: grid;
+  gap: 0.875rem;
+  width: 100%;
+  margin: 2.75rem 0 4rem;
+  padding: 0.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  list-style: none;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: var(--md-sys-typescale-body-medium-line-height);
+  text-align: left;
+}
+
+.instrucciones li {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.instrucciones li::before {
+  counter-increment: paso;
+  content: counter(paso);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: rgba(201, 162, 39, 0.18);
+  color: var(--color-gold-light);
+  font-weight: 500;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.6rem;
+  border: 1.5px solid var(--color-gold);
+  border-radius: 999px;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn--filled {
+  background: var(--color-gold);
+  color: #1a1408;
+}
+
+.btn--filled:hover {
+  background: var(--color-gold-light);
+}

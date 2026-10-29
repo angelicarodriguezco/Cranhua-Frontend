@@ -62,9 +62,16 @@ describe('RegistrarFincaComponent', () => {
 
   it('muestra el menú del cafetalero y el formulario con la descripción', () => {
     expect(pagina.querySelector('nav')?.textContent).toContain('Mis fincas');
-    expect(pagina.querySelector('.usuario__nombre')?.textContent).toBe('Rodrigo Solís');
+    expect(pagina.querySelector('.perfil-nombre')?.textContent).toBe('Rodrigo Alvarado');
     expect(pagina.querySelector('#descripcion-finca')?.getAttribute('maxlength')).toBe('300');
     expect(pagina.querySelector('#zona-finca')).not.toBeNull();
+  });
+
+  it('cambia entre tema oscuro y claro desde el menú', () => {
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    fixture.detectChanges();
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
   });
 
   it('toma el cantón y la provincia del pin', () => {
