@@ -1,0 +1,95 @@
+<aside class="menu-lateral">
+  <div class="marca">
+    <img
+      class="logo"
+      src="/images/logo-cranhua.png"
+      alt="Cránhua"
+      width="220"
+      height="52"
+    />
+  </div>
+
+  <nav class="nav-principal" aria-label="Principal">
+    @for (item of navPrincipal; track item.ruta) {
+      <a
+        [routerLink]="item.ruta"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: item.exacto === true }"
+      >
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          @switch (item.icono) {
+            @case ('home') {
+              <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />
+            }
+            @case ('fincas') {
+              <path d="M12 20V11" />
+              <path d="M12 14c-3.5 0-6-2.2-6-5.2 2.8 0 5.2 1.2 6 3.2" />
+              <path d="M12 14c3.5 0 6-2.2 6-5.2-2.8 0-5.2 1.2-6 3.2" />
+              <path d="M12 10.5C10.2 8 9 5.8 9.4 3.8c2.4.4 4 2.4 4.6 4.7" />
+            }
+            @case ('cosecha') {
+              <circle cx="12" cy="12" r="8.25" />
+              <path d="M12 8v8M8 12h8" />
+            }
+            @case ('historial') {
+              <circle cx="12" cy="12" r="8.25" />
+              <path d="M12 7.5V12l3 2" />
+            }
+          }
+        </svg>
+        <span>{{ item.etiqueta }}</span>
+      </a>
+    }
+  </nav>
+
+  <nav class="nav-secundario" aria-label="Cuenta">
+    @for (item of navSecundario; track item.ruta) {
+      <a [routerLink]="item.ruta" routerLinkActive="activo">
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          @switch (item.icono) {
+            @case ('perfil') {
+              <circle cx="12" cy="8" r="3.25" />
+              <path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" />
+            }
+            @case ('logout') {
+              <path d="M10 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19H10" />
+              <path d="M10 12h9M15.5 8.5 19 12l-3.5 3.5" />
+            }
+          }
+        </svg>
+        <span>{{ item.etiqueta }}</span>
+      </a>
+    }
+  </nav>
+
+  <button
+    type="button"
+    class="toggle-tema"
+    (click)="alternarTema.emit()"
+    [attr.aria-label]="
+      tema() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'
+    "
+  >
+    <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      @if (tema() === 'oscuro') {
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2.75v1.75M12 19.5v1.75M4.5 12H2.75M21.25 12H19.5M5.64 5.64l1.24 1.24M17.12 17.12l1.24 1.24M5.64 18.36l1.24-1.24M17.12 6.88l1.24-1.24"
+        />
+      } @else {
+        <path
+          d="M18.5 14.2A7.25 7.25 0 0 1 9.8 5.5 7.5 7.5 0 1 0 18.5 14.2z"
+        />
+      }
+    </svg>
+    <span>Tema {{ tema() === 'oscuro' ? 'claro' : 'oscuro' }}</span>
+  </button>
+
+  <div class="perfil">
+    <span class="avatar" aria-hidden="true">{{ perfil().iniciales }}</span>
+    <div class="perfil-texto">
+      <span class="perfil-nombre">{{ perfil().nombreCompleto }}</span>
+      <span class="perfil-rol">{{ perfil().rol }}</span>
+    </div>
+  </div>
+</aside>
