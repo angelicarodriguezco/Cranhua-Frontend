@@ -139,7 +139,9 @@
   font-weight: 600;
   font-size: 0.875rem;
   box-shadow: 0 10px 24px rgba(165, 112, 8, 0.28);
-  transition: filter 0.15s ease, transform 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.15s ease;
 }
 
 .cta:hover {
@@ -302,7 +304,9 @@
   padding: 0.4rem 0.85rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  transition: filter 0.15s ease, background-color 0.15s ease;
+  transition:
+    filter 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .btn-rechazar {
@@ -376,7 +380,10 @@
   border-color: var(--nueva-finca-border);
   background: transparent;
   min-height: 5.5rem;
-  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
 }
 
 .nueva-finca:hover {
