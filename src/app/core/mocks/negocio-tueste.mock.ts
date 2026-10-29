@@ -1,0 +1,68 @@
+import { Canton, Tostador } from '../models/negocio-tueste.model';
+
+// Datos de ejemplo mientras no existen el login ni el endpoint de negocios de tueste
+
+export const TOSTADOR_ACTUAL: Tostador = {
+  id: 'u-mariana',
+  nombre: 'Mariana',
+  apellidos: 'Castro Rojas',
+  correo: 'mariana.castro@ejemplo.cr',
+};
+
+// Coordenadas aproximadas de la cabecera de cada cantón. Las tostadurías se concentran en el
+// Valle Central, así que ahí la lista es más densa.
+export const CANTONES: Canton[] = [
+  { nombre: 'San José', provincia: 'San José', cabecera: { lat: 9.9333, lng: -84.0833 } },
+  { nombre: 'Escazú', provincia: 'San José', cabecera: { lat: 9.9189, lng: -84.1397 } },
+  { nombre: 'Desamparados', provincia: 'San José', cabecera: { lat: 9.8986, lng: -84.0628 } },
+  { nombre: 'Puriscal', provincia: 'San José', cabecera: { lat: 9.8467, lng: -84.3133 } },
+  { nombre: 'Tarrazú', provincia: 'San José', cabecera: { lat: 9.6575, lng: -84.0247 } },
+  { nombre: 'Aserrí', provincia: 'San José', cabecera: { lat: 9.8586, lng: -84.0911 } },
+  { nombre: 'Mora', provincia: 'San José', cabecera: { lat: 9.9136, lng: -84.2453 } },
+  { nombre: 'Goicoechea', provincia: 'San José', cabecera: { lat: 9.9475, lng: -84.0517 } },
+  { nombre: 'Santa Ana', provincia: 'San José', cabecera: { lat: 9.9325, lng: -84.1825 } },
+  { nombre: 'Alajuelita', provincia: 'San José', cabecera: { lat: 9.9017, lng: -84.1 } },
+  {
+    nombre: 'Vázquez de Coronado',
+    provincia: 'San José',
+    cabecera: { lat: 9.9783, lng: -84.0067 },
+  },
+  { nombre: 'Acosta', provincia: 'San José', cabecera: { lat: 9.7983, lng: -84.1625 } },
+  { nombre: 'Tibás', provincia: 'San José', cabecera: { lat: 9.9586, lng: -84.0817 } },
+  { nombre: 'Moravia', provincia: 'San José', cabecera: { lat: 9.9614, lng: -84.0486 } },
+  { nombre: 'Montes de Oca', provincia: 'San José', cabecera: { lat: 9.9364, lng: -84.0503 } },
+  { nombre: 'Dota', provincia: 'San José', cabecera: { lat: 9.6509, lng: -83.9686 } },
+  { nombre: 'Curridabat', provincia: 'San José', cabecera: { lat: 9.915, lng: -84.0386 } },
+  { nombre: 'Pérez Zeledón', provincia: 'San José', cabecera: { lat: 9.373, lng: -83.703 } },
+  { nombre: 'León Cortés', provincia: 'San José', cabecera: { lat: 9.7076, lng: -84.0575 } },
+  { nombre: 'Alajuela', provincia: 'Alajuela', cabecera: { lat: 10.0163, lng: -84.2116 } },
+  { nombre: 'San Ramón', provincia: 'Alajuela', cabecera: { lat: 10.087, lng: -84.47 } },
+  { nombre: 'Grecia', provincia: 'Alajuela', cabecera: { lat: 10.0731, lng: -84.312 } },
+  { nombre: 'Atenas', provincia: 'Alajuela', cabecera: { lat: 9.9785, lng: -84.38 } },
+  { nombre: 'Naranjo', provincia: 'Alajuela', cabecera: { lat: 10.0987, lng: -84.3786 } },
+  { nombre: 'Palmares', provincia: 'Alajuela', cabecera: { lat: 10.0559, lng: -84.4342 } },
+  { nombre: 'Poás', provincia: 'Alajuela', cabecera: { lat: 10.071, lng: -84.241 } },
+  { nombre: 'Sarchí', provincia: 'Alajuela', cabecera: { lat: 10.089, lng: -84.346 } },
+  { nombre: 'San Carlos', provincia: 'Alajuela', cabecera: { lat: 10.3238, lng: -84.4271 } },
+  { nombre: 'Cartago', provincia: 'Cartago', cabecera: { lat: 9.8644, lng: -83.9194 } },
+  { nombre: 'Paraíso', provincia: 'Cartago', cabecera: { lat: 9.837, lng: -83.865 } },
+  { nombre: 'La Unión', provincia: 'Cartago', cabecera: { lat: 9.903, lng: -83.985 } },
+  { nombre: 'Turrialba', provincia: 'Cartago', cabecera: { lat: 9.905, lng: -83.683 } },
+  { nombre: 'Oreamuno', provincia: 'Cartago', cabecera: { lat: 9.8728, lng: -83.9067 } },
+  { nombre: 'El Guarco', provincia: 'Cartago', cabecera: { lat: 9.8458, lng: -83.9447 } },
+  { nombre: 'Heredia', provincia: 'Heredia', cabecera: { lat: 9.9986, lng: -84.1169 } },
+  { nombre: 'Barva', provincia: 'Heredia', cabecera: { lat: 10.0213, lng: -84.1235 } },
+  { nombre: 'Santo Domingo', provincia: 'Heredia', cabecera: { lat: 9.9806, lng: -84.0886 } },
+  { nombre: 'Santa Bárbara', provincia: 'Heredia', cabecera: { lat: 10.039, lng: -84.158 } },
+  { nombre: 'San Rafael', provincia: 'Heredia', cabecera: { lat: 10.0128, lng: -84.0989 } },
+  { nombre: 'San Isidro', provincia: 'Heredia', cabecera: { lat: 10.0186, lng: -84.0578 } },
+  { nombre: 'Belén', provincia: 'Heredia', cabecera: { lat: 9.98, lng: -84.1844 } },
+  { nombre: 'Flores', provincia: 'Heredia', cabecera: { lat: 9.9978, lng: -84.155 } },
+  { nombre: 'San Pablo', provincia: 'Heredia', cabecera: { lat: 9.9947, lng: -84.0947 } },
+  { nombre: 'Liberia', provincia: 'Guanacaste', cabecera: { lat: 10.6346, lng: -85.4377 } },
+  { nombre: 'Nicoya', provincia: 'Guanacaste', cabecera: { lat: 10.148, lng: -85.452 } },
+  { nombre: 'Tilarán', provincia: 'Guanacaste', cabecera: { lat: 10.468, lng: -84.968 } },
+  { nombre: 'Puntarenas', provincia: 'Puntarenas', cabecera: { lat: 9.9763, lng: -84.8384 } },
+  { nombre: 'Coto Brus', provincia: 'Puntarenas', cabecera: { lat: 8.821, lng: -82.969 } },
+  { nombre: 'Limón', provincia: 'Limón', cabecera: { lat: 9.9907, lng: -83.0359 } },
+];
