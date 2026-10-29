@@ -107,9 +107,7 @@ describe('DashboardCafetaleroComponent', () => {
     expect(seccion!.textContent).toContain('Dota');
     expect(seccion!.textContent).toContain('2 cosechas');
     expect(seccion!.textContent).toContain('1 cosecha');
-    expect(seccion!.querySelector('.nueva-finca')?.textContent).toContain(
-      'Registrar nueva finca',
-    );
+    expect(seccion!.querySelector('.nueva-finca')?.textContent).toContain('Registrar nueva finca');
   });
 
   it('muestra la tabla de cosechas recientes con al menos 3 filas', () => {

@@ -1,15 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { PerfilCafetaleroSidebar, TemaDashboard } from '../../../../core/models/dashboard-cafetalero.model';
+import {
+  PerfilCafetaleroSidebar,
+  TemaDashboard,
+} from '../../../../core/models/dashboard-cafetalero.model';
 
-export type IconoNavCafetalero =
-  | 'home'
-  | 'fincas'
-  | 'cosecha'
-  | 'historial'
-  | 'perfil'
-  | 'logout';
+export type IconoNavCafetalero = 'home' | 'fincas' | 'cosecha' | 'historial' | 'perfil' | 'logout';
 
 export interface ItemNavCafetalero {
   etiqueta: string;
