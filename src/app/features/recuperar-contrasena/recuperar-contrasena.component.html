@@ -1,0 +1,209 @@
+<section class="recuperar">
+  <a routerLink="/" class="recuperar__logo-enlace" aria-label="Crán̈hua — inicio">
+    <img
+      class="recuperar__logo"
+      src="/images/logo-cranhua.png"
+      alt="Crán̈hua"
+      width="160"
+      height="40"
+    />
+  </a>
+
+  <div class="recuperar__card">
+    <div class="recuperar__icono" aria-hidden="true">
+      @if (paso() < 3) {
+        <svg class="recuperar__icono-svg" viewBox="0 0 24 24" fill="none" focusable="false">
+          <path
+            d="M4 6.75A1.75 1.75 0 0 1 5.75 5h12.5A1.75 1.75 0 0 1 20 6.75v10.5A1.75 1.75 0 0 1 18.25 19H5.75A1.75 1.75 0 0 1 4 17.25V6.75Z"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="m5 7.5 6.2 4.65a1.25 1.25 0 0 0 1.6 0L19 7.5"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      } @else {
+        <svg class="recuperar__icono-svg" viewBox="0 0 24 24" fill="none" focusable="false">
+          <rect
+            x="5"
+            y="10"
+            width="14"
+            height="10"
+            rx="2"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+          <path
+            d="M8 10V7.5a4 4 0 0 1 8 0V10"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      }
+    </div>
+
+    <div
+      class="recuperar__progreso"
+      role="progressbar"
+      [attr.aria-valuenow]="paso()"
+      aria-valuemin="1"
+      aria-valuemax="3"
+      [attr.aria-label]="'Paso ' + paso() + ' de 3'"
+    >
+      @for (n of [1, 2, 3]; track n) {
+        <span
+          class="recuperar__progreso-item"
+          [class.recuperar__progreso-item--activo]="paso() === n"
+        ></span>
+      }
+    </div>
+
+    <div class="recuperar__contenido">
+      @if (paso() === 1) {
+        <h1 class="recuperar__titulo">Recuperar contraseña</h1>
+        <p class="recuperar__descripcion">
+          Ingresá tu correo y te enviaremos un código para restablecer tu contraseña.
+        </p>
+
+        <form class="recuperar__form" [formGroup]="formCorreo" (ngSubmit)="mandarOtp()" novalidate>
+          <div class="campo">
+            <label class="campo__etiqueta" for="correo-recuperar">Correo electrónico</label>
+            <input
+              id="correo-recuperar"
+              class="campo__control"
+              type="email"
+              formControlName="correo"
+              placeholder="tucorreo@ejemplo.com"
+              autocomplete="email"
+              [attr.aria-invalid]="campoCorreoInvalido()"
+              [attr.aria-describedby]="campoCorreoInvalido() ? 'error-correo-recuperar' : null"
+            />
+            @if (campoCorreoInvalido()) {
+              <p id="error-correo-recuperar" class="campo__error">Campo requerido</p>
+            }
+          </div>
+
+          <button type="submit" class="recuperar__cta">Mandar OTP</button>
+        </form>
+      } @else if (paso() === 2) {
+        <h1 class="recuperar__titulo">Ingresá el código</h1>
+        <p class="recuperar__descripcion">
+          Te enviamos un código a
+          <strong class="recuperar__correo">{{ formCorreo.controls.correo.value }}</strong
+          >.
+        </p>
+
+        <form
+          class="recuperar__form"
+          [formGroup]="formOtp"
+          (ngSubmit)="verificarCodigo()"
+          novalidate
+        >
+          <div
+            class="recuperar__otp"
+            role="group"
+            aria-label="Código de verificación de 6 dígitos"
+            (paste)="onOtpPaste($event)"
+          >
+            @for (control of otpDigits; track $index) {
+              <input
+                #otpInput
+                class="recuperar__otp-casilla"
+                [class.recuperar__otp-casilla--llena]="control.value"
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                autocomplete="one-time-code"
+                [formControlName]="'d' + $index"
+                [attr.aria-label]="'Dígito ' + ($index + 1)"
+                [attr.aria-invalid]="otpError()"
+                (input)="onOtpInput($index, $event)"
+                (keydown)="onOtpKeydown($index, $event)"
+              />
+            }
+          </div>
+
+          @if (otpError()) {
+            <p class="campo__error" role="alert">Ingresá los 6 dígitos del código</p>
+          }
+
+          <p class="recuperar__reenvio">
+            ¿No te llegó el código?
+            <button type="button" class="recuperar__reenvio-enlace" (click)="reenviarOtp()">
+              Reenviar OTP
+            </button>
+          </p>
+
+          @if (otpReenviado()) {
+            <p class="recuperar__reenvio-aviso" role="status">Código reenviado</p>
+          }
+
+          <button type="submit" class="recuperar__cta">Verificar código</button>
+        </form>
+      } @else {
+        <h1 class="recuperar__titulo">Creá una nueva contraseña</h1>
+        <p class="recuperar__descripcion">
+          Elegí una contraseña segura y confirmala para continuar.
+        </p>
+
+        <form
+          class="recuperar__form"
+          [formGroup]="formContrasena"
+          (ngSubmit)="cambiarContrasena()"
+          novalidate
+        >
+          <div class="campo">
+            <label class="campo__etiqueta" for="nueva-contrasena">Nueva contraseña</label>
+            <input
+              id="nueva-contrasena"
+              class="campo__control"
+              type="password"
+              formControlName="nueva"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [attr.aria-invalid]="campoContrasenaInvalido('nueva')"
+              [attr.aria-describedby]="campoContrasenaInvalido('nueva') ? 'error-nueva' : null"
+            />
+            @if (campoContrasenaInvalido('nueva')) {
+              <p id="error-nueva" class="campo__error">Campo requerido</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="confirmar-contrasena">Confirmar contraseña</label>
+            <input
+              id="confirmar-contrasena"
+              class="campo__control"
+              type="password"
+              formControlName="confirmacion"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [attr.aria-invalid]="
+                campoContrasenaInvalido('confirmacion') || contrasenasNoCoinciden()
+              "
+              [attr.aria-describedby]="
+                campoContrasenaInvalido('confirmacion') || contrasenasNoCoinciden()
+                  ? 'error-confirmacion'
+                  : null
+              "
+            />
+            @if (campoContrasenaInvalido('confirmacion')) {
+              <p id="error-confirmacion" class="campo__error">Campo requerido</p>
+            } @else if (contrasenasNoCoinciden()) {
+              <p id="error-confirmacion" class="campo__error">Las contraseñas no coinciden</p>
+            }
+          </div>
+
+          <button type="submit" class="recuperar__cta">Cambiar contraseña</button>
+        </form>
+      }
+    </div>
+
+    <a routerLink="/iniciar-sesion" class="recuperar__volver">← Volver a iniciar sesión</a>
+  </div>
+</section>
