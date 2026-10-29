@@ -1,0 +1,93 @@
+<app-menu-cafetalero class="menu" />
+
+<main class="contenido">
+  <header class="encabezado">
+    <div>
+      <h1 class="encabezado__titulo">Registrar finca</h1>
+      @if (paso() !== 'confirmacion') {
+        <p class="encabezado__texto">Dibujá el perímetro de tu nueva finca sobre el mapa.</p>
+      }
+    </div>
+
+    <button type="button" class="volver" (click)="volver()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19 12H5m6-6-6 6 6 6" />
+      </svg>
+      Volver
+    </button>
+  </header>
+
+  @if (paso() === 'confirmacion') {
+    <app-paso-confirmacion
+      class="vidrio confirmacion"
+      [finca]="registrada()!"
+      [nombrePropietario]="usuario().nombre"
+      (irAlDashboard)="irAlDashboard()"
+      (registrarOtra)="registrarOtra()"
+    />
+  } @else {
+    @if (avisoVisible()) {
+      <div class="vidrio aviso" role="alert">
+        <svg class="icono-alerta" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3 1.5 21h21L12 3Zm-1 6h2v6h-2V9Zm0 8h2v2h-2v-2Z" />
+        </svg>
+        <span class="aviso__texto">Este polígono se sobrepone con una finca ya registrada.</span>
+        <button
+          type="button"
+          class="aviso__cerrar"
+          aria-label="Cerrar aviso"
+          (click)="avisoVisible.set(false)"
+        >
+          ×
+        </button>
+      </div>
+    }
+
+    <!-- Dibujo y conflicto comparten el mapa para no perder el zoom al corregir -->
+    <section class="editor">
+      <app-mapa-finca
+        class="editor__mapa"
+        [(perimetro)]="perimetro"
+        [(pin)]="pin"
+        [conflicto]="conflicto()"
+      />
+
+      @if (conflicto(); as finca) {
+        <aside class="vidrio conflicto">
+          <h2 class="conflicto__titulo">
+            <svg class="icono-alerta" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 3 1.5 21h21L12 3Zm-1 6h2v6h-2V9Zm0 8h2v2h-2v-2Z" />
+            </svg>
+            No pudimos registrar la finca
+          </h2>
+          <p>
+            Tu dibujo se cruza con el perímetro de <strong>{{ finca.nombre }}</strong
+            >,
+            @if (finca.propietarioId === usuario().id) {
+              que ya registraste.
+            } @else {
+              registrada por otro cafetalero.
+            }
+            Revisá el mapa: si el límite real es distinto, ajustá el dibujo.
+          </p>
+          <p>Si creés que hay un error de registro, podés pedir que se revise manualmente.</p>
+          <button type="button" class="conflicto__corregir" (click)="corregirDibujo()">
+            Corregir el dibujo
+          </button>
+        </aside>
+      } @else {
+        <app-detalles-finca
+          class="vidrio"
+          subtitulo="Completá esto mientras ajustás el dibujo en el mapa."
+          [formulario]="formulario"
+          [(duenos)]="duenos"
+          [canton]="canton()"
+          [hayPin]="pin() !== null"
+          [errorPerimetro]="errorPerimetro()"
+          [intentoGuardar]="intentoGuardar()"
+          (guardar)="guardar()"
+        />
+      }
+    </section>
+  }
+</main>

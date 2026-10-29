@@ -6,6 +6,7 @@ import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.componen
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 
 export const routes: Routes = [
@@ -25,5 +26,14 @@ export const routes: Routes = [
   { path: 'onboarding-finca', component: OnboardingFincaComponent },
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'dashboard', component: PaginaMockComponent, data: { title: 'Dashboard' } },
+  { path: 'fincas', component: PaginaMockComponent, data: { title: 'Mis fincas' } },
+  { path: 'fincas/registrar', component: RegistrarFincaComponent },
+  {
+    path: 'cosechas/registrar',
+    component: PaginaMockComponent,
+    data: { title: 'Registrar cosecha' },
+  },
+  { path: 'historial', component: PaginaMockComponent, data: { title: 'Historial' } },
+  { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
 ];

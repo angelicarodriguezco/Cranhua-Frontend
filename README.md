@@ -49,13 +49,17 @@ npm start
 
 Abrir http://localhost:4200.
 
-| Ruta                                   | Pantalla                                    |
-| -------------------------------------- | ------------------------------------------- |
-| `/`                                    | Landing page                                |
-| `/iniciar-sesion`                      | Iniciar sesión                              |
-| `/onboarding-finca`                    | Registro de la primera finca del cafetalero |
-| `/mapa-prueba`                         | Mapa de prueba de Google Maps               |
-| `/registro`, `/explorar`, `/dashboard` | Pantallas pendientes (placeholder)          |
+| Ruta                                                      | Pantalla                                           |
+| --------------------------------------------------------- | -------------------------------------------------- |
+| `/`                                                       | Landing page                                       |
+| `/iniciar-sesion`                                         | Iniciar sesión                                     |
+| `/onboarding-finca`                                       | Registro de la primera finca del cafetalero        |
+| `/fincas/registrar`                                       | Registrar otra finca desde el panel del cafetalero |
+| `/mapa-prueba`                                            | Mapa de prueba de Google Maps                      |
+| `/registro`, `/explorar`, `/dashboard`                    | Pantallas pendientes (placeholder)                 |
+| `/fincas`, `/cosechas/registrar`, `/historial`, `/perfil` | Pantallas pendientes del menú del cafetalero       |
+
+La vista `/fincas/registrar` sigue el tema del sistema operativo (claro u oscuro). Para probar el otro tema sin cambiarlo, en Chrome DevTools: _Rendering_ → _Emulate CSS media feature prefers-color-scheme_.
 
 Por ahora las pantallas usan datos de ejemplo de `src/app/core/mocks/finca.mock.ts`, así que no hace falta tener el backend corriendo. Cuando se conecten las vistas, levantar el backend siguiendo su README; queda en http://localhost:8080 y ya acepta peticiones desde `localhost:4200`.
 

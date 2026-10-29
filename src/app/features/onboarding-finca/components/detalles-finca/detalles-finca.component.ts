@@ -47,6 +47,7 @@ export class DetallesFincaComponent {
   private injector = inject(Injector);
 
   readonly formulario = input.required<FormularioFinca>();
+  readonly subtitulo = input<string | null>(null);
   readonly canton = input<Canton | null>(null);
   readonly hayPin = input(false);
   /** Error del perímetro; se muestra solo después de intentar guardar. */

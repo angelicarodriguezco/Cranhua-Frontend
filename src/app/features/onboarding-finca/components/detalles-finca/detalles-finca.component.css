@@ -47,7 +47,7 @@
 }
 
 .campo__control::placeholder {
-  color: #4f5f58;
+  color: var(--color-field-placeholder, #4f5f58);
 }
 
 .campo__control[aria-invalid='true'] {
@@ -107,7 +107,7 @@ textarea.campo__control {
   height: 1.375rem;
   border-radius: 50%;
   background: #6b4a06;
-  color: var(--color-text);
+  color: #ffffff;
   font-size: 0.625rem;
   font-weight: 500;
 }

@@ -1,5 +1,10 @@
 <form class="detalles" [formGroup]="formulario()" (ngSubmit)="enviar()" novalidate>
-  <h2 class="detalles__titulo">Detalles de tu finca</h2>
+  <div>
+    <h2 class="detalles__titulo">Detalles de tu finca</h2>
+    @if (subtitulo(); as texto) {
+      <p class="detalles__nota">{{ texto }}</p>
+    }
+  </div>
 
   <div class="campo">
     <label class="campo__etiqueta" for="nombre-finca">Nombre de la finca</label>
