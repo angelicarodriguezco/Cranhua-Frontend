@@ -1,0 +1,30 @@
+@switch (apiCargada()) {
+  @case (true) {
+    <google-map
+      width="100%"
+      height="100%"
+      [center]="centro"
+      [options]="opciones"
+      (mapClick)="marcar($event)"
+    >
+      @if (pin(); as posicion) {
+        <map-advanced-marker
+          [position]="posicion"
+          [content]="contenidoPin"
+          [gmpDraggable]="true"
+          title="Ubicación de tu local. Arrastrá el pin para ajustarla."
+          (mapDragend)="marcar($event)"
+        />
+      }
+    </google-map>
+  }
+  @case (false) {
+    <p class="aviso-carga">
+      No se pudo cargar Google Maps. Revisá que <code>GOOGLE_MAPS_API_KEY</code> esté en el
+      <code>.env</code>.
+    </p>
+  }
+  @default {
+    <p class="aviso-carga">Cargando mapa…</p>
+  }
+}
