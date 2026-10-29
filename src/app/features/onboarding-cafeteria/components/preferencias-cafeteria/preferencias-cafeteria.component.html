@@ -1,0 +1,59 @@
+<form class="formulario" [formGroup]="formulario()" (ngSubmit)="enviar()" novalidate>
+  <div>
+    <h1 class="titulo">¿Qué estás buscando comprar?</h1>
+    <p class="texto">
+      Esto nos ayuda a mostrarte los tostadores que mejor encajan con tu cafetería.
+    </p>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="volumen-cafeteria">Volumen mensual aproximado</label>
+    <select
+      id="volumen-cafeteria"
+      class="campo__control"
+      formControlName="volumenMensual"
+      [attr.aria-invalid]="invalido('volumenMensual')"
+      [attr.aria-describedby]="invalido('volumenMensual') ? 'error-volumen-cafeteria' : null"
+    >
+      <option [ngValue]="null">Elegí un rango</option>
+      @for (volumen of volumenes; track volumen) {
+        <option [ngValue]="volumen">{{ volumen }}</option>
+      }
+    </select>
+    @if (invalido('volumenMensual')) {
+      <p id="error-volumen-cafeteria" class="campo__error">Elegí un rango de volumen.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <span id="etiqueta-estilos-cafeteria" class="campo__etiqueta">Estilos de café que comprás</span>
+    <div
+      class="chips"
+      role="group"
+      aria-labelledby="etiqueta-estilos-cafeteria"
+      [attr.aria-describedby]="invalido('estilos') ? 'error-estilos-cafeteria' : null"
+    >
+      @for (estilo of estilos; track estilo) {
+        <button
+          type="button"
+          class="chip"
+          [class.chip--activo]="seleccionado(estilo)"
+          [attr.aria-pressed]="seleccionado(estilo)"
+          (click)="alternar(estilo)"
+        >
+          {{ estilo }}
+        </button>
+      }
+    </div>
+    @if (invalido('estilos')) {
+      <p id="error-estilos-cafeteria" class="campo__error">Elegí al menos un estilo de café.</p>
+    }
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="atras.emit()">← Atrás</button>
+    <button type="submit" class="btn btn--filled">
+      {{ editando() ? 'Guardar cambios' : 'Crear cuenta de cafetería' }}
+    </button>
+  </div>
+</form>

@@ -1,0 +1,45 @@
+<div class="check" aria-hidden="true">
+  <svg viewBox="0 0 24 24">
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </svg>
+</div>
+
+<h1 class="titulo">¡Tu cafetería quedó registrada!</h1>
+<p class="texto">
+  {{ cafeteria().nombre }} ya forma parte de Crán̈hua. Ahora podés explorar tostadores y recibir
+  ofertas de café directamente en tu dashboard.
+</p>
+
+<dl class="resumen">
+  <div>
+    <dt>Nombre</dt>
+    <dd>{{ cafeteria().nombre }}</dd>
+  </div>
+  <div>
+    <dt>Contacto</dt>
+    <dd>{{ cafeteria().contacto }}</dd>
+  </div>
+  <div>
+    <dt>Ubicación</dt>
+    <dd>
+      @if (cafeteria().canton; as canton) {
+        {{ canton.nombre }}, {{ canton.provincia }}
+      } @else {
+        Sin cantón de referencia
+      }
+    </dd>
+  </div>
+  <div>
+    <dt>Volumen mensual</dt>
+    <dd>{{ cafeteria().volumenMensual }}</dd>
+  </div>
+  <div>
+    <dt>Estilos de café</dt>
+    <dd>{{ estilos() }}</dd>
+  </div>
+</dl>
+
+<button type="button" class="btn btn--filled btn--ancho" (click)="irAlDashboard.emit()">
+  Ir a mi dashboard
+</button>
+<button type="button" class="editar" (click)="editar.emit()">Editar información</button>
