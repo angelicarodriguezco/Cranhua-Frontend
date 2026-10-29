@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  height: 13rem;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  background: #17332c;
+}
+
+google-map {
+  display: block;
+  height: 100%;
+}
+
+.aviso-carga {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  padding: 1.5rem;
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+/* Google Maps inserta el contenido del marcador fuera del template */
+:host ::ng-deep .pin-mapa {
+  width: 1.625rem;
+  height: 1.625rem;
+  border: 2px solid var(--color-text);
+  border-radius: 50% 50% 50% 0;
+  background: var(--color-gold);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px) rotate(-45deg);
+  cursor: grab;
+}

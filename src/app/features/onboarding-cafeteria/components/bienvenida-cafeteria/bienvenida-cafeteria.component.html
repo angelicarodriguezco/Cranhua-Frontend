@@ -1,0 +1,23 @@
+<div class="icono" aria-hidden="true">
+  <svg viewBox="0 0 24 24">
+    <path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6V9Z" />
+    <path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H16.5" />
+    <path d="M8 3.5v2.5M11.5 3.5v2.5" />
+  </svg>
+</div>
+
+<h1 class="titulo">¡Bienvenido, {{ nombre().trim() }}!</h1>
+<p class="texto">
+  Antes de explorar los cafés disponibles, registremos tu cafetería. Esto le da a tu local un perfil
+  verificado dentro de Crán̈hua para que los tostadores sepan quién eres.
+</p>
+
+<ol class="instrucciones">
+  <li>Cuéntanos el nombre de tu cafetería y cómo contactarte.</li>
+  <li>Marca en el mapa dónde está ubicado tu local.</li>
+  <li>Elige qué estilos de café buscás y tu volumen mensual aproximado.</li>
+</ol>
+
+<button type="button" class="btn btn--filled btn--ancho" (click)="empezar.emit()">
+  Empezar a registrar
+</button>
