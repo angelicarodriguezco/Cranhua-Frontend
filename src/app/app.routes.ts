@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
@@ -37,7 +38,20 @@ export const routes: Routes = [
     data: { title: 'Onboarding: Registrar cafetería' },
   },
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
-  { path: 'dashboard', component: PaginaMockComponent, data: { title: 'Dashboard' } },
+  { path: 'dashboard', component: DashboardCafetaleroComponent },
+  { path: 'mis-fincas', component: PaginaMockComponent, data: { title: 'Mis fincas' } },
+  {
+    path: 'fincas/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Detalle de finca' },
+  },
+  {
+    path: 'registrar-cosecha',
+    component: PaginaMockComponent,
+    data: { title: 'Registrar cosecha' },
+  },
+  { path: 'historial', component: PaginaMockComponent, data: { title: 'Historial' } },
+  { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
   {
