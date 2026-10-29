@@ -1,0 +1,35 @@
+<div class="check" aria-hidden="true">
+  <svg viewBox="0 0 24 24">
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </svg>
+</div>
+
+<h1 class="titulo">¡Tu negocio ya está registrado!</h1>
+<p class="texto">
+  {{ negocio().nombre }} ya forma parte de Crán̈hua. Ahora podés explorar cosechas disponibles y
+  enviar solicitudes de compra directamente a los cafetaleros.
+</p>
+
+<dl class="resumen">
+  <div>
+    <dt>Negocio</dt>
+    <dd>{{ negocio().nombre }}</dd>
+  </div>
+  <div>
+    <dt>Contacto</dt>
+    <dd>{{ negocio().contacto }}</dd>
+  </div>
+  <div>
+    <dt>Ubicación</dt>
+    <dd>{{ negocio().canton.nombre }}, {{ negocio().canton.provincia }}</dd>
+  </div>
+  <div>
+    <dt>Estilos de tueste</dt>
+    <dd>{{ listar(negocio().estilos) }}</dd>
+  </div>
+</dl>
+
+<button type="button" class="btn btn--filled" (click)="irAlDashboard.emit()">
+  Ir a mi dashboard
+</button>
+<button type="button" class="editar" (click)="editar.emit()">Editar información</button>

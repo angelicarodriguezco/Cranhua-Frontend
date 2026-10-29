@@ -1,0 +1,119 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 29rem;
+  margin: 0 auto;
+  padding: 1.75rem 2.25rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.check {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: #2a4c45;
+}
+
+.check svg {
+  width: 2rem;
+  height: 2rem;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.titulo {
+  margin: 1.25rem 0 0;
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+}
+
+.texto {
+  margin: 0.75rem 0 0;
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: var(--md-sys-typescale-body-small-line-height);
+  color: var(--color-text-muted);
+}
+
+.resumen {
+  width: 100%;
+  margin: 1.5rem 0 1.25rem;
+  padding: 0 0.875rem;
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+.resumen div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.resumen dt {
+  color: var(--color-text-muted);
+}
+
+.resumen dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: right;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.6rem;
+  border: 1.5px solid var(--color-gold);
+  border-radius: 999px;
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn--filled {
+  width: 100%;
+  background: var(--color-gold);
+  color: #1a1408;
+}
+
+.btn--filled:hover {
+  background: var(--color-gold-light);
+}
+
+.editar {
+  margin-top: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--color-gold-light);
+  font-family: var(--font-family);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.editar:hover {
+  border-bottom-color: var(--color-gold-light);
+}
+
+@media (max-width: 600px) {
+  :host {
+    padding: 1.5rem 1.1rem;
+  }
+}

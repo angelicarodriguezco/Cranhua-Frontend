@@ -1,0 +1,54 @@
+<div class="onboarding">
+  <header class="onboarding__encabezado">
+    <img
+      class="onboarding__logo"
+      src="/images/logo-cranhua.png"
+      alt="Crán̈hua"
+      width="647"
+      height="117"
+    />
+
+    <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
+      @for (p of pasos; track p) {
+        <li
+          class="pasos__punto"
+          [class.pasos__punto--activo]="$index === indicePaso()"
+          [attr.aria-current]="$index === indicePaso() ? 'step' : null"
+        ></li>
+      }
+    </ol>
+
+    <button type="button" class="onboarding__volver" (click)="volver()">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M19 12H5m6-6-6 6 6 6" />
+      </svg>
+      Volver
+    </button>
+  </header>
+
+  <main class="onboarding__contenido">
+    @switch (paso()) {
+      @case ('bienvenida') {
+        <app-bienvenida-tostador [nombre]="usuario.nombre" (empezar)="empezar()" />
+      }
+      @case ('formulario') {
+        <app-formulario-negocio
+          [formulario]="formulario"
+          [(pin)]="pin"
+          [canton]="canton()"
+          [intentoGuardar]="intentoGuardar()"
+          [editando]="registrado() !== null"
+          (guardar)="guardar()"
+          (cancelar)="cancelar()"
+        />
+      }
+      @case ('confirmacion') {
+        <app-confirmacion-tostador
+          [negocio]="registrado()!"
+          (irAlDashboard)="irAlDashboard()"
+          (editar)="editar()"
+        />
+      }
+    }
+  </main>
+</div>
