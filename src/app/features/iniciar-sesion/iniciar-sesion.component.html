@@ -47,7 +47,7 @@
           @if (campoInvalido('contrasena')) {
             <p id="error-contrasena" class="campo__error">Campo requerido</p>
           }
-          <a class="login__olvidaste" href="#" (click)="$event.preventDefault()">
+          <a class="login__olvidaste" routerLink="/recuperar-contrasena">
             ¿Olvidaste tu contraseña?
           </a>
         </div>
