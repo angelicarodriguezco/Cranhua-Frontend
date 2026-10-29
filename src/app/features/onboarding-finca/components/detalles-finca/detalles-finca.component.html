@@ -1,0 +1,128 @@
+<form class="detalles" [formGroup]="formulario()" (ngSubmit)="enviar()" novalidate>
+  <h2 class="detalles__titulo">Detalles de tu finca</h2>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="nombre-finca">Nombre de la finca</label>
+    <input
+      id="nombre-finca"
+      class="campo__control"
+      formControlName="nombre"
+      placeholder="Ej. Finca La Catalina"
+      maxlength="80"
+      autocomplete="off"
+      [attr.aria-invalid]="nombreInvalido()"
+      [attr.aria-describedby]="nombreInvalido() ? 'error-nombre' : null"
+    />
+    @if (nombreInvalido()) {
+      <p id="error-nombre" class="campo__error">Poné un nombre para tu finca.</p>
+    }
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="descripcion-finca">
+      Descripción <span class="campo__opcional">(opcional)</span>
+    </label>
+    <textarea
+      id="descripcion-finca"
+      class="campo__control"
+      formControlName="descripcion"
+      rows="3"
+      maxlength="300"
+      placeholder="Altitud, variedades, cómo llegar…"
+      aria-describedby="contador-descripcion"
+    ></textarea>
+    <p id="contador-descripcion" class="campo__ayuda campo__ayuda--derecha">
+      {{ formulario().controls.descripcion.value.length }}/300
+    </p>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="zona-finca">
+      Zona cafetalera <span class="campo__opcional">(opcional)</span>
+    </label>
+    <select id="zona-finca" class="campo__control" formControlName="zona">
+      <option [ngValue]="null">Sin especificar</option>
+      @for (zona of zonas; track zona) {
+        <option [ngValue]="zona">{{ zona }}</option>
+      }
+    </select>
+  </div>
+
+  <div class="campo">
+    <span class="campo__etiqueta">Ubicación</span>
+    <p class="detalles__ubicacion" aria-live="polite">
+      @if (canton(); as c) {
+        {{ c.nombre }}, {{ c.provincia }}
+      } @else if (hayPin()) {
+        El pin está fuera de los cantones de ejemplo.
+      } @else {
+        Aparece cuando dibujés el perímetro.
+      }
+    </p>
+    <p class="campo__ayuda">Se toma del pin del mapa. Arrastralo si hace falta.</p>
+  </div>
+
+  <div class="campo">
+    <span class="campo__etiqueta">
+      Dueños adicionales <span class="campo__opcional">(opcional)</span>
+    </span>
+    @if (duenos().length) {
+      <ul class="duenos">
+        @for (dueno of duenos(); track dueno.id) {
+          <li class="dueno">
+            <span class="dueno__iniciales" aria-hidden="true">{{ iniciales(dueno) }}</span>
+            <span class="dueno__nombre">{{ dueno.nombre }} {{ dueno.apellidos }}</span>
+            <button
+              type="button"
+              class="dueno__quitar"
+              [attr.aria-label]="'Quitar a ' + nombreCorto(dueno)"
+              (click)="quitarDueno(dueno)"
+            >
+              ×
+            </button>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (agregandoDueno()) {
+      <div class="nuevo-dueno">
+        <input
+          #campoCorreo
+          class="campo__control"
+          type="email"
+          [formControl]="correoDueno"
+          placeholder="correo@ejemplo.cr"
+          aria-label="Correo del dueño"
+          autocomplete="off"
+          (keydown.enter)="$event.preventDefault(); agregarDueno()"
+          (keydown.escape)="cancelarDueno()"
+        />
+        <button type="button" class="btn btn--filled btn--pequeno" (click)="agregarDueno()">
+          Agregar
+        </button>
+        <button type="button" class="btn btn--texto btn--pequeno" (click)="cancelarDueno()">
+          Cancelar
+        </button>
+      </div>
+      @if (errorDueno(); as error) {
+        <p class="campo__error" role="alert">{{ error }}</p>
+      }
+    } @else {
+      <button type="button" class="detalles__agregar" (click)="mostrarCampoDueno()">
+        + Agregar dueño por correo
+      </button>
+    }
+  </div>
+
+  <p class="detalles__nota">
+    El área se calcula automáticamente según el polígono. Si tu finca se sobrepone con una ya
+    registrada, te lo vamos a avisar antes de guardar.
+  </p>
+
+  @if (intentoGuardar() && errorPerimetro(); as error) {
+    <p class="campo__error" role="alert">{{ error }}</p>
+  }
+
+  <button type="submit" class="btn btn--filled detalles__guardar">Guardar finca</button>
+</form>
