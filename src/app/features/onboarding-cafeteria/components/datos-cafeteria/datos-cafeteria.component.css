@@ -1,0 +1,15 @@
+.fila {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem 1rem;
+}
+
+.campo__control[readonly] {
+  cursor: default;
+}
+
+@media (max-width: 600px) {
+  .fila {
+    grid-template-columns: 1fr;
+  }
+}
