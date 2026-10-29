@@ -141,7 +141,9 @@ export class RecuperarContrasenaComponent {
 
   protected onOtpPaste(event: ClipboardEvent): void {
     event.preventDefault();
-    const pasted = (event.clipboardData?.getData('text') ?? '').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    const pasted = (event.clipboardData?.getData('text') ?? '')
+      .replace(/\D/g, '')
+      .slice(0, OTP_LENGTH);
     if (!pasted) {
       return;
     }
