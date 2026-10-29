@@ -9,6 +9,7 @@ import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
+import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -43,5 +44,12 @@ export const routes: Routes = [
     path: 'tostador/dashboard',
     component: PaginaMockComponent,
     data: { title: 'Dashboard del tostador' },
+  },
+
+  { path: 'cafetalero/fincas', component: MisFincasComponent },
+  {
+    path: 'cafetalero/fincas/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Detalle de finca' },
   },
 ];
