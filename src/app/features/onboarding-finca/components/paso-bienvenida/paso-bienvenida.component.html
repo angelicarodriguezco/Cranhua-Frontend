@@ -1,0 +1,15 @@
+<div class="avatar" aria-hidden="true">{{ inicial() }}</div>
+
+<h1 class="titulo">¡Bienvenido, {{ nombre().trim() }}!</h1>
+<p class="texto">
+  Antes de explorar tu dashboard, registremos tu primera finca. Esto le da a tus cosechas un origen
+  verificable dentro de Crán̈hua.
+</p>
+
+<ol class="instrucciones">
+  <li>Dibujá el perímetro de tu finca sobre el mapa.</li>
+  <li>Contanos el nombre y, opcionalmente, la zona cafetalera.</li>
+  <li>Agregá otros dueños si la finca es de más de una persona.</li>
+</ol>
+
+<button type="button" class="btn btn--filled" (click)="empezar.emit()">Empezar a dibujar</button>
