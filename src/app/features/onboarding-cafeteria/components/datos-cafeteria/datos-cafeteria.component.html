@@ -1,0 +1,141 @@
+<form class="formulario" [formGroup]="formulario()" (ngSubmit)="enviar()" novalidate>
+  <div>
+    <h1 class="titulo">Cuéntanos sobre tu cafetería</h1>
+    <p class="texto">
+      Esta información es la que van a ver los tostadores que quieran ofrecerte café.
+    </p>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="nombre-cafeteria">Nombre de la cafetería</label>
+    <input
+      id="nombre-cafeteria"
+      class="campo__control"
+      formControlName="nombre"
+      placeholder="Ej. Café Brumas"
+      maxlength="80"
+      autocomplete="off"
+      [attr.aria-invalid]="invalido('nombre')"
+      [attr.aria-describedby]="invalido('nombre') ? 'error-nombre-cafeteria' : null"
+    />
+    @if (invalido('nombre')) {
+      <p id="error-nombre-cafeteria" class="campo__error">Poné el nombre de tu cafetería.</p>
+    }
+  </div>
+
+  <div class="fila">
+    <div class="campo">
+      <label class="campo__etiqueta" for="contacto-cafeteria">Nombre de contacto</label>
+      <input
+        id="contacto-cafeteria"
+        class="campo__control"
+        formControlName="contacto"
+        placeholder="Ej. Andrés Solano"
+        maxlength="80"
+        autocomplete="name"
+        [attr.aria-invalid]="invalido('contacto')"
+        [attr.aria-describedby]="invalido('contacto') ? 'error-contacto-cafeteria' : null"
+      />
+      @if (invalido('contacto')) {
+        <p id="error-contacto-cafeteria" class="campo__error">Poné un nombre de contacto.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="telefono-cafeteria">Teléfono</label>
+      <input
+        id="telefono-cafeteria"
+        class="campo__control"
+        type="tel"
+        formControlName="telefono"
+        placeholder="+506 0000-0000"
+        autocomplete="tel"
+        [attr.aria-invalid]="invalido('telefono')"
+        [attr.aria-describedby]="invalido('telefono') ? 'error-telefono-cafeteria' : null"
+      />
+      @if (invalido('telefono')) {
+        <p id="error-telefono-cafeteria" class="campo__error">Ingresá un teléfono de 8 dígitos.</p>
+      }
+    </div>
+  </div>
+
+  <div class="fila">
+    <div class="campo">
+      <label class="campo__etiqueta" for="correo-cafeteria">Correo electrónico</label>
+      <input
+        id="correo-cafeteria"
+        class="campo__control"
+        type="email"
+        formControlName="correo"
+        placeholder="contacto@tucafeteria.cr"
+        autocomplete="email"
+        [attr.aria-invalid]="invalido('correo')"
+        [attr.aria-describedby]="invalido('correo') ? 'error-correo-cafeteria' : null"
+      />
+      @if (invalido('correo')) {
+        <p id="error-correo-cafeteria" class="campo__error">Ingresá un correo válido.</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="ubicacion-cafeteria">Ubicación</label>
+      <input
+        id="ubicacion-cafeteria"
+        class="campo__control"
+        [value]="ubicacion()"
+        placeholder="Ej. Escazú, San José"
+        readonly
+        [attr.aria-invalid]="faltaPin()"
+        [attr.aria-describedby]="faltaPin() ? 'error-ubicacion-cafeteria' : null"
+      />
+      @if (faltaPin()) {
+        <p id="error-ubicacion-cafeteria" class="campo__error">
+          Marcá en el mapa dónde está tu local.
+        </p>
+      } @else if (pin() && !canton()) {
+        <p class="campo__ayuda" aria-live="polite">El pin está fuera de los cantones de ejemplo.</p>
+      }
+    </div>
+  </div>
+
+  <div class="campo">
+    <app-mapa-cafeteria [(pin)]="pin" />
+    <p class="campo__ayuda">Tocá el mapa para marcar tu local; podés arrastrar el pin.</p>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="descripcion-cafeteria">
+      Descripción <span class="campo__opcional">(opcional)</span>
+    </label>
+    <textarea
+      id="descripcion-cafeteria"
+      class="campo__control"
+      formControlName="descripcion"
+      rows="3"
+      maxlength="300"
+      aria-describedby="contador-descripcion-cafeteria"
+    ></textarea>
+    <p id="contador-descripcion-cafeteria" class="campo__ayuda campo__ayuda--derecha">
+      {{ formulario().controls.descripcion.value.length }}/300
+    </p>
+  </div>
+
+  <div class="campo">
+    <label class="campo__etiqueta" for="horario-cafeteria">
+      Horario <span class="campo__opcional">(opcional)</span>
+    </label>
+    <input
+      id="horario-cafeteria"
+      class="campo__control"
+      formControlName="horario"
+      placeholder="Ej. Lunes a sábado, 7 a. m. a 6 p. m."
+      maxlength="100"
+      autocomplete="off"
+    />
+  </div>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="atras.emit()">← Atrás</button>
+    <button type="submit" class="btn btn--filled">Continuar →</button>
+  </div>
+</form>
