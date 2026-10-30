@@ -8,24 +8,26 @@ import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { areaHectareas, centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
 import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
-import {
-  DetallesFincaComponent,
-  crearFormularioFinca,
-} from '../onboarding-finca/components/detalles-finca/detalles-finca.component';
 import { MapaFincaComponent } from '../onboarding-finca/components/mapa-finca/mapa-finca.component';
-import { PasoConfirmacionComponent } from '../onboarding-finca/components/paso-confirmacion/paso-confirmacion.component';
-import { RUTA_DASHBOARD } from '../onboarding-finca/onboarding-finca.component';
+import { ConfirmacionFincaComponent } from './components/confirmacion-finca/confirmacion-finca.component';
+import {
+  FormularioFincaComponent,
+  crearFormularioFinca,
+} from './components/formulario-finca/formulario-finca.component';
+
+export const RUTA_DASHBOARD = '/dashboard';
 
 type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
 
-// Registro de una finca adicional desde el panel del cafetalero; reutiliza las piezas del onboarding
+// Registro de una finca adicional desde el panel del cafetalero. Es una pantalla aparte del
+// onboarding: solo usa su mapa de dibujo, sin modificarlo.
 @Component({
   selector: 'app-registrar-finca',
   imports: [
-    DetallesFincaComponent,
+    ConfirmacionFincaComponent,
+    FormularioFincaComponent,
     MapaFincaComponent,
     MenuLateralCafetaleroComponent,
-    PasoConfirmacionComponent,
   ],
   templateUrl: './registrar-finca.component.html',
   styleUrl: './registrar-finca.component.css',

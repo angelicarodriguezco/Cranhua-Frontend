@@ -5,8 +5,7 @@ import { NEVER } from 'rxjs';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { Coordenada } from '../../core/models/finca.model';
-import { RUTA_DASHBOARD } from '../onboarding-finca/onboarding-finca.component';
-import { RegistrarFincaComponent } from './registrar-finca.component';
+import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
 
 // Cerca de la cabecera de Tarrazú y lejos de las fincas de ejemplo
 const LIBRE: Coordenada[] = [

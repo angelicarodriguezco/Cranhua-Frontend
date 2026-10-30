@@ -22,7 +22,7 @@
   </header>
 
   @if (paso() === 'confirmacion') {
-    <app-paso-confirmacion
+    <app-confirmacion-finca
       class="vidrio confirmacion"
       [finca]="registrada()!"
       [nombrePropietario]="usuario().nombre"
@@ -80,9 +80,8 @@
           </button>
         </aside>
       } @else {
-        <app-detalles-finca
+        <app-formulario-finca
           class="vidrio"
-          subtitulo="Completá esto mientras ajustás el dibujo en el mapa."
           [formulario]="formulario"
           [(duenos)]="duenos"
           [canton]="canton()"
