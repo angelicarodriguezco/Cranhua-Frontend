@@ -2,9 +2,7 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 
 import { sumaPorcentajesValidator } from './suma-porcentajes.validator';
 
-function arrayProcesos(
-  filas: { proceso: string; porcentaje: number | null }[],
-): FormArray {
+function arrayProcesos(filas: { proceso: string; porcentaje: number | null }[]): FormArray {
   return new FormArray(
     filas.map(
       (fila) =>

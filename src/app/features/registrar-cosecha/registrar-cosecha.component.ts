@@ -46,10 +46,9 @@ export class RegistrarCosechaComponent {
   protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
-  private readonly idRuta = toSignal(
-    this.route.paramMap.pipe(map((params) => params.get('id'))),
-    { initialValue: this.route.snapshot.paramMap.get('id') },
-  );
+  private readonly idRuta = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
+    initialValue: this.route.snapshot.paramMap.get('id'),
+  });
 
   protected readonly cosechaId = computed(() => this.idRuta());
   protected readonly modoEdicion = computed(() => this.idRuta() !== null);
@@ -220,8 +219,8 @@ export class RegistrarCosechaComponent {
     });
   }
 
-  protected onVerCosecha(_id: string): void {
-    void this.router.navigateByUrl('/historial');
+  protected onVerCosecha(id: string): void {
+    void this.router.navigateByUrl('/historial', { state: { cosechaId: id } });
   }
 
   protected abrirModalEliminar(): void {

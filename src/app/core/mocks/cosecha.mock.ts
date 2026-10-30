@@ -1,8 +1,4 @@
-import {
-  Cosecha,
-  FincaCosechaOpcion,
-  ProcesoBeneficiado,
-} from '../models/cosecha.model';
+import { Cosecha, FincaCosechaOpcion, ProcesoBeneficiado } from '../models/cosecha.model';
 
 export const FINCAS_COSECHA: FincaCosechaOpcion[] = [
   { id: 'finca-la-catalina', nombre: 'La Catalina' },

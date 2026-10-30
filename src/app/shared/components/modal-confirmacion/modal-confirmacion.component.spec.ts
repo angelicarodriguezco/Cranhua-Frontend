@@ -13,10 +13,7 @@ describe('ModalConfirmacionComponent', () => {
 
     fixture = TestBed.createComponent(ModalConfirmacionComponent);
     fixture.componentRef.setInput('titulo', '¿Eliminar cosecha?');
-    fixture.componentRef.setInput(
-      'mensaje',
-      'Esta acción no se puede deshacer.',
-    );
+    fixture.componentRef.setInput('mensaje', 'Esta acción no se puede deshacer.');
     fixture.componentRef.setInput('etiquetaConfirmar', 'Eliminar');
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -24,9 +21,7 @@ describe('ModalConfirmacionComponent', () => {
 
   it('renderiza título, mensaje y acciones', () => {
     expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha?');
-    expect(pagina.querySelector('.modal__mensaje')?.textContent).toContain(
-      'no se puede deshacer',
-    );
+    expect(pagina.querySelector('.modal__mensaje')?.textContent).toContain('no se puede deshacer');
     expect(pagina.textContent).toContain('Cancelar');
     expect(pagina.textContent).toContain('Eliminar');
     expect(pagina.querySelector('[role="dialog"]')).toBeTruthy();
@@ -54,9 +49,7 @@ describe('ModalConfirmacionComponent', () => {
     const spy = jasmine.createSpy('cancelar');
     fixture.componentInstance.cancelar.subscribe(spy);
 
-    fixture.componentInstance['onDocumentKeydown'](
-      new KeyboardEvent('keydown', { key: 'Escape' }),
-    );
+    fixture.componentInstance['onDocumentKeydown'](new KeyboardEvent('keydown', { key: 'Escape' }));
 
     expect(spy).toHaveBeenCalled();
   });
