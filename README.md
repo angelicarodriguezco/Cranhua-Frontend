@@ -49,14 +49,19 @@ npm start
 
 Abrir http://localhost:4200.
 
-| Ruta                                   | Pantalla                                    |
-| -------------------------------------- | ------------------------------------------- |
-| `/`                                    | Landing page                                |
-| `/iniciar-sesion`                      | Iniciar sesión                              |
-| `/onboarding-finca`                    | Registro de la primera finca del cafetalero |
-| `/mapa-prueba`                         | Mapa de prueba de Google Maps               |
-| `/registro`, `/explorar`, `/dashboard` | Pantallas pendientes (placeholder)          |
-| `/cafetalero/fincas`                   | Mis fincas del cafetalero                   |
+| Ruta                                                         | Pantalla                                           |
+| ------------------------------------------------------------ | -------------------------------------------------- |
+| `/`                                                          | Landing page                                       |
+| `/iniciar-sesion`                                            | Iniciar sesión                                     |
+| `/onboarding-finca`                                          | Registro de la primera finca del cafetalero        |
+| `/mis-fincas/registrar`                                      | Registrar otra finca desde el panel del cafetalero |
+| `/mapa-prueba`                                               | Mapa de prueba de Google Maps                      |
+| `/registro`                                                  | Crear cuenta                                       |
+| `/dashboard`                                                 | Dashboard del cafetalero                           |
+| `/explorar`                                                  | Pantalla pendiente (placeholder)                   |
+| `/mis-fincas`, `/registrar-cosecha`, `/historial`, `/perfil` | Pantallas pendientes del menú del cafetalero       |
+
+El dashboard y `/mis-fincas/registrar` comparten el tema: se cambia con el botón _Tema claro / Tema oscuro_ del menú lateral.
 
 Por ahora las pantallas usan datos de ejemplo de `src/app/core/mocks/finca.mock.ts`, así que no hace falta tener el backend corriendo. Cuando se conecten las vistas, levantar el backend siguiendo su README; queda en http://localhost:8080 y ya acepta peticiones desde `localhost:4200`.
 

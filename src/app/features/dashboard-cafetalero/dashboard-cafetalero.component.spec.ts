@@ -133,7 +133,7 @@ describe('DashboardCafetaleroComponent', () => {
   it('enlaza CTA, fincas, historial y menú a las rutas del plan', () => {
     expect(rutasDe('.cta')).toEqual(['/registrar-cosecha']);
     expect(rutasDe('.fincas .seccion-cabecera a')).toEqual(['/mis-fincas']);
-    expect(rutasDe('.nueva-finca')).toEqual(['/onboarding-finca']);
+    expect(rutasDe('.nueva-finca')).toEqual(['/mis-fincas/registrar']);
     expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/historial']);
 
     const detalles = rutasDe('.fincas-grid article a');

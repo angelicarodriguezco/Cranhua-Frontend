@@ -9,6 +9,7 @@ import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding
 import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 
@@ -40,6 +41,7 @@ export const routes: Routes = [
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'dashboard', component: DashboardCafetaleroComponent },
   { path: 'mis-fincas', component: PaginaMockComponent, data: { title: 'Mis fincas' } },
+  { path: 'mis-fincas/registrar', component: RegistrarFincaComponent },
   {
     path: 'fincas/:id',
     component: PaginaMockComponent,
