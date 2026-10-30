@@ -1,0 +1,76 @@
+:host {
+  display: block;
+}
+
+.zona-peligro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  margin-top: 1.75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-error, #a3243b) 35%, transparent);
+}
+
+.zona-peligro__texto {
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.zona-peligro__titulo {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-small-size, 0.875rem);
+  font-weight: 500;
+  line-height: var(--md-sys-typescale-title-small-line-height, 1.25rem);
+  color: var(--color-error, #a3243b);
+}
+
+.zona-peligro__descripcion {
+  margin: 0.35rem 0 0;
+  font-size: var(--md-sys-typescale-body-small-size, 0.75rem);
+  line-height: var(--md-sys-typescale-body-small-line-height, 1rem);
+  color: var(--color-text-muted, rgba(28, 42, 38, 0.72));
+  max-width: 36rem;
+}
+
+.zona-peligro__boton {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.35rem;
+  border: 1.5px solid color-mix(in srgb, var(--color-error, #a3243b) 70%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-error, #a3243b) 12%, transparent);
+  color: var(--color-error, #a3243b);
+  font-family: var(--font-family, inherit);
+  font-size: var(--md-sys-typescale-label-large-size, 0.875rem);
+  font-weight: var(--md-sys-typescale-label-large-weight, 500);
+  line-height: var(--md-sys-typescale-label-large-line-height, 1.25rem);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking, 0.01em);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.zona-peligro__boton:hover {
+  background: color-mix(in srgb, var(--color-error, #a3243b) 22%, transparent);
+  border-color: var(--color-error, #a3243b);
+}
+
+.zona-peligro__boton:focus-visible {
+  outline: 2px solid var(--color-error, #a3243b);
+  outline-offset: 2px;
+}
+
+@media (max-width: 700px) {
+  .zona-peligro {
+    flex-direction: column;
+  }
+
+  .zona-peligro__boton {
+    width: 100%;
+  }
+}

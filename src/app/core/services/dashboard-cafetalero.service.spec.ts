@@ -64,4 +64,33 @@ describe('DashboardCafetaleroService', () => {
     servicio.establecerTema('oscuro');
     expect(servicio.tema()).toBe('oscuro');
   });
+
+  it('sincroniza y elimina cosechas recientes en memoria', () => {
+    servicio.sincronizarCosechaReciente({
+      id: 'cosecha-nueva-test',
+      variedad: 'Typica',
+      finca: 'La Catalina',
+      proceso: 'Natural',
+      kgDisponibles: 30,
+      estado: 'Disponible',
+    });
+    expect(servicio.cosechasRecientes()[0].id).toBe('cosecha-nueva-test');
+    expect(servicio.indicadores().cosechasActivas).toBe(4);
+
+    servicio.sincronizarCosechaReciente({
+      id: 'cosecha-nueva-test',
+      variedad: 'Typica',
+      finca: 'La Catalina',
+      proceso: 'Honey',
+      kgDisponibles: 28,
+      estado: 'Disponible',
+    });
+    expect(servicio.cosechasRecientes().find((c) => c.id === 'cosecha-nueva-test')?.proceso).toBe(
+      'Honey',
+    );
+
+    servicio.eliminarCosechaReciente('cosecha-nueva-test');
+    expect(servicio.cosechasRecientes().some((c) => c.id === 'cosecha-nueva-test')).toBeFalse();
+    expect(servicio.indicadores().cosechasActivas).toBe(3);
+  });
 });

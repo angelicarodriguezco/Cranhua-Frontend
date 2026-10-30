@@ -1,0 +1,125 @@
+<form class="paso" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <section class="tarjeta" aria-labelledby="seleccion-titulo">
+    <h2 id="seleccion-titulo" class="tarjeta__titulo">Selección por tamaño y defectos</h2>
+
+    <div class="rejilla">
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-peso-antes">Peso antes de selección (kg)</label>
+        <input
+          id="cosecha-peso-antes"
+          class="campo__control"
+          type="number"
+          formControlName="pesoAntesKg"
+          min="0"
+          step="0.1"
+          placeholder="Ej. 120"
+          [attr.aria-invalid]="campoInvalido('pesoAntesKg')"
+        />
+        @if (campoInvalido('pesoAntesKg')) {
+          <p class="campo__error">Indicá el peso antes de la selección.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-peso-despues">
+          Peso tras selección — zarandas/mallas (kg)
+        </label>
+        <input
+          id="cosecha-peso-despues"
+          class="campo__control"
+          type="number"
+          formControlName="pesoTrasSeleccionKg"
+          min="0"
+          step="0.1"
+          placeholder="Ej. 96"
+          [attr.aria-invalid]="campoInvalido('pesoTrasSeleccionKg')"
+        />
+        @if (campoInvalido('pesoTrasSeleccionKg')) {
+          <p class="campo__error">Indicá el peso tras la selección.</p>
+        }
+      </div>
+    </div>
+
+    <div class="merma" aria-live="polite">
+      <span class="merma__etiqueta">Merma calculada por selección</span>
+      <p class="merma__valor" id="cosecha-merma">{{ mermaPorcentaje() | number: '1.0-1' }}%</p>
+    </div>
+
+    <div class="rejilla rejilla--caracolillo">
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-caracolillo">
+          ¿Se separó café caracolillo?
+          <span class="campo__opcional">(opcional)</span>
+        </label>
+        <select id="cosecha-caracolillo" class="campo__control" formControlName="separoCaracolillo">
+          <option value="">Sin indicar</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      @if (muestraPesoCaracolillo()) {
+        <div class="campo">
+          <label class="campo__etiqueta" for="cosecha-peso-caracolillo">
+            Peso de caracolillo (kg)
+          </label>
+          <input
+            id="cosecha-peso-caracolillo"
+            class="campo__control"
+            type="number"
+            formControlName="pesoCaracolilloKg"
+            min="0"
+            step="0.1"
+            placeholder="Ej. 4"
+            [attr.aria-invalid]="campoInvalido('pesoCaracolilloKg')"
+          />
+          @if (campoInvalido('pesoCaracolilloKg')) {
+            <p class="campo__error">Indicá el peso del caracolillo.</p>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="catacion-titulo">
+    <h2 id="catacion-titulo" class="tarjeta__titulo">
+      Catación SCA <span class="tarjeta__opcional">(opcional)</span>
+    </h2>
+
+    <div class="rejilla">
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-sca">Puntaje SCA</label>
+        <input
+          id="cosecha-sca"
+          class="campo__control"
+          type="number"
+          formControlName="puntajeSca"
+          min="0"
+          max="100"
+          step="0.1"
+          placeholder="Ej. 84.5"
+          [attr.aria-invalid]="campoInvalido('puntajeSca')"
+        />
+        @if (campoInvalido('puntajeSca')) {
+          <p class="campo__error">El puntaje debe estar entre 0 y 100.</p>
+        }
+      </div>
+
+      <div class="campo campo--ancho">
+        <label class="campo__etiqueta" for="cosecha-notas">Notas de catación</label>
+        <textarea
+          id="cosecha-notas"
+          class="campo__control campo__control--area"
+          formControlName="notasCatacion"
+          rows="3"
+          placeholder="Ej. Notas a chocolate y miel."
+        ></textarea>
+      </div>
+    </div>
+  </section>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="onAtras()">← Atrás</button>
+    <button type="submit" class="btn btn--filled">Guardar cosecha</button>
+  </div>
+</form>
