@@ -65,6 +65,13 @@
   background-position: center;
 }
 
+.contenido--exito {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+}
+
 .vidrio {
   --color-text: var(--vidrio-texto);
   --color-text-muted: var(--vidrio-texto-suave);
@@ -84,7 +91,6 @@
   border-radius: 14px;
   color: var(--color-text);
   color-scheme: var(--vidrio-esquema);
-  backdrop-filter: blur(var(--vidrio-blur));
 }
 
 .encabezado {
@@ -160,7 +166,6 @@
   padding: 1.5rem 1.75rem;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
-  backdrop-filter: blur(var(--vidrio-blur));
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
 }
 
@@ -169,11 +174,16 @@
 }
 
 .panel--exito {
-  max-width: 42rem;
-  margin: 2.5rem auto 0;
+  width: min(100%, 42rem);
+  margin: 0;
   padding: 2.25rem 2rem 2rem;
   border-radius: 24px;
+  background: color-mix(in srgb, var(--vidrio-fondo) 92%, #ffffff 8%);
   box-shadow: 0 24px 48px rgba(8, 50, 62, 0.18);
+}
+
+:host([data-theme='oscuro']) .panel--exito {
+  background: color-mix(in srgb, var(--vidrio-fondo) 88%, #000000 12%);
 }
 
 app-modal-confirmacion {

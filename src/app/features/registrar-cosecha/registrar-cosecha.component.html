@@ -4,7 +4,7 @@
   (alternarTema)="alternarTema()"
 />
 
-<main class="contenido" #contenido>
+<main class="contenido" [class.contenido--exito]="paso() === 'exito'" #contenido>
   @if (paso() !== 'exito') {
     <header class="encabezado">
       <div>
