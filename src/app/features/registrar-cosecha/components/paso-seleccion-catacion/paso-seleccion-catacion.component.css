@@ -77,6 +77,15 @@
   font-size: 0.875rem;
 }
 
+select.campo__control {
+  color-scheme: light;
+}
+
+select.campo__control option {
+  background-color: #ffffff;
+  color: #1c3426;
+}
+
 .campo__control--area {
   resize: vertical;
   min-height: 4.5rem;
