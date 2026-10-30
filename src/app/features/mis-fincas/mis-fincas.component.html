@@ -1,0 +1,12 @@
+<main class="mis-fincas">
+  <header class="mis-fincas__encabezado">
+    <h1>Mis fincas</h1>
+    <a routerLink="/onboarding-finca" class="btn btn--filled">Registrar finca</a>
+  </header>
+
+  @for (finca of fincas(); track finca.id) {
+    <app-tarjeta-finca [finca]="finca" />
+  } @empty {
+    <p class="mis-fincas__vacio">Todavía no tenés fincas registradas.</p>
+  }
+</main>
