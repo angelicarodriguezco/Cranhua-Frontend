@@ -11,6 +11,7 @@ import { OnboardingTostadorComponent } from './features/onboarding-tostador/onbo
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
+import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -59,5 +60,12 @@ export const routes: Routes = [
     path: 'tostador/dashboard',
     component: PaginaMockComponent,
     data: { title: 'Dashboard del tostador' },
+  },
+
+  { path: 'cafetalero/fincas', component: MisFincasComponent },
+  {
+    path: 'cafetalero/fincas/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Detalle de finca' },
   },
 ];
