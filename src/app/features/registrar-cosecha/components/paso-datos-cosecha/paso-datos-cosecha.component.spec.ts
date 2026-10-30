@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import {
-  DatosPasoCosecha,
-  PasoDatosCosechaComponent,
-} from './paso-datos-cosecha.component';
+import { DatosPasoCosecha, PasoDatosCosechaComponent } from './paso-datos-cosecha.component';
 
 describe('PasoDatosCosechaComponent', () => {
   let fixture: ComponentFixture<PasoDatosCosechaComponent>;
@@ -53,12 +50,8 @@ describe('PasoDatosCosechaComponent', () => {
     expect(pagina.querySelector('.reparto__punto')).toBeTruthy();
     expect(componente['formulario'].controls.procesos.at(0).controls.proceso.value).toBeTruthy();
     expect(pagina.querySelector('.btn-agregar')?.textContent?.trim()).toBe('+ Agregar proceso');
-    expect(pagina.querySelector('button[type="submit"]')?.textContent?.trim()).toBe(
-      'Continuar →',
-    );
-    expect(pagina.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(
-      false,
-    );
+    expect(pagina.querySelector('button[type="submit"]')?.textContent?.trim()).toBe('Continuar →');
+    expect(pagina.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
     expect(pagina.textContent).toContain('% asignado');
   });
 

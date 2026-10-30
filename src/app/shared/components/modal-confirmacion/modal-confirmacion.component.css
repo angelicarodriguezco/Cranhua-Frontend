@@ -62,7 +62,9 @@
   line-height: var(--md-sys-typescale-label-large-line-height, 1.25rem);
   letter-spacing: var(--md-sys-typescale-label-large-tracking, 0.01em);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .modal__btn:focus-visible {

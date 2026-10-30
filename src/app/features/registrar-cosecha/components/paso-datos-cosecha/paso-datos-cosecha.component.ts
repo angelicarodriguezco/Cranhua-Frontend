@@ -1,11 +1,5 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import {
-  FormArray,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
@@ -88,9 +82,12 @@ export function crearFormularioDatosCosecha(
         nonNullable: true,
         validators: [Validators.required],
       }),
-      procesos: new FormArray(filas.map((fila) => crearGrupoProceso(fila)), {
-        validators: [sumaPorcentajesValidator],
-      }),
+      procesos: new FormArray(
+        filas.map((fila) => crearGrupoProceso(fila)),
+        {
+          validators: [sumaPorcentajesValidator],
+        },
+      ),
     },
     { validators: [fechasOrdenadasValidator] },
   );
@@ -127,7 +124,8 @@ export class PasoDatosCosechaComponent {
 
   protected readonly sumaPorcentaje = computed(() =>
     this.procesosValue().reduce((acumulado, fila) => {
-      const porcentaje = typeof fila.porcentaje === 'number' ? fila.porcentaje : Number(fila.porcentaje);
+      const porcentaje =
+        typeof fila.porcentaje === 'number' ? fila.porcentaje : Number(fila.porcentaje);
       return acumulado + (Number.isFinite(porcentaje) ? porcentaje : 0);
     }, 0),
   );
