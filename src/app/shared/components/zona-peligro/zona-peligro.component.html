@@ -1,0 +1,10 @@
+<section class="zona-peligro" aria-labelledby="zona-peligro-titulo">
+  <div class="zona-peligro__texto">
+    <h2 id="zona-peligro-titulo" class="zona-peligro__titulo">{{ titulo() }}</h2>
+    <p class="zona-peligro__descripcion">{{ descripcion() }}</p>
+  </div>
+
+  <button type="button" class="zona-peligro__boton" (click)="onEliminar()">
+    {{ etiquetaBoton() }}
+  </button>
+</section>

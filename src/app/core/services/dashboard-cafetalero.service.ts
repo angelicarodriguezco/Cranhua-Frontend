@@ -102,4 +102,20 @@ export class DashboardCafetaleroService {
       lista.map((s) => (s.id === id ? { ...s, estado: 'rechazada' } : s)),
     );
   }
+
+  sincronizarCosechaReciente(cosecha: CosechaReciente): void {
+    this.cosechas.update((lista) => {
+      const indice = lista.findIndex((c) => c.id === cosecha.id);
+      if (indice === -1) {
+        return [{ ...cosecha }, ...lista];
+      }
+      const actualizada = [...lista];
+      actualizada[indice] = { ...cosecha };
+      return actualizada;
+    });
+  }
+
+  eliminarCosechaReciente(id: string): void {
+    this.cosechas.update((lista) => lista.filter((c) => c.id !== id));
+  }
 }

@@ -1,0 +1,71 @@
+<app-menu-lateral-cafetalero
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido" #contenido>
+  @if (paso() !== 'exito') {
+    <header class="encabezado">
+      <div>
+        <h1 class="encabezado__titulo">{{ titulo() }}</h1>
+        <p class="encabezado__texto">{{ subtitulo() }}</p>
+      </div>
+
+      <button type="button" class="volver" (click)="volver()">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M19 12H5m6-6-6 6 6 6" />
+        </svg>
+        Volver
+      </button>
+    </header>
+
+    <div class="vidrio formulario" aria-label="Formulario de cosecha">
+      @if (paso() === 'datos') {
+        <app-paso-datos-cosecha
+          [valorInicial]="valorInicialPaso1()"
+          (continuar)="onContinuarPaso1($event)"
+          (cancelar)="onCancelarPaso1()"
+        />
+      } @else if (paso() === 'seleccion') {
+        <app-paso-seleccion-catacion
+          [valorInicial]="valorInicialPaso2()"
+          [pesoAntesSugerido]="pesoAntesSugerido()"
+          (guardar)="onGuardarPaso2($event)"
+          (atras)="onAtrasPaso2()"
+        />
+      }
+
+      @if (modoEdicion()) {
+        <section class="panel zona-edicion">
+          <app-zona-peligro
+            etiquetaBoton="Eliminar cosecha"
+            descripcion="Al eliminar esta cosecha se perderá el registro de forma permanente. Esta acción no se puede deshacer."
+            (eliminar)="abrirModalEliminar()"
+          />
+        </section>
+      }
+    </div>
+  } @else {
+    @if (cosechaGuardada(); as cosecha) {
+      <section class="vidrio panel panel--exito" aria-label="Cosecha registrada">
+        <app-resumen-cosecha
+          [cosecha]="cosecha"
+          [modoEdicion]="modoEdicion()"
+          (registrarOtra)="onRegistrarOtra()"
+          (verCosecha)="onVerCosecha($event)"
+        />
+      </section>
+    }
+  }
+</main>
+
+@if (modalEliminarAbierto()) {
+  <app-modal-confirmacion
+    titulo="¿Eliminar cosecha?"
+    mensaje="Se eliminará esta cosecha de forma permanente. Esta acción no se puede deshacer."
+    etiquetaConfirmar="Eliminar cosecha"
+    (confirmar)="onConfirmarEliminar()"
+    (cancelar)="cerrarModalEliminar()"
+  />
+}
