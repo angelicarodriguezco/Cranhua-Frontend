@@ -1,0 +1,100 @@
+<div class="historial" [attr.data-theme]="tema()">
+  <app-menu-lateral-cafetalero
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    <header class="cabecera">
+      <div>
+        <h1>Historial</h1>
+        <p>Tus cosechas registradas y los lotes que ya vendiste.</p>
+      </div>
+      <a routerLink="/registrar-cosecha" class="cta">+ Nueva cosecha</a>
+    </header>
+
+    <section class="indicadores" aria-label="Indicadores">
+      <article class="glass">
+        <strong>{{ indicadores().cosechasRegistradas }}</strong>
+        <span>Cosechas registradas</span>
+      </article>
+      <article class="glass">
+        <strong>{{ kg(indicadores().produccionTotalKg) }}</strong>
+        <span>Producción total</span>
+      </article>
+      <article class="glass">
+        <strong>{{ indicadores().lotesVendidos }}</strong>
+        <span>Lotes vendidos</span>
+      </article>
+    </section>
+
+    <div class="tablas">
+      <section class="cosechas glass" aria-labelledby="titulo-cosechas">
+        <h2 id="titulo-cosechas">Todas mis cosechas</h2>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Variedad</th>
+                <th class="numero">Kilos</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cosecha of cosechas(); track cosecha.id) {
+                <tr>
+                  <td>{{ fecha(cosecha.fecha) }}</td>
+                  <td>{{ cosecha.variedad }}</td>
+                  <td class="numero">{{ kg(cosecha.kilos) }}</td>
+                  <td>
+                    <span class="pill" [class]="claseEstado[cosecha.estado]">
+                      {{ cosecha.estado }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="vacio">Todavía no registraste cosechas.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="lotes glass" aria-labelledby="titulo-lotes">
+        <h2 id="titulo-lotes">Lotes vendidos recientemente</h2>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código de lote</th>
+                <th>Comprador</th>
+                <th class="numero">Kilos</th>
+                <th class="numero">Precio</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (lote of lotes(); track lote.codigo) {
+                <tr>
+                  <td class="codigo">{{ lote.codigo }}</td>
+                  <td>{{ lote.comprador }}</td>
+                  <td class="numero">{{ kg(lote.kilos) }}</td>
+                  <td class="numero">{{ colones(lote.precioColones) }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="vacio">Todavía no vendiste lotes.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
