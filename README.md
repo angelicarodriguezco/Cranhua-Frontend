@@ -57,6 +57,7 @@ Abrir http://localhost:4200.
 | `/mapa-prueba`                         | Mapa de prueba de Google Maps               |
 | `/registro`, `/explorar`, `/dashboard` | Pantallas pendientes (placeholder)          |
 | `/cafetalero/fincas`                   | Mis fincas del cafetalero                   |
+| `/cafetalero/fincas/:id`               | Detalle de una finca del cafetalero         |
 
 Por ahora las pantallas usan datos de ejemplo de `src/app/core/mocks/finca.mock.ts`, así que no hace falta tener el backend corriendo. Cuando se conecten las vistas, levantar el backend siguiendo su README; queda en http://localhost:8080 y ya acepta peticiones desde `localhost:4200`.
 

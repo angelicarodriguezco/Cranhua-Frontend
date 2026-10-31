@@ -1,0 +1,39 @@
+@if (cosechas().length > 0) {
+  <div class="tabla-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Variedad</th>
+          <th>Proceso</th>
+          <th>Lote</th>
+          <th>Disponible</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cosecha of cosechas(); track cosecha.id) {
+          <tr>
+            <td>{{ cosecha.variedad }}</td>
+            <td>{{ cosecha.proceso }}</td>
+            <td class="lote">{{ cosecha.codigoLote }}</td>
+            <td>{{ cosecha.kgDisponibles === null ? '—' : cosecha.kgDisponibles + ' kg' }}</td>
+            <td>
+              <span
+                class="pill"
+                [class.pill-disponible]="cosecha.estado === 'Disponible'"
+                [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
+              >
+                {{ cosecha.estado }}
+              </span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <p class="vacio">
+    Esta finca todavía no tiene cosechas.
+    <a routerLink="/registrar-cosecha">Registrar cosecha</a>
+  </p>
+}

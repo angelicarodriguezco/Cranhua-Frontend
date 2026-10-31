@@ -169,6 +169,7 @@ function fincaDeEjemplo(
   canton: string,
   propietarioId: string,
   perimetro: Coordenada[],
+  duenosAdicionales: Usuario[] = [],
 ): Finca {
   return {
     id,
@@ -180,7 +181,7 @@ function fincaDeEjemplo(
     canton: CANTONES.find((c) => c.nombre === canton) ?? null,
     areaHectareas: areaHectareas(perimetro),
     propietarioId,
-    duenosAdicionales: [],
+    duenosAdicionales,
   };
 }
 
@@ -205,12 +206,20 @@ export const FINCAS_REGISTRADAS: Finca[] = [
     { lat: 10.0991, lng: -84.3792 },
     { lat: 10.0994, lng: -84.3819 },
   ]),
-  fincaDeEjemplo('f-la-esperanza', 'Finca La Esperanza', 'Tarrazú', 'León Cortés', 'u-rodrigo', [
-    { lat: 9.7102, lng: -84.0601 },
-    { lat: 9.7099, lng: -84.0572 },
-    { lat: 9.7078, lng: -84.0569 },
-    { lat: 9.7081, lng: -84.0598 },
-  ]),
+  fincaDeEjemplo(
+    'f-la-esperanza',
+    'Finca La Esperanza',
+    'Tarrazú',
+    'León Cortés',
+    'u-rodrigo',
+    [
+      { lat: 9.7102, lng: -84.0601 },
+      { lat: 9.7099, lng: -84.0572 },
+      { lat: 9.7078, lng: -84.0569 },
+      { lat: 9.7081, lng: -84.0598 },
+    ],
+    USUARIOS.filter((u) => u.id === 'u-maria'),
+  ),
   fincaDeEjemplo('f-el-mirador', 'Finca El Mirador', 'Valle Occidental', 'Grecia', 'u-rodrigo', [
     { lat: 10.0758, lng: -84.3148 },
     { lat: 10.0755, lng: -84.3121 },

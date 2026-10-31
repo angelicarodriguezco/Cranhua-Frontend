@@ -1,0 +1,36 @@
+:host {
+  position: relative;
+  display: block;
+  height: 16rem;
+  overflow: hidden;
+  border: 1px solid var(--divider);
+  border-radius: 0.95rem;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.aviso {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.aviso p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.area {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: rgba(6, 31, 39, 0.85);
+  color: #f5efe3;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
