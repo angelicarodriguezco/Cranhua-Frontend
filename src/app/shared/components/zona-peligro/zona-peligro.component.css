@@ -1,0 +1,53 @@
+:host {
+  --peligro: #912316;
+
+  display: block;
+}
+
+.zona {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--peligro);
+  border-radius: 1.15rem;
+  /* El tinte rojo va sobre el fondo de tarjeta de la vista para leerse sobre fotos */
+  background:
+    linear-gradient(
+      var(--peligro-fondo, rgba(145, 35, 22, 0.12)),
+      var(--peligro-fondo, rgba(145, 35, 22, 0.12))
+    ),
+    var(--card-bg, transparent);
+  backdrop-filter: blur(13px);
+}
+
+h2 {
+  margin: 0 0 0.2rem;
+  color: var(--peligro-texto, #f2a7b5);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+p {
+  margin: 0;
+  color: var(--text-muted, inherit);
+  font-size: 0.8125rem;
+}
+
+button {
+  padding: 0.55rem 1.1rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--peligro);
+  color: #fff;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.15);
+}

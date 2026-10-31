@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.tabla-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.55rem 0.5rem;
+  border-bottom: 1px solid var(--divider);
+  font-size: 0.8125rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--table-header);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+td {
+  color: var(--text);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.lote {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pill-disponible {
+  background: var(--pill-disponible-bg);
+  color: var(--pill-disponible-text);
+}
+
+.pill-beneficiado {
+  background: var(--pill-beneficiado-bg);
+  color: var(--pill-beneficiado-text);
+}
+
+.vacio {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.vacio a {
+  color: var(--link);
+  font-weight: 500;
+}
