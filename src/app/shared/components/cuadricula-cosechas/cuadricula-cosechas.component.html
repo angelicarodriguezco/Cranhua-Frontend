@@ -1,0 +1,36 @@
+<ul class="cuadricula">
+  @for (cosecha of cosechas(); track cosecha.id) {
+    <li class="tarjeta">
+      <div class="tarjeta-encabezado">
+        <h3>Finca {{ cosecha.finca }}</h3>
+        <span class="pill" [class.pill-proxima]="cosecha.disponibilidad === 'Próximamente'">
+          {{ cosecha.disponibilidad }}
+        </span>
+      </div>
+      <p class="ubicacion">{{ cosecha.ubicacion }}</p>
+
+      <dl class="datos">
+        <div>
+          <dt>Variedad</dt>
+          <dd>{{ cosecha.variedad }}</dd>
+        </div>
+        <div>
+          <dt>Proceso</dt>
+          <dd>{{ cosecha.proceso }}</dd>
+        </div>
+      </dl>
+      <p class="notas">{{ cosecha.notas.join(' · ') }}</p>
+
+      <div class="tarjeta-pie">
+        <p class="precio">
+          <span>Desde</span>
+          <strong>{{ precio(cosecha) }}</strong>
+          <span>/ kg</span>
+        </p>
+        <a [routerLink]="['/tostador/cosechas', cosecha.id]">Ver detalle</a>
+      </div>
+    </li>
+  } @empty {
+    <li class="vacio">Ninguna cosecha coincide con los filtros.</li>
+  }
+</ul>

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
+import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
@@ -54,11 +55,24 @@ export const routes: Routes = [
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
+  { path: 'tostador/dashboard', component: DashboardTostadorComponent },
   {
-    path: 'tostador/dashboard',
+    path: 'tostador/cosechas',
     component: PaginaMockComponent,
-    data: { title: 'Dashboard del tostador' },
+    data: { title: 'Explorar cosechas' },
   },
+  {
+    path: 'tostador/cosechas/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Detalle de cosecha' },
+  },
+  {
+    path: 'tostador/solicitudes',
+    component: PaginaMockComponent,
+    data: { title: 'Mis solicitudes' },
+  },
+  { path: 'tostador/tostados', component: PaginaMockComponent, data: { title: 'Mis tostados' } },
+  { path: 'tostador/negocio', component: PaginaMockComponent, data: { title: 'Mi negocio' } },
 
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   {

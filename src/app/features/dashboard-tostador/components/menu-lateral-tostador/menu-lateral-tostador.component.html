@@ -1,0 +1,83 @@
+<aside class="menu-lateral">
+  <div class="marca">
+    <img class="logo" src="/images/logo-cranhua.png" alt="Cránhua" width="220" height="52" />
+  </div>
+
+  <nav class="nav-principal" aria-label="Principal">
+    @for (item of navPrincipal; track item.ruta) {
+      <a
+        [routerLink]="item.ruta"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: item.exacto === true }"
+      >
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          @switch (item.icono) {
+            @case ('home') {
+              <path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />
+            }
+            @case ('explorar') {
+              <circle cx="11" cy="11" r="6.25" />
+              <path d="m20 20-4.5-4.5" />
+            }
+            @case ('solicitudes') {
+              <path
+                d="M9 4.5H7.5A1.5 1.5 0 0 0 6 6v13.5A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H15"
+              />
+              <rect x="9" y="3" width="6" height="3" rx="1" />
+              <path d="M9.5 11h5M9.5 15h5" />
+            }
+            @case ('tostados') {
+              <ellipse cx="12" cy="12" rx="5.5" ry="8.25" transform="rotate(35 12 12)" />
+              <path d="M8.6 17.2c2.6-1.6 2.2-4.4 3.4-6.2 1.1-1.7 2.7-2.6 3.4-4.2" />
+            }
+            @case ('negocio') {
+              <path d="M4.5 9.5 6 4.5h12l1.5 5" />
+              <path d="M4.5 9.5a2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0 2.5 2.5 0 0 0 5 0" />
+              <path d="M5.5 11.5V20h13v-8.5M10 20v-4.5h4V20" />
+            }
+          }
+        </svg>
+        <span>{{ item.etiqueta }}</span>
+      </a>
+    }
+  </nav>
+
+  <nav class="nav-secundario" aria-label="Cuenta">
+    @for (item of navSecundario; track item.ruta) {
+      <a [routerLink]="item.ruta" routerLinkActive="activo">
+        <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <circle cx="12" cy="8" r="3.25" />
+          <path d="M5.5 19.5a6.5 6.5 0 0 1 13 0" />
+        </svg>
+        <span>{{ item.etiqueta }}</span>
+      </a>
+    }
+  </nav>
+
+  <button
+    type="button"
+    class="toggle-tema"
+    (click)="alternarTema.emit()"
+    [attr.aria-label]="tema() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+  >
+    <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      @if (tema() === 'oscuro') {
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2.75v1.75M12 19.5v1.75M4.5 12H2.75M21.25 12H19.5M5.64 5.64l1.24 1.24M17.12 17.12l1.24 1.24M5.64 18.36l1.24-1.24M17.12 6.88l1.24-1.24"
+        />
+      } @else {
+        <path d="M18.5 14.2A7.25 7.25 0 0 1 9.8 5.5 7.5 7.5 0 1 0 18.5 14.2z" />
+      }
+    </svg>
+    <span>Tema {{ tema() === 'oscuro' ? 'claro' : 'oscuro' }}</span>
+  </button>
+
+  <div class="perfil">
+    <span class="avatar" aria-hidden="true">{{ perfil().iniciales }}</span>
+    <div class="perfil-texto">
+      <span class="perfil-nombre">{{ perfil().nombreCompleto }}</span>
+      <span class="perfil-rol">{{ perfil().rol }}</span>
+    </div>
+  </div>
+</aside>
