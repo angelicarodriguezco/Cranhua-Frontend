@@ -9,6 +9,10 @@ export interface LoteComprado {
   variedad: string;
   proceso: ProcesoCosecha;
   kg: number;
+  /** yyyy-mm-dd */
+  fechaCompra: string;
+  /** null mientras el tostador no lo genere */
+  codigoTrazabilidad: string | null;
 }
 
 export interface Tueste {

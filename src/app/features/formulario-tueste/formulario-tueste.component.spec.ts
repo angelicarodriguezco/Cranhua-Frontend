@@ -1,20 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 
+import { LOTES_COMPRADOS } from '../../core/mocks/tueste.mock';
 import { FormularioTuesteComponent, RUTA_MIS_TOSTADOS } from './formulario-tueste.component';
 
 describe('FormularioTuesteComponent', () => {
   let fixture: ComponentFixture<FormularioTuesteComponent>;
   let pagina: HTMLElement;
 
-  async function crear(id: string | null): Promise<void> {
+  async function crear(id: string | null, lote: string | null = null): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [FormularioTuesteComponent],
       providers: [
         provideRouter([]),
         {
           provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: convertToParamMap({ id }) } },
+          useValue: {
+            snapshot: {
+              paramMap: convertToParamMap({ id }),
+              queryParamMap: convertToParamMap({ lote }),
+            },
+          },
         },
       ],
     }).compileComponents();
@@ -84,7 +90,9 @@ describe('FormularioTuesteComponent', () => {
     it('muestra el título, los lotes comprados y los tres niveles', () => {
       expect(campo('h1').textContent).toContain('Crear tueste');
       expect(campo<HTMLSelectElement>('#lote-tueste').disabled).toBeFalse();
-      expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(4);
+      expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(
+        LOTES_COMPRADOS.length + 1,
+      );
       expect(niveles().map((n) => n.textContent!.trim())).toEqual(['Claro', 'Medio', 'Oscuro']);
       expect(niveles().every((n) => n.querySelector('input')!.type === 'radio')).toBeTrue();
       expect(nivelElegido()).toBeUndefined();
@@ -133,7 +141,7 @@ describe('FormularioTuesteComponent', () => {
     });
 
     function llenarYGuardar(): void {
-      elegirLote(1); // La Catalina, ya tiene un tueste
+      elegirLote(1); // La Catalina, ya tiene dos tuestes
       elegirNivel('Oscuro');
       escribir('#peso-verde', '10');
       escribir('#peso-tostado', '8.4');
@@ -145,7 +153,7 @@ describe('FormularioTuesteComponent', () => {
 
       expect(dialogo().open).toBeTrue();
       expect(campo('dialog h2').textContent).toContain('Tueste guardado');
-      expect(campo('dialog .codigo').textContent!.trim()).toBe('CRH-2026-0101-T02');
+      expect(campo('dialog .codigo').textContent!.trim()).toBe('CRH-2026-0101-T03');
       expect(pagina.querySelector('form')).not.toBeNull();
     });
 
@@ -224,6 +232,18 @@ describe('FormularioTuesteComponent', () => {
       expect(campo<HTMLInputElement>('#peso-verde').value).toBe('12');
       expect(campo<HTMLSelectElement>('#lote-tueste').disabled).toBeTrue();
     });
+  });
+
+  it('llega con el lote elegido desde Mis tostados', async () => {
+    await crear(null, 'l-los-robles-catuai');
+    expect(campo<HTMLSelectElement>('#lote-tueste').selectedOptions[0].textContent).toContain(
+      'CRH-2026-0103',
+    );
+  });
+
+  it('ignora un lote que no es del tostador', async () => {
+    await crear(null, 'l-ajeno');
+    expect(campo<HTMLSelectElement>('#lote-tueste').selectedIndex).toBe(0);
   });
 
   it('avisa si el tueste a editar no existe', async () => {
