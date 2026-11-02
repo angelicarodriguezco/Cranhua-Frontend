@@ -1,0 +1,267 @@
+:host {
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.dashboard {
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --radius-card: 1.15rem;
+  --blur-glass: 13px;
+
+  display: grid;
+  grid-template-columns: minmax(14rem, 17.5rem) 1fr;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: var(--font-ui);
+  color: var(--text);
+}
+
+.dashboard[data-theme='oscuro'] {
+  --bg-image: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --overlay: linear-gradient(
+    180deg,
+    rgba(5, 8, 20, 0.6) 0%,
+    rgba(5, 8, 20, 0.2) 22%,
+    rgba(8, 10, 28, 0.08) 45%,
+    rgba(10, 14, 32, 0.28) 100%
+  );
+  --card-bg: rgba(8, 28, 38, 0.55);
+  --card-outline: rgba(255, 255, 255, 0.12);
+  --card-shadow: 0 32px 70px rgba(0, 0, 0, 0.45);
+  --tarjeta-bg: rgba(255, 255, 255, 0.04);
+  --text: #f5efe3;
+  --text-muted: #aec0bc;
+  --text-heading: #f5efe3;
+  --link: #d9a441;
+  --divider: rgba(255, 255, 255, 0.1);
+  --chip-border: rgba(255, 255, 255, 0.16);
+  --chip-hover: rgba(245, 239, 227, 0.06);
+  --chip-activo-bg: rgba(217, 164, 65, 0.18);
+  --chip-activo-border: rgba(217, 164, 65, 0.55);
+  --chip-activo-text: #e3b65b;
+  --pill-disponible-bg: rgba(111, 203, 143, 0.16);
+  --pill-disponible-text: #7fda9f;
+  --pill-proxima-bg: rgba(255, 255, 255, 0.08);
+  --pill-proxima-text: #aec0bc;
+  --select-fondo: #0b2a33;
+  --cabecera-sub: #aec0bc;
+  --cabecera-sombra: none;
+}
+
+.dashboard[data-theme='claro'] {
+  --bg-image: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --overlay: linear-gradient(
+    180deg,
+    rgba(5, 8, 20, 0.28) 0%,
+    rgba(5, 8, 20, 0.08) 28%,
+    rgba(255, 255, 255, 0.12) 55%,
+    rgba(8, 50, 62, 0.18) 100%
+  );
+  /* El saludo queda sobre el cielo de la foto: texto oscuro con halo claro para que se lea */
+  --cabecera-sub: #1c3426;
+  --cabecera-sombra: 0 1px 10px rgba(255, 255, 255, 0.75);
+  --card-bg: rgba(255, 255, 255, 0.6);
+  --card-outline: rgba(255, 255, 255, 0.75);
+  --card-shadow: 0 32px 70px rgba(8, 50, 62, 0.18);
+  --tarjeta-bg: rgba(255, 255, 255, 0.45);
+  --text: #1c3426;
+  --text-muted: #5c6b5e;
+  --text-heading: #1c3426;
+  --link: #a57008;
+  --divider: rgba(28, 52, 38, 0.1);
+  --chip-border: rgba(28, 52, 38, 0.2);
+  --chip-hover: rgba(255, 255, 255, 0.5);
+  --chip-activo-bg: rgba(165, 112, 8, 0.12);
+  --chip-activo-border: rgba(165, 112, 8, 0.5);
+  --chip-activo-text: #8a5a06;
+  --pill-disponible-bg: rgba(63, 122, 84, 0.14);
+  --pill-disponible-text: #2f6b45;
+  --pill-proxima-bg: rgba(28, 52, 38, 0.08);
+  --pill-proxima-text: #5c6b5e;
+  --select-fondo: #ffffff;
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+  height: 100%;
+  padding: 1.1rem 1.35rem 1.15rem;
+  overflow-y: auto;
+  color: var(--text);
+  background-color: #061f27;
+  background-image: var(--overlay), var(--bg-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.cabecera h1 {
+  margin: 0 0 0.2rem;
+  font-size: clamp(1.45rem, 2vw, 1.85rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  text-shadow: var(--cabecera-sombra);
+}
+
+.cabecera p {
+  margin: 0;
+  color: var(--cabecera-sub);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-shadow: var(--cabecera-sombra);
+}
+
+.glass {
+  background: var(--card-bg);
+  border: 1px solid var(--card-outline);
+  border-radius: var(--radius-card);
+  box-shadow: var(--card-shadow);
+  backdrop-filter: blur(var(--blur-glass));
+  -webkit-backdrop-filter: blur(var(--blur-glass));
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  flex-shrink: 0;
+}
+
+.indicadores article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 0.95rem;
+}
+
+.indicadores strong {
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-heading);
+  line-height: 1.15;
+}
+
+.indicadores span {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.cosechas {
+  padding: 0.8rem 1rem 1rem;
+}
+
+.seccion-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.seccion-cabecera h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
+.seccion-cabecera a {
+  color: var(--link);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.seccion-cabecera a:hover {
+  text-decoration: underline;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.chip {
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--chip-border);
+  background-color: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.chip:hover {
+  background-color: var(--chip-hover);
+  color: var(--text);
+}
+
+.chip[aria-pressed='true'],
+.chip-zona.activo {
+  background-color: var(--chip-activo-bg);
+  border-color: var(--chip-activo-border);
+  color: var(--chip-activo-text);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+.chip-zona {
+  appearance: none;
+  padding-right: 1.9rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%23a3a3a3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 0.7rem;
+}
+
+.chip-zona option {
+  background: var(--select-fondo);
+  color: var(--text);
+}
+
+@media (max-width: 900px) {
+  :host,
+  .dashboard {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  /* Sin scroll propio la foto se estiraría a lo alto de toda la página */
+  .contenido {
+    height: auto;
+    overflow: visible;
+    padding: 1rem 1.1rem 1.25rem;
+    background-attachment: fixed;
+  }
+}
+
+@media (max-width: 560px) {
+  .indicadores {
+    grid-template-columns: 1fr;
+  }
+
+  .cabecera h1 {
+    font-size: 1.55rem;
+  }
+}
