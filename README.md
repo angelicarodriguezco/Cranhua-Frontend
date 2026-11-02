@@ -58,6 +58,8 @@ Abrir http://localhost:4200.
 | `/registro`, `/explorar`, `/dashboard` | Pantallas pendientes (placeholder)          |
 | `/cafetalero/fincas`                   | Mis fincas del cafetalero                   |
 | `/cafetalero/fincas/:id`               | Detalle de una finca del cafetalero         |
+| `/tostador/tostados/nuevo`             | Crear tueste (tostador)                     |
+| `/tostador/tostados/:id/editar`        | Editar tueste (tostador)                    |
 
 Por ahora las pantallas usan datos de ejemplo de `src/app/core/mocks/finca.mock.ts`, así que no hace falta tener el backend corriendo. Cuando se conecten las vistas, levantar el backend siguiendo su README; queda en http://localhost:8080 y ya acepta peticiones desde `localhost:4200`.
 
