@@ -49,17 +49,25 @@ npm start
 
 Abrir http://localhost:4200.
 
-| Ruta                                   | Pantalla                                    |
-| -------------------------------------- | ------------------------------------------- |
-| `/`                                    | Landing page                                |
-| `/iniciar-sesion`                      | Iniciar sesión                              |
-| `/onboarding-finca`                    | Registro de la primera finca del cafetalero |
-| `/mapa-prueba`                         | Mapa de prueba de Google Maps               |
-| `/registro`, `/explorar`, `/dashboard` | Pantallas pendientes (placeholder)          |
-| `/cafetalero/fincas`                   | Mis fincas del cafetalero                   |
-| `/cafetalero/fincas/:id`               | Detalle de una finca del cafetalero         |
-| `/tostador/tostados/nuevo`             | Crear tueste (tostador)                     |
-| `/tostador/tostados/:id/editar`        | Editar tueste (tostador)                    |
+| Ruta                            | Pantalla                                           |
+| ------------------------------- | -------------------------------------------------- |
+| `/`                             | Landing page                                       |
+| `/iniciar-sesion`               | Iniciar sesión                                     |
+| `/registro`                     | Crear cuenta                                       |
+| `/onboarding-finca`             | Registro de la primera finca del cafetalero        |
+| `/dashboard`                    | Dashboard del cafetalero                           |
+| `/cafetalero/fincas`            | Mis fincas del cafetalero                          |
+| `/cafetalero/fincas/:id`        | Detalle de una finca del cafetalero                |
+| `/mis-fincas/registrar`         | Registrar otra finca desde el panel del cafetalero |
+| `/registrar-cosecha`            | Registrar cosecha                                  |
+| `/cosechas/:id/editar`          | Editar cosecha                                     |
+| `/historial`                    | Historial de cosechas y lotes vendidos             |
+| `/tostador/tostados/nuevo`      | Crear tueste (tostador)                            |
+| `/tostador/tostados/:id/editar` | Editar tueste (tostador)                           |
+| `/mapa-prueba`                  | Mapa de prueba de Google Maps                      |
+| `/explorar`, `/perfil`          | Pantallas pendientes (placeholder)                 |
+
+El dashboard y `/mis-fincas/registrar` comparten el tema: se cambia con el botón _Tema claro / Tema oscuro_ del menú lateral.
 
 Por ahora las pantallas usan datos de ejemplo de `src/app/core/mocks/finca.mock.ts`, así que no hace falta tener el backend corriendo. Cuando se conecten las vistas, levantar el backend siguiendo su README; queda en http://localhost:8080 y ya acepta peticiones desde `localhost:4200`.
 

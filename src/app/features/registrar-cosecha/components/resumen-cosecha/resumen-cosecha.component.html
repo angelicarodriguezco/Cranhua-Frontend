@@ -1,0 +1,60 @@
+<div class="resumen" role="status">
+  <div class="resumen__encabezado">
+    <p class="resumen__badge" aria-hidden="true">✓</p>
+    <h2 class="resumen__titulo">{{ titulo() }}</h2>
+    <p class="resumen__mensaje">{{ mensaje() }}</p>
+  </div>
+
+  <dl class="resumen__lista">
+    <div class="resumen__item">
+      <dt>Finca</dt>
+      <dd>{{ etiquetaFinca() }}</dd>
+    </div>
+    <div class="resumen__item">
+      <dt>Variedad</dt>
+      <dd>{{ cosecha().variedad }}</dd>
+    </div>
+    <div class="resumen__item">
+      <dt>Altura</dt>
+      <dd>{{ cosecha().alturaMsnm | number: '1.0-0' }} msnm</dd>
+    </div>
+    <div class="resumen__item">
+      <dt>Producción total</dt>
+      <dd>{{ cosecha().cantidadTotalKg | number: '1.0-1' }} kg</dd>
+    </div>
+    <div class="resumen__item resumen__item--procesos">
+      <dt>Procesos</dt>
+      <dd>
+        @for (proceso of procesosResumen(); track $index) {
+          <span class="resumen__proceso">{{ proceso.texto }}</span>
+        }
+      </dd>
+    </div>
+    <div class="resumen__item">
+      <dt>Peso tras selección</dt>
+      <dd>
+        {{ cosecha().pesoTrasSeleccionKg | number: '1.0-1' }} kg (merma
+        {{ mermaPorcentaje() | number: '1.0-1' }}%)
+      </dd>
+    </div>
+    @if (textoCaracolillo(); as caracolillo) {
+      <div class="resumen__item">
+        <dt>Caracolillo separado</dt>
+        <dd>{{ caracolillo }}</dd>
+      </div>
+    }
+    @if (cosecha().puntajeSca !== null) {
+      <div class="resumen__item">
+        <dt>Catación SCA</dt>
+        <dd>{{ cosecha().puntajeSca | number: '1.0-1' }} pts</dd>
+      </div>
+    }
+  </dl>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="onRegistrarOtra()">
+      Registrar otra cosecha
+    </button>
+    <button type="button" class="btn btn--filled" (click)="onVerCosecha()">Ver cosecha</button>
+  </div>
+</div>
