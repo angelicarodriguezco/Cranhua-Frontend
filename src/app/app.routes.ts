@@ -11,6 +11,7 @@ import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding
 import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 
@@ -34,6 +35,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardCafetaleroComponent },
   // El menú y el dashboard del cafetalero enlazan a estas rutas cortas
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
+  { path: 'mis-fincas/registrar', component: RegistrarFincaComponent },
   { path: 'fincas/:id', redirectTo: 'cafetalero/fincas/:id' },
   {
     path: 'registrar-cosecha',
