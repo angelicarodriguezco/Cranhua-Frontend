@@ -11,6 +11,7 @@ import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding
 import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
@@ -37,12 +38,10 @@ export const routes: Routes = [
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
   { path: 'mis-fincas/registrar', component: RegistrarFincaComponent },
   { path: 'fincas/:id', redirectTo: 'cafetalero/fincas/:id' },
-  {
-    path: 'registrar-cosecha',
-    component: PaginaMockComponent,
-    data: { title: 'Registrar cosecha' },
-  },
+  { path: 'registrar-cosecha', component: RegistrarCosechaComponent },
+  { path: 'cosechas/:id/editar', component: RegistrarCosechaComponent },
   { path: 'historial', component: PaginaMockComponent, data: { title: 'Historial' } },
+
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'tostador/dashboard', component: DashboardTostadorComponent },
