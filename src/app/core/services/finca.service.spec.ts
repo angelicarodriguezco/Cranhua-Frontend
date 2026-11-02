@@ -66,4 +66,43 @@ describe('FincaService', () => {
     expect(servicio.buscarCanton('san ra')?.nombre).toBe('San Ramón');
     expect(servicio.buscarCanton('Narnia')).toBeUndefined();
   });
+
+  describe('agregarDueno', () => {
+    it('agrega a la cuenta del correo como dueña de la finca', async () => {
+      const resultado = await firstValueFrom(
+        servicio.agregarDueno('f-la-esperanza', 'Andres.Vargas@ejemplo.cr'),
+      );
+      expect(resultado.agregado).toBeTrue();
+
+      const finca = await firstValueFrom(servicio.obtener('f-la-esperanza'));
+      expect(finca?.duenosAdicionales.map((u) => u.id)).toEqual(['u-maria', 'u-andres']);
+    });
+
+    it('no modifica los datos de ejemplo', async () => {
+      await firstValueFrom(servicio.agregarDueno('f-la-esperanza', 'andres.vargas@ejemplo.cr'));
+      const original = FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza');
+      expect(original?.duenosAdicionales.length).toBe(1);
+    });
+
+    it('rechaza un correo sin cuenta', async () => {
+      expect(
+        await firstValueFrom(servicio.agregarDueno('f-la-esperanza', 'nadie@ejemplo.cr')),
+      ).toEqual({ agregado: false, error: 'correo-inexistente' });
+    });
+
+    it('rechaza a quien ya es dueño, sea propietario o dueño adicional', async () => {
+      for (const correo of [USUARIO_ACTUAL.correo, 'maria.jimenez@ejemplo.cr']) {
+        expect(await firstValueFrom(servicio.agregarDueno('f-la-esperanza', correo))).toEqual({
+          agregado: false,
+          error: 'ya-es-dueno',
+        });
+      }
+    });
+
+    it('avisa si la finca no existe', async () => {
+      expect(
+        await firstValueFrom(servicio.agregarDueno('f-no-existe', 'andres.vargas@ejemplo.cr')),
+      ).toEqual({ agregado: false, error: 'finca-inexistente' });
+    });
+  });
 });
