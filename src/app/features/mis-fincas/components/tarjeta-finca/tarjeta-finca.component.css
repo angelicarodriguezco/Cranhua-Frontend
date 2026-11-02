@@ -31,3 +31,11 @@
   line-height: var(--md-sys-typescale-body-medium-line-height);
   color: var(--mf-texto-suave);
 }
+
+.tarjeta__accion {
+  display: inline-block;
+  margin-top: 0.5rem;
+  color: var(--color-gold);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
