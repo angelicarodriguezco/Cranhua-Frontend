@@ -1,0 +1,42 @@
+<div class="check" aria-hidden="true">
+  <svg viewBox="0 0 24 24">
+    <path d="m5 12.5 4.5 4.5L19 7.5" />
+  </svg>
+</div>
+
+<h1 class="titulo">¡Tu finca quedó registrada!</h1>
+<p class="texto">Ya podés empezar a registrar cosechas sobre tu finca cuando quieras.</p>
+
+<dl class="resumen">
+  <div>
+    <dt>Nombre</dt>
+    <dd>{{ finca().nombre }}</dd>
+  </div>
+  <div>
+    <dt>Zona cafetalera</dt>
+    <dd>{{ finca().zona ?? 'Sin especificar' }}</dd>
+  </div>
+  <div>
+    <dt>Ubicación</dt>
+    <dd>
+      @if (finca().canton; as canton) {
+        {{ canton.nombre }}, {{ canton.provincia }}
+      } @else {
+        Sin cantón de referencia
+      }
+    </dd>
+  </div>
+  <div>
+    <dt>Área aproximada</dt>
+    <dd>{{ area() }}</dd>
+  </div>
+  <div>
+    <dt>Dueños</dt>
+    <dd>{{ duenos() }}</dd>
+  </div>
+</dl>
+
+<button type="button" class="btn btn--filled" (click)="irAlDashboard.emit()">
+  Ir a mi dashboard
+</button>
+<button type="button" class="otra" (click)="registrarOtra.emit()">Registrar otra finca</button>
