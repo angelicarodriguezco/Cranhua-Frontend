@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
+import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
@@ -40,8 +41,7 @@ export const routes: Routes = [
   { path: 'fincas/:id', redirectTo: 'cafetalero/fincas/:id' },
   { path: 'registrar-cosecha', component: RegistrarCosechaComponent },
   { path: 'cosechas/:id/editar', component: RegistrarCosechaComponent },
-  { path: 'historial', component: PaginaMockComponent, data: { title: 'Historial' } },
-
+  { path: 'historial', component: HistorialCafetaleroComponent },
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'tostador/dashboard', component: DashboardTostadorComponent },
