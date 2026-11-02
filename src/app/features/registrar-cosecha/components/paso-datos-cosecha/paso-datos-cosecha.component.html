@@ -1,0 +1,208 @@
+<form class="paso" [formGroup]="formulario" (ngSubmit)="enviar()" novalidate>
+  <section class="tarjeta" aria-labelledby="datos-titulo">
+    <h2 id="datos-titulo" class="tarjeta__titulo">Datos de la cosecha</h2>
+
+    <div class="rejilla">
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-finca">Finca</label>
+        <select
+          id="cosecha-finca"
+          class="campo__control"
+          formControlName="fincaId"
+          [attr.aria-invalid]="campoInvalido('fincaId')"
+        >
+          <option value="" disabled>Seleccioná una finca</option>
+          @for (finca of fincas; track finca.id) {
+            <option [value]="finca.id">{{ finca.nombre }}</option>
+          }
+        </select>
+        @if (campoInvalido('fincaId')) {
+          <p class="campo__error">Elegí la finca de esta cosecha.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-variedad">Variedad de café</label>
+        <select
+          id="cosecha-variedad"
+          class="campo__control"
+          formControlName="variedad"
+          [attr.aria-invalid]="campoInvalido('variedad')"
+        >
+          <option value="" disabled>Seleccioná una variedad</option>
+          @for (variedad of variedades; track variedad) {
+            <option [value]="variedad">{{ variedad }}</option>
+          }
+        </select>
+        @if (campoInvalido('variedad')) {
+          <p class="campo__error">Elegí la variedad.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-altura">Altura (msnm)</label>
+        <input
+          id="cosecha-altura"
+          class="campo__control"
+          type="number"
+          formControlName="alturaMsnm"
+          min="0"
+          step="1"
+          placeholder="Ej. 1,650"
+          [attr.aria-invalid]="campoInvalido('alturaMsnm')"
+        />
+        @if (campoInvalido('alturaMsnm')) {
+          <p class="campo__error">Indicá la altura en metros sobre el nivel del mar.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-cantidad">Cantidad total producida (kg)</label>
+        <input
+          id="cosecha-cantidad"
+          class="campo__control"
+          type="number"
+          formControlName="cantidadTotalKg"
+          min="0"
+          step="0.1"
+          placeholder="Ej. 280"
+          [attr.aria-invalid]="campoInvalido('cantidadTotalKg')"
+        />
+        @if (campoInvalido('cantidadTotalKg')) {
+          <p class="campo__error">Indicá la cantidad total en kilogramos.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-inicio">Inicio de cosecha</label>
+        <input
+          id="cosecha-inicio"
+          class="campo__control"
+          type="date"
+          formControlName="fechaInicio"
+          [attr.aria-invalid]="campoInvalido('fechaInicio')"
+        />
+        @if (campoInvalido('fechaInicio')) {
+          <p class="campo__error">Indicá la fecha de inicio.</p>
+        }
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-fin">Fin de cosecha</label>
+        <input
+          id="cosecha-fin"
+          class="campo__control"
+          type="date"
+          formControlName="fechaFin"
+          [attr.aria-invalid]="campoInvalido('fechaFin') || fechasInconsistentes()"
+        />
+        @if (campoInvalido('fechaFin')) {
+          <p class="campo__error">Indicá la fecha de fin.</p>
+        } @else if (fechasInconsistentes()) {
+          <p class="campo__error">La fecha de fin debe ser igual o posterior al inicio.</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="tarjeta" formArrayName="procesos" aria-labelledby="reparto-titulo">
+    <h2 id="reparto-titulo" class="tarjeta__titulo">Distribución por proceso de beneficiado</h2>
+
+    <div
+      class="barra"
+      role="img"
+      [attr.aria-label]="'Distribución: ' + sumaPorcentaje() + '% asignado'"
+    >
+      <div class="barra__pista">
+        @for (seg of segmentosBarra(); track $index) {
+          <span
+            class="barra__segmento"
+            [style.flex-grow]="seg.porcentaje"
+            [style.background]="seg.color"
+            [title]="seg.proceso + ': ' + seg.porcentaje + '%'"
+          ></span>
+        }
+      </div>
+    </div>
+
+    <div class="barra__fila">
+      @if (estadoReparto() === 'completo') {
+        <p class="reparto__feedback reparto__feedback--exito" role="status">
+          Repartiste el 100% de tu cosecha
+        </p>
+      } @else if (estadoReparto() === 'excedido') {
+        <p class="reparto__feedback reparto__feedback--error" role="status">
+          Te pasaste del 100%. Ajustá los porcentajes.
+        </p>
+      } @else {
+        <p class="reparto__feedback" role="status">Todavía falta repartir.</p>
+      }
+      <p class="barra__meta">{{ sumaPorcentaje() }}% asignado</p>
+    </div>
+
+    <ul class="reparto__lista">
+      @for (grupo of procesos.controls; track $index; let i = $index) {
+        <li class="reparto__fila" [formGroupName]="i">
+          <span
+            class="reparto__punto"
+            [style.background]="colorProceso(grupo.controls.proceso.value)"
+            aria-hidden="true"
+          ></span>
+
+          <div class="campo reparto__proceso">
+            <label class="visually-hidden" [attr.for]="'proceso-' + i">Proceso</label>
+            <select
+              [id]="'proceso-' + i"
+              class="campo__control"
+              formControlName="proceso"
+              [attr.aria-invalid]="procesoInvalido(i)"
+            >
+              <option value="" disabled>Seleccioná</option>
+              @for (opcion of catalogoProcesos; track opcion.id) {
+                <option [value]="opcion.nombre">{{ opcion.nombre }}</option>
+              }
+            </select>
+            @if (procesoInvalido(i)) {
+              <p class="campo__error">Elegí un proceso.</p>
+            }
+          </div>
+
+          <div class="campo reparto__porcentaje">
+            <label class="visually-hidden" [attr.for]="'porcentaje-' + i">Porcentaje</label>
+            <input
+              [id]="'porcentaje-' + i"
+              class="campo__control campo__control--pct"
+              type="number"
+              formControlName="porcentaje"
+              min="0"
+              max="100"
+              step="1"
+              [attr.aria-invalid]="porcentajeInvalido(i)"
+            />
+            <span class="reparto__pct-simbolo" aria-hidden="true">%</span>
+            @if (porcentajeInvalido(i)) {
+              <p class="campo__error">0–100</p>
+            }
+          </div>
+
+          <button
+            type="button"
+            class="reparto__eliminar"
+            [disabled]="procesos.length <= 1"
+            [attr.aria-label]="'Eliminar proceso ' + (i + 1)"
+            (click)="eliminarProceso(i)"
+          >
+            ✕
+          </button>
+        </li>
+      }
+    </ul>
+
+    <button type="button" class="btn-agregar" (click)="agregarProceso()">+ Agregar proceso</button>
+  </section>
+
+  <div class="acciones">
+    <button type="button" class="btn btn--texto" (click)="onCancelar()">Cancelar</button>
+    <button type="submit" class="btn btn--filled">Continuar →</button>
+  </div>
+</form>
