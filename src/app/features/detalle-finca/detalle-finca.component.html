@@ -1,0 +1,82 @@
+<div class="detalle" [attr.data-theme]="tema()">
+  <app-menu-lateral-cafetalero
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    @if (finca(); as finca) {
+      <header class="cabecera glass">
+        <div>
+          <a routerLink="/cafetalero/fincas" class="volver">← Mis fincas</a>
+          <h1>{{ finca.nombre }}</h1>
+          <p>{{ ubicacion() }} · {{ finca.zona ?? 'Zona sin especificar' }}</p>
+        </div>
+        <a [routerLink]="['/cafetalero/fincas', finca.id, 'editar']" class="cta">Editar finca</a>
+      </header>
+
+      <section class="indicadores" aria-label="Indicadores">
+        <article class="glass">
+          <strong>{{ indicadores().hectareas }}</strong>
+          <span>Hectáreas</span>
+        </article>
+        <article class="glass">
+          <strong>{{ indicadores().cosechasActivas }}</strong>
+          <span>Cosechas activas</span>
+        </article>
+        <article class="glass">
+          <strong>{{ indicadores().kgDisponibles }} kg</strong>
+          <span>Disponibles</span>
+        </article>
+        <article class="glass">
+          <strong>{{ indicadores().duenos }}</strong>
+          <span>{{ indicadores().duenos === 1 ? 'Dueño' : 'Dueños' }}</span>
+        </article>
+      </section>
+
+      <div class="columnas">
+        <section class="glass seccion" aria-labelledby="titulo-perimetro">
+          <div class="seccion-cabecera">
+            <h2 id="titulo-perimetro">Perímetro</h2>
+            <a [routerLink]="['/cafetalero/fincas', finca.id, 'editar']">Editar perímetro</a>
+          </div>
+          <app-mapa-perimetro [perimetro]="finca.perimetro" />
+        </section>
+
+        <section class="glass seccion" aria-labelledby="titulo-duenos">
+          <div class="seccion-cabecera">
+            <h2 id="titulo-duenos">Dueños</h2>
+          </div>
+          <app-lista-duenos
+            [duenos]="duenos()"
+            [propietarioId]="finca.propietarioId"
+            [error]="errorDueno()"
+            (agregar)="agregarDueno($event)"
+          />
+        </section>
+      </div>
+
+      <section class="glass seccion" aria-labelledby="titulo-cosechas">
+        <div class="seccion-cabecera">
+          <h2 id="titulo-cosechas">Cosechas</h2>
+          <a routerLink="/registrar-cosecha">+ Registrar cosecha</a>
+        </div>
+        <app-tabla-cosechas [cosechas]="cosechas()" />
+      </section>
+
+      <!-- El modal de confirmación de "Eliminar finca" es CP3-32 -->
+      <app-zona-peligro
+        descripcion="La finca deja de aparecer en tu cuenta. Sus cosechas y códigos de trazabilidad se conservan."
+        accion="Eliminar finca"
+      />
+    } @else if (!cargando()) {
+      <section class="glass no-encontrada">
+        <a routerLink="/cafetalero/fincas" class="volver">← Mis fincas</a>
+        <h1>No encontramos esta finca</h1>
+        <p>Puede que se haya eliminado o que el enlace esté mal.</p>
+        <a routerLink="/cafetalero/fincas" class="cta">Volver a Mis fincas</a>
+      </section>
+    }
+  </main>
+</div>
