@@ -1,0 +1,238 @@
+<app-menu-lateral-tostador
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <h1>Mis tostados</h1>
+    <p>Los lotes que le compraste a los cafetaleros y su código de trazabilidad.</p>
+  </header>
+
+  <section class="indicadores" aria-label="Indicadores">
+    <article class="vidrio">
+      <strong>{{ indicadores().lotes }}</strong>
+      <span>Lotes comprados</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ kilos.format(indicadores().kg) }} kg</strong>
+      <span>Kg comprados</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ indicadores().conCodigo }}</strong>
+      <span>Lotes con código</span>
+    </article>
+  </section>
+
+  <section class="vidrio seccion" aria-labelledby="titulo-lotes">
+    <h2 id="titulo-lotes" class="seccion__titulo">Todos mis lotes y cosechas comprados</h2>
+
+    @if (lotes().length > 0) {
+      <div class="tabla-wrap">
+        <table class="tabla-lotes">
+          <thead>
+            <tr>
+              <th scope="col">Código de lote</th>
+              <th scope="col">Finca de origen</th>
+              <th scope="col" class="numero">Kilos</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Trazabilidad</th>
+              <th scope="col"><span class="solo-lector">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lote of lotes(); track lote.id) {
+              <tr [class.abierto]="loteAbierto()?.id === lote.id">
+                <td class="mono">{{ lote.codigoLote }}</td>
+                <td>{{ lote.finca }}</td>
+                <td class="numero">{{ kilos.format(lote.kg) }} kg</td>
+                <td>{{ formatearFecha(lote.fechaCompra) }}</td>
+                <td>
+                  @if (lote.codigoTrazabilidad) {
+                    <span class="pill pill--codigo">Con código</span>
+                  } @else {
+                    <span class="pill pill--pendiente">Pendiente</span>
+                  }
+                </td>
+                <!-- Ver tuestes va al final para que quede alineado en todas las filas -->
+                <td class="acciones-fila">
+                  @if (lote.codigoTrazabilidad) {
+                    <button
+                      type="button"
+                      class="enlace"
+                      [id]="'codigo-' + lote.id"
+                      (click)="verCodigo(lote)"
+                    >
+                      Ver código
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="btn btn--chico"
+                      [id]="'codigo-' + lote.id"
+                      (click)="generarCodigo(lote)"
+                    >
+                      Generar código
+                    </button>
+                  }
+                  <button
+                    type="button"
+                    class="enlace"
+                    [id]="'tuestes-' + lote.id"
+                    [attr.aria-expanded]="loteAbierto()?.id === lote.id"
+                    aria-controls="panel-tuestes"
+                    (click)="alternarTuestes(lote)"
+                  >
+                    Ver tuestes
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="vacio">Todavía no compraste lotes. Empezá explorando las cosechas disponibles.</p>
+    }
+  </section>
+
+  @if (loteAbierto(); as lote) {
+    <section id="panel-tuestes" class="vidrio seccion" aria-labelledby="titulo-tuestes">
+      <div class="seccion__cabecera">
+        <div>
+          <h2 id="titulo-tuestes" class="seccion__titulo" tabindex="-1">
+            Tuestes del lote <span class="mono">{{ lote.codigoLote }}</span>
+          </h2>
+          <p class="seccion__sub">
+            Finca {{ lote.finca }} · {{ lote.variedad }}, {{ lote.proceso }}
+          </p>
+        </div>
+        <button type="button" class="enlace" (click)="cerrarTuestes()">Cerrar</button>
+      </div>
+
+      @if (tuestes().length > 0) {
+        <div class="tabla-wrap">
+          <table class="tabla-tuestes">
+            <thead>
+              <tr>
+                <th scope="col">Nivel</th>
+                <th scope="col" class="numero">Peso verde</th>
+                <th scope="col" class="numero">Peso tostado</th>
+                <th scope="col" class="numero">Merma</th>
+                <th scope="col">Fecha</th>
+                <th scope="col"><span class="solo-lector">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (tueste of tuestes(); track tueste.id) {
+                <tr>
+                  <td>
+                    <span class="nivel" [attr.data-nivel]="tueste.nivel">{{ tueste.nivel }}</span>
+                  </td>
+                  <td class="numero">{{ kilos.format(tueste.pesoVerdeKg) }} kg</td>
+                  <td class="numero">{{ kilos.format(tueste.pesoTostadoKg) }} kg</td>
+                  <td class="numero">{{ merma(tueste) }}</td>
+                  <td>{{ formatearFecha(tueste.fecha) }}</td>
+                  <td class="acciones-fila">
+                    <button
+                      type="button"
+                      class="enlace"
+                      [attr.aria-label]="'Editar tueste ' + tueste.codigoTrazabilidad"
+                      (click)="editor.abrir(tueste, lote)"
+                    >
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="sin-tuestes">
+          <p class="vacio">Todavía no registraste tuestes de este lote.</p>
+          <a
+            class="btn btn--chico"
+            [routerLink]="rutaCrearTueste"
+            [queryParams]="{ lote: lote.id }"
+          >
+            Crear tueste
+          </a>
+        </div>
+      }
+    </section>
+  }
+
+  <section class="vidrio seccion explicacion" aria-labelledby="titulo-explicacion">
+    <h2 id="titulo-explicacion" class="seccion__titulo">¿Para qué sirve el código?</h2>
+    <p>
+      El código de trazabilidad une cada bolsa que vendés con la finca y la cosecha de donde salió
+      el café. Quien lo consulte en Cránhua ve la finca de origen, la variedad, el proceso y quién
+      lo tostó.
+    </p>
+    <p>
+      Se genera una sola vez por lote y no cambia, así que podés imprimirlo en todas las bolsas que
+      salgan de ese lote.
+    </p>
+    <div class="acciones">
+      <a class="btn btn--borde" [routerLink]="rutaExplorarCosechas">Explorar cosechas</a>
+      <a class="btn btn--filled" [routerLink]="rutaCrearTueste">Crear tueste</a>
+    </div>
+  </section>
+</main>
+
+<app-editar-tueste #editor (guardado)="alGuardarTueste($event)" />
+
+<dialog #dialogo class="dialogo" aria-labelledby="titulo-ficha" (cancel)="alCancelarFicha($event)">
+  @if (ficha(); as lote) {
+    <div class="vidrio ficha">
+      <h2 id="titulo-ficha" class="ficha__titulo">
+        {{ recienGenerado() ? 'Código generado' : 'Código de trazabilidad' }}
+      </h2>
+      <p class="ficha__sub">Lote {{ lote.codigoLote }} · Finca {{ lote.finca }}</p>
+      <p class="codigo">{{ lote.codigoTrazabilidad }}</p>
+
+      <dl class="ficha__datos">
+        <div>
+          <dt>Finca de origen</dt>
+          <dd>{{ lote.finca }}</dd>
+        </div>
+        <div>
+          <dt>Variedad</dt>
+          <dd>{{ lote.variedad }}, {{ lote.proceso }}</dd>
+        </div>
+        <div>
+          <dt>Kilos</dt>
+          <dd>{{ kilos.format(lote.kg) }} kg</dd>
+        </div>
+        <div>
+          <dt>Tostador</dt>
+          <dd>{{ nombreTostador }}</dd>
+        </div>
+        <div>
+          <dt>Lote</dt>
+          <dd class="mono">{{ lote.codigoLote }}</dd>
+        </div>
+        <div>
+          <dt>Comprado</dt>
+          <dd>{{ formatearFecha(lote.fechaCompra) }}</dd>
+        </div>
+      </dl>
+
+      <p class="ficha__nota">
+        Imprimilo en las bolsas de los tuestes de este lote para que quien compre tu café vea de qué
+        finca viene.
+      </p>
+
+      <div class="acciones">
+        <button type="button" class="btn btn--texto" (click)="cerrarFicha()">
+          Volver a mis lotes
+        </button>
+        <button type="button" class="btn btn--filled" (click)="descargarCodigo(lote)">
+          Descargar código
+        </button>
+      </div>
+    </div>
+  }
+</dialog>

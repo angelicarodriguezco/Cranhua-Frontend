@@ -1,0 +1,519 @@
+/* Tema claro (prototipo de Figma). El oscuro solo cambia estos valores. */
+:host {
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --fondo-imagen: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --fondo-velo: linear-gradient(
+    180deg,
+    rgba(5, 8, 20, 0.28) 0%,
+    rgba(5, 8, 20, 0.08) 28%,
+    rgba(255, 255, 255, 0.08) 55%,
+    rgba(8, 50, 62, 0.18) 100%
+  );
+  --vidrio-fondo: rgba(255, 255, 255, 0.62);
+  --vidrio-borde: rgba(255, 255, 255, 0.7);
+  --vidrio-sombra: 0 24px 60px rgba(8, 50, 62, 0.16);
+  --dialogo-fondo: rgba(255, 255, 255, 0.92);
+  --texto: #1c3426;
+  --texto-suave: #4f5d56;
+  --encabezado-tabla: #6b7a70;
+  --divisor: rgba(28, 52, 38, 0.1);
+  --fila-abierta: rgba(201, 162, 39, 0.1);
+  --acento: #946c00;
+  --foco: #c9a227;
+  --codigo-fondo: rgba(201, 162, 39, 0.14);
+  --codigo-borde: rgba(201, 162, 39, 0.3);
+  --pill-codigo-fondo: rgba(63, 122, 84, 0.14);
+  --pill-codigo-texto: #2f6b45;
+  --pill-pendiente-fondo: rgba(165, 112, 8, 0.14);
+  --pill-pendiente-texto: #8a5a06;
+  --borde-btn: rgba(28, 52, 38, 0.25);
+  /* Campos del popup de edición (campos-tueste.css). Sobre el fondo casi blanco del popup los
+     campos llevan un tinte para que se distingan; en el formulario van blancos sobre vidrio. */
+  --campo-fondo: rgba(28, 52, 38, 0.04);
+  --campo-borde: rgba(28, 52, 38, 0.16);
+  --select-fondo: #ffffff;
+  --seleccion-fondo: rgba(201, 162, 39, 0.18);
+  --seleccion-borde: #c9a227;
+  --merma-fondo: var(--codigo-fondo);
+  --merma-borde: var(--codigo-borde);
+  --error: #a3243b;
+  --esquema: light;
+
+  display: grid;
+  grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+
+:host([data-theme='oscuro']) {
+  --fondo-imagen: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --fondo-velo: linear-gradient(
+    180deg,
+    rgba(5, 8, 20, 0.6) 0%,
+    rgba(5, 8, 20, 0.2) 22%,
+    rgba(8, 10, 28, 0.08) 45%,
+    rgba(10, 14, 32, 0.28) 100%
+  );
+  --vidrio-fondo: rgba(8, 28, 38, 0.62);
+  --vidrio-borde: rgba(255, 255, 255, 0.12);
+  --vidrio-sombra: 0 32px 70px rgba(0, 0, 0, 0.45);
+  --dialogo-fondo: rgba(8, 28, 38, 0.92);
+  --texto: #f5efe3;
+  --texto-suave: #aec0bc;
+  --encabezado-tabla: #8fa39d;
+  --divisor: rgba(255, 255, 255, 0.1);
+  --fila-abierta: rgba(217, 164, 65, 0.08);
+  --acento: #e3b65b;
+  --foco: #d9a441;
+  --codigo-fondo: rgba(217, 164, 65, 0.12);
+  --codigo-borde: rgba(217, 164, 65, 0.3);
+  --pill-codigo-fondo: rgba(111, 203, 143, 0.16);
+  --pill-codigo-texto: #7fda9f;
+  --pill-pendiente-fondo: rgba(217, 164, 65, 0.18);
+  --pill-pendiente-texto: #e3b65b;
+  --borde-btn: rgba(255, 255, 255, 0.22);
+  --campo-fondo: rgba(255, 255, 255, 0.07);
+  --campo-borde: rgba(255, 255, 255, 0.14);
+  --select-fondo: #0b2a33;
+  --seleccion-fondo: rgba(217, 164, 65, 0.16);
+  --seleccion-borde: #d9a441;
+  --error: #f2a7b5;
+  --esquema: dark;
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-height: 0;
+  padding: 2.25rem 4% 2rem;
+  overflow-y: auto;
+  color: var(--texto);
+  color-scheme: var(--esquema);
+  background-color: #061f27;
+  background-image: var(--fondo-velo), var(--fondo-imagen);
+  background-size: cover;
+  background-position: center;
+}
+
+/* El encabezado queda sobre la foto, en ambos temas */
+.encabezado {
+  margin-bottom: 0.6rem;
+  color: #ffffff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.encabezado h1 {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.encabezado p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.92;
+}
+
+.vidrio {
+  border: 1px solid var(--vidrio-borde);
+  border-radius: 1.25rem;
+  background: var(--vidrio-fondo);
+  box-shadow: var(--vidrio-sombra);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.indicadores article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.95rem 1.2rem;
+}
+
+.indicadores strong {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicadores span {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.seccion {
+  padding: 1.1rem 1.35rem 1.25rem;
+}
+
+.seccion__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.seccion__titulo {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.seccion__cabecera .seccion__titulo {
+  margin-bottom: 0.15rem;
+}
+
+.seccion__titulo:focus {
+  outline: none;
+}
+
+.seccion__sub {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.tabla-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-lotes {
+  min-width: 46rem;
+}
+
+.tabla-tuestes {
+  min-width: 36rem;
+}
+
+th,
+td {
+  padding: 0.65rem 0.6rem;
+  border-bottom: 1px solid var(--divisor);
+  font-size: 0.85rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--encabezado-tabla);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tr.abierto td {
+  background: var(--fila-abierta);
+}
+
+.numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+.acciones-fila {
+  text-align: right;
+}
+
+.acciones-fila > * + * {
+  margin-left: 0.85rem;
+}
+
+.pill {
+  display: inline-flex;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.pill--codigo {
+  background: var(--pill-codigo-fondo);
+  color: var(--pill-codigo-texto);
+}
+
+.pill--pendiente {
+  background: var(--pill-pendiente-fondo);
+  color: var(--pill-pendiente-texto);
+}
+
+.nivel {
+  --punto: #d9b26a;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.nivel[data-nivel='Medio'] {
+  --punto: #b8741a;
+}
+
+.nivel[data-nivel='Oscuro'] {
+  --punto: #4a2a12;
+}
+
+.nivel::before {
+  content: '';
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 50%;
+  background: var(--punto);
+}
+
+:host([data-theme='oscuro']) .nivel[data-nivel='Oscuro']::before {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.vacio {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.sin-tuestes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+  border: 1px dashed var(--divisor);
+  border-radius: 0.75rem;
+}
+
+.explicacion p {
+  max-width: 46rem;
+  margin: 0 0 0.6rem;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.enlace {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--acento);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.enlace:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn:focus-visible,
+.enlace:focus-visible {
+  outline: 2px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.btn--filled,
+.btn--chico {
+  background: #b8860b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.btn--filled:hover,
+.btn--chico:hover {
+  background: #c9952a;
+}
+
+.btn--chico {
+  padding: 0.4rem 0.95rem;
+  font-size: 0.8rem;
+}
+
+.btn--borde {
+  border: 1px solid var(--borde-btn);
+  background: transparent;
+  color: var(--texto);
+}
+
+.btn--borde:hover {
+  border-color: var(--foco);
+}
+
+.btn--texto {
+  padding-inline: 1rem;
+  background: none;
+  color: var(--acento);
+}
+
+.btn--texto:hover {
+  text-decoration: underline;
+}
+
+.dialogo {
+  width: min(36rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--texto);
+  color-scheme: var(--esquema);
+}
+
+.dialogo::backdrop {
+  background: rgba(5, 12, 20, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.ficha {
+  padding: 1.75rem 2rem 1.5rem;
+  background: var(--dialogo-fondo);
+}
+
+.ficha__titulo {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+}
+
+.ficha__sub {
+  margin: 0.25rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.codigo {
+  margin: 1.1rem 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--codigo-borde);
+  border-radius: 0.6rem;
+  background: var(--codigo-fondo);
+  color: var(--acento);
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  font-size: clamp(1.5rem, 4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+
+.ficha__datos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+  margin: 0;
+}
+
+.ficha__datos dt {
+  color: var(--texto-suave);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ficha__datos dd {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+}
+
+.ficha__nota {
+  margin: 1.5rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--divisor);
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  /* Sin scroll propio la foto se estiraría a lo alto de toda la página */
+  .contenido {
+    overflow: visible;
+    padding: 1.25rem 1rem 2rem;
+    background-attachment: fixed;
+  }
+}
+
+@media (max-width: 560px) {
+  .indicadores {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .seccion,
+  .ficha {
+    padding: 1.1rem 1rem 1.25rem;
+  }
+
+  .ficha__datos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acciones .btn {
+    flex: 1;
+  }
+}

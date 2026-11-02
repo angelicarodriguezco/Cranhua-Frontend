@@ -1,0 +1,111 @@
+/* Los colores vienen de las variables de Mis tostados, que cambian con el tema */
+.dialogo {
+  width: min(38rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--texto);
+  color-scheme: var(--esquema);
+  font-family: var(--font-ui);
+}
+
+.dialogo::backdrop {
+  background: rgba(5, 12, 20, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.vidrio {
+  border: 1px solid var(--vidrio-borde);
+  border-radius: 1.25rem;
+  box-shadow: var(--vidrio-sombra);
+}
+
+.editor {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.1rem 1.25rem;
+  padding: 1.75rem 2rem 1.5rem;
+  background: var(--dialogo-fondo);
+}
+
+.editor__cabecera {
+  grid-column: 1 / -1;
+}
+
+.editor__titulo {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 400;
+}
+
+.editor__sub {
+  margin: 0.25rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.mono {
+  font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--seleccion-borde);
+  outline-offset: 2px;
+}
+
+.btn--filled {
+  background: #b8860b;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.btn--filled:hover {
+  background: #c9952a;
+}
+
+.btn--texto {
+  padding-inline: 1rem;
+  background: none;
+  color: var(--acento);
+}
+
+.btn--texto:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 560px) {
+  .editor {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 1.25rem 1rem;
+  }
+
+  .niveles__opciones {
+    gap: 0.5rem;
+  }
+
+  .acciones .btn--filled {
+    flex: 1;
+  }
+}
