@@ -20,8 +20,8 @@
   --fila-abierta: rgba(201, 162, 39, 0.1);
   --acento: #946c00;
   --foco: #c9a227;
-  --codigo-fondo: rgba(201, 162, 39, 0.14);
-  --codigo-borde: rgba(201, 162, 39, 0.3);
+  --merma-fondo: rgba(201, 162, 39, 0.14);
+  --merma-borde: rgba(201, 162, 39, 0.3);
   --pill-codigo-fondo: rgba(63, 122, 84, 0.14);
   --pill-codigo-texto: #2f6b45;
   --pill-pendiente-fondo: rgba(165, 112, 8, 0.14);
@@ -34,8 +34,6 @@
   --select-fondo: #ffffff;
   --seleccion-fondo: rgba(201, 162, 39, 0.18);
   --seleccion-borde: #c9a227;
-  --merma-fondo: var(--codigo-fondo);
-  --merma-borde: var(--codigo-borde);
   --error: #a3243b;
   --esquema: light;
 
@@ -66,8 +64,8 @@
   --fila-abierta: rgba(217, 164, 65, 0.08);
   --acento: #e3b65b;
   --foco: #d9a441;
-  --codigo-fondo: rgba(217, 164, 65, 0.12);
-  --codigo-borde: rgba(217, 164, 65, 0.3);
+  --merma-fondo: rgba(217, 164, 65, 0.12);
+  --merma-borde: rgba(217, 164, 65, 0.3);
   --pill-codigo-fondo: rgba(111, 203, 143, 0.16);
   --pill-codigo-texto: #7fda9f;
   --pill-pendiente-fondo: rgba(217, 164, 65, 0.18);
@@ -434,9 +432,9 @@ tr.abierto td {
 .codigo {
   margin: 1.1rem 0 1.5rem;
   padding: 1rem;
-  border: 1px solid var(--codigo-borde);
+  border: 1px solid var(--merma-borde);
   border-radius: 0.6rem;
-  background: var(--codigo-fondo);
+  background: var(--merma-fondo);
   color: var(--acento);
   font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
   font-size: clamp(1.5rem, 4vw, 2.1rem);
