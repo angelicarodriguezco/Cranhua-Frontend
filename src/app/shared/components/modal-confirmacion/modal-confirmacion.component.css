@@ -1,0 +1,108 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 16, 22, 0.55);
+  backdrop-filter: blur(2px);
+}
+
+.modal__dialogo {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 26rem);
+  padding: 1.5rem 1.5rem 1.25rem;
+  border: 1px solid var(--color-border, rgba(255, 255, 255, 0.7));
+  border-radius: 14px;
+  background: var(--color-surface, rgba(255, 255, 255, 0.95));
+  color: var(--color-text, #1c2a26);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  outline: none;
+}
+
+.modal__titulo {
+  margin: 0;
+  font-size: var(--md-sys-typescale-title-medium-size, 1rem);
+  font-weight: 500;
+  line-height: var(--md-sys-typescale-title-medium-line-height, 1.5rem);
+}
+
+.modal__mensaje {
+  margin: 0.75rem 0 0;
+  font-size: var(--md-sys-typescale-body-medium-size, 0.875rem);
+  line-height: var(--md-sys-typescale-body-medium-line-height, 1.25rem);
+  color: var(--color-text-muted, rgba(28, 42, 38, 0.72));
+}
+
+.modal__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6.5rem;
+  padding: 0.65rem 1.25rem;
+  border-radius: 999px;
+  font-family: var(--font-family, inherit);
+  font-size: var(--md-sys-typescale-label-large-size, 0.875rem);
+  font-weight: var(--md-sys-typescale-label-large-weight, 500);
+  line-height: var(--md-sys-typescale-label-large-line-height, 1.25rem);
+  letter-spacing: var(--md-sys-typescale-label-large-tracking, 0.01em);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.modal__btn:focus-visible {
+  outline: 2px solid var(--color-gold, #a57008);
+  outline-offset: 2px;
+}
+
+.modal__btn--secundario {
+  border: 1.5px solid var(--color-border, rgba(28, 42, 38, 0.2));
+  background: transparent;
+  color: var(--color-text, #1c2a26);
+}
+
+.modal__btn--secundario:hover {
+  background: color-mix(in srgb, var(--color-text, #1c2a26) 6%, transparent);
+}
+
+.modal__btn--peligro {
+  border: 1.5px solid color-mix(in srgb, var(--color-error, #a3243b) 70%, transparent);
+  background: color-mix(in srgb, var(--color-error, #a3243b) 14%, transparent);
+  color: var(--color-error, #a3243b);
+}
+
+.modal__btn--peligro:hover {
+  background: color-mix(in srgb, var(--color-error, #a3243b) 24%, transparent);
+  border-color: var(--color-error, #a3243b);
+}
+
+.modal__btn--peligro:focus-visible {
+  outline-color: var(--color-error, #a3243b);
+}
+
+@media (max-width: 480px) {
+  .modal__acciones {
+    flex-direction: column-reverse;
+  }
+
+  .modal__btn {
+    width: 100%;
+  }
+}
