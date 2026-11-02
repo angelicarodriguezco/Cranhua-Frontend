@@ -1,0 +1,84 @@
+<div class="dashboard" [attr.data-theme]="tema()">
+  <app-menu-lateral-tostador
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    <header class="cabecera">
+      <h1>Hola, {{ tostador.nombre }}</h1>
+      <p>Esto es lo que está pasando con tus compras y las cosechas disponibles.</p>
+    </header>
+
+    <section class="indicadores" aria-label="Indicadores">
+      <article class="glass">
+        <strong>{{ indicadores.solicitudesActivas }}</strong>
+        <span>Solicitudes activas</span>
+      </article>
+      <article class="glass">
+        <strong>{{ indicadores.kgCompradosMes }} kg</strong>
+        <span>Comprados este mes</span>
+      </article>
+      <article class="glass">
+        <strong>{{ indicadores.lotesConCodigo }}</strong>
+        <span>Lotes con código</span>
+      </article>
+    </section>
+
+    <section class="cosechas glass" aria-labelledby="titulo-cosechas">
+      <div class="seccion-cabecera">
+        <h2 id="titulo-cosechas">Cosechas disponibles</h2>
+        <a routerLink="/tostador/cosechas">Explorar todas</a>
+      </div>
+
+      <div class="filtros" role="group" aria-label="Filtros rápidos">
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="sinFiltros()"
+          (click)="limpiarFiltros()"
+        >
+          Todas
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="filtros().soloDisponibles"
+          (click)="alternar('soloDisponibles')"
+        >
+          Disponible ahora
+        </button>
+        <select
+          class="chip chip-zona"
+          aria-label="Zona"
+          [class.activo]="filtros().zona"
+          (change)="elegirZona($event)"
+        >
+          <option value="" [selected]="!filtros().zona">Zona</option>
+          @for (zona of zonas(); track zona) {
+            <option [value]="zona" [selected]="zona === filtros().zona">{{ zona }}</option>
+          }
+        </select>
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="filtros().soloFlorales"
+          (click)="alternar('soloFlorales')"
+        >
+          Notas florales
+        </button>
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="filtros().soloHoney"
+          (click)="alternar('soloHoney')"
+        >
+          Proceso honey
+        </button>
+      </div>
+
+      <app-cuadricula-cosechas [cosechas]="cosechasFiltradas()" />
+    </section>
+  </main>
+</div>

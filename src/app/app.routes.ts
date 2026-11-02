@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
+import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
@@ -43,11 +44,24 @@ export const routes: Routes = [
   { path: 'historial', component: HistorialCafetaleroComponent },
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
+  { path: 'tostador/dashboard', component: DashboardTostadorComponent },
   {
-    path: 'tostador/dashboard',
+    path: 'tostador/cosechas',
     component: PaginaMockComponent,
-    data: { title: 'Dashboard del tostador' },
+    data: { title: 'Explorar cosechas' },
   },
+  {
+    path: 'tostador/cosechas/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Detalle de cosecha' },
+  },
+  {
+    path: 'tostador/solicitudes',
+    component: PaginaMockComponent,
+    data: { title: 'Mis solicitudes' },
+  },
+  { path: 'tostador/tostados', component: PaginaMockComponent, data: { title: 'Mis tostados' } },
+  { path: 'tostador/negocio', component: PaginaMockComponent, data: { title: 'Mi negocio' } },
 
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   { path: 'cafetalero/fincas/:id', component: DetalleFincaComponent },
