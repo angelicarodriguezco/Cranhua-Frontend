@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
 
 import { COSECHAS_INICIALES } from '../mocks/cosecha.mock';
 import { NuevaCosecha } from '../models/cosecha.model';
@@ -61,6 +62,8 @@ describe('CosechaService', () => {
     expect(creada.id).toBeTruthy();
     expect(servicio.lista()).toHaveSize(COSECHAS_INICIALES.length + 1);
     expect(servicio.obtener(creada.id)?.variedad).toBe('Bourbon');
+    expect(creada.proceso).toBe('Honey');
+    expect(creada.kgDisponibles).toBe(64);
 
     const reciente = dashboard.cosechasRecientes().find((c) => c.id === creada.id);
     expect(reciente).toEqual(
@@ -111,5 +114,15 @@ describe('CosechaService', () => {
     const reciente = dashboard.cosechasRecientes().find((c) => c.id === creada.id);
     expect(reciente?.estado).toBe('En beneficiado');
     expect(reciente?.kgDisponibles).toBeNull();
+  });
+
+  it('devuelve solo las cosechas de la finca pedida', async () => {
+    const cosechas = await firstValueFrom(servicio.deFinca('f-la-esperanza'));
+    expect(cosechas.length).toBe(2);
+    expect(cosechas.every((c) => c.fincaId === 'f-la-esperanza')).toBeTrue();
+  });
+
+  it('devuelve una lista vacía si la finca no tiene cosechas', async () => {
+    expect(await firstValueFrom(servicio.deFinca('f-el-tucan'))).toEqual([]);
   });
 });

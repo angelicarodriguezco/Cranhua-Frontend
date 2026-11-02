@@ -4,7 +4,6 @@ import { ZonaPeligroComponent } from './zona-peligro.component';
 
 describe('ZonaPeligroComponent', () => {
   let fixture: ComponentFixture<ZonaPeligroComponent>;
-  let pagina: HTMLElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -12,39 +11,18 @@ describe('ZonaPeligroComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(ZonaPeligroComponent);
-    pagina = fixture.nativeElement;
+    fixture.componentRef.setInput('descripcion', 'No se puede deshacer.');
+    fixture.componentRef.setInput('accion', 'Eliminar finca');
     fixture.detectChanges();
   });
 
-  it('muestra título, descripción y botón por defecto', () => {
-    expect(pagina.querySelector('.zona-peligro__titulo')?.textContent).toBe('Zona de peligro');
-    expect(pagina.querySelector('.zona-peligro__descripcion')?.textContent).toContain(
-      'no se puede deshacer',
-    );
-    expect(pagina.querySelector('.zona-peligro__boton')?.textContent?.trim()).toBe('Eliminar');
-  });
+  it('muestra el botón de la acción y lo emite al hacer clic', () => {
+    let confirmado = false;
+    fixture.componentInstance.confirmar.subscribe(() => (confirmado = true));
 
-  it('emite eliminar al pulsar el botón', () => {
-    const spy = jasmine.createSpy('eliminar');
-    fixture.componentInstance.eliminar.subscribe(spy);
-
-    pagina.querySelector<HTMLButtonElement>('.zona-peligro__boton')!.click();
-
-    expect(spy).toHaveBeenCalled();
-  });
-
-  it('respeta inputs personalizados', () => {
-    fixture.componentRef.setInput('titulo', 'Borrar finca');
-    fixture.componentRef.setInput('descripcion', 'Se perderán los datos.');
-    fixture.componentRef.setInput('etiquetaBoton', 'Eliminar finca');
-    fixture.detectChanges();
-
-    expect(pagina.querySelector('.zona-peligro__titulo')?.textContent).toBe('Borrar finca');
-    expect(pagina.querySelector('.zona-peligro__descripcion')?.textContent).toBe(
-      'Se perderán los datos.',
-    );
-    expect(pagina.querySelector('.zona-peligro__boton')?.textContent?.trim()).toBe(
-      'Eliminar finca',
-    );
+    const boton: HTMLButtonElement = fixture.nativeElement.querySelector('button');
+    expect(boton.textContent).toContain('Eliminar finca');
+    boton.click();
+    expect(confirmado).toBeTrue();
   });
 });

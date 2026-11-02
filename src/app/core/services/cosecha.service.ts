@@ -1,16 +1,17 @@
 import { Injectable, inject, signal } from '@angular/core';
+import { Observable, of } from 'rxjs';
 
 import {
+  CATALOGO_PROCESOS_BENEFICIADO,
   COSECHAS_INICIALES,
   FINCAS_COSECHA,
-  PROCESOS_BENEFICIADO,
   VARIEDADES_CAFE,
 } from '../mocks/cosecha.mock';
 import {
   Cosecha,
   FincaCosechaOpcion,
   NuevaCosecha,
-  ProcesoBeneficiado,
+  OpcionProcesoBeneficiado,
   ProcesoReparto,
 } from '../models/cosecha.model';
 import { CosechaReciente, EstadoCosecha } from '../models/dashboard-cafetalero.model';
@@ -42,20 +43,44 @@ function nombreFinca(fincaId: string, fincas: readonly FincaCosechaOpcion[]): st
   return fincas.find((f) => f.id === fincaId)?.nombre ?? fincaId;
 }
 
+function derivarEstado(pesoTrasSeleccionKg: number): {
+  kgDisponibles: number | null;
+  estado: EstadoCosecha;
+} {
+  const enBeneficiado = pesoTrasSeleccionKg <= 0;
+  return {
+    kgDisponibles: enBeneficiado ? null : pesoTrasSeleccionKg,
+    estado: enBeneficiado ? 'En beneficiado' : 'Disponible',
+  };
+}
+
+function completarCosecha(id: string, datos: NuevaCosecha): Cosecha {
+  const proceso = datos.proceso?.trim() || procesoPrincipal(datos.procesos);
+  const { kgDisponibles, estado } = derivarEstado(datos.pesoTrasSeleccionKg);
+  const prefijo = datos.fincaId.replace(/^finca-/, '').replace(/^f-/, '').slice(0, 2).toUpperCase();
+
+  return {
+    ...datos,
+    id,
+    proceso,
+    codigoLote: datos.codigoLote ?? `${prefijo || 'CO'}-${new Date().getFullYear()}-${id.slice(-3)}`,
+    kgDisponibles: datos.kgDisponibles !== undefined ? datos.kgDisponibles : kgDisponibles,
+    estado: datos.estado ?? estado,
+    procesos: clonarProcesos(datos.procesos),
+  };
+}
+
 function aCosechaReciente(
   cosecha: Cosecha,
   fincas: readonly FincaCosechaOpcion[],
 ): CosechaReciente {
-  const enBeneficiado = cosecha.pesoTrasSeleccionKg <= 0;
-  const estado: EstadoCosecha = enBeneficiado ? 'En beneficiado' : 'Disponible';
-
   return {
     id: cosecha.id,
     variedad: cosecha.variedad,
     finca: nombreFinca(cosecha.fincaId, fincas),
-    proceso: procesoPrincipal(cosecha.procesos),
-    kgDisponibles: enBeneficiado ? null : cosecha.pesoTrasSeleccionKg,
-    estado,
+    proceso: cosecha.proceso || procesoPrincipal(cosecha.procesos),
+    kgDisponibles: cosecha.kgDisponibles,
+    estado: cosecha.estado,
   };
 }
 
@@ -68,8 +93,14 @@ export class CosechaService {
   readonly lista = this.cosechas.asReadonly();
 
   readonly fincas: readonly FincaCosechaOpcion[] = FINCAS_COSECHA;
-  readonly procesosBeneficiado: readonly ProcesoBeneficiado[] = PROCESOS_BENEFICIADO;
+  readonly procesosBeneficiado: readonly OpcionProcesoBeneficiado[] =
+    CATALOGO_PROCESOS_BENEFICIADO;
   readonly variedades: readonly string[] = VARIEDADES_CAFE;
+
+  /** Cosechas de una finca (detalle de finca). */
+  deFinca(fincaId: string): Observable<Cosecha[]> {
+    return of(this.cosechas().filter((c) => c.fincaId === fincaId).map(clonarCosecha));
+  }
 
   obtener(id: string): Cosecha | undefined {
     const encontrada = this.cosechas().find((c) => c.id === id);
@@ -77,11 +108,7 @@ export class CosechaService {
   }
 
   crear(datos: NuevaCosecha): Cosecha {
-    const cosecha = clonarCosecha({
-      ...datos,
-      id: `cosecha-${Date.now()}-${this.siguienteId++}`,
-    });
-
+    const cosecha = completarCosecha(`cosecha-${Date.now()}-${this.siguienteId++}`, datos);
     this.cosechas.update((lista) => [cosecha, ...lista]);
     this.dashboard.sincronizarCosechaReciente(aCosechaReciente(cosecha, this.fincas));
     return clonarCosecha(cosecha);
@@ -92,7 +119,11 @@ export class CosechaService {
       return undefined;
     }
 
-    const cosecha = clonarCosecha({ ...datos, id });
+    const previa = this.cosechas().find((c) => c.id === id);
+    const cosecha = completarCosecha(id, {
+      ...datos,
+      codigoLote: datos.codigoLote ?? previa?.codigoLote,
+    });
     this.cosechas.update((lista) => lista.map((c) => (c.id === id ? cosecha : c)));
     this.dashboard.sincronizarCosechaReciente(aCosechaReciente(cosecha, this.fincas));
     return clonarCosecha(cosecha);

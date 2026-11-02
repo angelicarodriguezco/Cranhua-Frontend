@@ -1,17 +1,28 @@
-import { Cosecha, FincaCosechaOpcion, ProcesoBeneficiado } from '../models/cosecha.model';
+import {
+  Cosecha,
+  FincaCosechaOpcion,
+  OpcionProcesoBeneficiado,
+} from '../models/cosecha.model';
 
 export const FINCAS_COSECHA: FincaCosechaOpcion[] = [
   { id: 'finca-la-catalina', nombre: 'La Catalina' },
   { id: 'finca-monte-alto', nombre: 'Monte Alto' },
+  { id: 'f-la-esperanza', nombre: 'La Esperanza' },
+  { id: 'f-el-mirador', nombre: 'El Mirador' },
 ];
 
-export const PROCESOS_BENEFICIADO: ProcesoBeneficiado[] = [
+export const CATALOGO_PROCESOS_BENEFICIADO: OpcionProcesoBeneficiado[] = [
   { id: 'honey', nombre: 'Honey', color: '#A57008' },
   { id: 'lavado', nombre: 'Lavado', color: '#2F6B45' },
   { id: 'natural', nombre: 'Natural', color: '#8B4513' },
   { id: 'anaerobico', nombre: 'Anaeróbico', color: '#4A6FA5' },
   { id: 'semi-lavado', nombre: 'Semi-lavado', color: '#6B8E23' },
+  { id: 'red-honey', nombre: 'Red honey', color: '#B33A3A' },
+  { id: 'yellow-honey', nombre: 'Yellow honey', color: '#C9A227' },
 ];
+
+/** @deprecated Usar CATALOGO_PROCESOS_BENEFICIADO */
+export const PROCESOS_BENEFICIADO = CATALOGO_PROCESOS_BENEFICIADO;
 
 export const VARIEDADES_CAFE = [
   'Caturra',
@@ -38,6 +49,10 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     pesoCaracolilloKg: 4,
     puntajeSca: 84.5,
     notasCatacion: 'Notas a chocolate y miel.',
+    proceso: 'Honey',
+    codigoLote: 'LC-2025-001',
+    kgDisponibles: 96,
+    estado: 'Disponible',
   },
   {
     id: 'cosecha-geisha-monte-alto',
@@ -54,6 +69,10 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     pesoCaracolilloKg: null,
     puntajeSca: 88,
     notasCatacion: 'Floral, jazmín y bergamota.',
+    proceso: 'Lavado',
+    codigoLote: 'MA-2025-001',
+    kgDisponibles: 50,
+    estado: 'Disponible',
   },
   {
     id: 'cosecha-catuai-catalina',
@@ -70,5 +89,72 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     pesoCaracolilloKg: null,
     puntajeSca: null,
     notasCatacion: null,
+    proceso: 'Natural',
+    codigoLote: 'LC-2025-002',
+    kgDisponibles: null,
+    estado: 'En beneficiado',
+  },
+  {
+    id: 'c-le-caturra',
+    fincaId: 'f-la-esperanza',
+    variedad: 'Caturra',
+    alturaMsnm: 1600,
+    cantidadTotalKg: 120,
+    fechaInicio: '2026-01-05',
+    fechaFin: '2026-01-20',
+    procesos: [{ proceso: 'Honey', porcentaje: 100 }],
+    pesoAntesKg: 120,
+    pesoTrasSeleccionKg: 96,
+    separoCaracolillo: false,
+    pesoCaracolilloKg: null,
+    puntajeSca: null,
+    notasCatacion: null,
+    proceso: 'Honey',
+    codigoLote: 'LE-2026-001',
+    kgDisponibles: 96,
+    estado: 'Disponible',
+  },
+  {
+    id: 'c-le-catuai',
+    fincaId: 'f-la-esperanza',
+    variedad: 'Catuaí',
+    alturaMsnm: 1550,
+    cantidadTotalKg: 80,
+    fechaInicio: '2026-02-01',
+    fechaFin: '2026-02-12',
+    procesos: [{ proceso: 'Natural', porcentaje: 100 }],
+    pesoAntesKg: 80,
+    pesoTrasSeleccionKg: 0,
+    separoCaracolillo: null,
+    pesoCaracolilloKg: null,
+    puntajeSca: null,
+    notasCatacion: null,
+    proceso: 'Natural',
+    codigoLote: 'LE-2026-002',
+    kgDisponibles: null,
+    estado: 'En beneficiado',
+  },
+  {
+    id: 'c-em-geisha',
+    fincaId: 'f-el-mirador',
+    variedad: 'Geisha',
+    alturaMsnm: 1750,
+    cantidadTotalKg: 60,
+    fechaInicio: '2026-01-10',
+    fechaFin: '2026-01-25',
+    procesos: [{ proceso: 'Lavado', porcentaje: 100 }],
+    pesoAntesKg: 60,
+    pesoTrasSeleccionKg: 50,
+    separoCaracolillo: false,
+    pesoCaracolilloKg: null,
+    puntajeSca: 87,
+    notasCatacion: null,
+    proceso: 'Lavado',
+    codigoLote: 'EM-2026-001',
+    kgDisponibles: 50,
+    estado: 'Disponible',
   },
 ];
+
+/** Alias usado por detalle de finca / historial. */
+export const COSECHAS_REGISTRADAS = COSECHAS_INICIALES;

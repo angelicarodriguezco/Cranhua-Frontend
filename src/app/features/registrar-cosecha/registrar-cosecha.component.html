@@ -39,9 +39,9 @@
       @if (modoEdicion()) {
         <section class="panel zona-edicion">
           <app-zona-peligro
-            etiquetaBoton="Eliminar cosecha"
+            accion="Eliminar cosecha"
             descripcion="Al eliminar esta cosecha se perderá el registro de forma permanente. Esta acción no se puede deshacer."
-            (eliminar)="abrirModalEliminar()"
+            (confirmar)="abrirModalEliminar()"
           />
         </section>
       }

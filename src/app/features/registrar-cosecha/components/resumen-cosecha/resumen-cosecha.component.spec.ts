@@ -21,6 +21,10 @@ const COSECHA: Cosecha = {
   pesoCaracolilloKg: 4,
   puntajeSca: 84.5,
   notasCatacion: 'Chocolate',
+  proceso: 'Honey',
+  codigoLote: 'LC-2026-001',
+  kgDisponibles: 96,
+  estado: 'Disponible',
 };
 
 describe('ResumenCosechaComponent', () => {
