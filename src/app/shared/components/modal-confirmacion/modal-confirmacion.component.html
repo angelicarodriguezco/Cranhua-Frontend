@@ -1,0 +1,28 @@
+<div class="modal__backdrop" (click)="onCancelar()" aria-hidden="true"></div>
+
+<div
+  #dialogo
+  class="modal__dialogo"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'modal-confirmacion-titulo'"
+  [attr.aria-describedby]="'modal-confirmacion-mensaje'"
+  tabindex="-1"
+>
+  <h2 id="modal-confirmacion-titulo" class="modal__titulo">{{ titulo() }}</h2>
+  <p id="modal-confirmacion-mensaje" class="modal__mensaje">{{ mensaje() }}</p>
+
+  <div class="modal__acciones">
+    <button
+      #botonCancelar
+      type="button"
+      class="modal__btn modal__btn--secundario"
+      (click)="onCancelar()"
+    >
+      {{ etiquetaCancelar() }}
+    </button>
+    <button type="button" class="modal__btn modal__btn--peligro" (click)="onConfirmar()">
+      {{ etiquetaConfirmar() }}
+    </button>
+  </div>
+</div>
