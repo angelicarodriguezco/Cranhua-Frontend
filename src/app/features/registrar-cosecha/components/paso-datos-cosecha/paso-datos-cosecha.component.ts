@@ -5,7 +5,7 @@ import { startWith } from 'rxjs';
 
 import {
   FincaCosechaOpcion,
-  ProcesoBeneficiado,
+  OpcionProcesoBeneficiado,
   ProcesoReparto,
 } from '../../../../core/models/cosecha.model';
 import { CosechaService } from '../../../../core/services/cosecha.service';
@@ -109,7 +109,7 @@ export class PasoDatosCosechaComponent {
 
   protected readonly fincas: readonly FincaCosechaOpcion[] = this.cosechaService.fincas;
   protected readonly variedades: readonly string[] = this.cosechaService.variedades;
-  protected readonly catalogoProcesos: readonly ProcesoBeneficiado[] =
+  protected readonly catalogoProcesos: readonly OpcionProcesoBeneficiado[] =
     this.cosechaService.procesosBeneficiado;
 
   protected readonly formulario = crearFormularioDatosCosecha();

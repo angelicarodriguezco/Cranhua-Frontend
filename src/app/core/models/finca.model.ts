@@ -49,3 +49,9 @@ export type NuevaFinca = Omit<Finca, 'id'>;
 export type ResultadoRegistro =
   | { registrada: true; finca: Finca }
   | { registrada: false; conflicto: Finca };
+
+export type ErrorAgregarDueno = 'finca-inexistente' | 'correo-inexistente' | 'ya-es-dueno';
+
+export type ResultadoAgregarDueno =
+  | { agregado: true; finca: Finca }
+  | { agregado: false; error: ErrorAgregarDueno };

@@ -269,7 +269,7 @@ describe('RegistrarCosechaComponent', () => {
     const navigateSpy = spyOn(router, 'navigateByUrl').and.resolveTo(true);
     const eliminarSpy = spyOn(cosechaService, 'eliminar').and.returnValue(true);
 
-    pagina.querySelector<HTMLButtonElement>('.zona-peligro__boton')!.click();
+    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
     fixture.detectChanges();
 
     expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
@@ -288,7 +288,7 @@ describe('RegistrarCosechaComponent', () => {
     const cosechaService = TestBed.inject(CosechaService);
     const eliminarSpy = spyOn(cosechaService, 'eliminar');
 
-    pagina.querySelector<HTMLButtonElement>('.zona-peligro__boton')!.click();
+    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
     fixture.detectChanges();
     expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
 
