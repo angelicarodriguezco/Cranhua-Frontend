@@ -1,0 +1,33 @@
+<ul class="duenos">
+  @for (dueno of duenos(); track dueno.id) {
+    <li>
+      <span class="avatar" aria-hidden="true">{{ iniciales(dueno) }}</span>
+      <div class="datos">
+        <span class="nombre">{{ dueno.nombre }} {{ dueno.apellidos }}</span>
+        <span class="correo">{{ dueno.correo }}</span>
+      </div>
+      @if (dueno.id === propietarioId()) {
+        <span class="etiqueta">Propietario</span>
+      }
+    </li>
+  }
+</ul>
+
+<form class="agregar" (submit)="$event.preventDefault(); enviar()">
+  <label for="correo-dueno">Agregar dueño por correo</label>
+  <div class="fila">
+    <input
+      id="correo-dueno"
+      type="email"
+      placeholder="correo@ejemplo.cr"
+      autocomplete="off"
+      [formControl]="correo"
+    />
+    <button type="submit">Agregar</button>
+  </div>
+  @if (correo.touched && correo.invalid) {
+    <p class="error" role="alert">Escribí un correo válido.</p>
+  } @else if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+</form>

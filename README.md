@@ -49,17 +49,19 @@ npm start
 
 Abrir http://localhost:4200.
 
-| Ruta                                                         | Pantalla                                           |
-| ------------------------------------------------------------ | -------------------------------------------------- |
-| `/`                                                          | Landing page                                       |
-| `/iniciar-sesion`                                            | Iniciar sesión                                     |
-| `/onboarding-finca`                                          | Registro de la primera finca del cafetalero        |
-| `/mis-fincas/registrar`                                      | Registrar otra finca desde el panel del cafetalero |
-| `/mapa-prueba`                                               | Mapa de prueba de Google Maps                      |
-| `/registro`                                                  | Crear cuenta                                       |
-| `/dashboard`                                                 | Dashboard del cafetalero                           |
-| `/explorar`                                                  | Pantalla pendiente (placeholder)                   |
-| `/mis-fincas`, `/registrar-cosecha`, `/historial`, `/perfil` | Pantallas pendientes del menú del cafetalero       |
+| Ruta                                          | Pantalla                                           |
+| --------------------------------------------- | -------------------------------------------------- |
+| `/`                                           | Landing page                                       |
+| `/iniciar-sesion`                             | Iniciar sesión                                     |
+| `/registro`                                   | Crear cuenta                                       |
+| `/onboarding-finca`                           | Registro de la primera finca del cafetalero        |
+| `/dashboard`                                  | Dashboard del cafetalero                           |
+| `/cafetalero/fincas`                          | Mis fincas del cafetalero                          |
+| `/cafetalero/fincas/:id`                      | Detalle de una finca del cafetalero                |
+| `/mis-fincas/registrar`                       | Registrar otra finca desde el panel del cafetalero |
+| `/mapa-prueba`                                | Mapa de prueba de Google Maps                      |
+| `/explorar`                                   | Pantalla pendiente (placeholder)                   |
+| `/registrar-cosecha`, `/historial`, `/perfil` | Pantallas pendientes del menú del cafetalero       |
 
 El dashboard y `/mis-fincas/registrar` comparten el tema: se cambia con el botón _Tema claro / Tema oscuro_ del menú lateral.
 
