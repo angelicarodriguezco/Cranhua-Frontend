@@ -57,13 +57,18 @@ function derivarEstado(pesoTrasSeleccionKg: number): {
 function completarCosecha(id: string, datos: NuevaCosecha): Cosecha {
   const proceso = datos.proceso?.trim() || procesoPrincipal(datos.procesos);
   const { kgDisponibles, estado } = derivarEstado(datos.pesoTrasSeleccionKg);
-  const prefijo = datos.fincaId.replace(/^finca-/, '').replace(/^f-/, '').slice(0, 2).toUpperCase();
+  const prefijo = datos.fincaId
+    .replace(/^finca-/, '')
+    .replace(/^f-/, '')
+    .slice(0, 2)
+    .toUpperCase();
 
   return {
     ...datos,
     id,
     proceso,
-    codigoLote: datos.codigoLote ?? `${prefijo || 'CO'}-${new Date().getFullYear()}-${id.slice(-3)}`,
+    codigoLote:
+      datos.codigoLote ?? `${prefijo || 'CO'}-${new Date().getFullYear()}-${id.slice(-3)}`,
     kgDisponibles: datos.kgDisponibles !== undefined ? datos.kgDisponibles : kgDisponibles,
     estado: datos.estado ?? estado,
     procesos: clonarProcesos(datos.procesos),
@@ -93,13 +98,16 @@ export class CosechaService {
   readonly lista = this.cosechas.asReadonly();
 
   readonly fincas: readonly FincaCosechaOpcion[] = FINCAS_COSECHA;
-  readonly procesosBeneficiado: readonly OpcionProcesoBeneficiado[] =
-    CATALOGO_PROCESOS_BENEFICIADO;
+  readonly procesosBeneficiado: readonly OpcionProcesoBeneficiado[] = CATALOGO_PROCESOS_BENEFICIADO;
   readonly variedades: readonly string[] = VARIEDADES_CAFE;
 
   /** Cosechas de una finca (detalle de finca). */
   deFinca(fincaId: string): Observable<Cosecha[]> {
-    return of(this.cosechas().filter((c) => c.fincaId === fincaId).map(clonarCosecha));
+    return of(
+      this.cosechas()
+        .filter((c) => c.fincaId === fincaId)
+        .map(clonarCosecha),
+    );
   }
 
   obtener(id: string): Cosecha | undefined {
