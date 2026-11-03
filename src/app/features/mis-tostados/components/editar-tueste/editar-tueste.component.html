@@ -1,0 +1,118 @@
+<dialog #dialogo class="dialogo" aria-labelledby="titulo-editar" (cancel)="alCancelar($event)">
+  <!-- Sin @if: los campos tienen que existir cuando showModal() busca a quién dar el foco -->
+  <form class="vidrio editor" [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+    <div class="editor__cabecera">
+      <h2 id="titulo-editar" class="editor__titulo">Editar tueste</h2>
+      <p class="editor__sub">
+        Lote <span class="mono">{{ lote()?.codigoLote }}</span> · Finca {{ lote()?.finca }} ·
+        <span class="mono">{{ tueste()?.codigoTrazabilidad }}</span>
+      </p>
+    </div>
+
+    <fieldset class="campo campo--ancho niveles">
+      <legend class="campo__etiqueta">Nivel de tueste</legend>
+      <div class="niveles__opciones">
+        @for (nivel of niveles; track nivel) {
+          <label class="nivel" [attr.data-nivel]="nivel">
+            <input type="radio" name="nivel" formControlName="nivel" [value]="nivel" />
+            <span class="nivel__tarjeta">
+              <span class="nivel__punto" aria-hidden="true"></span>
+              {{ nivel }}
+            </span>
+          </label>
+        }
+      </div>
+      @if (invalido(formulario.controls.nivel)) {
+        <p class="campo__error">Elegí un nivel de tueste.</p>
+      }
+    </fieldset>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="editar-peso-verde">Peso verde (kg)</label>
+      <input
+        id="editar-peso-verde"
+        class="campo__control"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        formControlName="pesoVerdeKg"
+        [attr.aria-invalid]="errorPesoVerde() !== null"
+        [attr.aria-describedby]="errorPesoVerde() ? 'editar-error-peso-verde' : null"
+      />
+      @if (errorPesoVerde(); as error) {
+        <p id="editar-error-peso-verde" class="campo__error">{{ error }}</p>
+      }
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="editar-peso-tostado">Peso tostado (kg)</label>
+      <input
+        id="editar-peso-tostado"
+        class="campo__control"
+        type="number"
+        inputmode="decimal"
+        min="0"
+        step="0.01"
+        formControlName="pesoTostadoKg"
+        [attr.aria-invalid]="errorPesoTostado() !== null"
+        [attr.aria-describedby]="errorPesoTostado() ? 'editar-error-peso-tostado' : null"
+      />
+      @if (errorPesoTostado(); as error) {
+        <p id="editar-error-peso-tostado" class="campo__error">{{ error }}</p>
+      }
+    </div>
+
+    <div class="merma campo--ancho">
+      <label class="merma__etiqueta" for="editar-merma">Merma calculada por el tueste</label>
+      <output
+        id="editar-merma"
+        class="merma__valor"
+        for="editar-peso-verde editar-peso-tostado"
+        aria-live="polite"
+      >
+        {{ merma() === null ? '—' : porcentaje.format(merma()!) + '%' }}
+      </output>
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="editar-fecha">Fecha de tueste</label>
+      <input
+        id="editar-fecha"
+        class="campo__control"
+        type="date"
+        [max]="hoy"
+        formControlName="fecha"
+        [attr.aria-invalid]="invalido(formulario.controls.fecha)"
+        [attr.aria-describedby]="invalido(formulario.controls.fecha) ? 'editar-error-fecha' : null"
+      />
+      @if (invalido(formulario.controls.fecha)) {
+        <p id="editar-error-fecha" class="campo__error">
+          {{
+            formulario.controls.fecha.hasError('fechaFutura')
+              ? 'La fecha no puede ser posterior a hoy.'
+              : 'Indicá la fecha de tueste.'
+          }}
+        </p>
+      }
+    </div>
+
+    <div class="campo">
+      <label class="campo__etiqueta" for="editar-notas">
+        Notas de tueste <span class="campo__opcional">(opcional)</span>
+      </label>
+      <input
+        id="editar-notas"
+        class="campo__control"
+        formControlName="notas"
+        maxlength="300"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="acciones campo--ancho">
+      <button type="button" class="btn btn--texto" (click)="cerrar()">Cancelar</button>
+      <button type="submit" class="btn btn--filled">Guardar cambios</button>
+    </div>
+  </form>
+</dialog>

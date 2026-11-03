@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
+import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
 import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
@@ -17,7 +18,7 @@ import { RegistrarCosechaComponent } from './features/registrar-cosecha/registra
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
-import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
+import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -58,7 +59,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Mis solicitudes' },
   },
-  { path: 'tostador/tostados', component: PaginaMockComponent, data: { title: 'Mis tostados' } },
+  { path: 'tostador/tostados', component: MisTostadosComponent },
   { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: PaginaMockComponent, data: { title: 'Mi negocio' } },
