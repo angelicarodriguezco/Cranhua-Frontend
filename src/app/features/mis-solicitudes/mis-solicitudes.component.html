@@ -1,0 +1,64 @@
+<app-menu-lateral-tostador
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <div>
+      <h1>Mis solicitudes</h1>
+      <p>El estado de los lotes que le pediste a los cafetaleros.</p>
+    </div>
+    <a class="btn btn--filled" [routerLink]="rutaExplorarCosechas">Explorar cosechas</a>
+  </header>
+
+  <section class="indicadores" aria-label="Indicadores">
+    <article class="vidrio">
+      <strong>{{ indicadores().pendientes }}</strong
+      ><span>Solicitudes pendientes</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ indicadores().esteMes }}</strong
+      ><span>Solicitudes este mes</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ indicadores().fincasContactadas }}</strong
+      ><span>Fincas contactadas</span>
+    </article>
+  </section>
+
+  <section class="vidrio seccion" aria-labelledby="titulo-historial">
+    <h2 id="titulo-historial" class="seccion__titulo">Historial de solicitudes</h2>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Finca</th>
+            <th scope="col">Lote</th>
+            <th scope="col" class="numero">Kilos solicitados</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (solicitud of solicitudes(); track solicitud.id) {
+            <tr>
+              <td>{{ solicitud.finca }}</td>
+              <td>{{ solicitud.lote }}</td>
+              <td class="numero">{{ kg(solicitud.kilos) }}</td>
+              <td>{{ fecha(solicitud.fecha) }}</td>
+              <td>
+                <span [class]="claseEstado[solicitud.estado]">{{ solicitud.estado }}</span>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="vacio">Todavía no enviaste solicitudes.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
