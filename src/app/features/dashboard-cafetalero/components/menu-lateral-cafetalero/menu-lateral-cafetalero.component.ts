@@ -16,10 +16,10 @@ export interface ItemNavCafetalero {
 }
 
 export const NAV_PRINCIPAL_CAFETALERO: ItemNavCafetalero[] = [
-  { etiqueta: 'Dashboard', ruta: '/dashboard', icono: 'home', exacto: true },
-  { etiqueta: 'Mis fincas', ruta: '/mis-fincas', icono: 'fincas' },
-  { etiqueta: 'Registrar cosecha', ruta: '/registrar-cosecha', icono: 'cosecha' },
-  { etiqueta: 'Historial', ruta: '/historial', icono: 'historial' },
+  { etiqueta: 'Dashboard', ruta: '/cafetalero/dashboard', icono: 'home', exacto: true },
+  { etiqueta: 'Mis fincas', ruta: '/cafetalero/fincas', icono: 'fincas' },
+  { etiqueta: 'Registrar cosecha', ruta: '/cafetalero/registrar-cosecha', icono: 'cosecha' },
+  { etiqueta: 'Historial', ruta: '/cafetalero/historial', icono: 'historial' },
 ];
 
 export const NAV_SECUNDARIO_CAFETALERO: ItemNavCafetalero[] = [

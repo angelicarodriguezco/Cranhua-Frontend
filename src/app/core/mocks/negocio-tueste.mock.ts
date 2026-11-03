@@ -1,6 +1,4 @@
-import { Canton, Tostador } from '../models/negocio-tueste.model';
-
-// Datos de ejemplo mientras no existen el login ni el endpoint de negocios de tueste
+import { Canton, NegocioTueste, Tostador } from '../models/negocio-tueste.model';
 
 export const TOSTADOR_ACTUAL: Tostador = {
   id: 'u-mariana',
@@ -9,8 +7,6 @@ export const TOSTADOR_ACTUAL: Tostador = {
   correo: 'mariana.castro@ejemplo.cr',
 };
 
-// Coordenadas aproximadas de la cabecera de cada cantón. Las tostadurías se concentran en el
-// Valle Central, así que ahí la lista es más densa.
 export const CANTONES: Canton[] = [
   { nombre: 'San José', provincia: 'San José', cabecera: { lat: 9.9333, lng: -84.0833 } },
   { nombre: 'Escazú', provincia: 'San José', cabecera: { lat: 9.9189, lng: -84.1397 } },
@@ -66,3 +62,21 @@ export const CANTONES: Canton[] = [
   { nombre: 'Coto Brus', provincia: 'Puntarenas', cabecera: { lat: 8.821, lng: -82.969 } },
   { nombre: 'Limón', provincia: 'Limón', cabecera: { lat: 9.9907, lng: -83.0359 } },
 ];
+
+const CANTON_SAN_JOSE =
+  CANTONES.find((c) => c.nombre === 'San José') ?? CANTONES[0];
+
+export const NEGOCIO_EJEMPLO: NegocioTueste = {
+  id: 'n-tostaduria-volcan',
+  nombre: 'Tostaduría Volcán',
+  descripcion:
+    'Tostaduría artesanal en el corazón de San José. Perfiles claros y medios para resaltar la acidez y el dulzor del café costarricense.',
+  contacto: 'Mariana Castro',
+  telefono: '+506 8888-1234',
+  correo: TOSTADOR_ACTUAL.correo,
+  ubicacion: { lat: 9.9335, lng: -84.0775 },
+  canton: CANTON_SAN_JOSE,
+  estilos: ['Claro', 'Medio'],
+  propietarioId: TOSTADOR_ACTUAL.id,
+  portadaUrl: null,
+};
