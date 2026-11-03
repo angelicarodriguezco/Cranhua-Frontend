@@ -20,7 +20,7 @@ type Paso = 'bienvenida' | 'datos' | 'preferencias' | 'confirmacion';
 
 const PASOS: Paso[] = ['bienvenida', 'datos', 'preferencias', 'confirmacion'];
 
-export const RUTA_DASHBOARD = '/cafetalero/dashboard';
+export const RUTA_DASHBOARD = '/cafeteria/dashboard';
 
 @Component({
   selector: 'app-onboarding-cafeteria',

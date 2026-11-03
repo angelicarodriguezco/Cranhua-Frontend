@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { DashboardCafeteriaComponent } from './features/dashboard-cafeteria/dashboard-cafeteria.component';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
@@ -41,7 +42,6 @@ export const routes: Routes = [
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
 
-  // Cafetalero (prefijo /cafetalero/...)
   { path: 'cafetalero/dashboard', component: DashboardCafetaleroComponent },
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   { path: 'cafetalero/fincas/registrar', component: RegistrarFincaComponent },
@@ -55,7 +55,6 @@ export const routes: Routes = [
   { path: 'cafetalero/cosechas/:id/editar', component: RegistrarCosechaComponent },
   { path: 'cafetalero/historial', component: HistorialCafetaleroComponent },
 
-  // Redirecciones de rutas cortas antiguas del cafetalero
   { path: 'dashboard', redirectTo: 'cafetalero/dashboard', pathMatch: 'full' },
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
   { path: 'mis-fincas/registrar', redirectTo: 'cafetalero/fincas/registrar', pathMatch: 'full' },
@@ -64,7 +63,6 @@ export const routes: Routes = [
   { path: 'cosechas/:id/editar', redirectTo: 'cafetalero/cosechas/:id/editar' },
   { path: 'historial', redirectTo: 'cafetalero/historial', pathMatch: 'full' },
 
-  // Tostador
   { path: 'tostador/dashboard', component: DashboardTostadorComponent },
   {
     path: 'tostador/cosechas',
@@ -81,4 +79,21 @@ export const routes: Routes = [
   { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: MiNegocioComponent },
+
+  { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
+  {
+    path: 'cafeteria/explorar-tostadores',
+    component: PaginaMockComponent,
+    data: { title: 'Explorar tostadores' },
+  },
+  {
+    path: 'cafeteria/pedidos',
+    component: PaginaMockComponent,
+    data: { title: 'Mis pedidos' },
+  },
+  {
+    path: 'cafeteria/mi-cafeteria',
+    component: PaginaMockComponent,
+    data: { title: 'Mi cafetería' },
+  },
 ];
