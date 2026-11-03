@@ -31,6 +31,7 @@ export interface NegocioTueste {
   canton: Canton;
   estilos: EstiloTueste[];
   propietarioId: string;
+  portadaUrl?: string | null;
 }
 
 export type NuevoNegocioTueste = Omit<NegocioTueste, 'id'>;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { CANTONES } from '../mocks/negocio-tueste.mock';
+import { CANTONES, NEGOCIO_EJEMPLO, TOSTADOR_ACTUAL } from '../mocks/negocio-tueste.mock';
 import {
   Canton,
   Coordenada,
@@ -9,7 +9,6 @@ import {
   NuevoNegocioTueste,
 } from '../models/negocio-tueste.model';
 
-// Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
 const DISTANCIA_MAXIMA_CANTON_KM = 25;
 
 const RADIO_TIERRA_KM = 6371;
@@ -22,10 +21,11 @@ function distanciaKm(a: Coordenada, b: Coordenada): number {
   return Math.hypot(x, y) * RADIO_TIERRA_KM;
 }
 
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class NegocioTuesteService {
-  private negocios: NegocioTueste[] = [];
+  private negocios: NegocioTueste[] = [
+    { ...NEGOCIO_EJEMPLO, estilos: [...NEGOCIO_EJEMPLO.estilos] },
+  ];
 
   registrar(nuevo: NuevoNegocioTueste): Observable<NegocioTueste> {
     const negocio = { ...nuevo, id: `t-${Date.now()}` };
@@ -36,6 +36,23 @@ export class NegocioTuesteService {
   actualizar(negocio: NegocioTueste): Observable<NegocioTueste> {
     this.negocios = this.negocios.map((n) => (n.id === negocio.id ? negocio : n));
     return of(negocio);
+  }
+
+  obtenerPorPropietario(propietarioId: string): Observable<NegocioTueste | undefined> {
+    return of(this.negocios.find((n) => n.propietarioId === propietarioId));
+  }
+
+  obtenerActual(): Observable<NegocioTueste | undefined> {
+    return this.obtenerPorPropietario(TOSTADOR_ACTUAL.id);
+  }
+
+  eliminar(id: string): Observable<boolean> {
+    const existia = this.negocios.some((n) => n.id === id);
+    if (!existia) {
+      return of(false);
+    }
+    this.negocios = this.negocios.filter((n) => n.id !== id);
+    return of(true);
   }
 
   cantonDe(punto: Coordenada): Canton | null {

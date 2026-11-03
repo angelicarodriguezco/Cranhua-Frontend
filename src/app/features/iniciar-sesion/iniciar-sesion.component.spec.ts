@@ -52,7 +52,7 @@ describe('IniciarSesionComponent', () => {
     enviar();
 
     expect(sesion.iniciarSesion).toHaveBeenCalledWith(usuario);
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/cafetalero/dashboard');
   });
 
   it('usa USUARIO_ACTUAL si el correo no está en el mock', () => {
@@ -69,6 +69,6 @@ describe('IniciarSesionComponent', () => {
     enviar();
 
     expect(sesion.iniciarSesion).toHaveBeenCalledWith(USUARIO_ACTUAL);
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/cafetalero/dashboard');
   });
 });
