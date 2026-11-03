@@ -48,7 +48,9 @@ describe('CafeteriaService', () => {
       estilos: ['Oscuro'] as const,
       portadaUrl: 'blob:mock-portada',
     };
-    const guardada = await firstValueFrom(servicio.actualizar({ ...actualizada, estilos: [...actualizada.estilos] }));
+    const guardada = await firstValueFrom(
+      servicio.actualizar({ ...actualizada, estilos: [...actualizada.estilos] }),
+    );
     expect(guardada.nombre).toBe('Café Brumas Escazú');
     expect(guardada.portadaUrl).toBe('blob:mock-portada');
 

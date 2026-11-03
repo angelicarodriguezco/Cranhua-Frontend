@@ -1,10 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 import { RESUMEN_DASHBOARD_CAFETERIA } from '../mocks/dashboard-cafeteria.mock';
-import {
-  IndicadoresCafeteria,
-  PedidoRecienteCafeteria,
-} from '../models/dashboard-cafeteria.model';
+import { IndicadoresCafeteria, PedidoRecienteCafeteria } from '../models/dashboard-cafeteria.model';
 import { TemaDashboard } from '../models/dashboard-cafetalero.model';
 import { PerfilCafeteriaSidebar } from '../models/pedido.model';
 
