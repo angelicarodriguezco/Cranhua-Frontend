@@ -21,6 +21,7 @@ import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.component';
+import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -41,8 +42,6 @@ export const routes: Routes = [
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
-
-  // Cafetalero (prefijo /cafetalero/...)
   { path: 'cafetalero/dashboard', component: DashboardCafetaleroComponent },
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   { path: 'cafetalero/fincas/registrar', component: RegistrarFincaComponent },
@@ -55,8 +54,6 @@ export const routes: Routes = [
   { path: 'cafetalero/registrar-cosecha', component: RegistrarCosechaComponent },
   { path: 'cafetalero/cosechas/:id/editar', component: RegistrarCosechaComponent },
   { path: 'cafetalero/historial', component: HistorialCafetaleroComponent },
-
-  // Redirecciones de rutas cortas antiguas del cafetalero
   { path: 'dashboard', redirectTo: 'cafetalero/dashboard', pathMatch: 'full' },
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
   { path: 'mis-fincas/registrar', redirectTo: 'cafetalero/fincas/registrar', pathMatch: 'full' },
@@ -64,8 +61,6 @@ export const routes: Routes = [
   { path: 'registrar-cosecha', redirectTo: 'cafetalero/registrar-cosecha', pathMatch: 'full' },
   { path: 'cosechas/:id/editar', redirectTo: 'cafetalero/cosechas/:id/editar' },
   { path: 'historial', redirectTo: 'cafetalero/historial', pathMatch: 'full' },
-
-  // Tostador
   { path: 'tostador/dashboard', component: DashboardTostadorComponent },
   {
     path: 'tostador/cosechas',
@@ -73,11 +68,7 @@ export const routes: Routes = [
     data: { title: 'Explorar cosechas' },
   },
   { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
-  {
-    path: 'tostador/solicitudes',
-    component: PaginaMockComponent,
-    data: { title: 'Mis solicitudes' },
-  },
+  { path: 'tostador/solicitudes', component: MisSolicitudesComponent },
   { path: 'tostador/tostados', component: MisTostadosComponent },
   { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
