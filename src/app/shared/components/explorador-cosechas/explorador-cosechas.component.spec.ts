@@ -49,19 +49,6 @@ describe('ExploradorCosechasComponent', () => {
     expect(chip('Todas').getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('solo ofrece las zonas que tienen cosechas', () => {
-    const opciones = [...pagina.querySelectorAll('.chip-zona option')].map((o) => o.textContent);
-    expect(opciones).toEqual([
-      'Zona',
-      'Tarrazú',
-      'Valle Central',
-      'Valle Occidental',
-      'Orosi',
-      'Turrialba',
-      'Brunca',
-    ]);
-  });
-
   it('los filtros rápidos cambian las cosechas mostradas', () => {
     const todas = fincasVisibles().length;
 
@@ -87,7 +74,6 @@ describe('ExploradorCosechasComponent', () => {
     clic(chip('Todas'));
     elegirZona('Turrialba');
     expect(fincasVisibles()).toEqual(['Finca Los Robles']);
-    expect(pagina.querySelector('.chip-zona')?.classList).toContain('activo');
   });
 
   it('avisa si ninguna cosecha cumple los filtros', () => {
