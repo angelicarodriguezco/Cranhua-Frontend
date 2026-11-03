@@ -1,0 +1,42 @@
+<div class="filtros" role="group" aria-label="Filtros rápidos">
+  <button type="button" class="chip" [attr.aria-pressed]="sinFiltros()" (click)="limpiarFiltros()">
+    Todas
+  </button>
+  <button
+    type="button"
+    class="chip"
+    [attr.aria-pressed]="filtros().soloDisponibles"
+    (click)="alternar('soloDisponibles')"
+  >
+    Disponible ahora
+  </button>
+  <select
+    class="chip chip-zona"
+    aria-label="Zona"
+    [class.activo]="filtros().zona"
+    (change)="elegirZona($event)"
+  >
+    <option value="" [selected]="!filtros().zona">Zona</option>
+    @for (zona of zonas(); track zona) {
+      <option [value]="zona" [selected]="zona === filtros().zona">{{ zona }}</option>
+    }
+  </select>
+  <button
+    type="button"
+    class="chip"
+    [attr.aria-pressed]="filtros().soloFlorales"
+    (click)="alternar('soloFlorales')"
+  >
+    Notas florales
+  </button>
+  <button
+    type="button"
+    class="chip"
+    [attr.aria-pressed]="filtros().soloHoney"
+    (click)="alternar('soloHoney')"
+  >
+    Proceso honey
+  </button>
+</div>
+
+<app-cuadricula-cosechas [cosechas]="cosechasFiltradas()" />
