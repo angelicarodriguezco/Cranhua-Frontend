@@ -4,6 +4,7 @@ import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/da
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
+import { ExplorarCosechasComponent } from './features/explorar-cosechas/explorar-cosechas.component';
 import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
@@ -61,11 +62,7 @@ export const routes: Routes = [
   { path: 'cosechas/:id/editar', redirectTo: 'cafetalero/cosechas/:id/editar' },
   { path: 'historial', redirectTo: 'cafetalero/historial', pathMatch: 'full' },
   { path: 'tostador/dashboard', component: DashboardTostadorComponent },
-  {
-    path: 'tostador/cosechas',
-    component: PaginaMockComponent,
-    data: { title: 'Explorar cosechas' },
-  },
+  { path: 'tostador/cosechas', component: ExplorarCosechasComponent },
   { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
   { path: 'tostador/solicitudes', component: MisSolicitudesComponent },
   { path: 'tostador/tostados', component: MisTostadosComponent },
