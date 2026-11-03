@@ -1,0 +1,91 @@
+<app-menu-lateral-cafeteria
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <div>
+      <h1>Mis pedidos</h1>
+      <p>El café que le pediste a los tostadores y en qué va cada pedido.</p>
+    </div>
+    <a class="btn btn--filled" [routerLink]="rutaExplorarTostadores">Explorar tostadores</a>
+  </header>
+
+  <section class="indicadores" aria-label="Indicadores">
+    <article class="vidrio">
+      <strong>{{ indicadores().activos }}</strong>
+      <span>Pedidos activos</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ kg(indicadores().kgRecibidosMes) }}</strong>
+      <span>Kg recibidos este mes</span>
+    </article>
+    <article class="vidrio">
+      <strong>{{ indicadores().tostadoresActivos }}</strong>
+      <span>Tostadores activos</span>
+    </article>
+  </section>
+
+  <section class="vidrio seccion" aria-labelledby="titulo-historial">
+    <h2 id="titulo-historial" class="seccion__titulo">Historial de pedidos</h2>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Tostador</th>
+            <th scope="col" class="numero">Kilos</th>
+            <th scope="col">Fecha</th>
+            <th scope="col">Estado</th>
+            <th scope="col"><span class="solo-lector">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (pedido of pedidos(); track pedido.id) {
+            <tr>
+              <td>{{ pedido.tostador }}</td>
+              <td class="numero">{{ kg(pedido.kilos) }}</td>
+              <td>{{ fecha(pedido.fecha) }}</td>
+              <td>
+                <span
+                  [id]="'estado-' + pedido.id"
+                  [class]="claseEstado[pedido.estado]"
+                  tabindex="-1"
+                >
+                  {{ pedido.estado }}
+                </span>
+              </td>
+              <td class="acciones-fila">
+                @if (pedido.estado === 'En camino') {
+                  <button
+                    type="button"
+                    class="btn btn--borde btn--chico"
+                    [attr.aria-label]="'Marcar recibido el pedido de ' + pedido.tostador"
+                    (click)="marcarRecibido(pedido)"
+                  >
+                    Marcar recibido
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn--borde btn--chico"
+                    [attr.aria-label]="'Cancelar el pedido de ' + pedido.tostador"
+                    (click)="cancelar(pedido)"
+                  >
+                    Cancelar
+                  </button>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="vacio">
+                Todavía no hiciste pedidos. Empezá explorando los tostadores.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>

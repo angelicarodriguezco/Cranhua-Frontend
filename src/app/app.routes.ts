@@ -21,6 +21,7 @@ import { RegistrarFincaComponent } from './features/registrar-finca/registrar-fi
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
+import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.component';
 import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
 
 export const routes: Routes = [
@@ -69,4 +70,22 @@ export const routes: Routes = [
   { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: MiNegocioComponent },
+
+  // Cafetería
+  {
+    path: 'cafeteria/dashboard',
+    component: PaginaMockComponent,
+    data: { title: 'Dashboard' },
+  },
+  {
+    path: 'cafeteria/tostadores',
+    component: PaginaMockComponent,
+    data: { title: 'Explorar tostadores' },
+  },
+  { path: 'cafeteria/pedidos', component: MisPedidosComponent },
+  {
+    path: 'cafeteria/negocio',
+    component: PaginaMockComponent,
+    data: { title: 'Mi cafetería' },
+  },
 ];
