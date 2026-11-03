@@ -62,6 +62,7 @@ Abrir http://localhost:4200.
 | `/registrar-cosecha`            | Registrar cosecha                                  |
 | `/cosechas/:id/editar`          | Editar cosecha                                     |
 | `/historial`                    | Historial de cosechas y lotes vendidos             |
+| `/tostador/cosechas`            | Explorar cosechas (tostador)                       |
 | `/tostador/tostados`            | Mis tostados (tostador)                            |
 | `/tostador/tostados/nuevo`      | Crear tueste (tostador)                            |
 | `/tostador/tostados/:id/editar` | Editar tueste (tostador)                           |
