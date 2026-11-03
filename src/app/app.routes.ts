@@ -1,5 +1,11 @@
 import { Routes } from '@angular/router';
 
+import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
+import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
+import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
+import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
+import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
+import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
@@ -8,7 +14,11 @@ import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding
 import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
+import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
+import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
+import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -25,23 +35,41 @@ export const routes: Routes = [
     data: { title: 'Recuperar contraseña' },
   },
   { path: 'onboarding-finca', component: OnboardingFincaComponent },
-  {
-    path: 'onboarding-tostador',
-    component: PaginaMockComponent,
-    data: { title: 'Onboarding: Registrar negocio de tueste' },
-  },
-  {
-    path: 'onboarding-cafeteria',
-    component: PaginaMockComponent,
-    data: { title: 'Onboarding: Registrar cafetería' },
-  },
-  { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
-  { path: 'dashboard', component: PaginaMockComponent, data: { title: 'Dashboard' } },
-  { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
+  { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
+  { path: 'dashboard', component: DashboardCafetaleroComponent },
+  // El menú y el dashboard del cafetalero enlazan a estas rutas cortas
+  { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
+  { path: 'mis-fincas/registrar', component: RegistrarFincaComponent },
+  { path: 'fincas/:id', redirectTo: 'cafetalero/fincas/:id' },
+  { path: 'registrar-cosecha', component: RegistrarCosechaComponent },
+  { path: 'cosechas/:id/editar', component: RegistrarCosechaComponent },
+  { path: 'historial', component: HistorialCafetaleroComponent },
+  { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
+  { path: 'mapa-prueba', component: MapaPruebaComponent },
+  { path: 'tostador/dashboard', component: DashboardTostadorComponent },
   {
-    path: 'tostador/dashboard',
+    path: 'tostador/cosechas',
     component: PaginaMockComponent,
-    data: { title: 'Dashboard del tostador' },
+    data: { title: 'Explorar cosechas' },
+  },
+  { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
+  {
+    path: 'tostador/solicitudes',
+    component: PaginaMockComponent,
+    data: { title: 'Mis solicitudes' },
+  },
+  { path: 'tostador/tostados', component: MisTostadosComponent },
+  { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
+  { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
+  { path: 'tostador/negocio', component: PaginaMockComponent, data: { title: 'Mi negocio' } },
+
+  { path: 'cafetalero/fincas', component: MisFincasComponent },
+  { path: 'cafetalero/fincas/:id', component: DetalleFincaComponent },
+  // Provisional hasta que entre el formulario de edición de finca (CP3-22)
+  {
+    path: 'cafetalero/fincas/:id/editar',
+    component: PaginaMockComponent,
+    data: { title: 'Editar finca' },
   },
 ];

@@ -1,0 +1,195 @@
+<app-menu-lateral-tostador
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <h1>{{ modoEdicion ? 'Editar tueste' : 'Crear tueste' }}</h1>
+    @if (!noEncontrado()) {
+      <p>
+        {{
+          modoEdicion
+            ? 'Corregí los datos de este tueste.'
+            : 'Registrá el resultado de tostar un lote que ya compraste.'
+        }}
+      </p>
+    }
+  </header>
+
+  @if (noEncontrado()) {
+    <section class="vidrio tarjeta confirmacion">
+      <p class="tarjeta__texto">No encontramos ese tueste. Puede que se haya eliminado.</p>
+      <div class="confirmacion__acciones">
+        <button type="button" class="btn btn--filled" (click)="irAMisTostados()">
+          Ir a Mis tostados
+        </button>
+      </div>
+    </section>
+  } @else {
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="vidrio tarjeta formulario">
+        <h2 class="tarjeta__titulo campo--ancho">Lote a tostar</h2>
+
+        <div class="campo campo--ancho">
+          <label class="campo__etiqueta" for="lote-tueste">Lote comprado</label>
+          <select
+            id="lote-tueste"
+            class="campo__control"
+            formControlName="loteId"
+            [attr.aria-invalid]="invalido(formulario.controls.loteId)"
+            [attr.aria-describedby]="
+              modoEdicion || invalido(formulario.controls.loteId) ? 'ayuda-lote' : null
+            "
+          >
+            <option [ngValue]="null" disabled>Elegí uno de tus lotes comprados</option>
+            @for (l of lotes(); track l.id) {
+              <option [ngValue]="l.id">
+                {{ l.codigoLote }} · Finca {{ l.finca }} · {{ l.variedad }}, {{ l.proceso }} ·
+                {{ kilos.format(l.kg) }} kg
+              </option>
+            }
+          </select>
+          @if (invalido(formulario.controls.loteId)) {
+            <p id="ayuda-lote" class="campo__error">Elegí el lote que vas a tostar.</p>
+          } @else if (modoEdicion) {
+            <p id="ayuda-lote" class="campo__ayuda">
+              El lote no se puede cambiar en un tueste ya registrado.
+            </p>
+          }
+        </div>
+
+        <fieldset class="campo campo--ancho niveles">
+          <legend class="campo__etiqueta">Nivel de tueste</legend>
+          <div class="niveles__opciones">
+            @for (nivel of niveles; track nivel) {
+              <label class="nivel" [attr.data-nivel]="nivel">
+                <input type="radio" name="nivel" formControlName="nivel" [value]="nivel" />
+                <span class="nivel__tarjeta">
+                  <span class="nivel__punto" aria-hidden="true"></span>
+                  {{ nivel }}
+                </span>
+              </label>
+            }
+          </div>
+          @if (invalido(formulario.controls.nivel)) {
+            <p class="campo__error">Elegí un nivel de tueste.</p>
+          }
+        </fieldset>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="peso-verde">Peso verde (kg)</label>
+          <input
+            id="peso-verde"
+            class="campo__control"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="0.01"
+            placeholder="Ej. 20"
+            formControlName="pesoVerdeKg"
+            [attr.aria-invalid]="errorPesoVerde() !== null"
+            [attr.aria-describedby]="errorPesoVerde() ? 'error-peso-verde' : null"
+          />
+          @if (errorPesoVerde(); as error) {
+            <p id="error-peso-verde" class="campo__error">{{ error }}</p>
+          }
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="peso-tostado">Peso tostado (kg)</label>
+          <input
+            id="peso-tostado"
+            class="campo__control"
+            type="number"
+            inputmode="decimal"
+            min="0"
+            step="0.01"
+            placeholder="Ej. 16.8"
+            formControlName="pesoTostadoKg"
+            [attr.aria-invalid]="errorPesoTostado() !== null"
+            [attr.aria-describedby]="errorPesoTostado() ? 'error-peso-tostado' : null"
+          />
+          @if (errorPesoTostado(); as error) {
+            <p id="error-peso-tostado" class="campo__error">{{ error }}</p>
+          }
+        </div>
+
+        <div class="merma campo--ancho">
+          <label class="merma__etiqueta" for="merma">Merma calculada por el tueste</label>
+          <output id="merma" class="merma__valor" for="peso-verde peso-tostado" aria-live="polite">
+            {{ merma() === null ? '—' : porcentaje.format(merma()!) + '%' }}
+          </output>
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="fecha-tueste">Fecha de tueste</label>
+          <input
+            id="fecha-tueste"
+            class="campo__control"
+            type="date"
+            [max]="hoy"
+            formControlName="fecha"
+            [attr.aria-invalid]="invalido(formulario.controls.fecha)"
+            [attr.aria-describedby]="invalido(formulario.controls.fecha) ? 'error-fecha' : null"
+          />
+          @if (invalido(formulario.controls.fecha)) {
+            <p id="error-fecha" class="campo__error">
+              {{
+                formulario.controls.fecha.hasError('fechaFutura')
+                  ? 'La fecha no puede ser posterior a hoy.'
+                  : 'Indicá la fecha de tueste.'
+              }}
+            </p>
+          }
+        </div>
+
+        <div class="campo">
+          <label class="campo__etiqueta" for="notas-tueste">
+            Notas de tueste <span class="campo__opcional">(opcional)</span>
+          </label>
+          <input
+            id="notas-tueste"
+            class="campo__control"
+            formControlName="notas"
+            maxlength="300"
+            placeholder="Ej. Notas a caramelo y cítricos"
+            autocomplete="off"
+          />
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn btn--texto" (click)="irAMisTostados()">Cancelar</button>
+        <button type="submit" class="btn btn--filled">
+          {{ modoEdicion ? 'Guardar cambios' : 'Guardar tueste' }}
+        </button>
+      </div>
+    </form>
+  }
+</main>
+
+<dialog
+  #dialogo
+  class="dialogo"
+  aria-labelledby="titulo-dialogo"
+  (cancel)="alCancelarDialogo($event)"
+>
+  <!-- Sin @if: los botones tienen que existir cuando showModal() busca a quién dar el foco -->
+  <div class="vidrio dialogo__contenido">
+    <h2 id="titulo-dialogo" class="tarjeta__titulo">
+      {{ modoEdicion ? 'Cambios guardados' : 'Tueste guardado' }}
+    </h2>
+    <p class="tarjeta__texto">Código de trazabilidad para las bolsas de este tueste:</p>
+    <p class="codigo">{{ guardado()?.codigoTrazabilidad }}</p>
+    <div class="dialogo__acciones">
+      <button type="button" class="btn btn--texto" (click)="cerrarDialogo()">
+        {{ modoEdicion ? 'Seguir editando' : 'Registrar otro tueste' }}
+      </button>
+      <button type="button" class="btn btn--filled" (click)="irAMisTostados()">
+        Ir a Mis tostados
+      </button>
+    </div>
+  </div>
+</dialog>

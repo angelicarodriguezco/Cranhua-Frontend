@@ -2,7 +2,15 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { CANTONES, FINCAS_REGISTRADAS, USUARIOS } from '../mocks/finca.mock';
-import { Canton, Coordenada, NuevaFinca, ResultadoRegistro, Usuario } from '../models/finca.model';
+import {
+  Canton,
+  Coordenada,
+  Finca,
+  NuevaFinca,
+  ResultadoAgregarDueno,
+  ResultadoRegistro,
+  Usuario,
+} from '../models/finca.model';
 import { distanciaKm, seSuperponen } from '../../shared/utils/geo';
 
 // Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
@@ -54,5 +62,44 @@ export class FincaService {
       CANTONES.find((c) => normalizar(c.nombre) === buscado) ??
       CANTONES.find((c) => normalizar(c.nombre).startsWith(buscado))
     );
+  }
+
+  misFincas(usuarioId: string): Observable<Finca[]> {
+    return of(
+      this.fincas.filter(
+        (f) => f.propietarioId === usuarioId || f.duenosAdicionales.some((u) => u.id === usuarioId),
+      ),
+    );
+  }
+
+  obtener(id: string): Observable<Finca | undefined> {
+    return of(this.fincas.find((f) => f.id === id));
+  }
+
+  usuarioPorId(id: string): Usuario | undefined {
+    return USUARIOS.find((u) => u.id === id);
+  }
+
+  // Se reemplaza la finca por una copia para no modificar los datos de ejemplo
+  agregarDueno(fincaId: string, correo: string): Observable<ResultadoAgregarDueno> {
+    const indice = this.fincas.findIndex((f) => f.id === fincaId);
+    if (indice === -1) {
+      return of({ agregado: false, error: 'finca-inexistente' });
+    }
+    const buscado = normalizar(correo);
+    const usuario = USUARIOS.find((u) => u.correo === buscado);
+    if (!usuario) {
+      return of({ agregado: false, error: 'correo-inexistente' });
+    }
+    const finca = this.fincas[indice];
+    if (
+      finca.propietarioId === usuario.id ||
+      finca.duenosAdicionales.some((u) => u.id === usuario.id)
+    ) {
+      return of({ agregado: false, error: 'ya-es-dueno' });
+    }
+    const actualizada = { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] };
+    this.fincas[indice] = actualizada;
+    return of({ agregado: true, finca: actualizada });
   }
 }

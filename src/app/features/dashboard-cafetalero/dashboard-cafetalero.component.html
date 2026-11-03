@@ -1,0 +1,131 @@
+<div class="dashboard" [attr.data-theme]="tema()">
+  <app-menu-lateral-cafetalero
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    <header class="cabecera">
+      <div>
+        <h1>Hola, {{ usuario().nombre }}</h1>
+        <p>Esto es lo que está pasando en tus fincas hoy.</p>
+      </div>
+      <a routerLink="/registrar-cosecha" class="cta">+ Registrar cosecha</a>
+    </header>
+
+    <section class="indicadores" aria-label="Indicadores">
+      <article class="glass">
+        <strong>{{ indicadores().fincasRegistradas }}</strong>
+        <span>Fincas registradas</span>
+      </article>
+      <article class="glass">
+        <strong>{{ indicadores().cosechasActivas }}</strong>
+        <span>Cosechas activas</span>
+      </article>
+      <article class="glass">
+        <strong>{{ indicadores().kgDisponibles }} kg</strong>
+        <span>Disponible para tostadores</span>
+      </article>
+      <article class="glass kpi-pendientes">
+        <strong>{{ indicadores().solicitudesPendientes }}</strong>
+        <span>Solicitudes pendientes</span>
+      </article>
+    </section>
+
+    <section class="solicitudes glass" aria-labelledby="titulo-solicitudes">
+      <div class="seccion-cabecera">
+        <h2 id="titulo-solicitudes">Solicitudes de tostadores</h2>
+        <span class="badge">{{ indicadores().solicitudesPendientes }} pendientes</span>
+      </div>
+
+      <ul>
+        @for (solicitud of solicitudes(); track solicitud.id) {
+          <li>
+            <div>
+              <p>{{ solicitud.nombreTostador }} solicita {{ solicitud.kgSolicitados }} kg</p>
+              <p class="detalle">
+                Cosecha {{ solicitud.variedad }} · Proceso {{ solicitud.proceso }} · Finca
+                {{ solicitud.finca }}
+              </p>
+            </div>
+            <div class="acciones">
+              <button type="button" class="btn-rechazar" (click)="rechazar(solicitud.id)">
+                Rechazar
+              </button>
+              <button type="button" class="btn-aprobar" (click)="aprobar(solicitud.id)">
+                Aprobar
+              </button>
+            </div>
+          </li>
+        } @empty {
+          <li class="vacio">No hay solicitudes pendientes.</li>
+        }
+      </ul>
+    </section>
+
+    <section class="fincas glass" aria-labelledby="titulo-fincas">
+      <div class="seccion-cabecera">
+        <h2 id="titulo-fincas">Mis fincas</h2>
+        <a routerLink="/mis-fincas">Ver todas</a>
+      </div>
+
+      <div class="fincas-grid">
+        @for (finca of fincas(); track finca.id) {
+          <article>
+            <h3>Finca {{ finca.nombre }}</h3>
+            <p>{{ finca.ubicacion }}</p>
+            <p>
+              {{ finca.cosechasActivas }}
+              {{ finca.cosechasActivas === 1 ? 'cosecha' : 'cosechas' }}
+            </p>
+            <a [routerLink]="['/fincas', finca.id]">Ver detalle →</a>
+          </article>
+        }
+        <a routerLink="/mis-fincas/registrar" class="nueva-finca">+ Registrar nueva finca</a>
+      </div>
+    </section>
+
+    <section class="cosechas glass" aria-labelledby="titulo-cosechas">
+      <div class="seccion-cabecera">
+        <h2 id="titulo-cosechas">Cosechas recientes</h2>
+        <a routerLink="/historial">Ver historial completo</a>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Variedad</th>
+              <th>Finca</th>
+              <th>Proceso</th>
+              <th>Disponible</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cosecha of cosechas(); track cosecha.id) {
+              <tr>
+                <td>{{ cosecha.variedad }}</td>
+                <td>{{ cosecha.finca }}</td>
+                <td>{{ cosecha.proceso }}</td>
+                <td>
+                  {{ cosecha.kgDisponibles === null ? '—' : cosecha.kgDisponibles + ' kg' }}
+                </td>
+                <td>
+                  <span
+                    class="pill"
+                    [class.pill-disponible]="cosecha.estado === 'Disponible'"
+                    [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
+                  >
+                    {{ cosecha.estado }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
