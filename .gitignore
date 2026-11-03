@@ -20,7 +20,8 @@ yarn-error.log
 .settings/
 *.sublime-workspace
 
-# Visual Studio Code / Cursor
+# Visual Studio Code / Cursor / Claude
+.claude/
 .vscode/
 .cursor/
 .history/*

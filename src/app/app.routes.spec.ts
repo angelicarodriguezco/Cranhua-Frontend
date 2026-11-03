@@ -20,11 +20,23 @@ describe('Rutas del cafetalero', () => {
     harness = await RouterTestingHarness.create();
   });
 
-  it('redirige las rutas cortas del dashboard a las de Mis fincas', async () => {
+  it('redirige las rutas cortas del cafetalero al prefijo /cafetalero', async () => {
     await harness.navigateByUrl('/fincas/f-la-esperanza');
     expect(TestBed.inject(Location).path()).toBe('/cafetalero/fincas/f-la-esperanza');
 
     await harness.navigateByUrl('/mis-fincas');
     expect(TestBed.inject(Location).path()).toBe('/cafetalero/fincas');
+
+    await harness.navigateByUrl('/dashboard');
+    expect(TestBed.inject(Location).path()).toBe('/cafetalero/dashboard');
+
+    await harness.navigateByUrl('/historial');
+    expect(TestBed.inject(Location).path()).toBe('/cafetalero/historial');
+
+    await harness.navigateByUrl('/registrar-cosecha');
+    expect(TestBed.inject(Location).path()).toBe('/cafetalero/registrar-cosecha');
+
+    await harness.navigateByUrl('/mis-fincas/registrar');
+    expect(TestBed.inject(Location).path()).toBe('/cafetalero/fincas/registrar');
   });
 });

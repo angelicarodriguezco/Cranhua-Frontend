@@ -1,3 +1,5 @@
+@import './app/features/mi-negocio/mi-negocio.tema.css';
+
 :root {
   --color-gold: #c9a227;
   --color-gold-light: #d4af37;

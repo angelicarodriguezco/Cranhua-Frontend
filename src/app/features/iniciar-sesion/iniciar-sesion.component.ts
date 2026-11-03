@@ -41,6 +41,6 @@ export class IniciarSesionComponent {
     const usuario = USUARIOS.find((u) => u.correo.toLowerCase() === correo) ?? USUARIO_ACTUAL;
 
     this.sesion.iniciarSesion(usuario);
-    void this.router.navigateByUrl('/dashboard');
+    void this.router.navigateByUrl('/cafetalero/dashboard');
   }
 }

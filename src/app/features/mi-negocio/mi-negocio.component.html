@@ -1,0 +1,232 @@
+<app-menu-lateral-tostador
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <h1>Mi negocio</h1>
+    @if (!noEncontrado()) {
+      <p>Así ven tu tostaduría los cafetaleros que exploran cosechas.</p>
+    }
+  </header>
+
+  @if (noEncontrado()) {
+    <section class="vidrio tarjeta confirmacion">
+      <p class="tarjeta__texto">No encontramos tu negocio. Puede que se haya eliminado.</p>
+      <div class="confirmacion__acciones">
+        <button type="button" class="btn btn--filled" (click)="irAlDashboard()">
+          Ir al dashboard
+        </button>
+      </div>
+    </section>
+  } @else {
+    <form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+      <div class="vidrio tarjeta">
+        <div class="portada">
+          @if (portadaUrl(); as url) {
+            <img class="portada__imagen" [src]="url" alt="" />
+          } @else {
+            <div class="portada__placeholder" aria-hidden="true"></div>
+          }
+          <button type="button" class="portada__cambiar" (click)="abrirSelectorPortada()">
+            Cambiar portada
+          </button>
+          <input
+            #inputPortada
+            class="portada__input"
+            type="file"
+            accept="image/*"
+            aria-label="Cambiar portada"
+            (change)="alSeleccionarPortada($event)"
+          />
+        </div>
+
+        <div class="perfil">
+          <div class="avatar" aria-hidden="true">
+            <span class="avatar__iniciales">{{ iniciales() }}</span>
+            <button
+              type="button"
+              class="avatar__camara"
+              aria-label="Cambiar portada"
+              (click)="abrirSelectorPortada()"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M9.5 6h5l1.2 1.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2h3.3L9.5 6Zm2.5 11.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4Z"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="formulario">
+          <div class="campo campo--ancho">
+            <label class="campo__etiqueta" for="nombre-negocio">Nombre del negocio</label>
+            <input
+              id="nombre-negocio"
+              class="campo__control"
+              formControlName="nombre"
+              maxlength="80"
+              autocomplete="organization"
+              [attr.aria-invalid]="invalido('nombre')"
+              [attr.aria-describedby]="invalido('nombre') ? 'error-nombre' : null"
+            />
+            @if (invalido('nombre')) {
+              <p id="error-nombre" class="campo__error">Poné el nombre de tu negocio.</p>
+            }
+          </div>
+
+          <div class="campo campo--ancho">
+            <label class="campo__etiqueta" for="descripcion-negocio">
+              Descripción <span class="campo__opcional">(opcional)</span>
+            </label>
+            <textarea
+              id="descripcion-negocio"
+              class="campo__control campo__control--area"
+              formControlName="descripcion"
+              rows="3"
+              maxlength="300"
+              placeholder="Tu historia, qué tipo de cafés buscás, capacidad de compra…"
+              aria-describedby="contador-descripcion"
+            ></textarea>
+            <p id="contador-descripcion" class="campo__ayuda campo__ayuda--derecha">
+              {{ formulario.controls.descripcion.value.length }}/300
+            </p>
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="contacto-negocio">Nombre de contacto</label>
+            <input
+              id="contacto-negocio"
+              class="campo__control"
+              formControlName="contacto"
+              maxlength="80"
+              autocomplete="name"
+              [attr.aria-invalid]="invalido('contacto')"
+              [attr.aria-describedby]="invalido('contacto') ? 'error-contacto' : null"
+            />
+            @if (invalido('contacto')) {
+              <p id="error-contacto" class="campo__error">Poné quién atiende a los cafetaleros.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="telefono-negocio">Teléfono</label>
+            <input
+              id="telefono-negocio"
+              class="campo__control"
+              type="tel"
+              formControlName="telefono"
+              autocomplete="tel"
+              [attr.aria-invalid]="invalido('telefono')"
+              [attr.aria-describedby]="invalido('telefono') ? 'error-telefono' : null"
+            />
+            @if (tieneError('telefono', 'required')) {
+              <p id="error-telefono" class="campo__error">Poné un teléfono de contacto.</p>
+            } @else if (invalido('telefono')) {
+              <p id="error-telefono" class="campo__error">Debe tener 8 dígitos, ej. 8888-8888.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="correo-negocio">Correo electrónico</label>
+            <input
+              id="correo-negocio"
+              class="campo__control"
+              type="email"
+              formControlName="correo"
+              autocomplete="email"
+              [attr.aria-invalid]="invalido('correo')"
+              [attr.aria-describedby]="invalido('correo') ? 'error-correo' : null"
+            />
+            @if (tieneError('correo', 'required')) {
+              <p id="error-correo" class="campo__error">Poné un correo de contacto.</p>
+            } @else if (invalido('correo')) {
+              <p id="error-correo" class="campo__error">Ese correo no es válido.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="ubicacion-negocio">Ubicación</label>
+            <input
+              id="ubicacion-negocio"
+              class="campo__control"
+              type="text"
+              [value]="textoUbicacion()"
+              readonly
+              tabindex="-1"
+              aria-readonly="true"
+              [attr.aria-invalid]="ubicacionInvalida()"
+              [attr.aria-describedby]="ubicacionInvalida() ? 'error-ubicacion' : 'ayuda-ubicacion'"
+            />
+            @if (ubicacionInvalida()) {
+              <p id="error-ubicacion" class="campo__error">
+                @if (pin()) {
+                  El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu tostaduría.
+                } @else {
+                  Marcá en el mapa dónde está tu tostaduría.
+                }
+              </p>
+            } @else {
+              <p id="ayuda-ubicacion" class="campo__ayuda">
+                Se actualiza al mover el pin en el mapa.
+              </p>
+            }
+          </div>
+
+          <div class="campo campo--ancho mapa">
+            <app-mapa-ubicacion [(pin)]="pin" />
+          </div>
+
+          <div class="campo campo--ancho">
+            <span class="campo__etiqueta" id="etiqueta-estilos">Estilos de tueste que ofrecés</span>
+            <div class="estilos" role="group" aria-labelledby="etiqueta-estilos">
+              @for (estilo of estilos; track estilo) {
+                <button
+                  type="button"
+                  class="estilo"
+                  [class.estilo--activo]="seleccionado(estilo)"
+                  [attr.aria-pressed]="seleccionado(estilo)"
+                  (click)="alternarEstilo(estilo)"
+                >
+                  {{ estilo }}
+                  @if (seleccionado(estilo)) {
+                    <span class="estilo__quitar" aria-hidden="true">×</span>
+                  }
+                </button>
+              }
+            </div>
+            @if (invalido('estilos')) {
+              <p class="campo__error">Elegí al menos un estilo de tueste.</p>
+            }
+          </div>
+        </div>
+
+        <div class="separador" aria-hidden="true"></div>
+
+        <app-zona-peligro
+          [descripcion]="descripcionEliminar"
+          accion="Eliminar negocio"
+          (confirmar)="abrirModalEliminar()"
+        />
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn btn--filled">Guardar cambios</button>
+      </div>
+    </form>
+  }
+</main>
+
+@if (modalEliminarAbierto()) {
+  <app-modal-confirmacion
+    titulo="¿Eliminar negocio?"
+    mensaje="Se eliminará el perfil público de tu tostaduría. Tu cuenta de Cránhua sigue activa. Esta acción no se puede deshacer."
+    etiquetaConfirmar="Eliminar negocio"
+    (confirmar)="confirmarEliminar()"
+    (cancelar)="cerrarModalEliminar()"
+  />
+}

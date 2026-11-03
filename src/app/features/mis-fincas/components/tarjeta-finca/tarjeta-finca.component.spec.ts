@@ -6,7 +6,7 @@ import { TarjetaFincaComponent } from './tarjeta-finca.component';
 
 describe('TarjetaFincaComponent', () => {
   let fixture: ComponentFixture<TarjetaFincaComponent>;
-  const finca = FINCAS_REGISTRADAS[0];
+  const finca = FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza')!;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -19,9 +19,15 @@ describe('TarjetaFincaComponent', () => {
     fixture.detectChanges();
   });
 
-  it('muestra el nombre y enlaza al detalle de la finca', () => {
-    const enlace: HTMLAnchorElement = fixture.nativeElement.querySelector('a');
-    expect(enlace.textContent).toContain(finca.nombre);
-    expect(enlace.getAttribute('href')).toBe(`/cafetalero/fincas/${finca.id}`);
+  it('muestra nombre, ubicación, pills y enlaza al detalle', () => {
+    const pagina: HTMLElement = fixture.nativeElement;
+    expect(pagina.querySelector('.tarjeta__nombre')?.textContent).toContain(finca.nombre);
+    expect(pagina.textContent).toContain('Costa Rica');
+    expect(pagina.querySelectorAll('.tarjeta__pills li').length).toBe(3);
+    expect(pagina.textContent).toContain('dueño');
+
+    const enlace = pagina.querySelector<HTMLAnchorElement>('a.tarjeta__accion');
+    expect(enlace?.textContent).toContain('Ver detalle');
+    expect(enlace?.getAttribute('href')).toBe(`/cafetalero/fincas/${finca.id}`);
   });
 });

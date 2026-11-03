@@ -1,12 +1,31 @@
-<a class="tarjeta" [routerLink]="['/cafetalero/fincas', finca().id]">
-  <h2 class="tarjeta__nombre">{{ finca().nombre }}</h2>
-  <p class="tarjeta__dato">
-    @if (finca().canton; as canton) {
-      {{ canton.nombre }}, {{ canton.provincia }}
-    } @else {
-      Sin cantón de referencia
-    }
-  </p>
-  <p class="tarjeta__dato">{{ finca().zona ?? 'Zona sin especificar' }} · {{ area() }}</p>
-  <span class="tarjeta__accion">Ver detalle →</span>
-</a>
+<article class="tarjeta">
+  <div class="tarjeta__cuerpo">
+    <h2 class="tarjeta__nombre">{{ finca().nombre }}</h2>
+    <p class="tarjeta__ubicacion">
+      <svg class="tarjeta__pin" viewBox="0 0 16 16" aria-hidden="true">
+        <path
+          d="M8 1.5a4.5 4.5 0 0 0-4.5 4.5c0 3.2 4.5 8.5 4.5 8.5s4.5-5.3 4.5-8.5A4.5 4.5 0 0 0 8 1.5Zm0 6.2a1.7 1.7 0 1 1 0-3.4 1.7 1.7 0 0 1 0 3.4Z"
+        />
+      </svg>
+      <span>{{ ubicacion() }}</span>
+    </p>
+
+    <ul class="tarjeta__pills" aria-label="Resumen de la finca">
+      <li>{{ area() }}</li>
+      <li>{{ textoCosechas() }}</li>
+      <li>{{ textoKg() }}</li>
+    </ul>
+  </div>
+
+  <footer class="tarjeta__pie">
+    <span class="tarjeta__duenos">
+      <svg viewBox="0 0 20 20" aria-hidden="true">
+        <path
+          d="M7.2 9.2a2.6 2.6 0 1 0-2.6-2.6 2.6 2.6 0 0 0 2.6 2.6Zm5.6 0a2.2 2.2 0 1 0-2.2-2.2 2.2 2.2 0 0 0 2.2 2.2ZM3.2 16.2c0-2.2 2-3.5 4-3.5s4 1.3 4 3.5v.6H3.2Zm8.2-.2c.3-1.7 1.7-2.9 3.5-2.9 1.6 0 3 1 3 2.6v.5h-6.5Z"
+        />
+      </svg>
+      {{ textoDuenos() }}
+    </span>
+    <a class="tarjeta__accion" [routerLink]="['/cafetalero/fincas', finca().id]"> Ver detalle → </a>
+  </footer>
+</article>
