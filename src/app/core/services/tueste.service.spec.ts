@@ -41,6 +41,33 @@ describe('TuesteService', () => {
     expect(codigos).toEqual(['CRH-2026-0103-T01', 'CRH-2026-0103-T02']);
   });
 
+  it('genera el código de trazabilidad de un lote pendiente', () => {
+    servicio
+      .generarCodigo('l-los-robles-catuai')
+      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0103-MC'));
+
+    servicio.lotesComprados().subscribe((lotes) => {
+      expect(lotes.find((l) => l.id === 'l-los-robles-catuai')!.codigoTrazabilidad).toBe(
+        'TRZ-0103-MC',
+      );
+    });
+  });
+
+  it('no cambia el código de un lote que ya lo tiene', () => {
+    servicio
+      .generarCodigo('l-catalina-caturra')
+      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0101-MC'));
+  });
+
+  it('devuelve solo los tuestes del lote', () => {
+    servicio.tuestesDelLote('l-catalina-caturra').subscribe((tuestes) => {
+      expect(tuestes.map((t) => t.id)).toEqual(['tu-catalina-1', 'tu-catalina-2']);
+    });
+    servicio
+      .tuestesDelLote('l-los-robles-catuai')
+      .subscribe((tuestes) => expect(tuestes).toEqual([]));
+  });
+
   it('al actualizar conserva el lote y el código', () => {
     servicio
       .actualizar('tu-monte-alto-1', {

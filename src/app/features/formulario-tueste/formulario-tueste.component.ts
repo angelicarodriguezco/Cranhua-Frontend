@@ -21,7 +21,7 @@ import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/m
 
 export const RUTA_MIS_TOSTADOS = '/tostador/tostados';
 
-function hoy(): string {
+export function hoy(): string {
   return formatDate(new Date(), 'yyyy-MM-dd', 'en-US');
 }
 
@@ -74,12 +74,48 @@ const porcentaje = new Intl.NumberFormat('es-CR', { maximumFractionDigits: 1 });
 
 const kilos = new Intl.NumberFormat('es-CR', { maximumFractionDigits: 2 });
 
+// Mensajes de los pesos; el popup de edición de Mis tostados muestra los mismos
+export function errorPesoVerde(formulario: FormularioTueste): string | null {
+  const control = formulario.controls.pesoVerdeKg;
+  if (!control.touched) {
+    return null;
+  }
+  if (control.hasError('required')) {
+    return 'Ingresá el peso verde.';
+  }
+  if (control.hasError('min')) {
+    return 'El peso tiene que ser mayor que 0.';
+  }
+  const exceso = formulario.getError('excedeLote');
+  if (exceso) {
+    return `El lote tiene ${kilos.format(exceso.kgLote)} kg; el peso verde no puede ser mayor.`;
+  }
+  return null;
+}
+
+export function errorPesoTostado(formulario: FormularioTueste): string | null {
+  const control = formulario.controls.pesoTostadoKg;
+  if (!control.touched) {
+    return null;
+  }
+  if (control.hasError('required')) {
+    return 'Ingresá el peso tostado.';
+  }
+  if (control.hasError('min')) {
+    return 'El peso tiene que ser mayor que 0.';
+  }
+  if (formulario.hasError('tostadoMayorQueVerde')) {
+    return 'El peso tostado no puede ser mayor al peso verde.';
+  }
+  return null;
+}
+
 // Crear y editar tueste comparten pantalla; la ruta de edición trae el id del tueste
 @Component({
   selector: 'app-formulario-tueste',
   imports: [MenuLateralTostadorComponent, ReactiveFormsModule],
   templateUrl: './formulario-tueste.component.html',
-  styleUrl: './formulario-tueste.component.css',
+  styleUrls: ['./campos-tueste.css', './formulario-tueste.component.css'],
   host: { '[attr.data-theme]': 'tema()' },
 })
 export class FormularioTuesteComponent {
@@ -90,7 +126,8 @@ export class FormularioTuesteComponent {
   protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
-  private readonly tuesteId = inject(ActivatedRoute).snapshot.paramMap.get('id');
+  private readonly ruta = inject(ActivatedRoute).snapshot;
+  private readonly tuesteId = this.ruta.paramMap.get('id');
   protected readonly modoEdicion = this.tuesteId !== null;
 
   protected readonly niveles = ESTILOS_TUESTE;
@@ -135,6 +172,12 @@ export class FormularioTuesteComponent {
         });
         this.formulario.controls.loteId.disable();
       });
+      return;
+    }
+    // "Crear tueste" desde un lote de Mis tostados trae ?lote=<id>
+    const loteId = this.ruta.queryParamMap.get('lote');
+    if (this.lotes().some((l) => l.id === loteId)) {
+      this.formulario.controls.loteId.setValue(loteId);
     }
   }
 
@@ -147,38 +190,11 @@ export class FormularioTuesteComponent {
   }
 
   protected errorPesoVerde(): string | null {
-    const control = this.formulario.controls.pesoVerdeKg;
-    if (!control.touched) {
-      return null;
-    }
-    if (control.hasError('required')) {
-      return 'Ingresá el peso verde.';
-    }
-    if (control.hasError('min')) {
-      return 'El peso tiene que ser mayor que 0.';
-    }
-    const exceso = this.formulario.getError('excedeLote');
-    if (exceso) {
-      return `El lote tiene ${kilos.format(exceso.kgLote)} kg; el peso verde no puede ser mayor.`;
-    }
-    return null;
+    return errorPesoVerde(this.formulario);
   }
 
   protected errorPesoTostado(): string | null {
-    const control = this.formulario.controls.pesoTostadoKg;
-    if (!control.touched) {
-      return null;
-    }
-    if (control.hasError('required')) {
-      return 'Ingresá el peso tostado.';
-    }
-    if (control.hasError('min')) {
-      return 'El peso tiene que ser mayor que 0.';
-    }
-    if (this.formulario.hasError('tostadoMayorQueVerde')) {
-      return 'El peso tostado no puede ser mayor al peso verde.';
-    }
-    return null;
+    return errorPesoTostado(this.formulario);
   }
 
   protected guardar(): void {
