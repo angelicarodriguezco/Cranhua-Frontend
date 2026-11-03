@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { DashboardCafeteriaComponent } from './features/dashboard-cafeteria/dashboard-cafeteria.component';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
@@ -10,6 +11,7 @@ import { HistorialCafetaleroComponent } from './features/historial-cafetalero/hi
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
+import { MiCafeteriaComponent } from './features/mi-cafeteria/mi-cafeteria.component';
 import { MiNegocioComponent } from './features/mi-negocio/mi-negocio.component';
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
@@ -71,21 +73,17 @@ export const routes: Routes = [
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: MiNegocioComponent },
 
-  // Cafetería
-  {
-    path: 'cafeteria/dashboard',
-    component: PaginaMockComponent,
-    data: { title: 'Dashboard' },
-  },
+  { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
   {
     path: 'cafeteria/tostadores',
     component: PaginaMockComponent,
     data: { title: 'Explorar tostadores' },
   },
   { path: 'cafeteria/pedidos', component: MisPedidosComponent },
+  { path: 'cafeteria/mi-cafeteria', component: MiCafeteriaComponent },
   {
-    path: 'cafeteria/negocio',
+    path: 'cafeteria/menu',
     component: PaginaMockComponent,
-    data: { title: 'Mi cafetería' },
+    data: { title: 'Publicar en el menú' },
   },
 ];

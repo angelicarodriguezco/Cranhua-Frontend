@@ -29,6 +29,7 @@ export interface Cafeteria {
   volumenMensual: VolumenMensual;
   estilos: EstiloCafe[];
   propietarioId: string;
+  portadaUrl?: string | null;
 }
 
 export type NuevaCafeteria = Omit<Cafeteria, 'id'>;

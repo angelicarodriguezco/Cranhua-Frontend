@@ -84,7 +84,7 @@ export class OnboardingCafeteriaComponent {
     };
     const registrada = this.registrada();
     const peticion = registrada
-      ? this.cafeteriaService.actualizar(registrada.id, datos)
+      ? this.cafeteriaService.actualizar({ ...datos, id: registrada.id, portadaUrl: registrada.portadaUrl })
       : this.cafeteriaService.registrar(datos);
     peticion.subscribe((cafeteria) => {
       this.registrada.set(cafeteria);

@@ -1,21 +1,21 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { CANTONES_URBANOS } from '../mocks/cafeteria.mock';
+import { CAFETERIA_ACTUAL, CAFETERIA_EJEMPLO, CANTONES_URBANOS } from '../mocks/cafeteria.mock';
 import { CANTONES } from '../mocks/finca.mock';
 import { Cafeteria, CantonReferencia, NuevaCafeteria } from '../models/cafeteria.model';
 import { Coordenada } from '../models/finca.model';
 import { distanciaKm } from '../../shared/utils/geo';
 
-// Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
 const DISTANCIA_MAXIMA_CANTON_KM = 25;
 
 const CANTONES_CAFETERIA: CantonReferencia[] = [...CANTONES_URBANOS, ...CANTONES];
 
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class CafeteriaService {
-  private cafeterias: Cafeteria[] = [];
+  private cafeterias: Cafeteria[] = [
+    { ...CAFETERIA_EJEMPLO, estilos: [...CAFETERIA_EJEMPLO.estilos] },
+  ];
 
   registrar(nueva: NuevaCafeteria): Observable<Cafeteria> {
     const cafeteria = { ...nueva, id: `c-${Date.now()}` };
@@ -23,10 +23,26 @@ export class CafeteriaService {
     return of(cafeteria);
   }
 
-  actualizar(id: string, datos: NuevaCafeteria): Observable<Cafeteria> {
-    const cafeteria = { ...datos, id };
-    this.cafeterias = this.cafeterias.map((c) => (c.id === id ? cafeteria : c));
+  actualizar(cafeteria: Cafeteria): Observable<Cafeteria> {
+    this.cafeterias = this.cafeterias.map((c) => (c.id === cafeteria.id ? cafeteria : c));
     return of(cafeteria);
+  }
+
+  obtenerPorPropietario(propietarioId: string): Observable<Cafeteria | undefined> {
+    return of(this.cafeterias.find((c) => c.propietarioId === propietarioId));
+  }
+
+  obtenerActual(): Observable<Cafeteria | undefined> {
+    return this.obtenerPorPropietario(CAFETERIA_ACTUAL.id);
+  }
+
+  eliminar(id: string): Observable<boolean> {
+    const existia = this.cafeterias.some((c) => c.id === id);
+    if (!existia) {
+      return of(false);
+    }
+    this.cafeterias = this.cafeterias.filter((c) => c.id !== id);
+    return of(true);
   }
 
   cantonDe(punto: Coordenada): CantonReferencia | null {

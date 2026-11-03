@@ -1,4 +1,5 @@
 @import './app/features/mi-negocio/mi-negocio.tema.css';
+@import './app/features/mi-cafeteria/mi-cafeteria.tema.css';
 
 :root {
   --color-gold: #c9a227;
