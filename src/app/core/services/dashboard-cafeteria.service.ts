@@ -1,20 +1,18 @@
 import { Injectable, signal } from '@angular/core';
 
-import { CAFETERIA_USUARIO_ACTUAL } from '../mocks/cafeteria.mock';
+import { RESUMEN_DASHBOARD_CAFETERIA } from '../mocks/dashboard-cafeteria.mock';
+import { IndicadoresCafeteria, PedidoRecienteCafeteria } from '../models/dashboard-cafeteria.model';
 import { TemaDashboard } from '../models/dashboard-cafetalero.model';
 import { PerfilCafeteriaSidebar } from '../models/pedido.model';
-import { iniciales, nombreCorto } from '../../shared/utils/formato';
 
-// El tema y el perfil del menú de la cafetería, compartidos entre sus vistas
 @Injectable({ providedIn: 'root' })
 export class DashboardCafeteriaService {
   private readonly temaActual = signal<TemaDashboard>('oscuro');
 
-  readonly perfilSidebar: PerfilCafeteriaSidebar = {
-    iniciales: iniciales(CAFETERIA_USUARIO_ACTUAL),
-    nombreCompleto: nombreCorto(CAFETERIA_USUARIO_ACTUAL),
-    rol: 'Cafetería',
-  };
+  readonly indicadores: IndicadoresCafeteria = RESUMEN_DASHBOARD_CAFETERIA.indicadores;
+  readonly pedidosRecientes: PedidoRecienteCafeteria[] =
+    RESUMEN_DASHBOARD_CAFETERIA.pedidosRecientes;
+  readonly perfilSidebar: PerfilCafeteriaSidebar = RESUMEN_DASHBOARD_CAFETERIA.perfilSidebar;
   readonly tema = this.temaActual.asReadonly();
 
   alternarTema(): void {
