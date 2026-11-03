@@ -17,14 +17,13 @@ export const NAV_PRINCIPAL_CAFETERIA: ItemNavCafeteria[] = [
   { etiqueta: 'Dashboard', ruta: '/cafeteria/dashboard', icono: 'home', exacto: true },
   { etiqueta: 'Explorar tostadores', ruta: '/cafeteria/tostadores', icono: 'explorar' },
   { etiqueta: 'Mis pedidos', ruta: '/cafeteria/pedidos', icono: 'pedidos' },
-  { etiqueta: 'Mi cafetería', ruta: '/cafeteria/negocio', icono: 'negocio' },
+  { etiqueta: 'Mi cafetería', ruta: '/cafeteria/mi-cafeteria', icono: 'negocio' },
 ];
 
 export const NAV_SECUNDARIO_CAFETERIA: ItemNavCafeteria[] = [
   { etiqueta: 'Perfil y ajustes', ruta: '/perfil', icono: 'perfil' },
 ];
 
-// Mismo aspecto que el menú del cafetalero; solo cambian las opciones
 @Component({
   selector: 'app-menu-lateral-cafeteria',
   imports: [RouterLink, RouterLinkActive],
