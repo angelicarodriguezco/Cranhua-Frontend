@@ -25,6 +25,7 @@ import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.component';
 import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
+import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -86,4 +87,5 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Publicar en el menú' },
   },
+  { path: 'cafeteria/menu', component: PublicarMenuComponent },
 ];
