@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { MisFincasComponent } from './mis-fincas.component';
+import { MisFincasComponent, RUTA_REGISTRAR_FINCA } from './mis-fincas.component';
 
 describe('MisFincasComponent', () => {
   let fixture: ComponentFixture<MisFincasComponent>;
@@ -18,22 +18,42 @@ describe('MisFincasComponent', () => {
     elemento = fixture.nativeElement;
   });
 
+  it('muestra el menú lateral y el encabezado del prototipo', () => {
+    expect(elemento.querySelector('app-menu-lateral-cafetalero')).toBeTruthy();
+    expect(elemento.querySelector('h1')?.textContent).toContain('Mis fincas');
+    expect(elemento.textContent).toContain(
+      'Estas son las fincas que tenés registradas en Cránhua.',
+    );
+  });
+
   it('muestra una tarjeta por cada finca del usuario', () => {
     expect(elemento.querySelectorAll('app-tarjeta-finca').length).toBe(2);
   });
 
   it('enlaza cada finca a su detalle', () => {
-    const enlaces = Array.from(elemento.querySelectorAll('app-tarjeta-finca a')).map((a) =>
-      a.getAttribute('href'),
-    );
+    const enlaces = Array.from(
+      elemento.querySelectorAll<HTMLAnchorElement>('app-tarjeta-finca a.tarjeta__accion'),
+    ).map((a) => a.getAttribute('href'));
     expect(enlaces).toEqual([
       '/cafetalero/fincas/f-la-esperanza',
       '/cafetalero/fincas/f-el-mirador',
     ]);
   });
 
-  it('tiene el boton para registrar una nueva finca', () => {
-    const boton = elemento.querySelector('.mis-fincas__encabezado a');
-    expect(boton?.getAttribute('href')).toBe('/onboarding-finca');
+  it('tiene los botones para registrar una nueva finca', () => {
+    const cta = elemento.querySelector<HTMLAnchorElement>('.cabecera .cta');
+    const vacia = elemento.querySelector<HTMLAnchorElement>('a.nueva-finca');
+    expect(cta?.getAttribute('href')).toBe(RUTA_REGISTRAR_FINCA);
+    expect(vacia?.getAttribute('href')).toBe(RUTA_REGISTRAR_FINCA);
+    expect(cta?.textContent).toContain('Registrar finca');
+  });
+
+  it('permite alternar entre tema oscuro y claro', () => {
+    const root = elemento.querySelector('.mis-fincas')!;
+    expect(root.getAttribute('data-theme')).toBe('oscuro');
+
+    elemento.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    fixture.detectChanges();
+    expect(root.getAttribute('data-theme')).toBe('claro');
   });
 });

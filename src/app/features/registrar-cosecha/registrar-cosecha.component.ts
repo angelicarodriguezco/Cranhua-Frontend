@@ -143,7 +143,7 @@ export class RegistrarCosechaComponent {
       return;
     }
     if (this.paso() === 'exito') {
-      void this.router.navigateByUrl('/dashboard');
+      void this.router.navigateByUrl('/cafetalero/dashboard');
       return;
     }
     this.location.back();
@@ -209,7 +209,7 @@ export class RegistrarCosechaComponent {
     this.datosPaso2.set(null);
     this.cosechaGuardada.set(null);
     this.paso.set('datos');
-    void this.router.navigateByUrl('/registrar-cosecha');
+    void this.router.navigateByUrl('/cafetalero/registrar-cosecha');
     this.scrollAlInicio();
   }
 
@@ -220,7 +220,7 @@ export class RegistrarCosechaComponent {
   }
 
   protected onVerCosecha(id: string): void {
-    void this.router.navigateByUrl('/historial', { state: { cosechaId: id } });
+    void this.router.navigateByUrl('/cafetalero/historial', { state: { cosechaId: id } });
   }
 
   protected abrirModalEliminar(): void {
@@ -245,7 +245,7 @@ export class RegistrarCosechaComponent {
     this.modalEliminarAbierto.set(false);
 
     if (eliminada) {
-      void this.router.navigateByUrl('/historial');
+      void this.router.navigateByUrl('/cafetalero/historial');
     }
   }
 }

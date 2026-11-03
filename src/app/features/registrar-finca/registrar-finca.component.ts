@@ -15,7 +15,7 @@ import {
   crearFormularioFinca,
 } from './components/formulario-finca/formulario-finca.component';
 
-export const RUTA_DASHBOARD = '/dashboard';
+export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
 type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
 

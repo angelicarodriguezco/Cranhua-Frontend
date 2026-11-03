@@ -1,12 +1,28 @@
-<main class="mis-fincas">
-  <header class="mis-fincas__encabezado">
-    <h1>Mis fincas</h1>
-    <a routerLink="/onboarding-finca" class="btn btn--filled">Registrar finca</a>
-  </header>
+<div class="mis-fincas" [attr.data-theme]="tema()">
+  <app-menu-lateral-cafetalero
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
 
-  @for (finca of fincas(); track finca.id) {
-    <app-tarjeta-finca [finca]="finca" />
-  } @empty {
-    <p class="mis-fincas__vacio">Todavía no tenés fincas registradas.</p>
-  }
-</main>
+  <main class="contenido">
+    <header class="cabecera">
+      <div>
+        <h1>Mis fincas</h1>
+        <p>Estas son las fincas que tenés registradas en Cránhua.</p>
+      </div>
+      <a [routerLink]="rutaRegistrar" class="cta">+ Registrar finca</a>
+    </header>
+
+    <section class="fincas-grid" aria-label="Fincas registradas">
+      @for (finca of fincas(); track finca.id) {
+        <app-tarjeta-finca [finca]="finca" />
+      }
+
+      <a [routerLink]="rutaRegistrar" class="nueva-finca">
+        <span class="nueva-finca__icono" aria-hidden="true">+</span>
+        <span>Registrar nueva finca</span>
+      </a>
+    </section>
+  </main>
+</div>
