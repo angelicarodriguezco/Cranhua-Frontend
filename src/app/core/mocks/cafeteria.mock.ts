@@ -32,8 +32,7 @@ export const CAFETERIA_ACTUAL: Usuario = {
   correo: 'hola@cafebrumas.cr',
 };
 
-const CANTON_ESCAZU =
-  CANTONES_URBANOS.find((c) => c.nombre === 'Escazú') ?? CANTONES_URBANOS[0];
+const CANTON_ESCAZU = CANTONES_URBANOS.find((c) => c.nombre === 'Escazú') ?? CANTONES_URBANOS[0];
 
 export const CAFETERIA_EJEMPLO: Cafeteria = {
   id: 'c-cafe-brumas',

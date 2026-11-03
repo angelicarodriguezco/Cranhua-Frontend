@@ -78,7 +78,9 @@ describe('MiCafeteriaComponent', () => {
     expect(campo<HTMLTextAreaElement>('#descripcion-cafeteria').value).toBe(
       CAFETERIA_EJEMPLO.descripcion ?? '',
     );
-    expect(campo<HTMLInputElement>('#horario-cafeteria').value).toBe(CAFETERIA_EJEMPLO.horario ?? '');
+    expect(campo<HTMLInputElement>('#horario-cafeteria').value).toBe(
+      CAFETERIA_EJEMPLO.horario ?? '',
+    );
     expect(campo('.avatar__iniciales').textContent!.trim()).toBe('CB');
     expect(campo<HTMLInputElement>('#ubicacion-cafeteria').value).toBe('Escazú, San José');
     expect(campo<HTMLInputElement>('#ubicacion-cafeteria').readOnly).toBeTrue();
