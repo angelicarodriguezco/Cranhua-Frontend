@@ -1,4 +1,12 @@
 import { CantonReferencia } from '../models/cafeteria.model';
+import { Usuario } from '../models/finca.model';
+
+export const CAFETERIA_USUARIO_ACTUAL: Usuario = {
+  id: 'u-laura',
+  nombre: 'Laura',
+  apellidos: 'Méndez Arias',
+  correo: 'laura.mendez@ejemplo.cr',
+};
 
 // Cantones del GAM para ubicar cafeterías: CANTONES solo trae los cafetaleros.
 // Coordenadas aproximadas de la cabecera de cada cantón
