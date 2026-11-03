@@ -4,13 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TemaDashboard } from '../../../../core/models/dashboard-cafetalero.model';
 import { PerfilCafeteriaSidebar } from '../../../../core/models/dashboard-cafeteria.model';
 
-export type IconoNavCafeteria =
-  | 'home'
-  | 'explorar'
-  | 'pedidos'
-  | 'cafeteria'
-  | 'perfil'
-  | 'logout';
+export type IconoNavCafeteria = 'home' | 'explorar' | 'pedidos' | 'cafeteria' | 'perfil' | 'logout';
 
 export interface ItemNavCafeteria {
   etiqueta: string;
