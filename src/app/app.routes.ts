@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
+import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
 import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
@@ -52,11 +53,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Explorar cosechas' },
   },
-  {
-    path: 'tostador/cosechas/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Detalle de cosecha' },
-  },
+  { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
   {
     path: 'tostador/solicitudes',
     component: PaginaMockComponent,
