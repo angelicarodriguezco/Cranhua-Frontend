@@ -63,8 +63,7 @@ export const CANTONES: Canton[] = [
   { nombre: 'Limón', provincia: 'Limón', cabecera: { lat: 9.9907, lng: -83.0359 } },
 ];
 
-const CANTON_SAN_JOSE =
-  CANTONES.find((c) => c.nombre === 'San José') ?? CANTONES[0];
+const CANTON_SAN_JOSE = CANTONES.find((c) => c.nombre === 'San José') ?? CANTONES[0];
 
 export const NEGOCIO_EJEMPLO: NegocioTueste = {
   id: 'n-tostaduria-volcan',

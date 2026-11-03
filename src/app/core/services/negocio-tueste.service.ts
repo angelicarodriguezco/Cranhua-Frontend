@@ -23,7 +23,9 @@ function distanciaKm(a: Coordenada, b: Coordenada): number {
 
 @Injectable({ providedIn: 'root' })
 export class NegocioTuesteService {
-  private negocios: NegocioTueste[] = [{ ...NEGOCIO_EJEMPLO, estilos: [...NEGOCIO_EJEMPLO.estilos] }];
+  private negocios: NegocioTueste[] = [
+    { ...NEGOCIO_EJEMPLO, estilos: [...NEGOCIO_EJEMPLO.estilos] },
+  ];
 
   registrar(nuevo: NuevoNegocioTueste): Observable<NegocioTueste> {
     const negocio = { ...nuevo, id: `t-${Date.now()}` };
