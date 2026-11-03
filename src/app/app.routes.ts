@@ -17,6 +17,7 @@ import { RegistrarCosechaComponent } from './features/registrar-cosecha/registra
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
+import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -51,11 +52,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Explorar cosechas' },
   },
-  {
-    path: 'tostador/cosechas/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Detalle de cosecha' },
-  },
+  { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
   {
     path: 'tostador/solicitudes',
     component: PaginaMockComponent,

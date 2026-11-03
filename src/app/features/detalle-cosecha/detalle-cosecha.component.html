@@ -1,0 +1,106 @@
+<div class="dashboard" [attr.data-theme]="tema()">
+  <app-menu-lateral-tostador
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    <a class="volver" routerLink="/tostador/cosechas">← Volver a explorar cosechas</a>
+
+    @if (cosecha(); as c) {
+      <header class="cabecera">
+        <h1>Finca {{ c.finca }} · {{ c.variedad }}</h1>
+        <p>{{ c.ubicacion }}</p>
+      </header>
+
+      <div class="columnas">
+        <div class="columna-info">
+          @if (productor(); as p) {
+            <section class="glass productor" aria-label="Productor">
+              <span class="avatar" aria-hidden="true">{{ p.iniciales }}</span>
+              <div>
+                <strong>{{ p.nombreCorto }}</strong>
+                <span>Productor · Zona {{ c.zona }}</span>
+              </div>
+            </section>
+          }
+
+          <section class="glass datos-cosecha" aria-labelledby="titulo-datos">
+            <h2 id="titulo-datos">Datos de la cosecha</h2>
+            <p class="descripcion">{{ c.descripcion }}</p>
+            <dl class="datos">
+              <div>
+                <dt>Variedad</dt>
+                <dd>{{ c.variedad }}</dd>
+              </div>
+              <div>
+                <dt>Proceso</dt>
+                <dd>{{ c.proceso }}</dd>
+              </div>
+              <div>
+                <dt>Altitud</dt>
+                <dd>{{ c.altitudMsnm }} msnm</dd>
+              </div>
+              <div>
+                <dt>Cantidad disponible</dt>
+                <dd>{{ c.kgDisponibles }} kg</dd>
+              </div>
+            </dl>
+            <h3>Notas de sabor</h3>
+            <ul class="notas">
+              @for (nota of c.notas; track nota) {
+                <li>{{ nota }}</li>
+              }
+            </ul>
+          </section>
+        </div>
+
+        <form
+          class="glass solicitud"
+          [formGroup]="formulario"
+          (ngSubmit)="enviar()"
+          aria-labelledby="titulo-solicitud"
+        >
+          <h2 id="titulo-solicitud">Solicitar este lote</h2>
+
+          <label for="cantidad">Cantidad (kg)</label>
+          <input
+            id="cantidad"
+            type="number"
+            min="1"
+            [max]="c.kgDisponibles"
+            formControlName="cantidad"
+            [attr.aria-invalid]="cantidad.invalid && cantidad.touched"
+            aria-describedby="ayuda-cantidad"
+          />
+          @if (cantidad.touched && cantidad.hasError('excedeDisponible')) {
+            <p class="error" id="ayuda-cantidad">Solo hay {{ c.kgDisponibles }} kg disponibles.</p>
+          } @else if (cantidad.touched && cantidad.invalid) {
+            <p class="error" id="ayuda-cantidad">Ingresá una cantidad de al menos 1 kg.</p>
+          } @else {
+            <p class="ayuda" id="ayuda-cantidad">Máximo {{ c.kgDisponibles }} kg.</p>
+          }
+
+          <dl class="resumen">
+            <div>
+              <dt>Precio por kg</dt>
+              <dd>{{ colones(c.precioKg) }}</dd>
+            </div>
+            <div class="total">
+              <dt>Total estimado</dt>
+              <dd>{{ colones(total()) }}</dd>
+            </div>
+          </dl>
+
+          <button type="submit" class="boton-principal">Enviar solicitud de compra</button>
+          <a class="boton-secundario" [href]="'mailto:' + c.productor.correo">
+            Contactar al productor
+          </a>
+        </form>
+      </div>
+    } @else {
+      <p class="glass vacio">No encontramos esta cosecha.</p>
+    }
+  </main>
+</div>
