@@ -3,6 +3,7 @@ import { Routes } from '@angular/router';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
+import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
@@ -61,6 +62,8 @@ export const routes: Routes = [
     data: { title: 'Mis solicitudes' },
   },
   { path: 'tostador/tostados', component: PaginaMockComponent, data: { title: 'Mis tostados' } },
+  { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
+  { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: PaginaMockComponent, data: { title: 'Mi negocio' } },
 
   { path: 'cafetalero/fincas', component: MisFincasComponent },
