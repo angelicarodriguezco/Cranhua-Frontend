@@ -1,5 +1,4 @@
-/* Igual que la cuadrícula, los colores vienen del contenedor (--chip-*, --text, --text-muted,
-   --link, --select-fondo) para que los filtros sigan el tema de la vista que los usa. */
+/* Los colores vienen del contenedor, igual que en la cuadrícula de cosechas */
 
 :host {
   display: block;
