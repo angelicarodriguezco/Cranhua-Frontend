@@ -279,7 +279,7 @@ describe('RegistrarCosechaComponent', () => {
     fixture.detectChanges();
 
     expect(eliminarSpy).toHaveBeenCalledWith('cosecha-caturra-catalina');
-    expect(navigateSpy).toHaveBeenCalledWith('/historial');
+    expect(navigateSpy).toHaveBeenCalledWith('/cafetalero/historial');
     expect(fixture.componentInstance['modalEliminarAbierto']()).toBe(false);
   });
 

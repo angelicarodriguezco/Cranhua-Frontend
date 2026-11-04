@@ -20,7 +20,7 @@ type Paso = 'bienvenida' | 'datos' | 'preferencias' | 'confirmacion';
 
 const PASOS: Paso[] = ['bienvenida', 'datos', 'preferencias', 'confirmacion'];
 
-export const RUTA_DASHBOARD = '/dashboard';
+export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
 @Component({
   selector: 'app-onboarding-cafeteria',
@@ -84,7 +84,11 @@ export class OnboardingCafeteriaComponent {
     };
     const registrada = this.registrada();
     const peticion = registrada
-      ? this.cafeteriaService.actualizar(registrada.id, datos)
+      ? this.cafeteriaService.actualizar({
+          ...datos,
+          id: registrada.id,
+          portadaUrl: registrada.portadaUrl,
+        })
       : this.cafeteriaService.registrar(datos);
     peticion.subscribe((cafeteria) => {
       this.registrada.set(cafeteria);

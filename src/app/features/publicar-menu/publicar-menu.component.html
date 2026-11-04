@@ -1,0 +1,128 @@
+<app-menu-lateral-cafeteria
+  [perfil]="perfilSidebar"
+  [tema]="tema()"
+  (alternarTema)="alternarTema()"
+/>
+
+<main class="contenido">
+  <header class="encabezado">
+    <h1>Publicar en el menú</h1>
+    <p>Los cafés que vendés, con su código de trazabilidad, y las demás comidas de tu local.</p>
+  </header>
+
+  <section class="vidrio seccion" aria-labelledby="titulo-nuevo">
+    <h2 id="titulo-nuevo" class="seccion__titulo">Nuevo ítem del menú</h2>
+
+    <form class="formulario" [formGroup]="formulario" (ngSubmit)="publicar()" novalidate>
+      <div class="campo campo--ancho">
+        <label class="campo__etiqueta" for="item-nombre">Nombre</label>
+        <input
+          id="item-nombre"
+          class="campo__control"
+          type="text"
+          formControlName="nombre"
+          maxlength="80"
+          placeholder="Ej. Capuchino Tarrazú"
+          [attr.aria-invalid]="errorNombre() ? true : null"
+          [attr.aria-describedby]="errorNombre() ? 'error-nombre' : null"
+        />
+        @if (errorNombre(); as error) {
+          <p id="error-nombre" class="campo__error">{{ error }}</p>
+        }
+      </div>
+
+      <fieldset class="campo campo--ancho categorias">
+        <legend class="campo__etiqueta">Categoría</legend>
+        <div class="categorias__opciones">
+          @for (categoria of categorias; track categoria) {
+            <label class="categoria">
+              <input type="radio" formControlName="categoria" [value]="categoria" />
+              <span class="categoria__tarjeta">{{ categoria }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="item-codigo">
+          Código de trazabilidad <span class="campo__opcional">(opcional)</span>
+        </label>
+        <input
+          id="item-codigo"
+          class="campo__control"
+          type="text"
+          formControlName="codigoTrazabilidad"
+          placeholder="Ej. CRH-2026-0101-T01"
+        />
+      </div>
+
+      <div class="campo">
+        <label class="campo__etiqueta" for="item-precio">Precio (₡)</label>
+        <input
+          id="item-precio"
+          class="campo__control"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          formControlName="precio"
+          placeholder="Ej. 2000"
+          [attr.aria-invalid]="errorPrecio() ? true : null"
+          [attr.aria-describedby]="errorPrecio() ? 'error-precio' : null"
+        />
+        @if (errorPrecio(); as error) {
+          <p id="error-precio" class="campo__error">{{ error }}</p>
+        }
+      </div>
+
+      <div class="acciones campo--ancho">
+        <button type="button" class="btn btn--borde" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn btn--filled">Publicar ítem</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="vidrio seccion" aria-labelledby="titulo-menu">
+    <h2 id="titulo-menu" class="seccion__titulo">Mi menú publicado</h2>
+    <div class="tabla-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Ítem</th>
+            <th scope="col">Categoría</th>
+            <th scope="col">Trazabilidad</th>
+            <th scope="col" class="numero">Precio</th>
+            <th scope="col"><span class="solo-lector">Acciones</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items(); track item.id) {
+            <tr>
+              <td>{{ item.nombre }}</td>
+              <td>
+                <span class="pill" [class.pill--cafe]="item.categoria === 'Café'">
+                  {{ item.categoria }}
+                </span>
+              </td>
+              <td class="codigo">{{ item.codigoTrazabilidad ?? '—' }}</td>
+              <td class="numero">{{ colones(item.precio) }}</td>
+              <td class="acciones-fila">
+                <button
+                  type="button"
+                  class="btn btn--borde btn--chico"
+                  [attr.aria-label]="'Quitar ' + item.nombre + ' del menú'"
+                  (click)="quitar(item)"
+                >
+                  Quitar
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="5" class="vacio">Todavía no tenés ítems en el menú.</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>

@@ -131,22 +131,22 @@ describe('DashboardCafetaleroComponent', () => {
   });
 
   it('enlaza CTA, fincas, historial y menú a las rutas del plan', () => {
-    expect(rutasDe('.cta')).toEqual(['/registrar-cosecha']);
-    expect(rutasDe('.fincas .seccion-cabecera a')).toEqual(['/mis-fincas']);
-    expect(rutasDe('.nueva-finca')).toEqual(['/mis-fincas/registrar']);
-    expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/historial']);
+    expect(rutasDe('.cta')).toEqual(['/cafetalero/registrar-cosecha']);
+    expect(rutasDe('.fincas .seccion-cabecera a')).toEqual(['/cafetalero/fincas']);
+    expect(rutasDe('.nueva-finca')).toEqual(['/cafetalero/fincas/registrar']);
+    expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/cafetalero/historial']);
 
     const detalles = rutasDe('.fincas-grid article a');
-    expect(detalles).toContain('/fincas/finca-la-catalina');
-    expect(detalles).toContain('/fincas/finca-monte-alto');
+    expect(detalles).toContain('/cafetalero/fincas/finca-la-catalina');
+    expect(detalles).toContain('/cafetalero/fincas/finca-monte-alto');
 
     const nav = rutasDe('app-menu-lateral-cafetalero a');
     expect(nav).toEqual(
       jasmine.arrayContaining([
-        '/dashboard',
-        '/mis-fincas',
-        '/registrar-cosecha',
-        '/historial',
+        '/cafetalero/dashboard',
+        '/cafetalero/fincas',
+        '/cafetalero/registrar-cosecha',
+        '/cafetalero/historial',
         '/perfil',
         '/iniciar-sesion',
       ]),

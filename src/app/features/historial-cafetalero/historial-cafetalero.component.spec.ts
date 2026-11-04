@@ -75,7 +75,7 @@ describe('HistorialCafetaleroComponent', () => {
     const cta = fixture.debugElement.query(By.css('.cta'));
 
     expect(cta.nativeElement.textContent).toContain('Nueva cosecha');
-    expect(cta.injector.get(RouterLink).href).toBe('/registrar-cosecha');
+    expect(cta.injector.get(RouterLink).href).toBe('/cafetalero/registrar-cosecha');
   });
 
   it('comparte el tema del panel y permite cambiarlo a claro', () => {

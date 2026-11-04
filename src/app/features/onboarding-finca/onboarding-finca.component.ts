@@ -18,7 +18,7 @@ type Paso = 'bienvenida' | 'dibujo' | 'conflicto' | 'confirmacion';
 
 const PASOS: Paso[] = ['bienvenida', 'dibujo', 'conflicto', 'confirmacion'];
 
-export const RUTA_DASHBOARD = '/dashboard';
+export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
 @Component({
   selector: 'app-onboarding-finca',

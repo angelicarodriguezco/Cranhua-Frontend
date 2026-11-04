@@ -1,0 +1,18 @@
+<div class="dashboard" [attr.data-theme]="tema()">
+  <app-menu-lateral-tostador
+    [perfil]="perfilSidebar"
+    [tema]="tema()"
+    (alternarTema)="alternarTema()"
+  />
+
+  <main class="contenido">
+    <header class="cabecera">
+      <h1>Explorar cosechas</h1>
+      <p>Cosechas beneficiadas que los cafetaleros de todo el país tienen a la venta.</p>
+    </header>
+
+    <section class="cosechas glass" aria-label="Cosechas disponibles">
+      <app-explorador-cosechas />
+    </section>
+  </main>
+</div>

@@ -38,13 +38,6 @@ describe('DashboardTostadorComponent', () => {
     return [...pagina.querySelectorAll('.tarjeta h3')].map((h) => h.textContent!.trim());
   }
 
-  function elegirZona(zona: string): void {
-    const select = pagina.querySelector<HTMLSelectElement>('.chip-zona')!;
-    select.value = zona;
-    select.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-  }
-
   function rutasDe(selector: string): string[] {
     return fixture.debugElement
       .queryAll(By.css(selector))
@@ -67,43 +60,13 @@ describe('DashboardTostadorComponent', () => {
     expect(texto).not.toContain('favoritas');
   });
 
-  it('muestra al menos 6 cosechas sin filtros', () => {
+  it('reutiliza el explorador de cosechas con sus filtros', () => {
+    expect(pagina.querySelector('.cosechas app-explorador-cosechas')).not.toBeNull();
     expect(fincasVisibles().length).toBeGreaterThanOrEqual(6);
     expect(chip('Todas').getAttribute('aria-pressed')).toBe('true');
-  });
-
-  it('los filtros rápidos cambian las cosechas mostradas', () => {
-    const todas = fincasVisibles().length;
 
     clic(chip('Proceso honey'));
-    expect(fincasVisibles()).toEqual([
-      'Finca La Catalina',
-      'Finca Quebrada Honda',
-      'Finca Cerro Verde',
-    ]);
-    expect(chip('Todas').getAttribute('aria-pressed')).toBe('false');
-
-    clic(chip('Disponible ahora'));
-    expect(fincasVisibles()).toEqual(['Finca La Catalina', 'Finca Cerro Verde']);
-
-    clic(chip('Todas'));
-    expect(fincasVisibles()).toHaveSize(todas);
-  });
-
-  it('filtra por notas florales y por zona', () => {
-    clic(chip('Notas florales'));
-    expect(fincasVisibles()).not.toContain('Finca Los Robles');
-
-    clic(chip('Todas'));
-    elegirZona('Turrialba');
-    expect(fincasVisibles()).toEqual(['Finca Los Robles']);
-  });
-
-  it('avisa si ninguna cosecha cumple los filtros', () => {
-    elegirZona('Orosi');
-    clic(chip('Disponible ahora'));
-    expect(fincasVisibles()).toEqual([]);
-    expect(pagina.textContent).toContain('Ninguna cosecha coincide con los filtros.');
+    expect(fincasVisibles()).toHaveSize(3);
   });
 
   it('"Ver detalle" lleva al detalle de cada cosecha', () => {

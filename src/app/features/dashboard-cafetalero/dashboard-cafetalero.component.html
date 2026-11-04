@@ -11,7 +11,7 @@
         <h1>Hola, {{ usuario().nombre }}</h1>
         <p>Esto es lo que está pasando en tus fincas hoy.</p>
       </div>
-      <a routerLink="/registrar-cosecha" class="cta">+ Registrar cosecha</a>
+      <a routerLink="/cafetalero/registrar-cosecha" class="cta">+ Registrar cosecha</a>
     </header>
 
     <section class="indicadores" aria-label="Indicadores">
@@ -67,7 +67,7 @@
     <section class="fincas glass" aria-labelledby="titulo-fincas">
       <div class="seccion-cabecera">
         <h2 id="titulo-fincas">Mis fincas</h2>
-        <a routerLink="/mis-fincas">Ver todas</a>
+        <a routerLink="/cafetalero/fincas">Ver todas</a>
       </div>
 
       <div class="fincas-grid">
@@ -79,17 +79,17 @@
               {{ finca.cosechasActivas }}
               {{ finca.cosechasActivas === 1 ? 'cosecha' : 'cosechas' }}
             </p>
-            <a [routerLink]="['/fincas', finca.id]">Ver detalle →</a>
+            <a [routerLink]="['/cafetalero/fincas', finca.id]">Ver detalle →</a>
           </article>
         }
-        <a routerLink="/mis-fincas/registrar" class="nueva-finca">+ Registrar nueva finca</a>
+        <a routerLink="/cafetalero/fincas/registrar" class="nueva-finca">+ Registrar nueva finca</a>
       </div>
     </section>
 
     <section class="cosechas glass" aria-labelledby="titulo-cosechas">
       <div class="seccion-cabecera">
         <h2 id="titulo-cosechas">Cosechas recientes</h2>
-        <a routerLink="/historial">Ver historial completo</a>
+        <a routerLink="/cafetalero/historial">Ver historial completo</a>
       </div>
 
       <div class="tabla-wrap">
