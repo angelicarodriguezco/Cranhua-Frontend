@@ -18,6 +18,7 @@ import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/on
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { RegistroComponent } from './features/registro/registro.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
+import { PerfilUsuarioComponent } from './features/perfil-usuario/perfil-usuario.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
 import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
@@ -62,7 +63,7 @@ export const routes: Routes = [
   { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
-  { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
+  { path: 'perfil', component: PerfilUsuarioComponent },
   { path: 'cafetalero/dashboard', component: DashboardCafetaleroComponent },
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   { path: 'cafetalero/fincas/registrar', component: RegistrarFincaComponent },
