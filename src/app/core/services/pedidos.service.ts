@@ -11,20 +11,31 @@ export function calcularIndicadores(pedidos: Pedido[], hoy = new Date()): Indica
     kgRecibidosMes: pedidos
       .filter((p) => p.fechaRecibido?.startsWith(mesActual))
       .reduce((total, p) => total + p.kilos, 0),
-    // Un tostador al que solo se le cancelaron pedidos no cuenta como activo
     tostadoresActivos: new Set(
       pedidos.filter((p) => p.estado !== 'Cancelado').map((p) => p.tostador),
     ).size,
   };
 }
 
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class PedidosService {
   private pedidos: Pedido[] = PEDIDOS.map((p) => ({ ...p }));
 
   listar(): Observable<Pedido[]> {
     return of([...this.pedidos].sort((a, b) => b.fecha.localeCompare(a.fecha)));
+  }
+
+  crear(tostador: string, kilos: number): Observable<Pedido> {
+    const pedido: Pedido = {
+      id: `ped-${this.pedidos.length + 1}-${Date.now()}`,
+      tostador,
+      kilos,
+      fecha: fechaIso(new Date()),
+      estado: 'En camino',
+      fechaRecibido: null,
+    };
+    this.pedidos = [pedido, ...this.pedidos];
+    return of(pedido);
   }
 
   marcarRecibido(id: string): Observable<Pedido> {
@@ -35,7 +46,6 @@ export class PedidosService {
     return this.cerrar(id, 'Cancelado');
   }
 
-  // Solo un pedido en camino puede pasar a entregado o cancelado
   private cerrar(id: string, estado: Exclude<EstadoPedido, 'En camino'>): Observable<Pedido> {
     const pedido = this.pedidos.find((p) => p.id === id);
     if (!pedido || pedido.estado !== 'En camino') {
