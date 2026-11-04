@@ -28,7 +28,14 @@ function parseListaIds(valor: string | null): string[] {
   if (!valor) {
     return [];
   }
-  return [...new Set(valor.split(',').map((id) => id.trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      valor
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 @Component({
