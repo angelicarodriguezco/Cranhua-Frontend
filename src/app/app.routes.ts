@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { DashboardCafeteriaComponent } from './features/dashboard-cafeteria/dashboard-cafeteria.component';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
+import { DashboardConsumidorComponent } from './features/dashboard-consumidor/dashboard-consumidor.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
@@ -31,7 +32,22 @@ import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.co
 export const routes: Routes = [
   { path: '', component: InicioComponent },
   { path: 'registro', component: RegistroComponent },
-  { path: 'explorar', component: PaginaMockComponent, data: { title: 'Explorar' } },
+  { path: 'explorar', component: DashboardConsumidorComponent },
+  {
+    path: 'explorar/finca/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Perfil público de finca' },
+  },
+  {
+    path: 'explorar/tostador/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Perfil público de tostador' },
+  },
+  {
+    path: 'explorar/cafeteria/:id',
+    component: PaginaMockComponent,
+    data: { title: 'Perfil público de cafetería' },
+  },
   {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,
