@@ -25,6 +25,7 @@ import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
 import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.component';
 import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
+import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 
 export const routes: Routes = [
@@ -75,10 +76,11 @@ export const routes: Routes = [
   { path: 'tostador/negocio', component: MiNegocioComponent },
 
   { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
+  { path: 'cafeteria/tostadores', component: ExplorarTostadoresComponent },
   {
-    path: 'cafeteria/tostadores',
+    path: 'cafeteria/tostadores/:id',
     component: PaginaMockComponent,
-    data: { title: 'Explorar tostadores' },
+    data: { title: 'Detalle del tostador' },
   },
   { path: 'cafeteria/pedidos', component: MisPedidosComponent },
   { path: 'cafeteria/mi-cafeteria', component: MiCafeteriaComponent },
