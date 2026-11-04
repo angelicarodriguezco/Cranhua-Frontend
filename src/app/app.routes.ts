@@ -28,7 +28,7 @@ import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.componen
 import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
 import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
-
+import { DetalleTostadorComponent } from './features/detalle-tostador/detalle-tostador.component';
 export const routes: Routes = [
   { path: '', component: InicioComponent },
   { path: 'registro', component: RegistroComponent },
@@ -93,11 +93,7 @@ export const routes: Routes = [
 
   { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
   { path: 'cafeteria/tostadores', component: ExplorarTostadoresComponent },
-  {
-    path: 'cafeteria/tostadores/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Detalle del tostador' },
-  },
+  { path: 'cafeteria/tostadores/:id', component: DetalleTostadorComponent },
   { path: 'cafeteria/pedidos', component: MisPedidosComponent },
   { path: 'cafeteria/mi-cafeteria', component: MiCafeteriaComponent },
   {
