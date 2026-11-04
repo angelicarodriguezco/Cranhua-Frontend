@@ -1,5 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, ParamMap, Router, convertToParamMap, provideRouter } from '@angular/router';
+import {
+  ActivatedRoute,
+  ParamMap,
+  Router,
+  convertToParamMap,
+  provideRouter,
+} from '@angular/router';
 import { BehaviorSubject, NEVER } from 'rxjs';
 
 import { PUNTOS_MAPA_CONSUMIDOR } from '../../core/mocks/dashboard-consumidor.mock';
@@ -139,8 +145,12 @@ describe('DashboardConsumidorComponent', () => {
     fixture.detectChanges();
 
     expect(componente['idsResaltados']()).toEqual(new Set([a.id, b.id]));
-    expect(componente['contenidoPin'](a).classList.contains('pin-consumidor--resaltado')).toBeTrue();
-    expect(componente['contenidoPin'](b).classList.contains('pin-consumidor--resaltado')).toBeTrue();
+    expect(
+      componente['contenidoPin'](a).classList.contains('pin-consumidor--resaltado'),
+    ).toBeTrue();
+    expect(
+      componente['contenidoPin'](b).classList.contains('pin-consumidor--resaltado'),
+    ).toBeTrue();
     expect(
       componente['contenidoPin'](PUNTOS_MAPA_CONSUMIDOR[2]).classList.contains(
         'pin-consumidor--resaltado',
