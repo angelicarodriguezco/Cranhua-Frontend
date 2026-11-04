@@ -1,10 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 
 import { TOSTADORES_DISPONIBLES } from '../mocks/tostadores-disponibles.mock';
-import {
-  FiltrosTostadores,
-  TostadorDisponible,
-} from '../models/tostador-disponible.model';
+import { FiltrosTostadores, TostadorDisponible } from '../models/tostador-disponible.model';
 
 export function filtrarTostadores(
   tostadores: TostadorDisponible[],

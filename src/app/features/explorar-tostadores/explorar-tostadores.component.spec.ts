@@ -72,11 +72,7 @@ describe('ExplorarTostadoresComponent', () => {
     ]);
 
     clic(chip('Medio'));
-    expect(nombresVisibles()).toEqual([
-      'Tostaduría Volcán',
-      'Cerro Azul Roast',
-      'Grano Vivo',
-    ]);
+    expect(nombresVisibles()).toEqual(['Tostaduría Volcán', 'Cerro Azul Roast', 'Grano Vivo']);
     expect(nombresVisibles()).not.toContain('Brisas del Sur');
 
     clic(chip('Todos'));
@@ -94,9 +90,9 @@ describe('ExplorarTostadoresComponent', () => {
   it('"Ver tostador" lleva al detalle del tostador', () => {
     const rutas = rutasDe('.tarjeta a');
     expect(rutas).toContain('/cafeteria/tostadores/tostador-volcan');
-    expect(
-      [...pagina.querySelectorAll('.tarjeta a')].map((a) => a.textContent!.trim()),
-    ).toContain('Ver tostador');
+    expect([...pagina.querySelectorAll('.tarjeta a')].map((a) => a.textContent!.trim())).toContain(
+      'Ver tostador',
+    );
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
