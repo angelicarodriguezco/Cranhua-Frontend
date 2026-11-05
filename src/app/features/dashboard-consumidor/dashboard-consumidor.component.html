@@ -38,7 +38,13 @@
     </a>
 
     <form class="barra-busqueda" (submit)="$event.preventDefault(); buscar()" autocomplete="off">
-      <span class="barra-busqueda__marca">CRÁNHUA</span>
+      <img
+        class="barra-busqueda__marca"
+        [src]="logoSrc()"
+        width="110"
+        height="28"
+        alt="Cránhua"
+      />
       <input
         class="barra-busqueda__input"
         type="search"

@@ -2,7 +2,7 @@
   --font-ui: 'Inter', system-ui, sans-serif;
   --radius-card: 1.15rem;
   --blur-glass: 13px;
-  --bg-image: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --bg-image: url('/images/bg-claro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.28) 0%,
@@ -40,7 +40,7 @@
 }
 
 :host([data-theme='oscuro']) {
-  --bg-image: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --bg-image: url('/images/bg-oscuro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.6) 0%,

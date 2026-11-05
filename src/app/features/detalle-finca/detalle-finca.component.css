@@ -15,7 +15,7 @@
 
 /* Mismos valores que el dashboard del cafetalero, más los de la zona de peligro */
 .detalle[data-theme='oscuro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --bg-image: url('/images/bg-oscuro.jpg');
   --overlay: linear-gradient(180deg, rgba(5, 8, 20, 0.6), rgba(10, 14, 32, 0.3));
   --card-bg: rgba(8, 28, 38, 0.55);
   --card-outline: rgba(255, 255, 255, 0.12);
@@ -37,7 +37,7 @@
 }
 
 .detalle[data-theme='claro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --bg-image: url('/images/bg-claro.jpg');
   --overlay: linear-gradient(180deg, rgba(5, 8, 20, 0.28), rgba(8, 50, 62, 0.18));
   --card-bg: rgba(255, 255, 255, 0.6);
   --card-outline: rgba(255, 255, 255, 0.75);

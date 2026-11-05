@@ -29,13 +29,14 @@ import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitu
 import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 import { DetalleTostadorComponent } from './features/detalle-tostador/detalle-tostador.component';
+import { PerfilFincaPublicoComponent } from './features/perfil-finca-publico/perfil-finca-publico.component';
 export const routes: Routes = [
   { path: '', component: InicioComponent },
   { path: 'registro', component: RegistroComponent },
   { path: 'explorar', component: DashboardConsumidorComponent },
   {
     path: 'explorar/finca/:id',
-    component: PaginaMockComponent,
+    component: PerfilFincaPublicoComponent,
     data: { title: 'Perfil público de finca' },
   },
   {

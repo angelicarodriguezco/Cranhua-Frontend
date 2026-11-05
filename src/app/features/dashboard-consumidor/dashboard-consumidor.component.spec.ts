@@ -120,10 +120,16 @@ describe('DashboardConsumidorComponent', () => {
 
   it('el toggle cambia data-theme en el host', () => {
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src')).toBe(
+      '/images/logo-cranhua.png',
+    );
 
     boton('Claro').click();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src')).toBe(
+      '/images/logo-cranhua-negro.png',
+    );
 
     boton('Oscuro').click();
     fixture.detectChanges();
