@@ -6,11 +6,28 @@
   role="dialog"
   aria-modal="true"
   [attr.aria-labelledby]="'modal-confirmacion-titulo'"
-  [attr.aria-describedby]="'modal-confirmacion-mensaje'"
+  [attr.aria-describedby]="descritoPor()"
   tabindex="-1"
 >
-  <h2 id="modal-confirmacion-titulo" class="modal__titulo">{{ titulo() }}</h2>
+  <div class="modal__icono" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M12 3.5 2.75 19.5h18.5z" />
+      <path d="M12 9.5v4.5M12 16.75v.25" />
+    </svg>
+  </div>
+
+  <h2 id="modal-confirmacion-titulo" class="modal__titulo">{{ tituloFinal() }}</h2>
   <p id="modal-confirmacion-mensaje" class="modal__mensaje">{{ mensaje() }}</p>
+
+  @if (aviso(); as aviso) {
+    <div id="modal-confirmacion-aviso" class="modal__aviso">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 3.5 2.75 19.5h18.5z" />
+        <path d="M12 9.5v4.5M12 16.75v.25" />
+      </svg>
+      <p>{{ aviso }}</p>
+    </div>
+  }
 
   <div class="modal__acciones">
     <button

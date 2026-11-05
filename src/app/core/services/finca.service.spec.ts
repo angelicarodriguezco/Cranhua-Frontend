@@ -105,4 +105,10 @@ describe('FincaService', () => {
       ).toEqual({ agregado: false, error: 'finca-inexistente' });
     });
   });
+
+  it('eliminar quita la finca y responde false si no existe', async () => {
+    expect(await firstValueFrom(servicio.eliminar('f-la-esperanza'))).toBeTrue();
+    expect(await firstValueFrom(servicio.obtener('f-la-esperanza'))).toBeUndefined();
+    expect(await firstValueFrom(servicio.eliminar('f-la-esperanza'))).toBeFalse();
+  });
 });

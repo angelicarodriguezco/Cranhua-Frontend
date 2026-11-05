@@ -376,15 +376,6 @@ app-zona-peligro {
   margin-top: 1.25rem;
 }
 
-app-modal-confirmacion {
-  --color-surface: var(--dialogo-fondo);
-  --color-border: var(--vidrio-borde);
-  --color-text: var(--texto);
-  --color-text-muted: var(--texto-suave);
-  --color-error: var(--error);
-  --color-gold: var(--acento);
-}
-
 :host :is(.portada__cambiar, .avatar__camara, .campo__control, .estilo, .btn):focus-visible {
   outline: 2px solid var(--seleccion-borde);
   outline-offset: 2px;

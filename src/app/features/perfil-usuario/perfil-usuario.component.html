@@ -424,9 +424,9 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
+    tipo="cuenta"
     titulo="¿Eliminar tu cuenta?"
-    mensaje="Se borrarán tu perfil y tu acceso a Crán̈hua. Esta acción no se puede deshacer."
-    etiquetaConfirmar="Eliminar cuenta"
+    [aviso]="descripcionEliminar"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

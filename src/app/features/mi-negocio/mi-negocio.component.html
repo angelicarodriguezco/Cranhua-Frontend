@@ -219,9 +219,9 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
-    titulo="¿Eliminar negocio?"
-    mensaje="Se eliminará el perfil público de tu tostaduría. Tu cuenta de Cránhua sigue activa. Esta acción no se puede deshacer."
-    etiquetaConfirmar="Eliminar negocio"
+    tipo="Tostadería"
+    [nombre]="negocio()?.nombre"
+    [aviso]="avisoEliminar"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

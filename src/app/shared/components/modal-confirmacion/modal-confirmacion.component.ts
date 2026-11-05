@@ -1,6 +1,7 @@
 import {
   afterNextRender,
   Component,
+  computed,
   ElementRef,
   inject,
   Injector,
@@ -21,10 +22,28 @@ import {
 export class ModalConfirmacionComponent implements OnDestroy {
   private readonly injector = inject(Injector);
 
-  readonly titulo = input.required<string>();
-  readonly mensaje = input.required<string>();
+  readonly titulo = input<string>();
+  readonly tipo = input<string>();
+  readonly nombre = input<string>();
+  readonly mensaje = input('Esta acción no se puede deshacer.');
+  readonly aviso = input<string | null>(null);
   readonly etiquetaCancelar = input('Cancelar');
-  readonly etiquetaConfirmar = input('Confirmar');
+  readonly etiquetaConfirmar = input('Sí, entiendo. Eliminar');
+
+  protected readonly tituloFinal = computed(() => {
+    const titulo = this.titulo();
+    if (titulo) {
+      return titulo;
+    }
+    const partes = [this.tipo(), this.nombre()].filter(Boolean).join(' ');
+    return partes ? `¿Eliminar ${partes}?` : '¿Eliminar?';
+  });
+
+  protected readonly descritoPor = computed(() =>
+    this.aviso()
+      ? 'modal-confirmacion-mensaje modal-confirmacion-aviso'
+      : 'modal-confirmacion-mensaje',
+  );
 
   readonly confirmar = output<void>();
   readonly cancelar = output<void>();

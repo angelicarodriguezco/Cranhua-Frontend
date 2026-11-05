@@ -410,15 +410,6 @@ app-zona-peligro {
   background: var(--chip-hover);
 }
 
-app-modal-confirmacion {
-  --color-surface: var(--dialogo-fondo);
-  --color-border: var(--vidrio-borde);
-  --color-text: var(--texto);
-  --color-text-muted: var(--texto-suave);
-  --color-error: var(--error);
-  --color-gold: var(--acento);
-}
-
 :host
   :is(
     .btn,

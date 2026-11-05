@@ -75,6 +75,18 @@ export class RegistrarCosechaComponent {
   protected readonly cosechaGuardada = signal<Cosecha | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
 
+  protected readonly cosechaAEliminar = computed(() => {
+    const id = this.cosechaId();
+    return id ? (this.cosechaService.obtener(id) ?? null) : null;
+  });
+
+  protected readonly avisoEliminar = computed(() => {
+    const codigo = this.cosechaAEliminar()?.codigoLote;
+    return codigo
+      ? `Esta cosecha ya tiene el lote ${codigo}, con código de trazabilidad visible para tostadores y consumidores. Eliminar la cosecha no borra ese código, pero ya no vas a poder editar su información.`
+      : null;
+  });
+
   protected readonly valorInicialPaso1 = computed((): Partial<DatosPasoCosecha> | null => {
     const borrador = this.datosPaso1();
     if (borrador) {
