@@ -30,6 +30,8 @@ import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitu
 import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 import { DetalleTostadorComponent } from './features/detalle-tostador/detalle-tostador.component';
+import { PerfilTostadorComponent } from './features/perfil-tostador/perfil-tostador.component';
+
 export const routes: Routes = [
   { path: '', component: InicioComponent },
   { path: 'registro', component: RegistroComponent },
@@ -39,11 +41,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Perfil público de finca' },
   },
-  {
-    path: 'explorar/tostador/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Perfil público de tostador' },
-  },
+  { path: 'explorar/tostador/:id', component: PerfilTostadorComponent },
   {
     path: 'explorar/cafeteria/:id',
     component: PaginaMockComponent,
