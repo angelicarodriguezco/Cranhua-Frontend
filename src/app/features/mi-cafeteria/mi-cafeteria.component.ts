@@ -23,6 +23,7 @@ import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
+import { formatearTelefono } from '../../shared/utils/formato';
 import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
 import {
   crearFormularioDatos,
@@ -37,11 +38,6 @@ export const DESCRIPCION_ELIMINAR_CAFETERIA =
   'Eliminar tu cafetería borra su perfil público. Tu cuenta de Cránhua sigue activa.';
 
 type Campo = keyof FormularioDatos['controls'];
-
-function formatearTelefono(telefono: string): string {
-  const digitos = telefono.replace(/\D/g, '').slice(-8);
-  return `+506 ${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-}
 
 export function inicialesCafeteria(nombre: string): string {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);

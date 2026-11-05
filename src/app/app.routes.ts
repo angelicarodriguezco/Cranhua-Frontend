@@ -31,6 +31,8 @@ import { ExplorarTostadoresComponent } from './features/explorar-tostadores/expl
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 import { DetalleTostadorComponent } from './features/detalle-tostador/detalle-tostador.component';
 import { PerfilTostadorComponent } from './features/perfil-tostador/perfil-tostador.component';
+import { RegistrarCafeteriaComponent } from './features/registrar-cafeteria/registrar-cafeteria.component';
+import { conCafeteriaGuard, sinCafeteriaGuard } from './core/guards/cafeteria.guard';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -90,15 +92,26 @@ export const routes: Routes = [
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: MiNegocioComponent },
 
-  { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
-  { path: 'cafeteria/tostadores', component: ExplorarTostadoresComponent },
-  { path: 'cafeteria/tostadores/:id', component: DetalleTostadorComponent },
-  { path: 'cafeteria/pedidos', component: MisPedidosComponent },
-  { path: 'cafeteria/mi-cafeteria', component: MiCafeteriaComponent },
   {
-    path: 'cafeteria/menu',
-    component: PaginaMockComponent,
-    data: { title: 'Publicar en el menú' },
+    path: 'cafeteria/registrar',
+    component: RegistrarCafeteriaComponent,
+    canActivate: [sinCafeteriaGuard],
   },
-  { path: 'cafeteria/menu', component: PublicarMenuComponent },
+  {
+    path: 'cafeteria',
+    canActivateChild: [conCafeteriaGuard],
+    children: [
+      { path: 'dashboard', component: DashboardCafeteriaComponent },
+      { path: 'tostadores', component: ExplorarTostadoresComponent },
+      { path: 'tostadores/:id', component: DetalleTostadorComponent },
+      { path: 'pedidos', component: MisPedidosComponent },
+      { path: 'mi-cafeteria', component: MiCafeteriaComponent },
+      {
+        path: 'menu',
+        component: PaginaMockComponent,
+        data: { title: 'Publicar en el menú' },
+      },
+      { path: 'menu', component: PublicarMenuComponent },
+    ],
+  },
 ];
