@@ -1,7 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { TemaDashboard } from '../../../../core/models/dashboard-cafetalero.model';
 import { PerfilCafeteriaSidebar } from '../../../../core/models/pedido.model';
 
 export type IconoNavCafeteria = 'home' | 'explorar' | 'pedidos' | 'negocio' | 'perfil';
@@ -33,9 +32,6 @@ export const NAV_SECUNDARIO_CAFETERIA: ItemNavCafeteria[] = [
 })
 export class MenuLateralCafeteriaComponent {
   readonly perfil = input.required<PerfilCafeteriaSidebar>();
-  readonly tema = input<TemaDashboard>('oscuro');
-
-  readonly alternarTema = output<void>();
 
   protected readonly navPrincipal = NAV_PRINCIPAL_CAFETERIA;
   protected readonly navSecundario = NAV_SECUNDARIO_CAFETERIA;

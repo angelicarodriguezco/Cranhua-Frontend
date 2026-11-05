@@ -36,8 +36,4 @@ export class MisSolicitudesComponent {
   protected readonly claseEstado = CLASE_ESTADO;
   protected readonly fecha = formatearFecha;
   protected readonly kg = formatearKg;
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
 }

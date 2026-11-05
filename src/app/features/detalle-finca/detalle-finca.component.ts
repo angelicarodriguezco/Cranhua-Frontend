@@ -92,10 +92,6 @@ export class DetalleFincaComponent {
       });
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected agregarDueno(correo: string): void {
     const finca = this.finca();
     if (!finca) {

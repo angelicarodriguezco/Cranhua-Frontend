@@ -16,8 +16,4 @@ export class ExplorarCosechasComponent {
 
   protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
 }

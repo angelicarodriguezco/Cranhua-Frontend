@@ -133,10 +133,6 @@ export class RegistrarCosechaComponent {
     return paso1?.cantidadTotalKg ?? null;
   });
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected volver(): void {
     if (this.paso() === 'seleccion') {
       this.paso.set('datos');

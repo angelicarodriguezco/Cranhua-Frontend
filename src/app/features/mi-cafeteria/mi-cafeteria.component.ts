@@ -139,10 +139,6 @@ export class MiCafeteriaComponent implements OnDestroy {
     this.revocarPortadaObjectUrl();
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected invalido(campo: Campo): boolean {
     const control = this.formulario.controls[campo];
     return control.invalid && control.touched;

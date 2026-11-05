@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarCosechasComponent } from './explorar-cosechas.component';
 
 describe('ExplorarCosechasComponent', () => {
@@ -19,6 +20,8 @@ describe('ExplorarCosechasComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+
   it('muestra el explorador con al menos 6 cosechas', () => {
     expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Explorar cosechas');
     expect(pagina.querySelectorAll('.tarjeta').length).toBeGreaterThanOrEqual(6);
@@ -35,7 +38,7 @@ describe('ExplorarCosechasComponent', () => {
     const vista = pagina.querySelector('.dashboard')!;
     expect(vista.getAttribute('data-theme')).toBe('oscuro');
 
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(vista.getAttribute('data-theme')).toBe('claro');
   });

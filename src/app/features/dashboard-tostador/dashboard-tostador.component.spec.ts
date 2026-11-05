@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardTostadorComponent } from './dashboard-tostador.component';
 
 describe('DashboardTostadorComponent', () => {
@@ -18,6 +19,8 @@ describe('DashboardTostadorComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function chip(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll<HTMLButtonElement>('.filtros button')].find(
@@ -92,10 +95,12 @@ describe('DashboardTostadorComponent', () => {
     expect(pagina.querySelector('.perfil')?.textContent).toContain('Mariana Castro');
     expect(pagina.querySelector('.avatar')?.textContent?.trim()).toBe('MC');
 
+    expect(pagina.querySelector('app-menu-lateral-tostador button')).toBeNull();
     const dashboard = pagina.querySelector('.dashboard')!;
     expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
 
-    clic(pagina.querySelector<HTMLButtonElement>('.toggle-tema')!);
+    TestBed.inject(TemaService).alternarTema();
+    fixture.detectChanges();
     expect(dashboard.getAttribute('data-theme')).toBe('claro');
   });
 });

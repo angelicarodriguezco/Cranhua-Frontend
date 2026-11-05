@@ -1,7 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { TemaDashboard } from '../../../../core/models/dashboard-cafetalero.model';
 import { PerfilTostadorSidebar } from '../../../../core/models/dashboard-tostador.model';
 
 export type IconoNavTostador =
@@ -41,9 +40,6 @@ export const NAV_SECUNDARIO_TOSTADOR: ItemNavTostador[] = [
 })
 export class MenuLateralTostadorComponent {
   readonly perfil = input.required<PerfilTostadorSidebar>();
-  readonly tema = input<TemaDashboard>('oscuro');
-
-  readonly alternarTema = output<void>();
 
   protected readonly navPrincipal = NAV_PRINCIPAL_TOSTADOR;
   protected readonly navSecundario = NAV_SECUNDARIO_TOSTADOR;

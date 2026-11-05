@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { PUNTOS_MAPA_CONSUMIDOR } from '../mocks/dashboard-consumidor.mock';
 import { DashboardConsumidorService } from './dashboard-consumidor.service';
+import { CLAVE_TEMA } from './tema.service';
 
 describe('DashboardConsumidorService', () => {
   let servicio: DashboardConsumidorService;
@@ -10,6 +11,8 @@ describe('DashboardConsumidorService', () => {
     TestBed.configureTestingModule({});
     servicio = TestBed.inject(DashboardConsumidorService);
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   it('expone al menos 4 pines de finca, tostador y cafetería', () => {
     const puntos = servicio.puntos();

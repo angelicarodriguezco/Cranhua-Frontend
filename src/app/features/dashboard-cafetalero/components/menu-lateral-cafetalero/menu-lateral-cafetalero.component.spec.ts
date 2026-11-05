@@ -21,7 +21,6 @@ describe('MenuLateralCafetaleroComponent', () => {
 
     fixture = TestBed.createComponent(MenuLateralCafetaleroComponent);
     fixture.componentRef.setInput('perfil', PERFIL_CAFETALERO_SIDEBAR);
-    fixture.componentRef.setInput('tema', 'oscuro');
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
@@ -52,14 +51,8 @@ describe('MenuLateralCafetaleroComponent', () => {
     expect(pagina.textContent).toContain('Cafetalero');
   });
 
-  it('emite alternarTema al pulsar el toggle', () => {
-    const spy = jasmine.createSpy('alternarTema');
-    fixture.componentInstance.alternarTema.subscribe(spy);
-
-    const toggle = pagina.querySelector<HTMLButtonElement>('.toggle-tema')!;
-    expect(toggle.getAttribute('aria-label')).toBe('Cambiar a tema claro');
-    toggle.click();
-
-    expect(spy).toHaveBeenCalledTimes(1);
+  it('ya no tiene botón de tema', () => {
+    expect(pagina.querySelector('button')).toBeNull();
+    expect(pagina.textContent).not.toContain('Tema');
   });
 });

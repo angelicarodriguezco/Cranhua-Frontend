@@ -7,6 +7,7 @@ import { Coordenada } from '../../core/models/finca.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   DESCRIPCION_ELIMINAR_CAFETERIA,
   inicialesCafeteria,
@@ -41,6 +42,8 @@ describe('MiCafeteriaComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function campo<T extends HTMLElement>(selector: string): T {
     return pagina.querySelector<T>(selector)!;
@@ -207,11 +210,11 @@ describe('MiCafeteriaComponent', () => {
     expect(campo<HTMLInputElement>('#nombre-cafeteria').value).toBe(CAFETERIA_EJEMPLO.nombre);
   });
 
-  it('alterna el tema claro/oscuro desde el menú', () => {
+  it('sigue el tema global claro/oscuro', () => {
     expect(dashboard.tema()).toBe('oscuro');
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
 
-    componente['alternarTema']();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(dashboard.tema()).toBe('claro');
     expect(pagina.getAttribute('data-theme')).toBe('claro');

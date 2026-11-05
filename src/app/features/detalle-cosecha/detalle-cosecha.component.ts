@@ -68,10 +68,6 @@ export class DetalleCosechaComponent {
     return colones.format(monto);
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected enviar(): void {
     const cosecha = this.cosecha();
     if (!cosecha || this.formulario.invalid) {

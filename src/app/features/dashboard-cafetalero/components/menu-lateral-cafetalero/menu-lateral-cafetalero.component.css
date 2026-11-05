@@ -49,8 +49,7 @@
 }
 
 .nav-principal a,
-.nav-secundario a,
-.toggle-tema {
+.nav-secundario a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -66,8 +65,7 @@
 }
 
 .nav-principal a:hover,
-.nav-secundario a:hover,
-.toggle-tema:hover {
+.nav-secundario a:hover {
   background: rgba(245, 239, 227, 0.06);
 }
 
@@ -88,23 +86,8 @@
   stroke-linejoin: round;
 }
 
-.toggle-tema {
-  margin-top: auto;
-  align-self: stretch;
-  width: 100%;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--sidebar-muted);
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-}
-
-.toggle-tema:hover {
-  color: var(--sidebar-text);
-}
-
 .perfil {
+  margin-top: auto;
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -166,8 +149,7 @@
     border-top: none;
   }
 
-  .toggle-tema {
+  .perfil {
     margin-top: 0;
-    width: auto;
   }
 }
