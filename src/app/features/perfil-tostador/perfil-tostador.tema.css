@@ -1,5 +1,5 @@
 app-perfil-tostador {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --fondo-imagen: url('/images/bg-claro.jpg');
   --fondo-velo: linear-gradient(
     180deg,
     rgba(6, 31, 39, 0.5),
@@ -35,7 +35,7 @@ app-perfil-tostador {
 }
 
 app-perfil-tostador[data-theme='oscuro'] {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --fondo-imagen: url('/images/bg-oscuro.jpg');
   --fondo-velo: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.6),

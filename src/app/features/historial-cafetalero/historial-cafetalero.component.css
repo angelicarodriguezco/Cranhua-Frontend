@@ -22,7 +22,7 @@
 }
 
 .historial[data-theme='oscuro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --bg-image: url('/images/bg-oscuro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.6) 0%,
@@ -50,7 +50,7 @@
 }
 
 .historial[data-theme='claro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --bg-image: url('/images/bg-claro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.28) 0%,
