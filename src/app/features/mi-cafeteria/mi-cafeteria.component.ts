@@ -35,7 +35,7 @@ export const RUTA_DASHBOARD_CAFETERIA = '/cafeteria/dashboard';
 export const RUTA_PUBLICAR_MENU = '/cafeteria/menu';
 
 export const DESCRIPCION_ELIMINAR_CAFETERIA =
-  'Eliminar tu cafetería borra su perfil público. Tu cuenta de Cránhua sigue activa.';
+  'Eliminar tu cafetería borra su perfil público y su menú. Tu cuenta de Cránhua sigue activa.';
 
 export const AVISO_ELIMINAR_CAFETERIA =
   'Esta cafetería ya vendió bebidas con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu cafetería no borra esos códigos, pero ya no vas a poder editar tu menú ni recibir nuevos pedidos.';

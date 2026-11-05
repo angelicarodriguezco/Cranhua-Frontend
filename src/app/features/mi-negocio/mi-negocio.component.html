@@ -219,7 +219,6 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
-    tipo="Tostadería"
     [nombre]="negocio()?.nombre"
     [aviso]="avisoEliminar"
     (confirmar)="confirmarEliminar()"

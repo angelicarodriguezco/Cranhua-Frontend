@@ -136,9 +136,7 @@ describe('MiNegocioComponent', () => {
 
     boton('Eliminar negocio').click();
     fixture.detectChanges();
-    expect(campo('.modal__titulo').textContent).toBe(
-      `¿Eliminar Tostadería ${NEGOCIO_EJEMPLO.nombre}?`,
-    );
+    expect(campo('.modal__titulo').textContent).toBe(`¿Eliminar ${NEGOCIO_EJEMPLO.nombre}?`);
     expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_NEGOCIO);
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
       'rgba(8, 28, 38, 0.96)',
