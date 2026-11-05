@@ -1,0 +1,202 @@
+<app-menu-lateral-cafeteria [perfil]="perfilSidebar" [sinCafeteria]="true" />
+
+<main class="contenido">
+  @if (vista() === 'vacia') {
+    <section class="vidrio vacio" aria-labelledby="titulo-vacio">
+      <span class="vacio__icono" aria-hidden="true">
+        <svg viewBox="0 0 24 24" focusable="false">
+          <path d="M5 9.5h11V14a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z" />
+          <path d="M16 11h1.25a2.25 2.25 0 0 1 0 4.5H16M9 3.5V6M12.5 3.5V6" />
+        </svg>
+      </span>
+      <h1 id="titulo-vacio" class="vacio__titulo">Todavía no tenés una cafetería registrada</h1>
+      <p class="vacio__texto">
+        Registrá tu local para explorar tostadores, hacer pedidos y publicar tu menú.
+      </p>
+      <button type="button" class="btn btn--filled" (click)="abrirFormulario()">
+        Registrar cafetería
+      </button>
+    </section>
+  } @else {
+    <header class="encabezado">
+      <div class="encabezado__texto">
+        <h1>Registrar cafetería</h1>
+        <p>Completá los datos de tu local para que los tostadores puedan encontrarte.</p>
+      </div>
+    </header>
+
+    <form [formGroup]="formulario" (ngSubmit)="registrar()" novalidate>
+      <div class="vidrio tarjeta">
+        <div class="formulario">
+          <div class="campo">
+            <label class="campo__etiqueta" for="nombre-cafeteria">Nombre de la cafetería</label>
+            <input
+              id="nombre-cafeteria"
+              class="campo__control"
+              formControlName="nombre"
+              maxlength="80"
+              autocomplete="organization"
+              placeholder="Ej. Café Brumas"
+              [attr.aria-invalid]="invalido('nombre')"
+              [attr.aria-describedby]="invalido('nombre') ? 'error-nombre' : null"
+            />
+            @if (invalido('nombre')) {
+              <p id="error-nombre" class="campo__error">Poné el nombre de tu cafetería.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="contacto-cafeteria">Nombre de contacto</label>
+            <input
+              id="contacto-cafeteria"
+              class="campo__control"
+              formControlName="contacto"
+              maxlength="80"
+              autocomplete="name"
+              [attr.aria-invalid]="invalido('contacto')"
+              [attr.aria-describedby]="invalido('contacto') ? 'error-contacto' : null"
+            />
+            @if (invalido('contacto')) {
+              <p id="error-contacto" class="campo__error">Poné un nombre de contacto.</p>
+            }
+          </div>
+
+          <div class="campo campo--ancho">
+            <label class="campo__etiqueta" for="descripcion-cafeteria">
+              Descripción <span class="campo__opcional">(opcional)</span>
+            </label>
+            <textarea
+              id="descripcion-cafeteria"
+              class="campo__control campo__control--area"
+              formControlName="descripcion"
+              rows="3"
+              maxlength="300"
+              placeholder="Tu historia, el ambiente del local, qué perfiles buscás…"
+              aria-describedby="contador-descripcion"
+            ></textarea>
+            <p id="contador-descripcion" class="campo__ayuda campo__ayuda--derecha">
+              {{ formulario.controls.descripcion.value.length }}/300
+            </p>
+          </div>
+
+          <div class="campo campo--ancho">
+            <label class="campo__etiqueta" for="horario-cafeteria">
+              Horario <span class="campo__opcional">(opcional)</span>
+            </label>
+            <input
+              id="horario-cafeteria"
+              class="campo__control"
+              formControlName="horario"
+              maxlength="100"
+              placeholder="Ej. Lun–Sáb 7:00–19:00 · Dom 8:00–14:00"
+              autocomplete="off"
+              aria-describedby="contador-horario"
+            />
+            <p id="contador-horario" class="campo__ayuda campo__ayuda--derecha">
+              {{ formulario.controls.horario.value.length }}/100
+            </p>
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="telefono-cafeteria">Teléfono</label>
+            <input
+              id="telefono-cafeteria"
+              class="campo__control"
+              type="tel"
+              formControlName="telefono"
+              autocomplete="tel"
+              placeholder="8888-8888"
+              [attr.aria-invalid]="invalido('telefono')"
+              [attr.aria-describedby]="invalido('telefono') ? 'error-telefono' : null"
+            />
+            @if (tieneError('telefono', 'required')) {
+              <p id="error-telefono" class="campo__error">Poné un teléfono de contacto.</p>
+            } @else if (invalido('telefono')) {
+              <p id="error-telefono" class="campo__error">Debe tener 8 dígitos, ej. 8888-8888.</p>
+            }
+          </div>
+
+          <div class="campo">
+            <label class="campo__etiqueta" for="correo-cafeteria">Correo electrónico</label>
+            <input
+              id="correo-cafeteria"
+              class="campo__control"
+              type="email"
+              formControlName="correo"
+              autocomplete="email"
+              placeholder="hola@tucafeteria.cr"
+              [attr.aria-invalid]="invalido('correo')"
+              [attr.aria-describedby]="invalido('correo') ? 'error-correo' : null"
+            />
+            @if (tieneError('correo', 'required')) {
+              <p id="error-correo" class="campo__error">Poné un correo de contacto.</p>
+            } @else if (invalido('correo')) {
+              <p id="error-correo" class="campo__error">Ese correo no es válido.</p>
+            }
+          </div>
+
+          <div class="campo campo--ancho">
+            <label class="campo__etiqueta" for="ubicacion-cafeteria">Ubicación</label>
+            <input
+              id="ubicacion-cafeteria"
+              class="campo__control"
+              type="text"
+              [value]="textoUbicacion()"
+              placeholder="Se completa al marcar el pin"
+              readonly
+              tabindex="-1"
+              aria-readonly="true"
+              [attr.aria-invalid]="ubicacionInvalida()"
+              [attr.aria-describedby]="ubicacionInvalida() ? 'error-ubicacion' : 'ayuda-ubicacion'"
+            />
+            @if (ubicacionInvalida()) {
+              <p id="error-ubicacion" class="campo__error">
+                @if (pin()) {
+                  El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.
+                } @else {
+                  Marcá en el mapa dónde está tu local.
+                }
+              </p>
+            } @else {
+              <p id="ayuda-ubicacion" class="campo__ayuda">
+                Tocá el mapa para colocar el pin y arrastralo para ajustarlo.
+              </p>
+            }
+          </div>
+
+          <div class="campo campo--ancho mapa">
+            <app-mapa-cafeteria [(pin)]="pin" />
+          </div>
+
+          <div class="campo campo--ancho">
+            <span class="campo__etiqueta" id="etiqueta-estilos">Estilos de café que comprás</span>
+            <div class="estilos" role="group" aria-labelledby="etiqueta-estilos">
+              @for (estilo of estilosDisponibles; track estilo) {
+                <button
+                  type="button"
+                  class="estilo"
+                  [class.estilo--activo]="seleccionado(estilo)"
+                  [attr.aria-pressed]="seleccionado(estilo)"
+                  (click)="alternarEstilo(estilo)"
+                >
+                  {{ estilo }}
+                  @if (seleccionado(estilo)) {
+                    <span class="estilo__quitar" aria-hidden="true">×</span>
+                  }
+                </button>
+              }
+            </div>
+            @if (estilosInvalidos()) {
+              <p class="campo__error">Elegí al menos un estilo de café.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
+        <button type="submit" class="btn btn--filled">Registrar cafetería</button>
+      </div>
+    </form>
+  }
+</main>
