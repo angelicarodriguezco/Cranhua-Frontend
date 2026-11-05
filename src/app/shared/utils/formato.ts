@@ -1,7 +1,6 @@
 import { Usuario } from '../../core/models/finca.model';
 
 export function formatearHectareas(hectareas: number): string {
-  // Fincas pequeñas necesitan un decimal más para no mostrar "0.0"
   return `${hectareas.toFixed(hectareas < 1 ? 2 : 1)} hectáreas`;
 }
 
@@ -31,7 +30,6 @@ const fechaCorta = new Intl.DateTimeFormat('es-CR', {
 });
 
 export function formatearFecha(fechaIso: string): string {
-  // Sin hora, "2025-12-01" se lee como UTC y en Costa Rica se mostraría el 30 de noviembre
   return fechaCorta.format(new Date(`${fechaIso}T00:00:00`));
 }
 
@@ -49,4 +47,13 @@ const colones = new Intl.NumberFormat('es-CR', {
 
 export function formatearColones(monto: number): string {
   return colones.format(monto);
+}
+
+const mesAnio = new Intl.DateTimeFormat('es-CR', { month: 'long', year: 'numeric' });
+
+export function formatearMesAnio(fechaIso: string): string {
+  const partes = mesAnio.formatToParts(new Date(`${fechaIso}T00:00:00`));
+  const mes = partes.find((p) => p.type === 'month')?.value ?? '';
+  const anio = partes.find((p) => p.type === 'year')?.value ?? '';
+  return `${mes.charAt(0).toUpperCase()}${mes.slice(1)} ${anio}`;
 }
