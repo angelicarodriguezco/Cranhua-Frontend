@@ -9,6 +9,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
+  AVISO_ELIMINAR_NEGOCIO,
   DESCRIPCION_ELIMINAR_NEGOCIO,
   inicialesNegocio,
   MiNegocioComponent,
@@ -135,7 +136,11 @@ describe('MiNegocioComponent', () => {
 
     boton('Eliminar negocio').click();
     fixture.detectChanges();
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
+    expect(campo('.modal__titulo').textContent).toBe(`¿Eliminar ${NEGOCIO_EJEMPLO.nombre}?`);
+    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_NEGOCIO);
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();

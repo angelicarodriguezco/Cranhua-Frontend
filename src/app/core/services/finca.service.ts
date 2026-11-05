@@ -80,6 +80,12 @@ export class FincaService {
     return USUARIOS.find((u) => u.id === id);
   }
 
+  eliminar(id: string): Observable<boolean> {
+    const existia = this.fincas.some((f) => f.id === id);
+    this.fincas = this.fincas.filter((f) => f.id !== id);
+    return of(existia);
+  }
+
   // Se reemplaza la finca por una copia para no modificar los datos de ejemplo
   agregarDueno(fincaId: string, correo: string): Observable<ResultadoAgregarDueno> {
     const indice = this.fincas.findIndex((f) => f.id === fincaId);

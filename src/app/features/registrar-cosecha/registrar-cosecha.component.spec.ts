@@ -275,8 +275,11 @@ describe('RegistrarCosechaComponent', () => {
     pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
     fixture.detectChanges();
 
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
-    expect(pagina.textContent).toContain('¿Eliminar cosecha?');
+    expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha Caturra?');
+    expect(pagina.querySelector('.modal__aviso')?.textContent).toContain('LC-2025-001');
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
     fixture.detectChanges();

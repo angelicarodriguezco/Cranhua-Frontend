@@ -329,18 +329,32 @@ describe('PerfilUsuarioComponent', () => {
 
     clic('Eliminar mi cuenta');
     expect(campo('.modal__titulo').textContent).toBe('¿Eliminar tu cuenta?');
+    expect(campo('.modal__mensaje').textContent).toBe('Esta acción no se puede deshacer.');
+    expect(campo('.modal__aviso').textContent).toContain(DESCRIPCION_ELIMINAR_CUENTA);
     campo<HTMLButtonElement>('.modal__btn--secundario').click();
     fixture.detectChanges();
     expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
     expect(eliminar).not.toHaveBeenCalled();
 
     clic('Eliminar mi cuenta');
-    expect(campo('.modal__btn--peligro').textContent!.trim()).toBe('Eliminar cuenta');
+    expect(campo('.modal__btn--peligro').textContent!.trim()).toBe('Sí, entiendo. Eliminar');
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
 
     expect(eliminar).toHaveBeenCalled();
     expect(navegar).toHaveBeenCalledWith('/');
     expect(await firstValueFrom(perfilService.obtener())).toBeNull();
+  });
+
+  it('el modal de eliminar cuenta sigue el tema global', () => {
+    clic('Editar perfil');
+    clic('Eliminar mi cuenta');
+    const fondo = () => getComputedStyle(campo('.modal__dialogo')).backgroundColor;
+    expect(fondo()).toBe('rgba(8, 28, 38, 0.96)');
+
+    TestBed.inject(TemaService).alternarTema();
+    fixture.detectChanges();
+
+    expect(fondo()).toBe('rgb(255, 255, 255)');
   });
 });

@@ -9,6 +9,7 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
+  AVISO_ELIMINAR_CAFETERIA,
   DESCRIPCION_ELIMINAR_CAFETERIA,
   inicialesCafeteria,
   MiCafeteriaComponent,
@@ -171,7 +172,11 @@ describe('MiCafeteriaComponent', () => {
 
     boton('Eliminar cafetería').click();
     fixture.detectChanges();
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
+    expect(campo('.modal__titulo').textContent).toBe('¿Eliminar Cafetería Café Brumas?');
+    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_CAFETERIA);
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
