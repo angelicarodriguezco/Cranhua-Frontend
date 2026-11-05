@@ -4,11 +4,14 @@ import { convertToParamMap, provideRouter, ActivatedRoute, Router } from '@angul
 import { of } from 'rxjs';
 
 import { CosechaService } from '../../core/services/cosecha.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { PasoDatosCosechaComponent } from './components/paso-datos-cosecha/paso-datos-cosecha.component';
 import { PasoSeleccionCatacionComponent } from './components/paso-seleccion-catacion/paso-seleccion-catacion.component';
 import { RegistrarCosechaComponent } from './registrar-cosecha.component';
 
 describe('RegistrarCosechaComponent', () => {
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+
   let fixture: ComponentFixture<RegistrarCosechaComponent>;
   let pagina: HTMLElement;
 
@@ -123,7 +126,7 @@ describe('RegistrarCosechaComponent', () => {
     expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#7fda9f');
     expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#e3b65b');
 
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
     expect(pagina.getAttribute('data-theme')).toBe('claro');

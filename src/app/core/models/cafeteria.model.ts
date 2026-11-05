@@ -26,7 +26,7 @@ export interface Cafeteria {
   horario: string | null;
   ubicacion: Coordenada;
   canton: CantonReferencia | null;
-  volumenMensual: VolumenMensual;
+  volumenMensual: VolumenMensual | null;
   estilos: EstiloCafe[];
   propietarioId: string;
   portadaUrl?: string | null;

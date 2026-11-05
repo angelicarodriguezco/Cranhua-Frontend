@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardCafeteriaComponent } from './dashboard-cafeteria.component';
 
 describe('DashboardCafeteriaComponent', () => {
@@ -19,15 +20,7 @@ describe('DashboardCafeteriaComponent', () => {
     fixture.detectChanges();
   });
 
-  function boton(texto: string): HTMLButtonElement {
-    const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes(texto),
-    );
-    if (!encontrado) {
-      throw new Error(`No hay botón "${texto}"`);
-    }
-    return encontrado;
-  }
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function rutasDe(enlaceSelector: string): string[] {
     return fixture.debugElement
@@ -87,18 +80,20 @@ describe('DashboardCafeteriaComponent', () => {
     ]);
   });
 
-  it('muestra el perfil del sidebar y permite alternar el tema', () => {
+  it('muestra el perfil del sidebar y sigue el tema global', () => {
+    const temas = TestBed.inject(TemaService);
     expect(pagina.textContent).toContain('Andrés Solano');
     expect(pagina.textContent).toContain('AS');
     expect(pagina.textContent).toContain('Cafetería - Café Brumas');
+    expect(pagina.querySelector('app-menu-lateral-cafeteria button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
-    boton('Tema claro').click();
+    temas.alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
-    boton('Tema oscuro').click();
+    temas.alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');

@@ -46,10 +46,6 @@ export class PublicarMenuComponent {
     this.menuService.listar().subscribe((items) => this.items.set(items));
   }
 
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
-
   protected errorNombre(): string | null {
     const control = this.formulario.controls.nombre;
     if (!control.touched) {

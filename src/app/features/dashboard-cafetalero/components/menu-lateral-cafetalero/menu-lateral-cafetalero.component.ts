@@ -1,10 +1,7 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import {
-  PerfilCafetaleroSidebar,
-  TemaDashboard,
-} from '../../../../core/models/dashboard-cafetalero.model';
+import { PerfilCafetaleroSidebar } from '../../../../core/models/dashboard-cafetalero.model';
 
 export type IconoNavCafetalero = 'home' | 'fincas' | 'cosecha' | 'historial' | 'perfil' | 'logout';
 
@@ -35,9 +32,6 @@ export const NAV_SECUNDARIO_CAFETALERO: ItemNavCafetalero[] = [
 })
 export class MenuLateralCafetaleroComponent {
   readonly perfil = input.required<PerfilCafetaleroSidebar>();
-  readonly tema = input<TemaDashboard>('oscuro');
-
-  readonly alternarTema = output<void>();
 
   protected readonly navPrincipal = NAV_PRINCIPAL_CAFETALERO;
   protected readonly navSecundario = NAV_SECUNDARIO_CAFETALERO;

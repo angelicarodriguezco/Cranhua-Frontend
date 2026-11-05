@@ -5,6 +5,8 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 
 import { routes } from './app.routes';
+import { CAFETERIA_EJEMPLO } from './core/mocks/cafeteria.mock';
+import { CafeteriaService } from './core/services/cafeteria.service';
 import { GoogleMapsService } from './core/services/google-maps.service';
 
 describe('Rutas del cafetalero', () => {
@@ -38,5 +40,33 @@ describe('Rutas del cafetalero', () => {
 
     await harness.navigateByUrl('/mis-fincas/registrar');
     expect(TestBed.inject(Location).path()).toBe('/cafetalero/fincas/registrar');
+  });
+});
+
+describe('Rutas de la cafetería', () => {
+  let harness: RouterTestingHarness;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
+      ],
+    });
+    harness = await RouterTestingHarness.create();
+  });
+
+  it('con cafetería registrada, el registro redirige al dashboard', async () => {
+    await harness.navigateByUrl('/cafeteria/registrar');
+    expect(TestBed.inject(Location).path()).toBe('/cafeteria/dashboard');
+  });
+
+  it('sin cafetería, las vistas de cafetería redirigen al registro', async () => {
+    TestBed.inject(CafeteriaService).eliminar(CAFETERIA_EJEMPLO.id).subscribe();
+
+    for (const ruta of ['/cafeteria/dashboard', '/cafeteria/pedidos', '/cafeteria/mi-cafeteria']) {
+      await harness.navigateByUrl(ruta);
+      expect(TestBed.inject(Location).path()).withContext(ruta).toBe('/cafeteria/registrar');
+    }
   });
 });

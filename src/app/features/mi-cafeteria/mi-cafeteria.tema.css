@@ -1,4 +1,5 @@
-app-mi-cafeteria {
+app-mi-cafeteria,
+app-registrar-cafeteria {
   --fondo-imagen: url('/images/bg-claro.jpg');
   --fondo-velo: linear-gradient(
     180deg,
@@ -33,7 +34,8 @@ app-mi-cafeteria {
   --esquema: light;
 }
 
-app-mi-cafeteria[data-theme='oscuro'] {
+app-mi-cafeteria[data-theme='oscuro'],
+app-registrar-cafeteria[data-theme='oscuro'] {
   --fondo-imagen: url('/images/bg-oscuro.jpg');
   --fondo-velo: linear-gradient(
     180deg,

@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { HistorialCafetaleroComponent } from './historial-cafetalero.component';
 
 describe('HistorialCafetaleroComponent', () => {
@@ -19,6 +20,8 @@ describe('HistorialCafetaleroComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function filas(selector: string): string[][] {
     return [...pagina.querySelectorAll(`${selector} tbody tr`)].map((fila) =>
@@ -78,14 +81,11 @@ describe('HistorialCafetaleroComponent', () => {
     expect(cta.injector.get(RouterLink).href).toBe('/cafetalero/registrar-cosecha');
   });
 
-  it('comparte el tema del panel y permite cambiarlo a claro', () => {
+  it('comparte el tema global con el panel', () => {
     const contenedor = () => pagina.querySelector('.historial')?.getAttribute('data-theme');
     expect(contenedor()).toBe('oscuro');
 
-    const toggle = [...pagina.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes('Tema claro'),
-    )!;
-    toggle.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
     expect(contenedor()).toBe('claro');

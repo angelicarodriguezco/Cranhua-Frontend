@@ -27,8 +27,4 @@ export class MisFincasComponent {
   protected readonly fincas = toSignal(inject(FincaService).misFincas(this.usuario().id), {
     initialValue: [],
   });
-
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
 }

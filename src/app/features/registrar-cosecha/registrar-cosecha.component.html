@@ -1,8 +1,4 @@
-<app-menu-lateral-cafetalero
-  [perfil]="perfilSidebar"
-  [tema]="tema()"
-  (alternarTema)="alternarTema()"
-/>
+<app-menu-lateral-cafetalero [perfil]="perfilSidebar" />
 
 <main class="contenido" [class.contenido--exito]="paso() === 'exito'" #contenido>
   @if (paso() !== 'exito') {

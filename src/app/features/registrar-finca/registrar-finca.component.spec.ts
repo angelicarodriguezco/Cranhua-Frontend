@@ -5,6 +5,7 @@ import { NEVER } from 'rxjs';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { Coordenada } from '../../core/models/finca.model';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
 
 // Cerca de la cabecera de Tarrazú y lejos de las fincas de ejemplo
@@ -34,6 +35,8 @@ describe('RegistrarFincaComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -66,9 +69,9 @@ describe('RegistrarFincaComponent', () => {
     expect(pagina.querySelector('#zona-finca')).not.toBeNull();
   });
 
-  it('cambia entre tema oscuro y claro desde el menú', () => {
+  it('sigue el tema global oscuro/claro', () => {
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
   });

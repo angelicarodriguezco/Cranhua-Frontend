@@ -10,9 +10,12 @@ import {
 import { firstValueFrom, of } from 'rxjs';
 
 import { PedidosService } from '../../core/services/pedidos.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DetalleTostadorComponent } from './detalle-tostador.component';
 
 describe('DetalleTostadorComponent', () => {
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+
   let fixture: ComponentFixture<DetalleTostadorComponent>;
   let elemento: HTMLElement;
 
@@ -134,7 +137,7 @@ describe('DetalleTostadorComponent', () => {
     crear('tostador-volcan');
     expect(elemento.getAttribute('data-theme')).toBe('oscuro');
 
-    elemento.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(elemento.getAttribute('data-theme')).toBe('claro');
   });

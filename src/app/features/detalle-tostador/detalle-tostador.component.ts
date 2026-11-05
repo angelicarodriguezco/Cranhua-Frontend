@@ -73,10 +73,6 @@ export class DetalleTostadorComponent {
     this.tuesteId.valueChanges.subscribe(() => this.cantidad.updateValueAndValidity());
   }
 
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
-
   protected elegir(tueste: TuesteDisponible): void {
     this.tuesteId.setValue(tueste.id);
     this.tuesteId.markAsTouched();

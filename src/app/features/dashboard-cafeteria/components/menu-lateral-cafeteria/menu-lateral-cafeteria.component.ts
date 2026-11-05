@@ -1,10 +1,16 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { TemaDashboard } from '../../../../core/models/dashboard-cafetalero.model';
 import { PerfilCafeteriaSidebar } from '../../../../core/models/pedido.model';
 
-export type IconoNavCafeteria = 'home' | 'explorar' | 'pedidos' | 'negocio' | 'perfil';
+export type IconoNavCafeteria =
+  | 'home'
+  | 'explorar'
+  | 'pedidos'
+  | 'negocio'
+  | 'registrar'
+  | 'perfil'
+  | 'logout';
 
 export interface ItemNavCafeteria {
   etiqueta: string;
@@ -24,6 +30,15 @@ export const NAV_SECUNDARIO_CAFETERIA: ItemNavCafeteria[] = [
   { etiqueta: 'Perfil y ajustes', ruta: '/perfil', icono: 'perfil' },
 ];
 
+export const NAV_PRINCIPAL_SIN_CAFETERIA: ItemNavCafeteria[] = [
+  { etiqueta: 'Registrar cafetería', ruta: '/cafeteria/registrar', icono: 'registrar' },
+];
+
+export const NAV_SECUNDARIO_SIN_CAFETERIA: ItemNavCafeteria[] = [
+  { etiqueta: 'Perfil y ajustes', ruta: '/perfil', icono: 'perfil' },
+  { etiqueta: 'Cerrar sesión', ruta: '/iniciar-sesion', icono: 'logout' },
+];
+
 @Component({
   selector: 'app-menu-lateral-cafeteria',
   imports: [RouterLink, RouterLinkActive],
@@ -33,10 +48,12 @@ export const NAV_SECUNDARIO_CAFETERIA: ItemNavCafeteria[] = [
 })
 export class MenuLateralCafeteriaComponent {
   readonly perfil = input.required<PerfilCafeteriaSidebar>();
-  readonly tema = input<TemaDashboard>('oscuro');
+  readonly sinCafeteria = input(false);
 
-  readonly alternarTema = output<void>();
-
-  protected readonly navPrincipal = NAV_PRINCIPAL_CAFETERIA;
-  protected readonly navSecundario = NAV_SECUNDARIO_CAFETERIA;
+  protected readonly navPrincipal = computed(() =>
+    this.sinCafeteria() ? NAV_PRINCIPAL_SIN_CAFETERIA : NAV_PRINCIPAL_CAFETERIA,
+  );
+  protected readonly navSecundario = computed(() =>
+    this.sinCafeteria() ? NAV_SECUNDARIO_SIN_CAFETERIA : NAV_SECUNDARIO_CAFETERIA,
+  );
 }

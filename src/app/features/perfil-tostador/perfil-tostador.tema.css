@@ -1,0 +1,71 @@
+app-perfil-tostador {
+  --fondo-imagen: url('/images/bg-claro.jpg');
+  --fondo-velo: linear-gradient(
+    180deg,
+    rgba(6, 31, 39, 0.5),
+    rgba(6, 31, 39, 0.08) 22%,
+    rgba(6, 31, 39, 0.03) 45%,
+    rgba(8, 50, 62, 0.12)
+  );
+  --marca: #142320;
+  --vidrio-fondo: rgba(255, 255, 255, 0.6);
+  --vidrio-borde: rgba(255, 255, 255, 0.75);
+  --vidrio-sombra: 0 32px 70px rgba(8, 50, 62, 0.18);
+  --vidrio-blur: 32px;
+  --portada: linear-gradient(135deg, #7d5bab, #5e3f90);
+  --avatar-anillo: rgba(255, 255, 255, 0.85);
+  --pill-fondo: rgba(165, 112, 8, 0.16);
+  --pill-texto: #8a5a06;
+  --texto: #1c3426;
+  --texto-suave: #5c6b5e;
+  --texto-cuerpo: #35443a;
+  --separador: rgba(28, 52, 38, 0.08);
+  --separador-seccion: rgba(28, 52, 38, 0.1);
+  --mapa-borde: rgba(28, 52, 38, 0.12);
+  --mapa-fondo: linear-gradient(149deg, #e4eedf, #cfe0c8 50%, #bbd4b1);
+  --pin-fondo: rgba(255, 255, 255, 0.92);
+  --pin-borde: transparent;
+  --chip-fondo: rgba(28, 52, 38, 0.08);
+  --chip-hover: rgba(28, 52, 38, 0.14);
+  --chip-texto: #1c3426;
+  --volver: #a57008;
+  --toggle-fondo: rgba(20, 35, 32, 0.88);
+  --toggle-texto: rgba(245, 239, 227, 0.72);
+  color-scheme: light;
+}
+
+app-perfil-tostador[data-theme='oscuro'] {
+  --fondo-imagen: url('/images/bg-oscuro.jpg');
+  --fondo-velo: linear-gradient(
+    180deg,
+    rgba(5, 8, 20, 0.6),
+    rgba(5, 8, 20, 0.2) 22%,
+    rgba(8, 10, 28, 0.08) 45%,
+    rgba(10, 14, 32, 0.28)
+  );
+  --marca: #fff;
+  --vidrio-fondo: rgba(8, 28, 38, 0.55);
+  --vidrio-borde: rgba(255, 255, 255, 0.12);
+  --vidrio-sombra: 0 32px 70px rgba(0, 0, 0, 0.45);
+  --vidrio-blur: 13px;
+  --portada: linear-gradient(135deg, #2a1a4a, #4b2f7e);
+  --avatar-anillo: #0b2230;
+  --pill-fondo: rgba(217, 164, 65, 0.18);
+  --pill-texto: #e3b65b;
+  --texto: #f5efe3;
+  --texto-suave: #aec0bc;
+  --texto-cuerpo: #d7e4df;
+  --separador: rgba(255, 255, 255, 0.1);
+  --separador-seccion: rgba(255, 255, 255, 0.12);
+  --mapa-borde: rgba(255, 255, 255, 0.12);
+  --mapa-fondo: linear-gradient(135deg, #10263b, #122a3f 50%, #16314a);
+  --pin-fondo: rgba(8, 28, 38, 0.88);
+  --pin-borde: rgba(255, 255, 255, 0.14);
+  --chip-fondo: rgba(255, 255, 255, 0.08);
+  --chip-hover: rgba(255, 255, 255, 0.14);
+  --chip-texto: #d7e4df;
+  --volver: #d9a441;
+  --toggle-fondo: rgba(8, 28, 38, 0.92);
+  --toggle-texto: rgba(245, 239, 227, 0.55);
+  color-scheme: dark;
+}

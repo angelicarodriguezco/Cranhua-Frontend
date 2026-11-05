@@ -87,10 +87,6 @@ export class MisTostadosComponent {
       );
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected merma(tueste: Tueste): string {
     const merma = calcularMerma(tueste.pesoVerdeKg, tueste.pesoTostadoKg);
     return merma === null ? '—' : `${porcentaje.format(merma)}%`;
