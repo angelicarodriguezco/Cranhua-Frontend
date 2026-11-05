@@ -60,9 +60,7 @@ export class DashboardConsumidorComponent {
   protected readonly idsResaltados = signal<ReadonlySet<string>>(new Set());
 
   protected readonly logoSrc = computed(() =>
-    this.tema() === 'claro'
-      ? '/images/logo-cranhua-negro.png'
-      : '/images/logo-cranhua.png',
+    this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',
   );
 
   protected readonly centro = signal(CENTRO_COSTA_RICA);

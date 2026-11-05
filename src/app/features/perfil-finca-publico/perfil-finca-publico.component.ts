@@ -32,9 +32,7 @@ export class PerfilFincaPublicoComponent {
   protected readonly kg = formatearKg;
 
   protected readonly finca = toSignal(
-    this.route.paramMap.pipe(
-      switchMap((params) => this.servicio.obtener(params.get('id') ?? '')),
-    ),
+    this.route.paramMap.pipe(switchMap((params) => this.servicio.obtener(params.get('id') ?? ''))),
   );
 
   protected readonly cosechaQuery = toSignal(
@@ -49,9 +47,7 @@ export class PerfilFincaPublicoComponent {
   });
 
   protected readonly logoSrc = computed(() =>
-    this.tema() === 'claro'
-      ? '/images/logo-cranhua-negro.png'
-      : '/images/logo-cranhua.png',
+    this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',
   );
 
   protected readonly opciones = computed<google.maps.MapOptions>(() => ({
