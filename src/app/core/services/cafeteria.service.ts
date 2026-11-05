@@ -36,6 +36,10 @@ export class CafeteriaService {
     return this.obtenerPorPropietario(CAFETERIA_ACTUAL.id);
   }
 
+  registrarActual(nueva: Omit<NuevaCafeteria, 'propietarioId'>): Observable<Cafeteria> {
+    return this.registrar({ ...nueva, propietarioId: CAFETERIA_ACTUAL.id });
+  }
+
   eliminar(id: string): Observable<boolean> {
     const existia = this.cafeterias.some((c) => c.id === id);
     if (!existia) {

@@ -13,6 +13,11 @@ export function nombreCorto(usuario: Usuario): string {
   return `${usuario.nombre} ${usuario.apellidos.split(' ')[0]}`.trim();
 }
 
+export function formatearTelefono(telefono: string): string {
+  const digitos = telefono.replace(/\D/g, '').slice(-8);
+  return `+506 ${digitos.slice(0, 4)}-${digitos.slice(4)}`;
+}
+
 const lista = new Intl.ListFormat('es', { type: 'conjunction' });
 
 export function listar(nombres: string[]): string {
