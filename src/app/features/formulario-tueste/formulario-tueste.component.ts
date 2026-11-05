@@ -181,10 +181,6 @@ export class FormularioTuesteComponent {
     }
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected invalido(control: AbstractControl): boolean {
     return control.invalid && control.touched;
   }

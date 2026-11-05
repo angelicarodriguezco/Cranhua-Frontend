@@ -18,8 +18,4 @@ export class DashboardTostadorComponent {
   protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly indicadores = this.dashboard.indicadores;
   protected readonly tema = this.dashboard.tema;
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
 }

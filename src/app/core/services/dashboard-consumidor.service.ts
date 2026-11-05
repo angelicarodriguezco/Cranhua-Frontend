@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import {
   CODIGOS_TRAZABILIDAD_CONSUMIDOR,
@@ -10,11 +10,13 @@ import {
   PuntoMapaConsumidor,
 } from '../models/punto-mapa-consumidor.model';
 
+import { TemaService } from './tema.service';
+
 @Injectable({ providedIn: 'root' })
 export class DashboardConsumidorService {
-  private readonly temaActual = signal<TemaDashboard>('oscuro');
+  private readonly temas = inject(TemaService);
 
-  readonly tema = this.temaActual.asReadonly();
+  readonly tema = this.temas.tema;
 
   puntos(): PuntoMapaConsumidor[] {
     return PUNTOS_MAPA_CONSUMIDOR;
@@ -31,6 +33,6 @@ export class DashboardConsumidorService {
   }
 
   establecerTema(tema: TemaDashboard): void {
-    this.temaActual.set(tema);
+    this.temas.establecerTema(tema);
   }
 }

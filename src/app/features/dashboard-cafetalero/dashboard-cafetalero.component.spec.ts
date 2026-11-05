@@ -3,6 +3,7 @@ import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
 import { SesionService } from '../../core/services/sesion.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { DashboardCafetaleroComponent } from './dashboard-cafetalero.component';
 
@@ -20,6 +21,8 @@ describe('DashboardCafetaleroComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -153,12 +156,13 @@ describe('DashboardCafetaleroComponent', () => {
     );
   });
 
-  it('muestra el perfil del sidebar y permite alternar el tema', () => {
+  it('muestra el perfil del sidebar y sigue el tema global', () => {
     expect(pagina.textContent).toContain('Rodrigo Alvarado');
     expect(pagina.textContent).toContain('RC');
+    expect(pagina.querySelector('app-menu-lateral-cafetalero button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
-    boton('Tema claro').click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');

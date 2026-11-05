@@ -35,8 +35,4 @@ export class HistorialCafetaleroComponent {
   protected readonly fecha = formatearFecha;
   protected readonly kg = formatearKg;
   protected readonly colones = formatearColones;
-
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
 }

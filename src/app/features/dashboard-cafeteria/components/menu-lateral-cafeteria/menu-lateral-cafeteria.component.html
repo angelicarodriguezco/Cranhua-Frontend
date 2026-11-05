@@ -46,25 +46,6 @@
     }
   </nav>
 
-  <button
-    type="button"
-    class="toggle-tema"
-    (click)="alternarTema.emit()"
-    [attr.aria-label]="tema() === 'oscuro' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
-  >
-    <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      @if (tema() === 'oscuro') {
-        <circle cx="12" cy="12" r="4" />
-        <path
-          d="M12 2.75v1.75M12 19.5v1.75M4.5 12H2.75M21.25 12H19.5M5.64 5.64l1.24 1.24M17.12 17.12l1.24 1.24M5.64 18.36l1.24-1.24M17.12 6.88l1.24-1.24"
-        />
-      } @else {
-        <path d="M18.5 14.2A7.25 7.25 0 0 1 9.8 5.5 7.5 7.5 0 1 0 18.5 14.2z" />
-      }
-    </svg>
-    <span>Tema {{ tema() === 'oscuro' ? 'claro' : 'oscuro' }}</span>
-  </button>
-
   <div class="perfil">
     <span class="avatar" aria-hidden="true">{{ perfil().iniciales }}</span>
     <div class="perfil-texto">

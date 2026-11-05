@@ -23,10 +23,6 @@ export class DashboardCafetaleroComponent {
   protected readonly fincas = this.dashboard.fincasResumen;
   protected readonly cosechas = this.dashboard.cosechasRecientes;
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected aprobar(id: string): void {
     this.dashboard.aprobarSolicitud(id);
   }

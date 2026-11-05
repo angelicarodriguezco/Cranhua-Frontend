@@ -5,11 +5,13 @@ import { firstValueFrom } from 'rxjs';
 import { PERFIL_EJEMPLO } from '../../core/mocks/perfil.mock';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   DESCRIPCION_ELIMINAR_CUENTA,
   enlaceRedSocial,
   inicialesPerfil,
   PerfilUsuarioComponent,
+  validarRed,
 } from './perfil-usuario.component';
 
 describe('PerfilUsuarioComponent', () => {
@@ -19,6 +21,7 @@ describe('PerfilUsuarioComponent', () => {
   let dashboard: DashboardCafetaleroService;
 
   beforeEach(async () => {
+    localStorage.removeItem(CLAVE_TEMA);
     await TestBed.configureTestingModule({
       imports: [PerfilUsuarioComponent],
       providers: [provideRouter([])],
@@ -30,6 +33,8 @@ describe('PerfilUsuarioComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find(
@@ -61,12 +66,13 @@ describe('PerfilUsuarioComponent', () => {
     return campo('h1').textContent!.trim();
   }
 
-  function irAlPaso2(): void {
-    clic('Editar perfil');
-    clic('Siguiente');
+  function titulosSecciones(): string[] {
+    return [...pagina.querySelectorAll('.seccion__titulo, app-zona-peligro h2')].map((h) =>
+      h.firstChild!.textContent!.trim(),
+    );
   }
 
-  it('calcula iniciales y enlaces de redes', () => {
+  it('calcula iniciales, enlaces y validación de redes', () => {
     expect(inicialesPerfil('Rodrigo Alvarado Castro')).toBe('RA');
     expect(enlaceRedSocial({ tipo: 'instagram', valor: '@fincalacatalina' })).toBe(
       'https://instagram.com/fincalacatalina',
@@ -77,9 +83,19 @@ describe('PerfilUsuarioComponent', () => {
     expect(enlaceRedSocial({ tipo: 'sitio', valor: 'lacatalina.cr' })).toBe(
       'https://lacatalina.cr',
     );
+
+    expect(validarRed({ tipo: 'instagram', valor: '@finca.la_catalina' })).toBeNull();
+    expect(validarRed({ tipo: 'instagram', valor: 'finca la catalina' })).not.toBeNull();
+    expect(validarRed({ tipo: 'whatsapp', valor: '8888-4321' })).toBeNull();
+    expect(validarRed({ tipo: 'whatsapp', valor: '1234' })).not.toBeNull();
+    expect(validarRed({ tipo: 'sitio', valor: 'https://lacatalina.cr/cafe' })).toBeNull();
+    expect(validarRed({ tipo: 'sitio', valor: 'lacatalina' })).not.toBeNull();
+    expect(validarRed({ tipo: 'facebook', valor: '  ' })).toBe(
+      'Completá el enlace o quitá esta red.',
+    );
   });
 
-  it('muestra los datos del mock, los indicadores y la información de la cuenta', () => {
+  it('la vista muestra los datos, los indicadores y la cuenta, sin secciones de edición', () => {
     const indicadores = dashboard.indicadores();
 
     expect(titulo()).toBe('Mi perfil');
@@ -107,31 +123,50 @@ describe('PerfilUsuarioComponent', () => {
     expect(datos).toContain('rodrigo@fincalacatalina.cr');
     expect(datos).toContain('+506 8888-4321');
     expect(datos).toContain('Cafetalero');
+
+    expect(titulosSecciones()).toEqual(['Información de la cuenta']);
+    expect(pagina.querySelector('[role="switch"]')).toBeNull();
+    expect(pagina.querySelector('app-zona-peligro')).toBeNull();
   });
 
-  it('edita en dos pasos y guarda volviendo a la vista con el dato nuevo', () => {
-    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
-
+  it('editar muestra todo en una sola página con los datos cargados', () => {
     clic('Editar perfil');
+
     expect(titulo()).toBe('Editar perfil');
-    expect(pagina.textContent).toContain('(1 de 2)');
+    expect(pagina.textContent).toContain(
+      'Actualizá tu foto de portada, tu información y tus preferencias.',
+    );
+    expect(pagina.textContent).not.toContain('de 2)');
+    expect(() => boton('Siguiente')).toThrow();
+
     expect(campo('#nombre-perfil').value).toBe(PERFIL_EJEMPLO.nombreCompleto);
     expect(campo('#correo-perfil').value).toBe(PERFIL_EJEMPLO.correo);
     expect(campo('#telefono-perfil').value).toBe(PERFIL_EJEMPLO.telefono);
     expect(campo('#ubicacion-perfil').value).toBe(PERFIL_EJEMPLO.ubicacion);
     expect(campo<HTMLTextAreaElement>('#biografia-perfil').value).toBe(PERFIL_EJEMPLO.biografia);
 
-    escribir('#nombre-perfil', 'Rodrigo Alvarado');
-    clic('Siguiente');
-    expect(pagina.textContent).toContain('(2 de 2)');
+    expect(titulosSecciones()).toEqual([
+      'Redes sociales',
+      'Seguridad',
+      'Preferencias',
+      'Zona de peligro',
+    ]);
+    expect(boton('Guardar cambios')).toBeTruthy();
+  });
 
+  it('"Guardar cambios" guarda y vuelve a la vista con el dato editado', () => {
+    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
+
+    clic('Editar perfil');
+    escribir('#nombre-perfil', 'Rodrigo Alvarado');
     clic('Guardar cambios');
+
     expect(actualizar).toHaveBeenCalled();
     expect(titulo()).toBe('Mi perfil');
     expect(campo('.identidad h2').textContent!.trim()).toBe('Rodrigo Alvarado');
   });
 
-  it('Cancelar y Volver no guardan cambios', () => {
+  it('Cancelar y Volver descartan los cambios', () => {
     const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
 
     clic('Editar perfil');
@@ -141,22 +176,14 @@ describe('PerfilUsuarioComponent', () => {
     expect(pagina.textContent).toContain(PERFIL_EJEMPLO.nombreCompleto);
 
     clic('Editar perfil');
-    escribir('#nombre-perfil', 'Otro nombre');
-    clic('← Volver');
-    expect(titulo()).toBe('Mi perfil');
-
-    clic('Editar perfil');
     expect(campo('#nombre-perfil').value).toBe(PERFIL_EJEMPLO.nombreCompleto);
     escribir('#ubicacion-perfil', 'Dota, Costa Rica');
-    clic('Siguiente');
+    clic('Quitar Instagram');
     clic('← Volver');
-    expect(pagina.textContent).toContain('(1 de 2)');
-    expect(campo('#ubicacion-perfil').value).toBe('Dota, Costa Rica');
-    clic('Siguiente');
-    clic('Cancelar');
 
     expect(titulo()).toBe('Mi perfil');
     expect(pagina.textContent).toContain(PERFIL_EJEMPLO.ubicacion);
+    expect([...pagina.querySelectorAll('.chips a')].length).toBe(2);
     expect(actualizar).not.toHaveBeenCalled();
   });
 
@@ -169,14 +196,21 @@ describe('PerfilUsuarioComponent', () => {
   ];
 
   invalidos.forEach(([selector, valor, mensaje]) => {
-    it(`no avanza del paso 1 con ${selector} = "${valor}"`, () => {
+    it(`no guarda con ${selector} = "${valor}" y lleva al campo con error`, async () => {
+      const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
+      const desplazar = spyOn(HTMLElement.prototype, 'scrollIntoView');
+
       clic('Editar perfil');
       escribir(selector, valor);
-      clic('Siguiente');
+      clic('Guardar cambios');
+      await fixture.whenStable();
 
-      expect(pagina.textContent).toContain('(1 de 2)');
+      expect(actualizar).not.toHaveBeenCalled();
+      expect(titulo()).toBe('Editar perfil');
       expect(pagina.textContent).toContain(mensaje);
       expect(campo(selector).getAttribute('aria-invalid')).toBe('true');
+      expect(desplazar).toHaveBeenCalled();
+      expect(document.activeElement).toBe(campo(selector));
     });
   });
 
@@ -191,7 +225,7 @@ describe('PerfilUsuarioComponent', () => {
   });
 
   it('agrega y quita redes sin repetir tipo', () => {
-    irAlPaso2();
+    clic('Editar perfil');
     expect(pagina.querySelectorAll('.red').length).toBe(2);
 
     clic('+ Agregar red social');
@@ -210,6 +244,7 @@ describe('PerfilUsuarioComponent', () => {
       .toEqual(['Sitio web']);
     clic('Sitio web');
     expect(pagina.querySelector('.agregar-red')).toBeNull();
+    escribir('#red-sitio', 'lacatalina.cr');
 
     clic('Quitar Instagram');
     expect(pagina.querySelector('#red-instagram')).toBeNull();
@@ -217,11 +252,33 @@ describe('PerfilUsuarioComponent', () => {
 
     clic('Guardar cambios');
     const chips = [...pagina.querySelectorAll('.chips a')].map((c) => c.textContent!.trim());
-    expect(chips).toEqual(['WhatsApp', 'Facebook']);
+    expect(chips).toEqual(['WhatsApp', 'Facebook', 'Sitio web']);
   });
 
-  it('valida la contraseña y muestra error o éxito', () => {
-    irAlPaso2();
+  it('no guarda con una red vacía o inválida', async () => {
+    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
+    spyOn(HTMLElement.prototype, 'scrollIntoView');
+
+    clic('Editar perfil');
+    clic('+ Agregar red social');
+    clic('Sitio web');
+    clic('Guardar cambios');
+    await fixture.whenStable();
+
+    expect(actualizar).not.toHaveBeenCalled();
+    expect(campo('#error-red-sitio').textContent).toContain('Completá el enlace o quitá esta red.');
+    expect(campo('#red-sitio').getAttribute('aria-invalid')).toBe('true');
+    expect(document.activeElement).toBe(campo('#red-sitio'));
+
+    escribir('#red-sitio', 'lacatalina');
+    clic('Guardar cambios');
+    expect(actualizar).not.toHaveBeenCalled();
+    expect(campo('#error-red-sitio').textContent).toContain('Ingresá un enlace válido');
+  });
+
+  it('valida la contraseña aparte y muestra error o éxito', () => {
+    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
+    clic('Editar perfil');
 
     const casos: [string, string, string][] = [
       ['', '', 'Completá la contraseña actual y la nueva.'],
@@ -243,16 +300,20 @@ describe('PerfilUsuarioComponent', () => {
     expect(campo('.mensaje').classList).toContain('mensaje--exito');
     expect(campo('#contrasena-actual').value).toBe('');
     expect(campo('#contrasena-nueva').value).toBe('');
+    expect(actualizar).not.toHaveBeenCalled();
+    expect(titulo()).toBe('Editar perfil');
   });
 
-  it('el switch de apariencia cambia el tema del host', () => {
-    irAlPaso2();
+  it('el switch de apariencia cambia el tema global y el data-theme del host', () => {
+    const temas = TestBed.inject(TemaService);
+    clic('Editar perfil');
     const interruptor = campo<HTMLButtonElement>('[role="switch"]');
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
     expect(interruptor.getAttribute('aria-checked')).toBe('true');
 
     interruptor.click();
     fixture.detectChanges();
+    expect(temas.tema()).toBe('claro');
     expect(dashboard.tema()).toBe('claro');
     expect(pagina.getAttribute('data-theme')).toBe('claro');
     expect(interruptor.getAttribute('aria-checked')).toBe('false');
@@ -263,7 +324,7 @@ describe('PerfilUsuarioComponent', () => {
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
     const eliminar = spyOn(perfilService, 'eliminarCuenta').and.callThrough();
 
-    irAlPaso2();
+    clic('Editar perfil');
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_CUENTA);
 
     clic('Eliminar mi cuenta');

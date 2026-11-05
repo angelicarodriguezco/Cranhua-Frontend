@@ -1,8 +1,4 @@
-<app-menu-lateral-cafetalero
-  [perfil]="perfilSidebar"
-  [tema]="tema()"
-  (alternarTema)="alternarTema()"
-/>
+<app-menu-lateral-cafetalero [perfil]="perfilSidebar" />
 
 <ng-template #iconoRed let-tipo>
   <svg class="icono-red" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -128,17 +124,23 @@
           </div>
         </dl>
       </section>
-    } @else if (modo() === 'paso1') {
+    } @else {
       <header class="encabezado">
         <div>
           <h1>Editar perfil</h1>
-          <p>Actualizá tu foto de portada y tu información básica. (1 de 2)</p>
+          <p>Actualizá tu foto de portada, tu información y tus preferencias.</p>
         </div>
         <button type="button" class="btn btn--volver" (click)="cancelar()">← Volver</button>
       </header>
 
-      <form [formGroup]="formulario" (ngSubmit)="siguiente()" novalidate>
-        <div class="vidrio tarjeta">
+      <div class="pasos">
+        <form
+          class="vidrio tarjeta"
+          aria-label="Datos del perfil"
+          [formGroup]="formulario"
+          (ngSubmit)="guardar()"
+          novalidate
+        >
           <div class="portada">
             @if (portadaUrl(); as url) {
               <img class="portada__imagen" [src]="url" alt="Vista previa de la portada" />
@@ -270,23 +272,8 @@
               </p>
             </div>
           </div>
-        </div>
+        </form>
 
-        <div class="acciones">
-          <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
-          <button type="submit" class="btn btn--filled">Siguiente</button>
-        </div>
-      </form>
-    } @else {
-      <header class="encabezado">
-        <div>
-          <h1>Editar perfil</h1>
-          <p>Tus redes, tu seguridad y tus preferencias. (2 de 2)</p>
-        </div>
-        <button type="button" class="btn btn--volver" (click)="volverAlPaso1()">← Volver</button>
-      </header>
-
-      <div class="pasos">
         <section class="vidrio seccion" aria-labelledby="titulo-redes">
           <h2 id="titulo-redes" class="seccion__titulo">
             Redes sociales <span class="campo__opcional">(opcional)</span>
@@ -295,29 +282,37 @@
 
           <ul class="redes">
             @for (red of redes(); track red.tipo) {
-              <li class="red">
-                <span class="red__icono">
-                  <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
-                </span>
-                <input
-                  class="campo__control"
-                  [id]="'red-' + red.tipo"
-                  [value]="red.valor"
-                  [placeholder]="placeholdersRed[red.tipo]"
-                  [attr.aria-label]="nombresRed[red.tipo]"
-                  autocomplete="off"
-                  (input)="cambiarRed(red.tipo, $event)"
-                />
-                <button
-                  type="button"
-                  class="red__quitar"
-                  [attr.aria-label]="'Quitar ' + nombresRed[red.tipo]"
-                  (click)="quitarRed(red.tipo)"
-                >
-                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
-                  </svg>
-                </button>
+              @let error = errorRed(red);
+              <li>
+                <div class="red">
+                  <span class="red__icono">
+                    <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
+                  </span>
+                  <input
+                    class="campo__control"
+                    [id]="'red-' + red.tipo"
+                    [value]="red.valor"
+                    [placeholder]="placeholdersRed[red.tipo]"
+                    [attr.aria-label]="nombresRed[red.tipo]"
+                    [attr.aria-invalid]="error !== null"
+                    [attr.aria-describedby]="error ? 'error-red-' + red.tipo : null"
+                    autocomplete="off"
+                    (input)="cambiarRed(red.tipo, $event)"
+                  />
+                  <button
+                    type="button"
+                    class="red__quitar"
+                    [attr.aria-label]="'Quitar ' + nombresRed[red.tipo]"
+                    (click)="quitarRed(red.tipo)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+                    </svg>
+                  </button>
+                </div>
+                @if (error) {
+                  <p [id]="'error-red-' + red.tipo" class="campo__error red__error">{{ error }}</p>
+                }
               </li>
             }
           </ul>

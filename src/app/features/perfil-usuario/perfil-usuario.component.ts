@@ -1,8 +1,10 @@
 import {
+  afterNextRender,
   Component,
   computed,
   ElementRef,
   inject,
+  Injector,
   OnDestroy,
   signal,
   viewChild,
@@ -27,6 +29,7 @@ import {
 } from '../../core/models/perfil.model';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
+import { TemaService } from '../../core/services/tema.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
@@ -52,7 +55,10 @@ const PLACEHOLDERS_RED_SOCIAL: Record<TipoRedSocial, string> = {
   sitio: 'https://tusitio.cr',
 };
 
-type Modo = 'vista' | 'paso1' | 'paso2';
+const INSTAGRAM = /^@?[\w.]{1,30}$/;
+const ENLACE = /^(https?:\/\/)?[^\s/.]+(\.[^\s/.]+)+(\/\S*)?$/;
+
+type Modo = 'vista' | 'edicion';
 
 type Campo = keyof ReturnType<typeof crearFormularioPerfil>['controls'];
 
@@ -98,6 +104,23 @@ export function inicialesPerfil(nombre: string): string {
   return `${partes[0][0]}${partes[1][0]}`.toUpperCase();
 }
 
+export function validarRed(red: RedSocial): string | null {
+  const valor = red.valor.trim();
+  if (!valor) {
+    return 'Completá el enlace o quitá esta red.';
+  }
+  switch (red.tipo) {
+    case 'instagram':
+      return INSTAGRAM.test(valor) ? null : 'Usá tu usuario de Instagram, ej. @tufinca.';
+    case 'whatsapp':
+      return TELEFONO.test(valor) ? null : 'Ingresá un número de 8 dígitos.';
+    case 'facebook':
+      return /^\S+$/.test(valor) ? null : 'Ingresá tu página de Facebook sin espacios.';
+    case 'sitio':
+      return ENLACE.test(valor) ? null : 'Ingresá un enlace válido, ej. https://tusitio.cr.';
+  }
+}
+
 export function enlaceRedSocial(red: RedSocial): string {
   const valor = red.valor.trim();
   switch (red.tipo) {
@@ -136,11 +159,14 @@ export function enlaceRedSocial(red: RedSocial): string {
 })
 export class PerfilUsuarioComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardCafetaleroService);
+  private readonly temas = inject(TemaService);
   private readonly perfilService = inject(PerfilService);
   private readonly router = inject(Router);
+  private readonly injector = inject(Injector);
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly perfilSidebar = this.dashboard.perfilSidebar;
-  protected readonly tema = this.dashboard.tema;
+  protected readonly tema = this.temas.tema;
   protected readonly indicadores = this.dashboard.indicadores;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CUENTA;
   protected readonly nombresRed = NOMBRES_RED_SOCIAL;
@@ -149,6 +175,7 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected readonly perfil = signal<PerfilUsuario | null>(null);
   protected readonly modo = signal<Modo>('vista');
+  protected readonly intentoGuardar = signal(false);
 
   protected readonly formulario = crearFormularioPerfil();
   protected readonly contrasena = new FormGroup({
@@ -183,7 +210,11 @@ export class PerfilUsuarioComponent implements OnDestroy {
   }
 
   protected alternarTema(): void {
-    this.dashboard.alternarTema();
+    this.temas.alternarTema();
+  }
+
+  protected errorRed(red: RedSocial): string | null {
+    return this.intentoGuardar() ? validarRed(red) : null;
   }
 
   protected invalido(campo: Campo): boolean {
@@ -213,19 +244,8 @@ export class PerfilUsuarioComponent implements OnDestroy {
     this.mensajeContrasena.set(null);
     this.portadaUrl.set(perfil.portadaUrl);
     this.avatarUrl.set(perfil.avatarUrl);
-    this.modo.set('paso1');
-  }
-
-  protected siguiente(): void {
-    this.formulario.markAllAsTouched();
-    if (this.formulario.invalid) {
-      return;
-    }
-    this.modo.set('paso2');
-  }
-
-  protected volverAlPaso1(): void {
-    this.modo.set('paso1');
+    this.intentoGuardar.set(false);
+    this.modo.set('edicion');
   }
 
   protected cancelar(): void {
@@ -235,7 +255,13 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected guardar(): void {
     const perfil = this.perfil();
-    if (!perfil || this.formulario.invalid) {
+    if (!perfil) {
+      return;
+    }
+    this.intentoGuardar.set(true);
+    this.formulario.markAllAsTouched();
+    if (this.formulario.invalid || this.redes().some((r) => validarRed(r))) {
+      afterNextRender(() => this.irAlPrimerError(), { injector: this.injector });
       return;
     }
     const { nombreCompleto, correo, telefono, ubicacion, biografia } =
@@ -247,9 +273,7 @@ export class PerfilUsuarioComponent implements OnDestroy {
       telefono: telefono.trim(),
       ubicacion: ubicacion.trim(),
       biografia: biografia.trim(),
-      redes: this.redes()
-        .map((r) => ({ ...r, valor: r.valor.trim() }))
-        .filter((r) => r.valor),
+      redes: this.redes().map((r) => ({ ...r, valor: r.valor.trim() })),
       portadaUrl: this.portadaUrl(),
       avatarUrl: this.avatarUrl(),
     };
@@ -332,6 +356,12 @@ export class PerfilUsuarioComponent implements OnDestroy {
       this.modalEliminarAbierto.set(false);
       void this.router.navigateByUrl('/');
     });
+  }
+
+  private irAlPrimerError(): void {
+    const campo = this.host.nativeElement.querySelector<HTMLElement>('[aria-invalid="true"]');
+    campo?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    campo?.focus({ preventScroll: true });
   }
 
   private reemplazarVistaPrevia(
