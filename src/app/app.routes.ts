@@ -24,6 +24,7 @@ import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.compo
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
+import { PerfilCafeteriaComponent } from './features/perfil-cafeteria/perfil-cafeteria.component';
 import { PerfilFincaPublicoComponent } from './features/perfil-finca-publico/perfil-finca-publico.component';
 import { PerfilTostadorComponent } from './features/perfil-tostador/perfil-tostador.component';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/perfil-usuario.component';
@@ -46,11 +47,7 @@ export const routes: Routes = [
     data: { title: 'Perfil público de finca' },
   },
   { path: 'explorar/tostador/:id', component: PerfilTostadorComponent },
-  {
-    path: 'explorar/cafeteria/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Perfil público de cafetería' },
-  },
+  { path: 'explorar/cafeteria/:id', component: PerfilCafeteriaComponent },
   { path: 'explorar/cafeteria/:id/menu', component: MenuPublicoComponent },
   {
     path: 'iniciar-sesion',
