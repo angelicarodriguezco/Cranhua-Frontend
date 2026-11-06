@@ -1,0 +1,86 @@
+<div class="pagina">
+  <header class="barra">
+    <img class="marca" [src]="logo()" alt="Crán̈hua" width="160" height="29" />
+
+    <div class="toggle-tema" role="group" aria-label="Tema de la vista">
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+        [attr.aria-pressed]="tema() === 'claro'"
+        (click)="establecerTema('claro')"
+      >
+        Claro
+      </button>
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+        [attr.aria-pressed]="tema() === 'oscuro'"
+        (click)="establecerTema('oscuro')"
+      >
+        Oscuro
+      </button>
+    </div>
+  </header>
+
+  @if (menu(); as m) {
+    <article class="tarjeta" aria-labelledby="nombre-cafeteria">
+      <span class="pill-rol">Menú</span>
+      <h1 id="nombre-cafeteria">{{ m.nombre }}</h1>
+      <p class="ubicacion">{{ m.ubicacion }}</p>
+
+      <section class="seccion" aria-labelledby="titulo-cafes">
+        <h2 id="titulo-cafes">Cafés</h2>
+        <ul class="lista">
+          @for (cafe of m.cafes; track cafe.id) {
+            <li class="fila fila--cafe">
+              <div class="fila__info">
+                <p class="fila__nombre">{{ cafe.nombre }}</p>
+                <p class="fila__detalle">
+                  Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
+                </p>
+                <a
+                  class="ver-origen"
+                  [routerLink]="['/explorar/finca', cafe.fincaOrigen.id]"
+                  [attr.aria-label]="
+                    'Ver origen de ' + cafe.nombre + ': ' + cafe.fincaOrigen.nombre
+                  "
+                >
+                  Ver origen →
+                </a>
+              </div>
+              <span class="fila__precio">{{ precio(cafe.precio) }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <section class="seccion" aria-labelledby="titulo-comidas">
+        <h2 id="titulo-comidas">Otras comidas</h2>
+        <ul class="lista">
+          @for (comida of m.otrasComidas; track comida.id) {
+            <li class="fila">
+              <p class="fila__nombre">{{ comida.nombre }}</p>
+              <span class="fila__precio">{{ precio(comida.precio) }}</span>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <div class="acciones">
+        <a class="volver" [routerLink]="['/explorar/cafeteria', id()]">← Volver a la cafetería</a>
+      </div>
+    </article>
+  } @else {
+    <article class="tarjeta" role="alert">
+      <h1>No encontramos este menú</h1>
+      <p class="ubicacion">
+        Puede que el enlace esté mal o que la cafetería ya no esté en Cránhua.
+      </p>
+      <div class="acciones">
+        <a class="volver" routerLink="/explorar">← Volver al directorio</a>
+      </div>
+    </article>
+  }
+</div>
