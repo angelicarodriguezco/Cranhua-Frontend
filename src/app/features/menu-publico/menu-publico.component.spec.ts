@@ -76,7 +76,7 @@ describe('MenuPublicoComponent', () => {
     });
 
     it('"Volver a la cafetería" regresa al perfil público de la cafetería', () => {
-       expect(enlace(pagina, 'Volver a la cafetería').getAttribute('href')).toBe(
+      expect(enlace(pagina, 'Volver a la cafetería').getAttribute('href')).toBe(
         '/explorar/cafeteria/c-cafe-brumas',
       );
     });
