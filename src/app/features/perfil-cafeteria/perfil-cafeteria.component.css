@@ -9,7 +9,7 @@
 }
 
 .pagina {
-  padding: 1.25rem 1rem 1.25rem;
+  padding: 1.25rem 1rem;
 }
 
 .barra {
@@ -91,7 +91,7 @@
 
 .cuerpo {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-areas:
     'intro datos'
     'fincas mapa'
@@ -225,15 +225,9 @@ h2 {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem 1.75rem;
+  gap: 1rem;
   padding-top: 1rem;
   border-top: 1px solid var(--separador-seccion);
-}
-
-.tarjeta--vacia .acciones {
-  justify-content: center;
-  margin-top: 1.25rem;
-  border-top: 0;
 }
 
 .volver {
@@ -294,7 +288,7 @@ h2 {
       'mapa'
       'fincas'
       'acciones';
-    padding: 1.25rem 1.25rem 1.5rem;
+    padding-inline: 1.25rem;
   }
 
   .avatar {
