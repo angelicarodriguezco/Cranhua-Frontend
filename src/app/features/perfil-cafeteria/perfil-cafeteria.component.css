@@ -1,0 +1,307 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    var(--fondo-velo),
+    var(--fondo-imagen) center / cover;
+  color: var(--texto);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.pagina {
+  padding: 1.25rem 1rem 1.25rem;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 90rem;
+  margin: 0 auto 1rem;
+}
+
+.marca {
+  display: block;
+  width: 10rem;
+  height: auto;
+}
+
+.toggle-tema {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.28rem;
+  border-radius: 999px;
+  background: var(--toggle-fondo);
+}
+
+.toggle-tema__opcion {
+  height: 2rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--toggle-texto);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.toggle-tema__opcion--activa {
+  background: #c9a227;
+  color: #142320;
+}
+
+.tarjeta {
+  position: relative;
+  max-width: 64rem;
+  margin: 0 auto;
+  overflow: hidden;
+  border: 1px solid var(--vidrio-borde);
+  border-radius: 1.4rem;
+  background: var(--vidrio-fondo);
+  box-shadow: var(--vidrio-sombra);
+  backdrop-filter: blur(var(--vidrio-blur));
+}
+
+.tarjeta--vacia {
+  padding: 2rem;
+}
+
+.portada {
+  height: 5.5rem;
+  background: var(--portada);
+}
+
+.avatar {
+  position: absolute;
+  top: 2.9rem;
+  left: 2rem;
+  display: grid;
+  place-items: center;
+  width: 5.75rem;
+  height: 5.75rem;
+  border: 4px solid var(--avatar-anillo);
+  border-radius: 50%;
+  background: var(--avatar-fondo);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.cuerpo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-areas:
+    'intro datos'
+    'fincas mapa'
+    'acciones acciones';
+  gap: 1rem 2.25rem;
+  padding: 1.25rem 2rem 1.5rem;
+}
+
+.intro {
+  grid-area: intro;
+  padding-top: 2.4rem;
+}
+
+.pill-rol {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--pill-fondo);
+  color: var(--pill-texto);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0.4rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.ubicacion {
+  margin: 0.25rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.descripcion {
+  margin: 0.75rem 0 0;
+  color: var(--texto-cuerpo);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.datos {
+  grid-area: datos;
+  align-self: end;
+  margin: 0;
+}
+
+.fila-dato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.6rem;
+  border-bottom: 1px solid var(--separador);
+}
+
+.fila-dato:last-child {
+  border-bottom: 0;
+}
+
+.fila-dato dt {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+}
+
+.fila-dato dd {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: right;
+}
+
+.mapa {
+  grid-area: mapa;
+  min-height: 10.5rem;
+  overflow: hidden;
+  border: 1px solid var(--mapa-borde);
+  border-radius: 1rem;
+  background: var(--mapa-fondo);
+}
+
+.mapa__aviso {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.fincas {
+  grid-area: fincas;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--separador-seccion);
+}
+
+h2 {
+  margin: 0.75rem 0 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  background: var(--chip-fondo);
+  color: var(--chip-texto);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chip:hover {
+  background: var(--chip-hover);
+}
+
+.acciones {
+  grid-area: acciones;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--separador-seccion);
+}
+
+.tarjeta--vacia .acciones {
+  justify-content: center;
+  margin-top: 1.25rem;
+  border-top: 0;
+}
+
+.volver {
+  color: var(--volver);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-primario {
+  padding: 0.85rem 1.4rem;
+  border-radius: 999px;
+  background: #a57008;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.btn-primario:hover {
+  background: #b67d0e;
+}
+
+:is(a, button):focus-visible {
+  outline: 2px solid #d9a441;
+  outline-offset: 2px;
+}
+
+:host ::ng-deep .pin-cafeteria {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+}
+
+:host ::ng-deep .pin-cafeteria__icono {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+:host ::ng-deep .pin-cafeteria__etiqueta {
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--pin-borde);
+  border-radius: 999px;
+  background: var(--pin-fondo);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  color: var(--texto);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'intro'
+      'datos'
+      'mapa'
+      'fincas'
+      'acciones';
+    padding: 1.25rem 1.25rem 1.5rem;
+  }
+
+  .avatar {
+    left: 1.25rem;
+  }
+
+  .acciones {
+    flex-direction: column-reverse;
+  }
+}
