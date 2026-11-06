@@ -36,10 +36,6 @@ export class ExplorarTostadoresComponent {
   );
   protected readonly kg = formatearKg;
 
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
-
   protected limpiarFiltros(): void {
     this.filtros.set(SIN_FILTROS);
   }

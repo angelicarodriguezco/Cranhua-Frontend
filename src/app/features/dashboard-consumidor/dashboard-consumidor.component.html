@@ -1,0 +1,92 @@
+<div class="dashboard-consumidor">
+  <div class="mapa" aria-label="Mapa de fincas, tostadores y cafeterías">
+    @switch (apiCargada()) {
+      @case (true) {
+        <google-map
+          width="100%"
+          height="100%"
+          [center]="centro()"
+          [zoom]="zoom()"
+          [options]="opciones()"
+        >
+          @for (punto of puntos; track punto.id) {
+            <map-advanced-marker
+              [position]="punto.coordenada"
+              [content]="contenidoPin(punto)"
+              [title]="punto.nombre"
+              (mapClick)="abrirPerfil(punto)"
+            />
+          }
+        </google-map>
+      }
+      @case (false) {
+        <p class="aviso-carga">
+          No se pudo cargar Google Maps. Revisá que <code>GOOGLE_MAPS_API_KEY</code> esté en el
+          <code>.env</code>.
+        </p>
+      }
+      @default {
+        <p class="aviso-carga">Cargando mapa…</p>
+      }
+    }
+  </div>
+
+  <div class="overlays">
+    <a routerLink="/" class="volver-inicio" aria-label="Volver al inicio">
+      <span class="volver-inicio__flecha" aria-hidden="true">←</span>
+      Volver al inicio
+    </a>
+
+    <form class="barra-busqueda" (submit)="$event.preventDefault(); buscar()" autocomplete="off">
+      <img class="barra-busqueda__marca" [src]="logoSrc()" width="110" height="28" alt="Cránhua" />
+      <input
+        class="barra-busqueda__input"
+        type="search"
+        [formControl]="codigo"
+        placeholder="Ingresá tu código de trazabilidad — Ej. CRH-2026-0103"
+        aria-label="Código de trazabilidad"
+        [attr.aria-invalid]="errorBusqueda() ? true : null"
+        [attr.aria-describedby]="errorBusqueda() ? 'error-codigo' : null"
+      />
+      <button class="barra-busqueda__boton" type="submit">Buscar</button>
+    </form>
+
+    @if (errorBusqueda(); as mensaje) {
+      <p id="error-codigo" class="barra-busqueda__error" role="alert">{{ mensaje }}</p>
+    }
+
+    <div class="toggle-tema" role="group" aria-label="Tema del mapa">
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+        [attr.aria-pressed]="tema() === 'claro'"
+        (click)="establecerTema('claro')"
+      >
+        Claro
+      </button>
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+        [attr.aria-pressed]="tema() === 'oscuro'"
+        (click)="establecerTema('oscuro')"
+      >
+        Oscuro
+      </button>
+    </div>
+
+    <ul class="leyenda" aria-label="Leyenda de tipos">
+      @for (item of leyenda; track item.tipo) {
+        <li class="leyenda__item">
+          <span
+            class="leyenda__punto"
+            [style.background]="colorTipo(item.tipo)"
+            aria-hidden="true"
+          ></span>
+          <span>{{ item.etiqueta }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+</div>

@@ -1,5 +1,6 @@
-app-mi-cafeteria {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-claro.jpg');
+app-mi-cafeteria,
+app-registrar-cafeteria {
+  --fondo-imagen: url('/images/bg-claro.jpg');
   --fondo-velo: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.28),
@@ -33,8 +34,9 @@ app-mi-cafeteria {
   --esquema: light;
 }
 
-app-mi-cafeteria[data-theme='oscuro'] {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+app-mi-cafeteria[data-theme='oscuro'],
+app-registrar-cafeteria[data-theme='oscuro'] {
+  --fondo-imagen: url('/images/bg-oscuro.jpg');
   --fondo-velo: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.6),

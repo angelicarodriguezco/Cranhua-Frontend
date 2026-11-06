@@ -82,10 +82,6 @@ export class RegistrarFincaComponent {
     });
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
-
   protected volver(): void {
     if (this.paso() === 'conflicto') {
       this.corregirDibujo();

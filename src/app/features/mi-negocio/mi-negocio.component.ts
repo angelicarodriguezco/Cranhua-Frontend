@@ -35,6 +35,9 @@ export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
 export const DESCRIPCION_ELIMINAR_NEGOCIO =
   'Eliminar tu negocio borra su perfil público. Tu cuenta de Cránhua sigue activa.';
 
+export const AVISO_ELIMINAR_NEGOCIO =
+  'Ya tostaste lotes con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu negocio no borra esos códigos, pero ya no vas a poder editar tu información ni generar nuevos tuestes.';
+
 type Campo = keyof FormularioNegocio['controls'];
 
 function formatearTelefono(telefono: string): string {
@@ -84,6 +87,7 @@ export class MiNegocioComponent implements OnDestroy {
   protected readonly tema = this.dashboard.tema;
   protected readonly estilos = ESTILOS_TUESTE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_NEGOCIO;
+  protected readonly avisoEliminar = AVISO_ELIMINAR_NEGOCIO;
 
   protected readonly formulario = crearFormularioNegocio();
   protected readonly pin = signal<Coordenada | null>(null);
@@ -129,10 +133,6 @@ export class MiNegocioComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.revocarPortadaObjectUrl();
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected invalido(campo: Campo): boolean {

@@ -51,10 +51,6 @@ export class MisPedidosComponent {
     this.pedidosService.listar().subscribe((pedidos) => this.pedidos.set(pedidos));
   }
 
-  protected alternarTema(): void {
-    this.panel.alternarTema();
-  }
-
   protected marcarRecibido(pedido: Pedido): void {
     this.pedidosService.marcarRecibido(pedido.id).subscribe((p) => this.reemplazar(p));
   }

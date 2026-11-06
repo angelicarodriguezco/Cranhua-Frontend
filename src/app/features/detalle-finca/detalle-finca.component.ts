@@ -1,6 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin, map, switchMap } from 'rxjs';
 
 import { Cosecha } from '../../core/models/cosecha.model';
@@ -8,6 +8,7 @@ import { ErrorAgregarDueno, Finca, Usuario } from '../../core/models/finca.model
 import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { FincaService } from '../../core/services/finca.service';
+import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import { ListaDuenosComponent } from './components/lista-duenos/lista-duenos.component';
@@ -21,12 +22,16 @@ const MENSAJES_ERROR_DUENO: Record<ErrorAgregarDueno, string> = {
   'ya-es-dueno': 'Esa persona ya es dueña de esta finca.',
 };
 
+export const AVISO_ELIMINAR_FINCA =
+  'Esta finca ya tiene un lote (CRH-2026-0103) comprado por un tostador, con código de trazabilidad visible para consumidores. Eliminar la finca no borra ese código, pero ya no vas a poder editar su información.';
+
 @Component({
   selector: 'app-detalle-finca',
   imports: [
     ListaDuenosComponent,
     MapaPerimetroComponent,
     MenuLateralCafetaleroComponent,
+    ModalConfirmacionComponent,
     RouterLink,
     TablaCosechasComponent,
     ZonaPeligroComponent,
@@ -37,6 +42,7 @@ const MENSAJES_ERROR_DUENO: Record<ErrorAgregarDueno, string> = {
 export class DetalleFincaComponent {
   private readonly fincaService = inject(FincaService);
   private readonly cosechaService = inject(CosechaService);
+  private readonly router = inject(Router);
   // El tema y el perfil del menú se comparten con el dashboard del cafetalero
   private readonly dashboard = inject(DashboardCafetaleroService);
 
@@ -47,6 +53,8 @@ export class DetalleFincaComponent {
   protected readonly finca = signal<Finca | undefined>(undefined);
   protected readonly cosechas = signal<Cosecha[]>([]);
   protected readonly errorDueno = signal<string | null>(null);
+  protected readonly modalEliminarAbierto = signal(false);
+  protected readonly avisoEliminar = AVISO_ELIMINAR_FINCA;
 
   protected readonly ubicacion = computed(() => {
     const canton = this.finca()?.canton;
@@ -92,8 +100,24 @@ export class DetalleFincaComponent {
       });
   }
 
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
+  protected abrirModalEliminar(): void {
+    this.modalEliminarAbierto.set(true);
+  }
+
+  protected cerrarModalEliminar(): void {
+    this.modalEliminarAbierto.set(false);
+  }
+
+  protected confirmarEliminar(): void {
+    const finca = this.finca();
+    if (!finca) {
+      this.modalEliminarAbierto.set(false);
+      return;
+    }
+    this.fincaService.eliminar(finca.id).subscribe(() => {
+      this.modalEliminarAbierto.set(false);
+      void this.router.navigateByUrl('/cafetalero/fincas');
+    });
   }
 
   protected agregarDueno(correo: string): void {

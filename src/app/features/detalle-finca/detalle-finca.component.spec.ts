@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { provideRouter, RouterLink } from '@angular/router';
+import { provideRouter, Router, RouterLink } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 
+import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
-import { DetalleFincaComponent } from './detalle-finca.component';
+import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
 
 describe('DetalleFincaComponent', () => {
   let harness: RouterTestingHarness;
@@ -92,6 +93,36 @@ describe('DetalleFincaComponent', () => {
     expect(pagina.querySelector('app-zona-peligro button')?.textContent).toContain(
       'Eliminar finca',
     );
+  });
+
+  it('"Eliminar finca" abre el modal; cancelar lo cierra y confirmar elimina y vuelve a Mis fincas', async () => {
+    const pagina = await abrir('f-la-esperanza');
+    const fincaService = TestBed.inject(FincaService);
+    const eliminar = spyOn(fincaService, 'eliminar').and.callThrough();
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+
+    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+    harness.detectChanges();
+    expect(pagina.querySelector('.modal__titulo')?.textContent).toBe(
+      '¿Eliminar Finca La Esperanza?',
+    );
+    expect(pagina.querySelector('.modal__aviso')?.textContent).toContain(AVISO_ELIMINAR_FINCA);
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
+
+    pagina.querySelector<HTMLButtonElement>('.modal__btn--secundario')!.click();
+    harness.detectChanges();
+    expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
+    expect(eliminar).not.toHaveBeenCalled();
+
+    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+    harness.detectChanges();
+    pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
+    harness.detectChanges();
+
+    expect(eliminar).toHaveBeenCalledWith('f-la-esperanza');
+    expect(navegar).toHaveBeenCalledWith('/cafetalero/fincas');
   });
 
   it('avisa cuando la finca no existe', async () => {

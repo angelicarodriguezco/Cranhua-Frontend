@@ -1,8 +1,4 @@
-<app-menu-lateral-cafetalero
-  [perfil]="perfilSidebar"
-  [tema]="tema()"
-  (alternarTema)="alternarTema()"
-/>
+<app-menu-lateral-cafetalero [perfil]="perfilSidebar" />
 
 <main class="contenido" [class.contenido--exito]="paso() === 'exito'" #contenido>
   @if (paso() !== 'exito') {
@@ -62,9 +58,9 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
-    titulo="¿Eliminar cosecha?"
-    mensaje="Se eliminará esta cosecha de forma permanente. Esta acción no se puede deshacer."
-    etiquetaConfirmar="Eliminar cosecha"
+    tipo="cosecha"
+    [nombre]="cosechaAEliminar()?.variedad"
+    [aviso]="avisoEliminar()"
     (confirmar)="onConfirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

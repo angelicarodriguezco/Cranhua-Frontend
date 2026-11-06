@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarTostadoresComponent } from './explorar-tostadores.component';
 
 describe('ExplorarTostadoresComponent', () => {
@@ -18,6 +19,8 @@ describe('ExplorarTostadoresComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function chip(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll<HTMLButtonElement>('.filtros button')].find(
@@ -108,7 +111,7 @@ describe('ExplorarTostadoresComponent', () => {
   it('arranca en tema oscuro y alterna a claro en el host', () => {
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
 
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
   });

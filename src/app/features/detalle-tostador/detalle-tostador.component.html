@@ -1,0 +1,136 @@
+<app-menu-lateral-cafeteria [perfil]="perfilSidebar" />
+
+<main class="contenido">
+  <a class="volver" [routerLink]="rutaExplorar">← Volver a explorar tostadores</a>
+
+  @if (tostador(); as t) {
+    <header class="cabecera">
+      <h1>{{ t.nombre }}</h1>
+      <p>{{ t.ubicacion }}</p>
+    </header>
+
+    <div class="columnas">
+      <div class="columna-info">
+        <section class="glass tostador" aria-label="Tostador">
+          <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
+          <div>
+            <strong>{{ t.nombre }}</strong>
+            <span>Tostador · {{ t.ubicacion }}</span>
+          </div>
+        </section>
+
+        <section class="glass bloque" aria-labelledby="titulo-datos">
+          <h2 id="titulo-datos">Datos del tostador</h2>
+          <p class="descripcion">{{ t.descripcion }}</p>
+          <h3>Estilos de tueste</h3>
+          <ul class="estilos">
+            @for (estilo of t.estilos; track estilo) {
+              <li>{{ estilo }}</li>
+            }
+          </ul>
+          <h3>Contacto</h3>
+          <dl class="datos">
+            <div>
+              <dt>Nombre</dt>
+              <dd>{{ t.contacto.nombre }}</dd>
+            </div>
+            <div>
+              <dt>Teléfono</dt>
+              <dd>{{ t.contacto.telefono }}</dd>
+            </div>
+            <div class="ancho">
+              <dt>Correo</dt>
+              <dd>
+                <a [href]="'mailto:' + t.contacto.correo">{{ t.contacto.correo }}</a>
+              </dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="glass bloque" aria-labelledby="titulo-tuestes">
+          <h2 id="titulo-tuestes">Tuestes disponibles</h2>
+          <ul class="tuestes">
+            @for (tueste of t.tuestes; track tueste.id) {
+              <li class="tueste" [class.tueste--elegido]="tuesteElegido()?.id === tueste.id">
+                <div class="tueste-info">
+                  <strong>{{ tueste.finca }} · {{ tueste.variedad }}</strong>
+                  <span>Tueste {{ tueste.nivel.toLowerCase() }}</span>
+                </div>
+                <span class="tueste-kg">{{ kg(tueste.kgDisponibles) }}</span>
+                <button
+                  type="button"
+                  class="chip"
+                  [attr.aria-pressed]="tuesteElegido()?.id === tueste.id"
+                  [attr.aria-label]="'Elegir ' + tueste.finca + ' ' + tueste.variedad"
+                  (click)="elegir(tueste)"
+                >
+                  Elegir
+                </button>
+              </li>
+            } @empty {
+              <li class="vacio">Este tostador no tiene café disponible por ahora.</li>
+            }
+          </ul>
+        </section>
+      </div>
+
+      <form
+        class="glass pedido"
+        [formGroup]="formulario"
+        (ngSubmit)="enviar()"
+        aria-labelledby="titulo-pedido"
+      >
+        <h2 id="titulo-pedido">Pedir café</h2>
+
+        <label for="tueste">Tueste</label>
+        <select
+          id="tueste"
+          formControlName="tuesteId"
+          [attr.aria-invalid]="tuesteId.invalid && tuesteId.touched"
+          aria-describedby="ayuda-tueste"
+        >
+          <option [ngValue]="null" disabled>Elegí un tueste</option>
+          @for (tueste of t.tuestes; track tueste.id) {
+            <option [ngValue]="tueste.id">
+              {{ tueste.finca }} · {{ tueste.variedad }} ({{ tueste.nivel }})
+            </option>
+          }
+        </select>
+        @if (tuesteId.touched && tuesteId.invalid) {
+          <p class="error" id="ayuda-tueste">Elegí el tueste que querés pedir.</p>
+        } @else if (tuesteElegido()) {
+          <p class="ayuda" id="ayuda-tueste">
+            {{ kg(tuesteElegido()!.kgDisponibles) }} disponibles de este tueste.
+          </p>
+        } @else {
+          <p class="ayuda" id="ayuda-tueste">Podés elegirlo también desde la lista.</p>
+        }
+
+        <label for="cantidad">Cantidad (kg)</label>
+        <input
+          id="cantidad"
+          type="number"
+          min="1"
+          [attr.max]="tuesteElegido()?.kgDisponibles ?? null"
+          formControlName="cantidad"
+          [attr.aria-invalid]="cantidad.invalid && cantidad.touched"
+          aria-describedby="ayuda-cantidad"
+        />
+        @if (cantidad.touched && cantidad.hasError('excedeDisponible')) {
+          <p class="error" id="ayuda-cantidad">
+            Solo hay {{ kg(tuesteElegido()?.kgDisponibles ?? 0) }} disponibles.
+          </p>
+        } @else if (cantidad.touched && cantidad.invalid) {
+          <p class="error" id="ayuda-cantidad">Ingresá una cantidad de al menos 1 kg.</p>
+        } @else {
+          <p class="ayuda" id="ayuda-cantidad">Mínimo 1 kg.</p>
+        }
+
+        <button type="submit" class="boton-principal">Enviar pedido</button>
+        <a class="boton-secundario" [routerLink]="rutaExplorar">Volver</a>
+      </form>
+    </div>
+  } @else {
+    <p class="glass vacio">No encontramos este tostador.</p>
+  }
+</main>

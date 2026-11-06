@@ -1,8 +1,4 @@
-<app-menu-lateral-cafeteria
-  [perfil]="perfilSidebar"
-  [tema]="tema()"
-  (alternarTema)="alternarTema()"
-/>
+<app-menu-lateral-cafeteria [perfil]="perfilSidebar" />
 
 <main class="contenido">
   <header class="encabezado">
@@ -242,9 +238,9 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
-    titulo="¿Eliminar cafetería?"
-    mensaje="Se eliminará el perfil público de tu local. Tu cuenta de Cránhua sigue activa. Esta acción no se puede deshacer."
-    etiquetaConfirmar="Eliminar cafetería"
+    tipo="Cafetería"
+    [nombre]="cafeteria()?.nombre"
+    [aviso]="avisoEliminar"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

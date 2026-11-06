@@ -1,0 +1,433 @@
+<app-menu-lateral-cafetalero [perfil]="perfilSidebar" />
+
+<ng-template #iconoRed let-tipo>
+  <svg class="icono-red" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    @switch (tipo) {
+      @case ('instagram') {
+        <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+        <circle cx="12" cy="12" r="3.75" />
+        <circle class="relleno" cx="17.2" cy="6.8" r="1" />
+      }
+      @case ('whatsapp') {
+        <path d="M4.5 19.5l1.2-3.6A8 8 0 1 1 8.4 18.4z" />
+        <path d="M9.2 8.6c0 3 2.6 6 5.8 6.2l.9-1.4-1.9-1-.8.8c-.9-.4-1.6-1.1-2-2l.8-.8-1-1.9z" />
+      }
+      @case ('facebook') {
+        <path
+          d="M14.5 8H17V4.5h-2.5A4 4 0 0 0 10.5 8.5V11H8v3.5h2.5V21H14v-6.5h2.5L17 11h-3V8.5z"
+        />
+      }
+      @case ('sitio') {
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M3.5 12h17M12 3.5c2.4 2.6 3.5 5.4 3.5 8.5s-1.1 5.9-3.5 8.5" />
+        <path d="M12 3.5C9.6 6.1 8.5 8.9 8.5 12s1.1 5.9 3.5 8.5" />
+      }
+    }
+  </svg>
+</ng-template>
+
+<ng-template #camara>
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path
+      d="M9.5 6h5l1.2 1.5H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5a2 2 0 0 1 2-2h3.3L9.5 6Zm2.5 11.2a3.7 3.7 0 1 0 0-7.4 3.7 3.7 0 0 0 0 7.4Z"
+    />
+  </svg>
+</ng-template>
+
+<main class="contenido">
+  @if (perfil(); as perfil) {
+    @if (modo() === 'vista') {
+      <header class="encabezado">
+        <div>
+          <h1>Mi perfil</h1>
+          <p>Así te ven los demás dentro de Crán̈hua.</p>
+        </div>
+        <button type="button" class="btn btn--filled" (click)="editar()">Editar perfil</button>
+      </header>
+
+      <section class="vidrio tarjeta" aria-label="Perfil público">
+        <div class="portada">
+          @if (perfil.portadaUrl) {
+            <img class="portada__imagen" [src]="perfil.portadaUrl" alt="" />
+          }
+        </div>
+
+        <div class="perfil">
+          <div class="avatar">
+            @if (perfil.avatarUrl) {
+              <img class="avatar__imagen" [src]="perfil.avatarUrl" alt="" />
+            } @else {
+              <span class="avatar__iniciales" aria-hidden="true">{{ iniciales() }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="identidad">
+          <div class="identidad__nombre">
+            <h2>{{ perfil.nombreCompleto }}</h2>
+            <span class="badge">{{ perfil.rol }}</span>
+          </div>
+          <p class="identidad__ubicacion">{{ perfil.ubicacion }}</p>
+          @if (perfil.biografia) {
+            <p class="identidad__biografia">{{ perfil.biografia }}</p>
+          }
+          @if (perfil.redes.length > 0) {
+            <ul class="chips" aria-label="Redes sociales">
+              @for (red of perfil.redes; track red.tipo) {
+                <li>
+                  <a
+                    class="chip"
+                    [href]="enlaceRed(red)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    [attr.aria-label]="nombresRed[red.tipo] + ': ' + red.valor"
+                  >
+                    <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
+                    {{ nombresRed[red.tipo] }}
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+
+      <section class="indicadores" aria-label="Indicadores">
+        <article class="vidrio">
+          <strong>{{ indicadores().fincasRegistradas }}</strong>
+          <span>Fincas registradas</span>
+        </article>
+        <article class="vidrio">
+          <strong>{{ indicadores().cosechasActivas }}</strong>
+          <span>Cosechas activas</span>
+        </article>
+        <article class="vidrio">
+          <strong>{{ perfil.miembroDesde }}</strong>
+          <span>Miembro desde</span>
+        </article>
+      </section>
+
+      <section class="vidrio seccion" aria-labelledby="titulo-cuenta">
+        <h2 id="titulo-cuenta" class="seccion__titulo">Información de la cuenta</h2>
+        <dl class="datos">
+          <div>
+            <dt>Correo electrónico</dt>
+            <dd>{{ perfil.correo }}</dd>
+          </div>
+          <div>
+            <dt>Teléfono</dt>
+            <dd>{{ perfil.telefono }}</dd>
+          </div>
+          <div>
+            <dt>Rol</dt>
+            <dd>{{ perfil.rol }}</dd>
+          </div>
+        </dl>
+      </section>
+    } @else {
+      <header class="encabezado">
+        <div>
+          <h1>Editar perfil</h1>
+          <p>Actualizá tu foto de portada, tu información y tus preferencias.</p>
+        </div>
+        <button type="button" class="btn btn--volver" (click)="cancelar()">← Volver</button>
+      </header>
+
+      <div class="pasos">
+        <form
+          class="vidrio tarjeta"
+          aria-label="Datos del perfil"
+          [formGroup]="formulario"
+          (ngSubmit)="guardar()"
+          novalidate
+        >
+          <div class="portada">
+            @if (portadaUrl(); as url) {
+              <img class="portada__imagen" [src]="url" alt="Vista previa de la portada" />
+            }
+            <button type="button" class="portada__cambiar" (click)="abrirSelectorPortada()">
+              Cambiar portada
+            </button>
+            <input
+              #inputPortada
+              class="oculto"
+              type="file"
+              accept="image/*"
+              aria-label="Elegir imagen de portada"
+              (change)="alSeleccionarPortada($event)"
+            />
+          </div>
+
+          <div class="perfil">
+            <div class="avatar">
+              @if (avatarUrl(); as url) {
+                <img class="avatar__imagen" [src]="url" alt="Vista previa de la foto de perfil" />
+              } @else {
+                <span class="avatar__iniciales" aria-hidden="true">{{ iniciales() }}</span>
+              }
+              <button
+                type="button"
+                class="avatar__camara"
+                aria-label="Cambiar foto de perfil"
+                (click)="abrirSelectorAvatar()"
+              >
+                <ng-container *ngTemplateOutlet="camara" />
+              </button>
+              <input
+                #inputAvatar
+                class="oculto"
+                type="file"
+                accept="image/*"
+                aria-label="Elegir foto de perfil"
+                (change)="alSeleccionarAvatar($event)"
+              />
+            </div>
+          </div>
+
+          <div class="formulario">
+            <div class="campo campo--ancho">
+              <label class="campo__etiqueta" for="nombre-perfil">Nombre completo</label>
+              <input
+                id="nombre-perfil"
+                class="campo__control"
+                formControlName="nombreCompleto"
+                maxlength="80"
+                autocomplete="name"
+                [attr.aria-invalid]="invalido('nombreCompleto')"
+                [attr.aria-describedby]="invalido('nombreCompleto') ? 'error-nombre-perfil' : null"
+              />
+              @if (invalido('nombreCompleto')) {
+                <p id="error-nombre-perfil" class="campo__error">Poné tu nombre completo.</p>
+              }
+            </div>
+
+            <div class="campo">
+              <label class="campo__etiqueta" for="correo-perfil">Correo electrónico</label>
+              <input
+                id="correo-perfil"
+                class="campo__control"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                [attr.aria-invalid]="invalido('correo')"
+                [attr.aria-describedby]="invalido('correo') ? 'error-correo-perfil' : null"
+              />
+              @if (tieneError('correo', 'required')) {
+                <p id="error-correo-perfil" class="campo__error">Poné tu correo electrónico.</p>
+              } @else if (invalido('correo')) {
+                <p id="error-correo-perfil" class="campo__error">Ingresá un correo válido.</p>
+              }
+            </div>
+
+            <div class="campo">
+              <label class="campo__etiqueta" for="telefono-perfil">Teléfono</label>
+              <input
+                id="telefono-perfil"
+                class="campo__control"
+                type="tel"
+                formControlName="telefono"
+                placeholder="+506 0000-0000"
+                autocomplete="tel"
+                [attr.aria-invalid]="invalido('telefono')"
+                [attr.aria-describedby]="invalido('telefono') ? 'error-telefono-perfil' : null"
+              />
+              @if (invalido('telefono')) {
+                <p id="error-telefono-perfil" class="campo__error">
+                  Ingresá un teléfono de 8 dígitos.
+                </p>
+              }
+            </div>
+
+            <div class="campo campo--ancho">
+              <label class="campo__etiqueta" for="ubicacion-perfil">Ubicación</label>
+              <input
+                id="ubicacion-perfil"
+                class="campo__control"
+                formControlName="ubicacion"
+                maxlength="120"
+                autocomplete="off"
+                [attr.aria-invalid]="invalido('ubicacion')"
+                [attr.aria-describedby]="invalido('ubicacion') ? 'error-ubicacion-perfil' : null"
+              />
+              @if (invalido('ubicacion')) {
+                <p id="error-ubicacion-perfil" class="campo__error">Poné tu ubicación.</p>
+              }
+            </div>
+
+            <div class="campo campo--ancho">
+              <label class="campo__etiqueta" for="biografia-perfil">
+                Biografía <span class="campo__opcional">(opcional)</span>
+              </label>
+              <textarea
+                id="biografia-perfil"
+                class="campo__control campo__control--area"
+                formControlName="biografia"
+                rows="3"
+                maxlength="300"
+                [attr.aria-invalid]="invalido('biografia')"
+                aria-describedby="contador-biografia-perfil"
+              ></textarea>
+              <p id="contador-biografia-perfil" class="campo__ayuda campo__ayuda--derecha">
+                {{ formulario.controls.biografia.value.length }}/300
+              </p>
+            </div>
+          </div>
+        </form>
+
+        <section class="vidrio seccion" aria-labelledby="titulo-redes">
+          <h2 id="titulo-redes" class="seccion__titulo">
+            Redes sociales <span class="campo__opcional">(opcional)</span>
+          </h2>
+          <p class="seccion__texto">Agregá los enlaces que quieras mostrar en tu perfil público.</p>
+
+          <ul class="redes">
+            @for (red of redes(); track red.tipo) {
+              @let error = errorRed(red);
+              <li>
+                <div class="red">
+                  <span class="red__icono">
+                    <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
+                  </span>
+                  <input
+                    class="campo__control"
+                    [id]="'red-' + red.tipo"
+                    [value]="red.valor"
+                    [placeholder]="placeholdersRed[red.tipo]"
+                    [attr.aria-label]="nombresRed[red.tipo]"
+                    [attr.aria-invalid]="error !== null"
+                    [attr.aria-describedby]="error ? 'error-red-' + red.tipo : null"
+                    autocomplete="off"
+                    (input)="cambiarRed(red.tipo, $event)"
+                  />
+                  <button
+                    type="button"
+                    class="red__quitar"
+                    [attr.aria-label]="'Quitar ' + nombresRed[red.tipo]"
+                    (click)="quitarRed(red.tipo)"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />
+                    </svg>
+                  </button>
+                </div>
+                @if (error) {
+                  <p [id]="'error-red-' + red.tipo" class="campo__error red__error">{{ error }}</p>
+                }
+              </li>
+            }
+          </ul>
+
+          @if (tiposDisponibles().length > 0) {
+            <button
+              type="button"
+              class="agregar-red"
+              [attr.aria-expanded]="selectorRedAbierto()"
+              (click)="abrirSelectorRed()"
+            >
+              + Agregar red social
+            </button>
+            @if (selectorRedAbierto()) {
+              <div class="selector-red" role="group" aria-label="Elegí qué red agregar">
+                @for (tipo of tiposDisponibles(); track tipo) {
+                  <button type="button" class="chip" (click)="agregarRed(tipo)">
+                    <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: tipo }" />
+                    {{ nombresRed[tipo] }}
+                  </button>
+                }
+              </div>
+            }
+          }
+        </section>
+
+        <form
+          class="vidrio seccion"
+          aria-labelledby="titulo-seguridad"
+          [formGroup]="contrasena"
+          (ngSubmit)="actualizarContrasena()"
+          novalidate
+        >
+          <h2 id="titulo-seguridad" class="seccion__titulo">Seguridad</h2>
+          <div class="formulario formulario--compacto">
+            <div class="campo">
+              <label class="campo__etiqueta" for="contrasena-actual">Contraseña actual</label>
+              <input
+                id="contrasena-actual"
+                class="campo__control"
+                type="password"
+                formControlName="actual"
+                autocomplete="current-password"
+              />
+            </div>
+            <div class="campo">
+              <label class="campo__etiqueta" for="contrasena-nueva">Nueva contraseña</label>
+              <input
+                id="contrasena-nueva"
+                class="campo__control"
+                type="password"
+                formControlName="nueva"
+                autocomplete="new-password"
+              />
+            </div>
+          </div>
+          <div class="seguridad__pie">
+            @if (mensajeContrasena(); as mensaje) {
+              <p
+                class="mensaje"
+                [class.mensaje--exito]="mensaje.tipo === 'exito'"
+                [class.mensaje--error]="mensaje.tipo === 'error'"
+                role="status"
+              >
+                {{ mensaje.texto }}
+              </p>
+            }
+            <button type="submit" class="btn btn--borde">Actualizar contraseña</button>
+          </div>
+        </form>
+
+        <section class="vidrio seccion" aria-labelledby="titulo-preferencias">
+          <h2 id="titulo-preferencias" class="seccion__titulo">Preferencias</h2>
+          <div class="preferencia">
+            <div>
+              <p class="preferencia__titulo">Apariencia</p>
+              <p class="seccion__texto" id="ayuda-apariencia">
+                Elegí entre modo claro y modo oscuro
+              </p>
+            </div>
+            <button
+              type="button"
+              class="switch"
+              role="switch"
+              [attr.aria-checked]="tema() === 'oscuro'"
+              aria-label="Modo oscuro"
+              aria-describedby="ayuda-apariencia"
+              (click)="alternarTema()"
+            >
+              <span class="switch__perilla" aria-hidden="true"></span>
+            </button>
+          </div>
+        </section>
+
+        <app-zona-peligro
+          [descripcion]="descripcionEliminar"
+          accion="Eliminar mi cuenta"
+          (confirmar)="abrirModalEliminar()"
+        />
+      </div>
+
+      <div class="acciones">
+        <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
+        <button type="button" class="btn btn--filled" (click)="guardar()">Guardar cambios</button>
+      </div>
+    }
+  }
+</main>
+
+@if (modalEliminarAbierto()) {
+  <app-modal-confirmacion
+    tipo="cuenta"
+    titulo="¿Eliminar tu cuenta?"
+    [aviso]="descripcionEliminar"
+    (confirmar)="confirmarEliminar()"
+    (cancelar)="cerrarModalEliminar()"
+  />
+}

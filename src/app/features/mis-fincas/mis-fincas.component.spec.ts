@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { MisFincasComponent, RUTA_REGISTRAR_FINCA } from './mis-fincas.component';
 
 describe('MisFincasComponent', () => {
@@ -17,6 +18,8 @@ describe('MisFincasComponent', () => {
     fixture.detectChanges();
     elemento = fixture.nativeElement;
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   it('muestra el menú lateral y el encabezado del prototipo', () => {
     expect(elemento.querySelector('app-menu-lateral-cafetalero')).toBeTruthy();
@@ -52,7 +55,7 @@ describe('MisFincasComponent', () => {
     const root = elemento.querySelector('.mis-fincas')!;
     expect(root.getAttribute('data-theme')).toBe('oscuro');
 
-    elemento.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(root.getAttribute('data-theme')).toBe('claro');
   });
