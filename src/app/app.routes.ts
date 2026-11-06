@@ -34,6 +34,7 @@ import { RegistrarCosechaComponent } from './features/registrar-cosecha/registra
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { RegistroComponent } from './features/registro/registro.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
+import { MenuPublicoComponent } from './features/menu-publico/menu-publico.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -50,6 +51,7 @@ export const routes: Routes = [
     component: PaginaMockComponent,
     data: { title: 'Perfil público de cafetería' },
   },
+  { path: 'explorar/cafeteria/:id/menu', component: MenuPublicoComponent },
   {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,

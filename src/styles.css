@@ -1,6 +1,7 @@
 @import './app/features/mi-negocio/mi-negocio.tema.css';
 @import './app/features/mi-cafeteria/mi-cafeteria.tema.css';
 @import './app/features/perfil-tostador/perfil-tostador.tema.css';
+@import './app/features/menu-publico/menu-publico.tema.css';
 
 :root {
   --color-gold: #c9a227;

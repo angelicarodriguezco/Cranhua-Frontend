@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
-
 import { DashboardConsumidorService } from '../../core/services/dashboard-consumidor.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { PerfilTostadorComponent } from './perfil-tostador.component';
+import { CLAVE_TEMA } from '../../core/services/tema.service';
 
 describe('PerfilTostadorComponent', () => {
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
   function crear(id: string): ComponentFixture<PerfilTostadorComponent> {
     TestBed.configureTestingModule({
       imports: [PerfilTostadorComponent],
