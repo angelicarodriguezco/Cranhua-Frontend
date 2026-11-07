@@ -28,7 +28,7 @@
             [attr.aria-describedby]="campoInvalido('correo') ? 'error-correo' : null"
           />
           @if (campoInvalido('correo')) {
-            <p id="error-correo" class="campo__error">Campo requerido</p>
+            <p id="error-correo" class="campo__error">{{ errorCampo('correo') }}</p>
           }
         </div>
 
@@ -45,14 +45,20 @@
             [attr.aria-describedby]="campoInvalido('contrasena') ? 'error-contrasena' : null"
           />
           @if (campoInvalido('contrasena')) {
-            <p id="error-contrasena" class="campo__error">Campo requerido</p>
+            <p id="error-contrasena" class="campo__error">{{ errorCampo('contrasena') }}</p>
           }
           <a class="login__olvidaste" routerLink="/recuperar-contrasena">
             ¿Olvidaste tu contraseña?
           </a>
         </div>
 
-        <button type="submit" class="login__cta">Iniciar sesión</button>
+        @if (errorGeneral(); as mensaje) {
+          <p class="login__error-general" role="alert">{{ mensaje }}</p>
+        }
+
+        <button type="submit" class="login__cta" [disabled]="enviando()">
+          {{ enviando() ? 'Iniciando sesión…' : 'Iniciar sesión' }}
+        </button>
       </form>
 
       <div class="login__separador" aria-hidden="true">
@@ -61,7 +67,12 @@
         <span class="login__separador-linea"></span>
       </div>
 
-      <button type="button" class="login__google">
+      <button
+        type="button"
+        class="login__google"
+        [disabled]="enviando()"
+        (click)="iniciarSesionConGoogle()"
+      >
         <svg class="login__google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path
             fill="#4285F4"

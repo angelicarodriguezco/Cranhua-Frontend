@@ -1,0 +1,52 @@
+import { RolCuenta } from './cuenta.model';
+
+export type RolApi = 'CAFETALERO' | 'TOSTADOR' | 'CAFETERIA';
+
+export interface CuentaResponseApi {
+  id: string;
+  nombreCompleto: string;
+  correo: string;
+  roles: RolApi[];
+  telefono?: string | null;
+  fotoUrl?: string | null;
+  redes?: { tipo: string; url: string }[];
+}
+
+export interface RegistroRequest {
+  nombreCompleto: string;
+  correo: string;
+  contrasena: string;
+  roles: RolApi[];
+  telefono?: string;
+}
+
+export interface RegistroGoogleRequest {
+  credencial: string;
+  roles: RolApi[];
+}
+
+export interface IniciarSesionRequest {
+  correo: string;
+  contrasena: string;
+}
+
+export interface IniciarSesionGoogleRequest {
+  credencial: string;
+}
+
+export interface ErrorAuth {
+  mensaje: string;
+  errores?: Record<string, string>;
+}
+
+export const ROL_A_API: Record<RolCuenta, RolApi> = {
+  cafetalero: 'CAFETALERO',
+  tostador: 'TOSTADOR',
+  cafeteria: 'CAFETERIA',
+};
+
+export const ROL_DESDE_API: Record<RolApi, RolCuenta> = {
+  CAFETALERO: 'cafetalero',
+  TOSTADOR: 'tostador',
+  CAFETERIA: 'cafeteria',
+};
