@@ -55,9 +55,7 @@ describe('AuthService', () => {
   });
 
   it('POST /api/auth/registro/google con withCredentials', () => {
-    servicio
-      .registrarConGoogle({ credencial: 'token-google', roles: ['TOSTADOR'] })
-      .subscribe();
+    servicio.registrarConGoogle({ credencial: 'token-google', roles: ['TOSTADOR'] }).subscribe();
 
     const req = http.expectOne(`${environment.apiUrl}/api/auth/registro/google`);
     expect(req.request.method).toBe('POST');

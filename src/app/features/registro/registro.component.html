@@ -112,9 +112,7 @@
             autocomplete="new-password"
             [attr.aria-invalid]="campoInvalido('contrasena') || !!errorServidor('contrasena')"
             [attr.aria-describedby]="
-              campoInvalido('contrasena') || errorServidor('contrasena')
-                ? 'error-contrasena'
-                : null
+              campoInvalido('contrasena') || errorServidor('contrasena') ? 'error-contrasena' : null
             "
           />
           @if (campoInvalido('contrasena')) {

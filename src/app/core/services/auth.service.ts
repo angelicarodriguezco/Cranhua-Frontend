@@ -29,7 +29,11 @@ export class AuthService {
   }
 
   registrar(request: RegistroRequest): Observable<CuentaResponseApi> {
-    return this.http.post<CuentaResponseApi>(`${this.base}/registro`, request, opcionesCredenciales);
+    return this.http.post<CuentaResponseApi>(
+      `${this.base}/registro`,
+      request,
+      opcionesCredenciales,
+    );
   }
 
   registrarConGoogle(request: RegistroGoogleRequest): Observable<CuentaResponseApi> {

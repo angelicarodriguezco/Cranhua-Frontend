@@ -201,9 +201,7 @@ export class RegistroComponent {
     } catch (error: unknown) {
       this.enviando.set(false);
       const mensaje =
-        error instanceof Error
-          ? error.message
-          : 'No se pudo completar el registro con Google.';
+        error instanceof Error ? error.message : 'No se pudo completar el registro con Google.';
       this.errorGeneral.set(mensaje);
     }
   }
