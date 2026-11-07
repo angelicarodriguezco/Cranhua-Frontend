@@ -5,7 +5,7 @@ import { EstadoCosechaHistorial } from '../../core/models/historial-cafetalero.m
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { HistorialCafetaleroService } from '../../core/services/historial-cafetalero.service';
 import { formatearColones, formatearFecha, formatearKg } from '../../shared/utils/formato';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 const CLASE_ESTADO: Record<EstadoCosechaHistorial, string> = {
   Disponible: 'pill-disponible',
@@ -16,7 +16,7 @@ const CLASE_ESTADO: Record<EstadoCosechaHistorial, string> = {
 
 @Component({
   selector: 'app-historial-cafetalero',
-  imports: [MenuLateralCafetaleroComponent, RouterLink],
+  imports: [MenuLateralComponent, RouterLink],
   templateUrl: './historial-cafetalero.component.html',
   styleUrl: './historial-cafetalero.component.css',
 })
@@ -25,7 +25,6 @@ export class HistorialCafetaleroComponent {
   private readonly panel = inject(DashboardCafetaleroService);
   private readonly historial = inject(HistorialCafetaleroService);
 
-  protected readonly perfilSidebar = this.panel.perfilSidebar;
   protected readonly tema = this.panel.tema;
   protected readonly indicadores = this.historial.indicadores;
   protected readonly cosechas = this.historial.cosechas;

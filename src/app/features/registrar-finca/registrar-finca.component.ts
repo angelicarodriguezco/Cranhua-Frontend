@@ -7,13 +7,13 @@ import { DashboardCafetaleroService } from '../../core/services/dashboard-cafeta
 import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { areaHectareas, centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import { MapaFincaComponent } from '../onboarding-finca/components/mapa-finca/mapa-finca.component';
 import { ConfirmacionFincaComponent } from './components/confirmacion-finca/confirmacion-finca.component';
 import {
   FormularioFincaComponent,
   crearFormularioFinca,
 } from './components/formulario-finca/formulario-finca.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
@@ -27,7 +27,7 @@ type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
     ConfirmacionFincaComponent,
     FormularioFincaComponent,
     MapaFincaComponent,
-    MenuLateralCafetaleroComponent,
+    MenuLateralComponent,
   ],
   templateUrl: './registrar-finca.component.html',
   styleUrl: './registrar-finca.component.css',
@@ -41,7 +41,6 @@ export class RegistrarFincaComponent {
 
   protected readonly usuario = inject(SesionService).usuario;
   // El menú y el tema son los del dashboard, así el tema elegido se mantiene al navegar
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
   protected readonly paso = signal<Paso>('dibujo');

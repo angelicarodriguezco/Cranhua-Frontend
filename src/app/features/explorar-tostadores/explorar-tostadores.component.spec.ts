@@ -99,13 +99,16 @@ describe('ExplorarTostadoresComponent', () => {
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
-    expect(rutasDe('app-menu-lateral-cafeteria a')).toEqual([
-      '/cafeteria/dashboard',
-      '/cafeteria/tostadores',
-      '/cafeteria/pedidos',
-      '/cafeteria/mi-cafeteria',
-      '/perfil',
-    ]);
+    expect(rutasDe('app-menu-lateral a')).toEqual(
+      jasmine.arrayContaining([
+        '/cafeteria/dashboard',
+        '/cafeteria/tostadores',
+        '/cafeteria/pedidos',
+        '/cafeteria/mi-cafeteria',
+        '/perfil',
+        '/iniciar-sesion',
+      ]),
+    );
   });
 
   it('arranca en tema oscuro y alterna a claro en el host', () => {

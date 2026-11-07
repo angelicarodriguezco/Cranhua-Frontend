@@ -16,14 +16,14 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { DetalleTostadorService } from '../../core/services/detalle-tostador.service';
 import { PedidosService } from '../../core/services/pedidos.service';
 import { formatearKg } from '../../shared/utils/formato';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
 import { RUTA_EXPLORAR_TOSTADORES } from '../mis-pedidos/mis-pedidos.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_MIS_PEDIDOS = '/cafeteria/pedidos';
 
 @Component({
   selector: 'app-detalle-tostador',
-  imports: [MenuLateralCafeteriaComponent, ReactiveFormsModule, RouterLink],
+  imports: [MenuLateralComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './detalle-tostador.component.html',
   styleUrl: './detalle-tostador.component.css',
   host: { '[attr.data-theme]': 'tema()' },
@@ -36,7 +36,6 @@ export class DetalleTostadorComponent {
   private readonly panel = inject(DashboardCafeteriaService);
 
   protected readonly tema = this.panel.tema;
-  protected readonly perfilSidebar = this.panel.perfilSidebar;
   protected readonly rutaExplorar = RUTA_EXPLORAR_TOSTADORES;
   protected readonly kg = formatearKg;
 

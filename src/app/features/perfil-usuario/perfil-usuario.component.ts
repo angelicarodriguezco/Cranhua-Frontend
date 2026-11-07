@@ -32,7 +32,7 @@ import { PerfilService } from '../../core/services/perfil.service';
 import { TemaService } from '../../core/services/tema.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 // Mismos patrones que onboarding-cafeteria (allá no están exportados)
 const TELEFONO = /^(\+506[\s-]?)?\d{4}[\s-]?\d{4}$/;
@@ -143,7 +143,7 @@ export function enlaceRedSocial(red: RedSocial): string {
 @Component({
   selector: 'app-perfil-usuario',
   imports: [
-    MenuLateralCafetaleroComponent,
+    MenuLateralComponent,
     ReactiveFormsModule,
     NgTemplateOutlet,
     ZonaPeligroComponent,
@@ -165,7 +165,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.temas.tema;
   protected readonly indicadores = this.dashboard.indicadores;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CUENTA;

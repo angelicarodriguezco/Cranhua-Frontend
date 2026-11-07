@@ -143,7 +143,7 @@ describe('DashboardCafetaleroComponent', () => {
     expect(detalles).toContain('/cafetalero/fincas/finca-la-catalina');
     expect(detalles).toContain('/cafetalero/fincas/finca-monte-alto');
 
-    const nav = rutasDe('app-menu-lateral-cafetalero a');
+    const nav = rutasDe('app-menu-lateral a');
     expect(nav).toEqual(
       jasmine.arrayContaining([
         '/cafetalero/dashboard',
@@ -157,9 +157,11 @@ describe('DashboardCafetaleroComponent', () => {
   });
 
   it('muestra el perfil del sidebar y sigue el tema global', () => {
-    expect(pagina.textContent).toContain('Rodrigo Alvarado');
-    expect(pagina.textContent).toContain('RC');
-    expect(pagina.querySelector('app-menu-lateral-cafetalero button')).toBeNull();
+    expect(pagina.querySelector('app-menu-lateral .perfil')?.textContent).toContain(
+      'Rodrigo Alvarado',
+    );
+    expect(pagina.querySelector('app-menu-lateral .avatar')?.textContent?.trim()).toBe('RA');
+    expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
     TestBed.inject(TemaService).alternarTema();

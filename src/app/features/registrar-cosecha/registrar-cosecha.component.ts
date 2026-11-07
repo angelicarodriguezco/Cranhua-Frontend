@@ -9,7 +9,6 @@ import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import {
   DatosPasoCosecha,
   PasoDatosCosechaComponent,
@@ -19,13 +18,14 @@ import {
   PasoSeleccionCatacionComponent,
 } from './components/paso-seleccion-catacion/paso-seleccion-catacion.component';
 import { ResumenCosechaComponent } from './components/resumen-cosecha/resumen-cosecha.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 type Paso = 'datos' | 'seleccion' | 'exito';
 
 @Component({
   selector: 'app-registrar-cosecha',
   imports: [
-    MenuLateralCafetaleroComponent,
+    MenuLateralComponent,
     PasoDatosCosechaComponent,
     PasoSeleccionCatacionComponent,
     ResumenCosechaComponent,
@@ -43,7 +43,6 @@ export class RegistrarCosechaComponent {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
   private readonly idRuta = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
