@@ -77,25 +77,22 @@ describe('DashboardTostadorComponent', () => {
     expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/tostador/cosechas']);
   });
 
-  it('el menú lateral lleva a las secciones del tostador con Perfil y ajustes al final', () => {
-    const enlaces = pagina.querySelectorAll('app-menu-lateral-tostador a');
-    expect(enlaces[enlaces.length - 1].textContent?.trim()).toBe('Perfil y ajustes');
+  it('el menú lateral lleva a las secciones del tostador con la cuenta al final', () => {
+    const enlaces = pagina.querySelectorAll('app-menu-lateral a');
+    expect(enlaces[enlaces.length - 1].textContent?.trim()).toBe('Cerrar sesión');
 
-    expect(rutasDe('app-menu-lateral-tostador a')).toEqual([
+    expect(rutasDe('app-menu-lateral [data-rol="tostador"] a')).toEqual([
       '/tostador/dashboard',
       '/tostador/cosechas',
       '/tostador/solicitudes',
       '/tostador/tostados',
       '/tostador/negocio',
-      '/perfil',
     ]);
   });
 
-  it('muestra el perfil del tostador y alterna entre tema oscuro y claro', () => {
-    expect(pagina.querySelector('.perfil')?.textContent).toContain('Mariana Castro');
-    expect(pagina.querySelector('.avatar')?.textContent?.trim()).toBe('MC');
-
-    expect(pagina.querySelector('app-menu-lateral-tostador button')).toBeNull();
+  it('muestra el rol tostador en el perfil y alterna entre tema oscuro y claro', () => {
+    expect(pagina.querySelector('.perfil-rol')?.textContent).toContain('Tostador');
+    expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     const dashboard = pagina.querySelector('.dashboard')!;
     expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
 

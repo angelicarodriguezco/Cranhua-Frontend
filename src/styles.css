@@ -1,6 +1,7 @@
 @import './app/features/mi-negocio/mi-negocio.tema.css';
 @import './app/features/mi-cafeteria/mi-cafeteria.tema.css';
 @import './app/features/perfil-tostador/perfil-tostador.tema.css';
+@import './app/features/perfil-cafeteria/perfil-cafeteria.tema.css';
 @import './app/features/menu-publico/menu-publico.tema.css';
 
 :root {
@@ -95,4 +96,36 @@ body {
   background-color: #08323e;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scroll compartido en toda la app */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6f857f transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(8, 50, 62, 0.25);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #6f857f;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #8aa09a;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }

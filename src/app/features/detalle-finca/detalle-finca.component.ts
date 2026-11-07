@@ -10,10 +10,10 @@ import { DashboardCafetaleroService } from '../../core/services/dashboard-cafeta
 import { FincaService } from '../../core/services/finca.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import { ListaDuenosComponent } from './components/lista-duenos/lista-duenos.component';
 import { MapaPerimetroComponent } from './components/mapa-perimetro/mapa-perimetro.component';
 import { TablaCosechasComponent } from './components/tabla-cosechas/tabla-cosechas.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 // Mensajes según los errores que define CP3-43
 const MENSAJES_ERROR_DUENO: Record<ErrorAgregarDueno, string> = {
@@ -30,7 +30,7 @@ export const AVISO_ELIMINAR_FINCA =
   imports: [
     ListaDuenosComponent,
     MapaPerimetroComponent,
-    MenuLateralCafetaleroComponent,
+    MenuLateralComponent,
     ModalConfirmacionComponent,
     RouterLink,
     TablaCosechasComponent,
@@ -47,7 +47,6 @@ export class DetalleFincaComponent {
   private readonly dashboard = inject(DashboardCafetaleroService);
 
   protected readonly tema = this.dashboard.tema;
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
 
   protected readonly cargando = signal(true);
   protected readonly finca = signal<Finca | undefined>(undefined);

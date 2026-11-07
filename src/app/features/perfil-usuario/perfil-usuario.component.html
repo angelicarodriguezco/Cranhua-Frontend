@@ -1,4 +1,4 @@
-<app-menu-lateral-cafetalero [perfil]="perfilSidebar" />
+<app-menu-lateral />
 
 <ng-template #iconoRed let-tipo>
   <svg class="icono-red" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -71,24 +71,6 @@
           @if (perfil.biografia) {
             <p class="identidad__biografia">{{ perfil.biografia }}</p>
           }
-          @if (perfil.redes.length > 0) {
-            <ul class="chips" aria-label="Redes sociales">
-              @for (red of perfil.redes; track red.tipo) {
-                <li>
-                  <a
-                    class="chip"
-                    [href]="enlaceRed(red)"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    [attr.aria-label]="nombresRed[red.tipo] + ': ' + red.valor"
-                  >
-                    <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
-                    {{ nombresRed[red.tipo] }}
-                  </a>
-                </li>
-              }
-            </ul>
-          }
         </div>
       </section>
 
@@ -123,6 +105,53 @@
             <dd>{{ perfil.rol }}</dd>
           </div>
         </dl>
+      </section>
+
+      <section class="vidrio seccion" aria-labelledby="titulo-redes-vista">
+        <h2 id="titulo-redes-vista" class="seccion__titulo">Redes sociales</h2>
+        @if (perfil.redes.length > 0) {
+          <ul class="chips" aria-label="Redes sociales">
+            @for (red of perfil.redes; track red.tipo) {
+              <li>
+                <a
+                  class="chip"
+                  [href]="enlaceRed(red)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  [attr.aria-label]="nombresRed[red.tipo] + ': ' + red.valor"
+                >
+                  <ng-container *ngTemplateOutlet="iconoRed; context: { $implicit: red.tipo }" />
+                  {{ nombresRed[red.tipo] }}
+                </a>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="seccion__texto">
+            Todavía no agregaste redes. Podés hacerlo al editar tu perfil.
+          </p>
+        }
+      </section>
+
+      <section class="vidrio seccion" aria-labelledby="titulo-preferencias">
+        <h2 id="titulo-preferencias" class="seccion__titulo">Preferencias</h2>
+        <div class="preferencia">
+          <div>
+            <p class="preferencia__titulo">Apariencia</p>
+            <p class="seccion__texto" id="ayuda-apariencia">Elegí entre modo claro y modo oscuro</p>
+          </div>
+          <button
+            type="button"
+            class="switch"
+            role="switch"
+            [attr.aria-checked]="tema() === 'oscuro'"
+            aria-label="Modo oscuro"
+            aria-describedby="ayuda-apariencia"
+            (click)="alternarTema()"
+          >
+            <span class="switch__perilla" aria-hidden="true"></span>
+          </button>
+        </div>
       </section>
     } @else {
       <header class="encabezado">
@@ -383,29 +412,6 @@
             <button type="submit" class="btn btn--borde">Actualizar contraseña</button>
           </div>
         </form>
-
-        <section class="vidrio seccion" aria-labelledby="titulo-preferencias">
-          <h2 id="titulo-preferencias" class="seccion__titulo">Preferencias</h2>
-          <div class="preferencia">
-            <div>
-              <p class="preferencia__titulo">Apariencia</p>
-              <p class="seccion__texto" id="ayuda-apariencia">
-                Elegí entre modo claro y modo oscuro
-              </p>
-            </div>
-            <button
-              type="button"
-              class="switch"
-              role="switch"
-              [attr.aria-checked]="tema() === 'oscuro'"
-              aria-label="Modo oscuro"
-              aria-describedby="ayuda-apariencia"
-              (click)="alternarTema()"
-            >
-              <span class="switch__perilla" aria-hidden="true"></span>
-            </button>
-          </div>
-        </section>
 
         <app-zona-peligro
           [descripcion]="descripcionEliminar"

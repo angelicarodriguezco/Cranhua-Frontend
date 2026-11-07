@@ -60,7 +60,7 @@ describe('RegistrarCafeteriaComponent', () => {
   }
 
   function enlacesMenu(): string[] {
-    return [...pagina.querySelectorAll('app-menu-lateral-cafeteria nav a')].map((a) =>
+    return [...pagina.querySelectorAll('app-menu-lateral [data-rol="cafeteria"] a')].map((a) =>
       a.textContent!.trim(),
     );
   }
@@ -88,8 +88,8 @@ describe('RegistrarCafeteriaComponent', () => {
     expect(campo('h1').textContent).toContain('Todavía no tenés una cafetería registrada');
     expect(boton('Registrar cafetería')).toBeTruthy();
     expect(campo('form')).toBeNull();
-    expect(enlacesMenu()).toEqual(['Registrar cafetería', 'Perfil y ajustes', 'Cerrar sesión']);
-    expect(campo('.perfil-rol').textContent!.trim()).toBe('Cafetería');
+    expect(enlacesMenu()).toEqual(['Registrar cafetería']);
+    expect(campo('.perfil-rol').textContent).toContain('Cafetería');
   });
 
   it('abre el formulario con todos los campos y solo los estilos claro, medio y oscuro', () => {

@@ -7,13 +7,13 @@ import { Coordenada } from '../../core/models/finca.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { formatearTelefono } from '../../shared/utils/formato';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
 import { RUTA_DASHBOARD_CAFETERIA } from '../mi-cafeteria/mi-cafeteria.component';
 import {
   crearFormularioDatos,
   FormularioDatos,
 } from '../onboarding-cafeteria/components/datos-cafeteria/datos-cafeteria.component';
 import { MapaCafeteriaComponent } from '../onboarding-cafeteria/components/mapa-cafeteria/mapa-cafeteria.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 type Vista = 'vacia' | 'formulario';
 
@@ -21,7 +21,7 @@ type Campo = keyof FormularioDatos['controls'];
 
 @Component({
   selector: 'app-registrar-cafeteria',
-  imports: [MenuLateralCafeteriaComponent, ReactiveFormsModule, MapaCafeteriaComponent],
+  imports: [MenuLateralComponent, ReactiveFormsModule, MapaCafeteriaComponent],
   templateUrl: './registrar-cafeteria.component.html',
   styleUrls: ['../mi-cafeteria/mi-cafeteria.component.css', './registrar-cafeteria.component.css'],
   host: { '[attr.data-theme]': 'tema()' },
@@ -32,7 +32,6 @@ export class RegistrarCafeteriaComponent {
   private readonly router = inject(Router);
 
   // El rol del mock incluye el nombre del local, que ya no existe
-  protected readonly perfilSidebar = { ...this.dashboard.perfilSidebar, rol: 'Cafetería' };
   protected readonly tema = this.dashboard.tema;
   protected readonly estilosDisponibles = ESTILOS_CAFE;
 
