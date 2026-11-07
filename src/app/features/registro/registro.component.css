@@ -178,6 +178,13 @@
   object-fit: cover;
 }
 
+.registro__error-general {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--registro-error);
+  text-align: center;
+}
+
 .registro__cta {
   align-self: center;
   width: 77%;
@@ -193,16 +200,22 @@
   cursor: pointer;
   transition:
     filter 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.registro__cta:hover {
+.registro__cta:hover:not(:disabled) {
   filter: brightness(1.08);
   transform: translateY(-2px);
 }
 
-.registro__cta:active {
+.registro__cta:active:not(:disabled) {
   transform: scale(0.985);
+}
+
+.registro__cta:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .registro__separador {
@@ -247,10 +260,15 @@
     transform 0.2s ease;
 }
 
-.registro__google:hover {
+.registro__google:hover:not(:disabled) {
   background: rgba(245, 239, 227, 0.06);
   border-color: rgba(245, 239, 227, 0.28);
   transform: translateY(-2px);
+}
+
+.registro__google:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .registro__google-icon {
@@ -333,8 +351,8 @@
     animation: none;
   }
 
-  .registro__cta:hover,
-  .registro__google:hover {
+  .registro__cta:hover:not(:disabled),
+  .registro__google:hover:not(:disabled) {
     transform: none;
   }
 }

@@ -25,6 +25,7 @@
                 type="button"
                 class="roles__chip"
                 [attr.aria-pressed]="estaSeleccionado(rol.valor)"
+                [disabled]="enviando()"
                 (click)="alternarRol(rol.valor)"
               >
                 {{ rol.etiqueta }}
@@ -33,6 +34,8 @@
           </div>
           @if (campoInvalido('roles')) {
             <p class="campo__error">Elegí al menos un rol</p>
+          } @else if (errorServidor('roles')) {
+            <p class="campo__error">{{ errorServidor('roles') }}</p>
           }
         </div>
 
@@ -44,11 +47,15 @@
             formControlName="nombre"
             placeholder="Rodrigo Vargas Mora"
             autocomplete="name"
-            [attr.aria-invalid]="campoInvalido('nombre')"
-            [attr.aria-describedby]="campoInvalido('nombre') ? 'error-nombre' : null"
+            [attr.aria-invalid]="campoInvalido('nombre') || !!errorServidor('nombre')"
+            [attr.aria-describedby]="
+              campoInvalido('nombre') || errorServidor('nombre') ? 'error-nombre' : null
+            "
           />
           @if (campoInvalido('nombre')) {
             <p id="error-nombre" class="campo__error">Ingresá tu nombre completo</p>
+          } @else if (errorServidor('nombre')) {
+            <p id="error-nombre" class="campo__error">{{ errorServidor('nombre') }}</p>
           }
         </div>
 
@@ -61,11 +68,15 @@
             formControlName="correo"
             placeholder="rodrigo@fincalacatalina.cr"
             autocomplete="email"
-            [attr.aria-invalid]="campoInvalido('correo')"
-            [attr.aria-describedby]="campoInvalido('correo') ? 'error-correo' : null"
+            [attr.aria-invalid]="campoInvalido('correo') || !!errorServidor('correo')"
+            [attr.aria-describedby]="
+              campoInvalido('correo') || errorServidor('correo') ? 'error-correo' : null
+            "
           />
           @if (campoInvalido('correo')) {
             <p id="error-correo" class="campo__error">Ingresá un correo válido</p>
+          } @else if (errorServidor('correo')) {
+            <p id="error-correo" class="campo__error">{{ errorServidor('correo') }}</p>
           }
         </div>
 
@@ -78,11 +89,15 @@
             formControlName="telefono"
             placeholder="+506 8888-0000"
             autocomplete="tel"
-            [attr.aria-invalid]="campoInvalido('telefono')"
-            [attr.aria-describedby]="campoInvalido('telefono') ? 'error-telefono' : null"
+            [attr.aria-invalid]="campoInvalido('telefono') || !!errorServidor('telefono')"
+            [attr.aria-describedby]="
+              campoInvalido('telefono') || errorServidor('telefono') ? 'error-telefono' : null
+            "
           />
           @if (campoInvalido('telefono')) {
             <p id="error-telefono" class="campo__error">Ingresá un teléfono válido</p>
+          } @else if (errorServidor('telefono')) {
+            <p id="error-telefono" class="campo__error">{{ errorServidor('telefono') }}</p>
           }
         </div>
 
@@ -93,13 +108,19 @@
             class="campo__control"
             type="password"
             formControlName="contrasena"
-            placeholder="Mínimo 8 caracteres"
+            placeholder="Mínimo 8 caracteres, letra y número"
             autocomplete="new-password"
-            [attr.aria-invalid]="campoInvalido('contrasena')"
-            [attr.aria-describedby]="campoInvalido('contrasena') ? 'error-contrasena' : null"
+            [attr.aria-invalid]="campoInvalido('contrasena') || !!errorServidor('contrasena')"
+            [attr.aria-describedby]="
+              campoInvalido('contrasena') || errorServidor('contrasena')
+                ? 'error-contrasena'
+                : null
+            "
           />
           @if (campoInvalido('contrasena')) {
-            <p id="error-contrasena" class="campo__error">Debe tener al menos 8 caracteres</p>
+            <p id="error-contrasena" class="campo__error">{{ mensajeContrasena() }}</p>
+          } @else if (errorServidor('contrasena')) {
+            <p id="error-contrasena" class="campo__error">{{ errorServidor('contrasena') }}</p>
           }
         </div>
 
@@ -134,7 +155,13 @@
           />
         </div>
 
-        <button type="submit" class="registro__cta">Crear cuenta</button>
+        @if (errorGeneral(); as mensaje) {
+          <p class="registro__error-general" role="alert">{{ mensaje }}</p>
+        }
+
+        <button type="submit" class="registro__cta" [disabled]="enviando()">
+          {{ enviando() ? 'Creando cuenta…' : 'Crear cuenta' }}
+        </button>
       </form>
 
       <div class="registro__separador" aria-hidden="true">
@@ -143,7 +170,12 @@
         <span class="registro__separador-linea"></span>
       </div>
 
-      <button type="button" class="registro__google">
+      <button
+        type="button"
+        class="registro__google"
+        [disabled]="enviando()"
+        (click)="registrarConGoogle()"
+      >
         <svg class="registro__google-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path
             fill="#4285F4"
