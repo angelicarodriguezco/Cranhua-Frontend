@@ -95,7 +95,7 @@ describe('PerfilUsuarioComponent', () => {
     );
   });
 
-  it('la vista muestra los datos, los indicadores y la cuenta, sin secciones de edición', () => {
+  it('la vista muestra los datos, redes, apariencia y la cuenta, sin zona de peligro', () => {
     const indicadores = dashboard.indicadores();
 
     expect(titulo()).toBe('Mi perfil');
@@ -124,8 +124,13 @@ describe('PerfilUsuarioComponent', () => {
     expect(datos).toContain('+506 8888-4321');
     expect(datos).toContain('Cafetalero');
 
-    expect(titulosSecciones()).toEqual(['Información de la cuenta']);
-    expect(pagina.querySelector('[role="switch"]')).toBeNull();
+    expect(titulosSecciones()).toEqual([
+      'Información de la cuenta',
+      'Redes sociales',
+      'Preferencias',
+    ]);
+    expect(pagina.textContent).toContain('Apariencia');
+    expect(pagina.querySelector('[role="switch"]')).toBeTruthy();
     expect(pagina.querySelector('app-zona-peligro')).toBeNull();
   });
 
@@ -145,12 +150,7 @@ describe('PerfilUsuarioComponent', () => {
     expect(campo('#ubicacion-perfil').value).toBe(PERFIL_EJEMPLO.ubicacion);
     expect(campo<HTMLTextAreaElement>('#biografia-perfil').value).toBe(PERFIL_EJEMPLO.biografia);
 
-    expect(titulosSecciones()).toEqual([
-      'Redes sociales',
-      'Seguridad',
-      'Preferencias',
-      'Zona de peligro',
-    ]);
+    expect(titulosSecciones()).toEqual(['Redes sociales', 'Seguridad', 'Zona de peligro']);
     expect(boton('Guardar cambios')).toBeTruthy();
   });
 
@@ -306,7 +306,6 @@ describe('PerfilUsuarioComponent', () => {
 
   it('el switch de apariencia cambia el tema global y el data-theme del host', () => {
     const temas = TestBed.inject(TemaService);
-    clic('Editar perfil');
     const interruptor = campo<HTMLButtonElement>('[role="switch"]');
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
     expect(interruptor.getAttribute('aria-checked')).toBe('true');

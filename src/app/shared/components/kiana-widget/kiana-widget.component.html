@@ -1,0 +1,118 @@
+@if (!abierto()) {
+  <div class="kiana-fab">
+    <button
+      type="button"
+      class="kiana-fab__burbuja"
+      (click)="abrir()"
+      [attr.aria-label]="textoPrompter"
+    >
+      {{ textoPrompter }}
+    </button>
+    <button
+      type="button"
+      class="kiana-fab__avatar"
+      (click)="abrir()"
+      aria-label="Abrir chat con Kiana"
+    >
+      <img [src]="avatarIdle" alt="" width="80" height="80" />
+    </button>
+  </div>
+} @else {
+  <section class="kiana-panel" role="dialog" aria-labelledby="kiana-titulo" aria-modal="false">
+    <header class="kiana-panel__header">
+      <div class="kiana-panel__meta">
+        <h2 id="kiana-titulo" class="kiana-panel__nombre">Kiana</h2>
+        <p class="kiana-panel__estado">
+          <span class="kiana-panel__punto" aria-hidden="true"></span>
+          En línea
+        </p>
+      </div>
+      <button type="button" class="kiana-panel__cerrar" (click)="cerrar()" aria-label="Cerrar chat">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path
+            d="M6.4 6.4 17.6 17.6M17.6 6.4 6.4 17.6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+          />
+        </svg>
+      </button>
+    </header>
+
+    <div class="kiana-panel__hilo" #hilo>
+      @for (msg of mensajes(); track msg.id) {
+        @if (msg.rol === 'usuario') {
+          <div class="kiana-msg kiana-msg--usuario">
+            <p class="kiana-msg__burbuja">{{ msg.texto }}</p>
+          </div>
+        } @else {
+          <div
+            class="kiana-msg kiana-msg--kiana"
+            [class.kiana-msg--error]="msg.rol === 'error'"
+          >
+            <img
+              class="kiana-msg__avatar"
+              [src]="avatarMensaje(msg)"
+              alt=""
+              width="64"
+              height="64"
+            />
+            <p class="kiana-msg__burbuja">{{ msg.texto }}</p>
+          </div>
+        }
+      }
+
+      @if (pensando()) {
+        <div class="kiana-msg kiana-msg--kiana kiana-msg--pensando">
+          <img
+            class="kiana-msg__avatar"
+            [src]="avatarPensando"
+            alt=""
+            width="64"
+            height="64"
+          />
+          <p class="kiana-msg__burbuja">{{ textoPensando }}</p>
+        </div>
+      }
+    </div>
+
+    <div class="kiana-panel__chips">
+      @for (chip of chips; track chip) {
+        <button
+          type="button"
+          class="kiana-chip"
+          (click)="onChip(chip)"
+          [disabled]="pensando()"
+        >
+          {{ chip }}
+        </button>
+      }
+    </div>
+
+    <form class="kiana-panel__composer" (submit)="$event.preventDefault(); onEnviar()">
+      <input
+        class="kiana-panel__input"
+        type="text"
+        [value]="mensaje()"
+        (input)="onMensajeInput($event)"
+        (keydown)="onInputKeydown($event)"
+        [attr.maxlength]="maxLongitud"
+        [placeholder]="placeholderInput"
+        [disabled]="pensando()"
+        aria-label="Mensaje para Kiana"
+        autocomplete="off"
+      />
+      <button
+        type="submit"
+        class="kiana-panel__enviar"
+        [disabled]="!puedeEnviar()"
+        aria-label="Enviar mensaje"
+      >
+        <span aria-hidden="true">➤</span>
+      </button>
+    </form>
+
+    <p class="kiana-panel__disclaimer">{{ disclaimer }}</p>
+  </section>
+}
