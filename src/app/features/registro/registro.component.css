@@ -154,30 +154,6 @@
   background: rgba(165, 112, 8, 0.18);
 }
 
-.subir-foto {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  height: 5rem;
-  border: 2px dashed rgba(245, 239, 227, 0.25);
-  border-radius: 14px;
-  color: var(--registro-muted);
-  font-size: 0.9375rem;
-  cursor: pointer;
-}
-
-.subir-foto__input {
-  display: none;
-}
-
-.subir-foto__preview {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
 .registro__error-general {
   margin: 0;
   font-size: 0.875rem;

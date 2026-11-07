@@ -58,8 +58,6 @@ export class RegistroComponent {
   private readonly googleIdentity = inject(GoogleIdentityService);
 
   protected readonly roles = ROLES;
-  protected readonly fotoPreview = signal<string | null>(null);
-  protected readonly fotoNombre = signal<string | null>(null);
   protected readonly enviando = signal(false);
   protected readonly errorGeneral = signal<string | null>(null);
   protected readonly erroresServidor = signal<Partial<Record<CampoRegistro, string>>>({});
@@ -87,8 +85,6 @@ export class RegistroComponent {
         contrasenaConLetraYNumero,
       ],
     }),
-    instagram: new FormControl('', { nonNullable: true }),
-    foto: new FormControl<File | null>(null),
   });
 
   protected estaSeleccionado(rol: Rol): boolean {
@@ -102,18 +98,6 @@ export class RegistroComponent {
       actuales.includes(rol) ? actuales.filter((r) => r !== rol) : [...actuales, rol],
     );
     control.markAsTouched();
-  }
-
-  protected alSeleccionarFoto(evento: Event): void {
-    const archivo = (evento.target as HTMLInputElement).files?.[0] ?? null;
-    this.form.controls.foto.setValue(archivo);
-
-    const anterior = this.fotoPreview();
-    if (anterior) {
-      URL.revokeObjectURL(anterior);
-    }
-    this.fotoPreview.set(archivo ? URL.createObjectURL(archivo) : null);
-    this.fotoNombre.set(archivo?.name ?? null);
   }
 
   protected campoInvalido(nombre: CampoRegistro): boolean {

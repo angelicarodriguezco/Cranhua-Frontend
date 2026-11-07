@@ -69,13 +69,15 @@ describe('RegistroComponent', () => {
     });
   }
 
-  it('muestra los tres roles y los seis campos del formulario', () => {
+  it('muestra los tres roles y los campos del formulario', () => {
     expect(pagina.querySelectorAll('.roles__chip').length).toBe(3);
-    for (const id of ['nombre', 'correo', 'telefono', 'contrasena', 'instagram', 'foto']) {
+    for (const id of ['nombre', 'correo', 'telefono', 'contrasena']) {
       expect(pagina.querySelector(`#${id}`))
         .withContext(id)
         .not.toBeNull();
     }
+    expect(pagina.querySelector('#instagram')).toBeNull();
+    expect(pagina.querySelector('#foto')).toBeNull();
   });
 
   it('marca los campos obligatorios y no navega al enviar vacío', () => {
@@ -93,11 +95,6 @@ describe('RegistroComponent', () => {
     expect(pagina.textContent).toContain('Elegí al menos un rol');
     expect(auth.registrar).not.toHaveBeenCalled();
     expect(router.navigateByUrl).not.toHaveBeenCalled();
-  });
-
-  it('Instagram y foto son opcionales', () => {
-    expect(componente['form'].controls.instagram.valid).toBeTrue();
-    expect(componente['form'].controls.foto.valid).toBeTrue();
   });
 
   it('permite elegir varios roles y desmarcarlos', () => {

@@ -122,37 +122,6 @@
           }
         </div>
 
-        <div class="campo">
-          <label class="campo__etiqueta" for="instagram">Instagram (opcional)</label>
-          <input
-            id="instagram"
-            class="campo__control"
-            formControlName="instagram"
-            placeholder="@fincalacatalina"
-          />
-        </div>
-
-        <div class="campo">
-          <label class="campo__etiqueta" for="foto">Foto de perfil</label>
-          <label class="subir-foto" for="foto">
-            @if (fotoPreview(); as src) {
-              <img
-                class="subir-foto__preview"
-                [src]="src"
-                alt="Vista previa de la foto de perfil"
-              />
-            }
-            {{ fotoNombre() ?? 'Subir foto' }}
-          </label>
-          <input
-            id="foto"
-            class="subir-foto__input"
-            type="file"
-            accept="image/*"
-            (change)="alSeleccionarFoto($event)"
-          />
-        </div>
-
         @if (errorGeneral(); as mensaje) {
           <p class="registro__error-general" role="alert">{{ mensaje }}</p>
         }
