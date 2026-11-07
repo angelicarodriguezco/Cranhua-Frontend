@@ -6,8 +6,7 @@ export const INTERVALO_FALLO_KIANA = 4;
 
 export const SALUDO_KIANA = '¡Hola! Soy Kiana ¿En qué te puedo ayudar hoy?';
 
-export const MENSAJE_ERROR_KIANA =
-  'Uy, algo salió mal. Intentá de nuevo en un momento.';
+export const MENSAJE_ERROR_KIANA = 'Uy, algo salió mal. Intentá de nuevo en un momento.';
 
 export const CHIPS_SUGERIDOS_KIANA = [
   '¿Cómo registro mi finca?',

@@ -13,10 +13,7 @@ import { KianaChatService } from '../../../core/services/kiana-chat.service';
 import { CLAVE_TEMA, TemaService } from '../../../core/services/tema.service';
 import { KianaWidgetComponent } from './kiana-widget.component';
 
-function respuestaTras(
-  ms: number,
-  texto: string,
-): Observable<RespuestaKiana> {
+function respuestaTras(ms: number, texto: string): Observable<RespuestaKiana> {
   return timer(ms).pipe(map(() => ({ texto })));
 }
 
