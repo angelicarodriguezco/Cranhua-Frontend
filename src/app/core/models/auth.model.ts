@@ -34,6 +34,21 @@ export interface IniciarSesionGoogleRequest {
   credencial: string;
 }
 
+export interface RecuperarContrasenaRequest {
+  correo: string;
+}
+
+export interface VerificarCodigoRequest {
+  correo: string;
+  codigo: string;
+}
+
+export interface RestablecerContrasenaRequest {
+  correo: string;
+  codigo: string;
+  contrasena: string;
+}
+
 export interface ErrorAuth {
   mensaje: string;
   errores?: Record<string, string>;
