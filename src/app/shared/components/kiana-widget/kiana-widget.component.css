@@ -1,0 +1,384 @@
+:host {
+  --kiana-texto: #f5efe3;
+  --kiana-texto-usuario: #e7edea;
+  --kiana-texto-suave: #5c6b6a;
+  --kiana-texto-muted: #7c8c92;
+  --kiana-online: #7fda9f;
+  --kiana-acento: #d9a441;
+  --kiana-acento-suave: rgba(217, 164, 65, 0.14);
+  --kiana-send: #a57008;
+  --kiana-panel: rgba(8, 24, 32, 0.92);
+  --kiana-panel-borde: rgba(255, 255, 255, 0.12);
+  --kiana-header-borde: rgba(255, 255, 255, 0.1);
+  --kiana-burbuja-ia: rgba(217, 164, 65, 0.14);
+  --kiana-burbuja-usuario: rgba(255, 255, 255, 0.08);
+  --kiana-burbuja-error: rgba(162, 36, 59, 0.35);
+  --kiana-chip-fondo: rgba(255, 255, 255, 0.06);
+  --kiana-chip-borde: rgba(255, 255, 255, 0.16);
+  --kiana-input-fondo: rgba(255, 255, 255, 0.06);
+  --kiana-input-borde: rgba(255, 255, 255, 0.14);
+  --kiana-fab-burbuja: rgba(8, 28, 38, 0.88);
+  --kiana-fab-borde: rgba(255, 255, 255, 0.14);
+  --kiana-sombra-panel: 0 20px 45px rgba(0, 0, 0, 0.5);
+  --kiana-sombra-fab: 0 10px 25px rgba(0, 0, 0, 0.4);
+  --kiana-sombra-avatar: 0 9px 22px rgba(0, 0, 0, 0.3);
+
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 1100;
+  font-family: Inter, var(--font-family, system-ui, sans-serif);
+  color: var(--kiana-texto);
+}
+
+/* Claro: mismos tokens de marca del prototipo light (teal + naranja). */
+:host([data-theme='claro']) {
+  --kiana-texto: #f5efe3;
+  --kiana-texto-usuario: #ffffff;
+  --kiana-texto-suave: rgba(245, 239, 227, 0.7);
+  --kiana-texto-muted: #aec0bc;
+  --kiana-online: #7fda9f;
+  --kiana-acento: #f5efe3;
+  --kiana-acento-suave: #0c4452;
+  --kiana-send: #e07a2f;
+  --kiana-panel: #08323e;
+  --kiana-panel-borde: rgba(255, 255, 255, 0.12);
+  --kiana-header-borde: rgba(255, 255, 255, 0.1);
+  --kiana-burbuja-ia: #0c4452;
+  --kiana-burbuja-usuario: #e07a2f;
+  --kiana-burbuja-error: #7a2f3d;
+  --kiana-chip-fondo: rgba(255, 255, 255, 0.06);
+  --kiana-chip-borde: rgba(255, 255, 255, 0.16);
+  --kiana-input-fondo: #ffffff;
+  --kiana-input-borde: transparent;
+  --kiana-fab-burbuja: rgba(8, 28, 38, 0.92);
+  --kiana-fab-borde: rgba(255, 255, 255, 0.14);
+  --kiana-sombra-panel: 0 18px 40px rgba(8, 20, 28, 0.4);
+  --kiana-sombra-fab: 0 10px 25px rgba(8, 20, 28, 0.35);
+  --kiana-sombra-avatar: 0 9px 22px rgba(0, 0, 0, 0.28);
+}
+
+.kiana-fab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.55rem;
+}
+
+.kiana-fab__burbuja {
+  max-width: 11.5rem;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--kiana-fab-borde);
+  /* Figma: 26 26 4 26 — esquina inferior derecha apuntando al avatar */
+  border-radius: 0.75rem 0.75rem 0.125rem 0.75rem;
+  background: var(--kiana-fab-burbuja);
+  color: var(--kiana-texto);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: left;
+  box-shadow: var(--kiana-sombra-fab);
+  cursor: pointer;
+}
+
+.kiana-fab__avatar {
+  display: block;
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.kiana-fab__avatar img {
+  display: block;
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.3));
+}
+
+.kiana-fab__burbuja:focus-visible,
+.kiana-fab__avatar:focus-visible,
+.kiana-panel__cerrar:focus-visible,
+.kiana-chip:focus-visible,
+.kiana-panel__input:focus-visible,
+.kiana-panel__enviar:focus-visible {
+  outline: 2px solid var(--kiana-acento);
+  outline-offset: 2px;
+}
+
+.kiana-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(100vw - 2rem, 22.5rem);
+  height: min(72vh, 34rem);
+  overflow: hidden;
+  border: 1px solid var(--kiana-panel-borde);
+  border-radius: 1.125rem;
+  background: var(--kiana-panel);
+  box-shadow: var(--kiana-sombra-panel);
+  backdrop-filter: blur(13px);
+}
+
+.kiana-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.15rem 1rem 0.85rem;
+  border-bottom: 1px solid var(--kiana-header-borde);
+}
+
+.kiana-panel__meta {
+  min-width: 0;
+}
+
+.kiana-panel__nombre {
+  margin: 0;
+  color: var(--kiana-texto);
+  font-size: 0.925rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.kiana-panel__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.35rem 0 0;
+  color: var(--kiana-online);
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.kiana-panel__punto {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--kiana-online);
+}
+
+.kiana-panel__cerrar {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-top: 0.15rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--kiana-texto-muted);
+  cursor: pointer;
+}
+
+.kiana-panel__cerrar:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--kiana-texto);
+}
+
+.kiana-panel__hilo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.7rem 0.55rem 0.75rem 0.85rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.kiana-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.55rem;
+  max-width: 96%;
+}
+
+.kiana-msg--usuario {
+  align-self: flex-end;
+}
+
+.kiana-msg--kiana {
+  align-self: flex-start;
+}
+
+.kiana-msg__avatar {
+  display: block;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
+  object-position: center;
+}
+
+.kiana-msg__burbuja {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* Figma IA: gold tint + radio 6 26 26 26 */
+.kiana-msg--kiana .kiana-msg__burbuja {
+  border-radius: 0.2rem 0.8125rem 0.8125rem 0.8125rem;
+  background: var(--kiana-burbuja-ia);
+  color: var(--kiana-texto);
+}
+
+/* Figma usuario: white/8% + radio 26 6 26 26 */
+.kiana-msg--usuario .kiana-msg__burbuja {
+  border-radius: 0.8125rem 0.2rem 0.8125rem 0.8125rem;
+  background: var(--kiana-burbuja-usuario);
+  color: var(--kiana-texto-usuario);
+}
+
+.kiana-msg--error .kiana-msg__burbuja {
+  background: var(--kiana-burbuja-error);
+}
+
+/* Figma pensando: radio 16 16 16 4 */
+.kiana-msg--pensando .kiana-msg__burbuja {
+  padding: 0.55rem 0.85rem 0.55rem 0.65rem;
+  border-radius: 0.5rem 0.5rem 0.5rem 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.kiana-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0 0.9rem 0.7rem;
+}
+
+.kiana-chip {
+  max-width: 100%;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--kiana-chip-borde);
+  border-radius: 999px;
+  background: var(--kiana-chip-fondo);
+  color: var(--kiana-acento);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.kiana-chip:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.kiana-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.kiana-panel__composer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.9rem 0.45rem;
+}
+
+.kiana-panel__input {
+  flex: 1;
+  min-width: 0;
+  height: 2.4rem;
+  padding: 0 1rem;
+  border: 1px solid var(--kiana-input-borde);
+  border-radius: 999px;
+  background: var(--kiana-input-fondo);
+  color: var(--kiana-texto);
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+.kiana-panel__input::placeholder {
+  color: var(--kiana-texto-muted);
+}
+
+:host([data-theme='claro']) .kiana-panel__input {
+  color: #142320;
+}
+
+:host([data-theme='claro']) .kiana-panel__input::placeholder {
+  color: #6b7570;
+}
+
+.kiana-panel__input:disabled {
+  opacity: 0.7;
+}
+
+.kiana-panel__enviar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.15rem;
+  height: 2.15rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--kiana-send);
+  color: #ffffff;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: filter 0.15s ease;
+}
+
+.kiana-panel__enviar:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.kiana-panel__enviar:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.kiana-panel__disclaimer {
+  margin: 0;
+  padding: 0 1rem 0.85rem;
+  color: var(--kiana-texto-suave);
+  font-size: 0.58rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  :host {
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .kiana-panel {
+    width: min(100vw - 1.5rem, 22.5rem);
+    height: min(78vh, 34rem);
+  }
+
+  .kiana-fab__burbuja {
+    max-width: 10rem;
+    font-size: 0.7rem;
+  }
+
+  .kiana-fab__avatar,
+  .kiana-fab__avatar img {
+    width: 72px;
+    height: 72px;
+  }
+}

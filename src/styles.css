@@ -97,3 +97,35 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Scroll compartido en toda la app */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #6f857f transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(8, 50, 62, 0.25);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #6f857f;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #8aa09a;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
