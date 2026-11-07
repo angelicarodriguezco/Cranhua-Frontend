@@ -24,12 +24,12 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { formatearTelefono } from '../../shared/utils/formato';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
 import {
   crearFormularioDatos,
   FormularioDatos,
 } from '../onboarding-cafeteria/components/datos-cafeteria/datos-cafeteria.component';
 import { MapaCafeteriaComponent } from '../onboarding-cafeteria/components/mapa-cafeteria/mapa-cafeteria.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_DASHBOARD_CAFETERIA = '/cafeteria/dashboard';
 export const RUTA_PUBLICAR_MENU = '/cafeteria/menu';
@@ -67,7 +67,7 @@ function clonarCafeteria(cafeteria: Cafeteria): Cafeteria {
 @Component({
   selector: 'app-mi-cafeteria',
   imports: [
-    MenuLateralCafeteriaComponent,
+    MenuLateralComponent,
     ReactiveFormsModule,
     MapaCafeteriaComponent,
     ZonaPeligroComponent,
@@ -82,7 +82,6 @@ export class MiCafeteriaComponent implements OnDestroy {
   private readonly cafeteriaService = inject(CafeteriaService);
   private readonly router = inject(Router);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly estilosDisponibles = ESTILOS_CAFE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CAFETERIA;

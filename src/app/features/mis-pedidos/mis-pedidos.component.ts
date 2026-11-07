@@ -13,7 +13,7 @@ import { EstadoPedido, Pedido } from '../../core/models/pedido.model';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { PedidosService, calcularIndicadores } from '../../core/services/pedidos.service';
 import { formatearFecha, formatearKg } from '../../shared/utils/formato';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_EXPLORAR_TOSTADORES = '/cafeteria/tostadores';
 
@@ -25,7 +25,7 @@ const CLASE_ESTADO: Record<EstadoPedido, string> = {
 
 @Component({
   selector: 'app-mis-pedidos',
-  imports: [MenuLateralCafeteriaComponent, RouterLink],
+  imports: [MenuLateralComponent, RouterLink],
   templateUrl: './mis-pedidos.component.html',
   styleUrl: './mis-pedidos.component.css',
   host: { '[attr.data-theme]': 'tema()' },
@@ -36,7 +36,6 @@ export class MisPedidosComponent {
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly perfilSidebar = this.panel.perfilSidebar;
   protected readonly tema = this.panel.tema;
 
   protected readonly pedidos = signal<Pedido[]>([]);

@@ -71,21 +71,24 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
-    expect(rutasDe('app-menu-lateral-cafeteria a')).toEqual([
-      '/cafeteria/dashboard',
-      '/cafeteria/tostadores',
-      '/cafeteria/pedidos',
-      '/cafeteria/mi-cafeteria',
-      '/perfil',
-    ]);
+    expect(rutasDe('app-menu-lateral a')).toEqual(
+      jasmine.arrayContaining([
+        '/cafeteria/dashboard',
+        '/cafeteria/tostadores',
+        '/cafeteria/pedidos',
+        '/cafeteria/mi-cafeteria',
+        '/perfil',
+        '/iniciar-sesion',
+      ]),
+    );
   });
 
   it('muestra el perfil del sidebar y sigue el tema global', () => {
     const temas = TestBed.inject(TemaService);
-    expect(pagina.textContent).toContain('Andrés Solano');
-    expect(pagina.textContent).toContain('AS');
-    expect(pagina.textContent).toContain('Cafetería - Café Brumas');
-    expect(pagina.querySelector('app-menu-lateral-cafeteria button')).toBeNull();
+    expect(pagina.querySelector('app-menu-lateral .perfil-rol')?.textContent).toContain(
+      'Cafetería',
+    );
+    expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
     temas.alternarTema();

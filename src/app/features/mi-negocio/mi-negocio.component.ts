@@ -23,12 +23,12 @@ import { DashboardTostadorService } from '../../core/services/dashboard-tostador
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
 import { MapaUbicacionComponent } from '../onboarding-tostador/components/mapa-ubicacion/mapa-ubicacion.component';
 import {
   crearFormularioNegocio,
   FormularioNegocio,
 } from '../onboarding-tostador/components/formulario-negocio/formulario-negocio.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
 
@@ -68,7 +68,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 @Component({
   selector: 'app-mi-negocio',
   imports: [
-    MenuLateralTostadorComponent,
+    MenuLateralComponent,
     ReactiveFormsModule,
     MapaUbicacionComponent,
     ZonaPeligroComponent,
@@ -83,7 +83,6 @@ export class MiNegocioComponent implements OnDestroy {
   private readonly negocioService = inject(NegocioTuesteService);
   private readonly router = inject(Router);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly estilos = ESTILOS_TUESTE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_NEGOCIO;
