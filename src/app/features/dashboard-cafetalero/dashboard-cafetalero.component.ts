@@ -3,11 +3,11 @@ import { RouterLink } from '@angular/router';
 
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { SesionService } from '../../core/services/sesion.service';
-import { MenuLateralCafetaleroComponent } from './components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 @Component({
   selector: 'app-dashboard-cafetalero',
-  imports: [MenuLateralCafetaleroComponent, RouterLink],
+  imports: [MenuLateralComponent, RouterLink],
   templateUrl: './dashboard-cafetalero.component.html',
   styleUrl: './dashboard-cafetalero.component.css',
 })
@@ -16,7 +16,6 @@ export class DashboardCafetaleroComponent {
   private readonly sesion = inject(SesionService);
 
   protected readonly usuario = this.sesion.usuario;
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly indicadores = this.dashboard.indicadores;
   protected readonly solicitudes = this.dashboard.solicitudesPendientes;

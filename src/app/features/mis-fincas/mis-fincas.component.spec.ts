@@ -22,7 +22,7 @@ describe('MisFincasComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   it('muestra el menú lateral y el encabezado del prototipo', () => {
-    expect(elemento.querySelector('app-menu-lateral-cafetalero')).toBeTruthy();
+    expect(elemento.querySelector('app-menu-lateral')).toBeTruthy();
     expect(elemento.querySelector('h1')?.textContent).toContain('Mis fincas');
     expect(elemento.textContent).toContain(
       'Estas son las fincas que tenés registradas en Cránhua.',
