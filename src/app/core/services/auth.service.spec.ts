@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
 import { CuentaResponseApi } from '../models/auth.model';
@@ -145,6 +145,82 @@ describe('AuthService', () => {
       nombre: 'Rodrigo',
       apellidos: 'Vargas Mora',
       correo: 'rodrigo@fincalacatalina.cr',
+    });
+  });
+
+  describe('restaurarSesion', () => {
+    const urlCuenta = `${environment.apiUrl}/api/cuenta`;
+
+    it('con 200 hidrata la cuenta y la sesión', async () => {
+      const promesa = servicio.restaurarSesion();
+      const req = http.expectOne(urlCuenta);
+      expect(req.request.method).toBe('GET');
+      expect(req.request.withCredentials).toBeTrue();
+      req.flush(cuentaApi);
+      await promesa;
+
+      expect(cuentaService.cuenta()?.id).toBe('uuid-1');
+      expect(sesionService.usuario()?.id).toBe('uuid-1');
+    });
+
+    it('con 401 deja la cuenta y la sesión en null', async () => {
+      const promesa = servicio.restaurarSesion();
+      http.expectOne(urlCuenta).flush(null, { status: 401, statusText: 'Unauthorized' });
+      await promesa;
+
+      expect(cuentaService.cuenta()).toBeNull();
+      expect(sesionService.usuario()).toBeNull();
+    });
+
+    it('sin red no cambia nada y la promesa resuelve', async () => {
+      const cuentaAntes = cuentaService.cuenta();
+      const usuarioAntes = sesionService.usuario();
+
+      const promesa = servicio.restaurarSesion();
+      http.expectOne(urlCuenta).error(new ProgressEvent('error'));
+      await expectAsync(promesa).toBeResolved();
+
+      expect(cuentaService.cuenta()).toBe(cuentaAntes);
+      expect(sesionService.usuario()).toBe(usuarioAntes);
+    });
+
+    it('si el backend no responde en 5 s resuelve sin cambiar nada', fakeAsync(() => {
+      const cuentaAntes = cuentaService.cuenta();
+      const usuarioAntes = sesionService.usuario();
+      let resuelta = false;
+
+      servicio.restaurarSesion().then(() => (resuelta = true));
+      const req = http.expectOne(urlCuenta);
+      tick(5000);
+      flushMicrotasks();
+
+      expect(resuelta).toBeTrue();
+      expect(req.cancelled).toBeTrue();
+      expect(cuentaService.cuenta()).toBe(cuentaAntes);
+      expect(sesionService.usuario()).toBe(usuarioAntes);
+    }));
+  });
+
+  describe('cerrarSesion', () => {
+    const urlCerrar = `${environment.apiUrl}/api/auth/cerrarSesion`;
+
+    it('limpia la sesión y hace POST /api/auth/cerrarSesion con withCredentials', () => {
+      servicio.cerrarSesion();
+
+      expect(cuentaService.cuenta()).toBeNull();
+      expect(sesionService.usuario()).toBeNull();
+      const req = http.expectOne(urlCerrar);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.withCredentials).toBeTrue();
+      req.flush(null, { status: 204, statusText: 'No Content' });
+    });
+
+    it('si el backend falla no lanza excepción', () => {
+      expect(() => {
+        servicio.cerrarSesion();
+        http.expectOne(urlCerrar).flush(null, { status: 500, statusText: 'Server Error' });
+      }).not.toThrow();
+      expect(sesionService.usuario()).toBeNull();
     });
   });
 });
