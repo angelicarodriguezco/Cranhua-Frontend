@@ -2,9 +2,10 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { Coordenada, Finca, Usuario } from '../../core/models/finca.model';
+import { ConflictoFinca, Coordenada, Finca, Usuario } from '../../core/models/finca.model';
 import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
+import { listar } from '../../shared/utils/formato';
 import { areaHectareas, centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
 import {
   DetallesFincaComponent,
@@ -63,7 +64,13 @@ export class OnboardingFincaComponent {
   protected readonly duenos = signal<Usuario[]>([]);
   protected readonly intentoGuardar = signal(false);
 
-  protected readonly conflicto = signal<Finca | null>(null);
+  protected readonly conflicto = signal<ConflictoFinca | null>(null);
+  protected readonly conflictoPropio = computed(
+    () => this.conflicto()?.duenos.some((d) => d.id === this.usuario()?.id) ?? false,
+  );
+  protected readonly nombresDuenos = computed(() =>
+    listar(this.conflicto()?.duenos.map((d) => d.nombreCompleto) ?? []),
+  );
   protected readonly avisoVisible = signal(false);
   protected readonly registrada = signal<Finca | null>(null);
 
@@ -130,7 +137,9 @@ export class OnboardingFincaComponent {
       });
   }
 
+  // Solo se borra el polígono; el formulario, el pin y los dueños viven aquí y se conservan
   protected corregirDibujo(): void {
+    this.perimetro.set([]);
     this.conflicto.set(null);
     this.avisoVisible.set(false);
     this.paso.set('dibujo');

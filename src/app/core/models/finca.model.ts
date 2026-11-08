@@ -46,9 +46,17 @@ export interface Finca {
 
 export type NuevaFinca = Omit<Finca, 'id'>;
 
+// Misma forma que el 409 del backend
+export interface ConflictoFinca {
+  fincaId: string;
+  nombre: string;
+  duenos: { id: string; nombreCompleto: string }[];
+  perimetro: Coordenada[];
+}
+
 export type ResultadoRegistro =
   | { registrada: true; finca: Finca }
-  | { registrada: false; conflicto: Finca };
+  | { registrada: false; conflicto: ConflictoFinca; mensaje: string };
 
 export type ErrorAgregarDueno = 'finca-inexistente' | 'correo-inexistente' | 'ya-es-dueno';
 

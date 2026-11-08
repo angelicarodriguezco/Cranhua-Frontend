@@ -32,10 +32,40 @@ describe('FincaService', () => {
     servicio = TestBed.inject(FincaService);
   });
 
-  it('rechaza un perímetro que se superpone con una finca registrada', async () => {
+  it('rechaza un perímetro superpuesto con los datos de la finca y su dueño, sin guardarlo', async () => {
     const tucan = FINCAS_REGISTRADAS[0];
     const resultado = await firstValueFrom(servicio.registrar(nuevaFinca(tucan.perimetro)));
-    expect(resultado).toEqual({ registrada: false, conflicto: tucan });
+    expect(resultado).toEqual({
+      registrada: false,
+      conflicto: {
+        fincaId: 'f-el-tucan',
+        nombre: 'Finca El Tucán',
+        duenos: [{ id: 'u-andres', nombreCompleto: 'Andrés Vargas Quesada' }],
+        perimetro: tucan.perimetro,
+      },
+      mensaje: 'El terreno se sobrepone con la finca "Finca El Tucán" de Andrés Vargas Quesada.',
+    });
+    expect(await firstValueFrom(servicio.misFincas(USUARIO_ACTUAL.id))).toHaveSize(2);
+  });
+
+  it('ordena a los dueños por nombre y los une con comas y "y"', async () => {
+    const esperanza = FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza')!;
+    await firstValueFrom(servicio.agregarDueno(esperanza.id, 'andres.vargas@ejemplo.cr'));
+
+    const resultado = await firstValueFrom(servicio.registrar(nuevaFinca(esperanza.perimetro)));
+    if (resultado.registrada) {
+      fail('debía rechazarse');
+      return;
+    }
+    expect(resultado.conflicto.duenos).toEqual([
+      { id: 'u-andres', nombreCompleto: 'Andrés Vargas Quesada' },
+      { id: 'u-maria', nombreCompleto: 'María Jiménez Solano' },
+      { id: 'u-rodrigo', nombreCompleto: 'Rodrigo Solís Ureña' },
+    ]);
+    expect(resultado.mensaje).toBe(
+      'El terreno se sobrepone con la finca "Finca La Esperanza" de Andrés Vargas Quesada, ' +
+        'María Jiménez Solano y Rodrigo Solís Ureña.',
+    );
   });
 
   it('registra la finca y la toma en cuenta para las siguientes', async () => {
