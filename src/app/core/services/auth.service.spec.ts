@@ -91,6 +91,46 @@ describe('AuthService', () => {
     req.flush(cuentaApi);
   });
 
+  it('POST /api/auth/recuperar con el correo', () => {
+    servicio.solicitarRecuperacion({ correo: 'rodrigo@fincalacatalina.cr' }).subscribe();
+
+    const req = http.expectOne(`${environment.apiUrl}/api/auth/recuperar`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ correo: 'rodrigo@fincalacatalina.cr' });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('POST /api/auth/verificarCodigo con correo y código', () => {
+    servicio
+      .verificarCodigo({ correo: 'rodrigo@fincalacatalina.cr', codigo: '123456' })
+      .subscribe();
+
+    const req = http.expectOne(`${environment.apiUrl}/api/auth/verificarCodigo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ correo: 'rodrigo@fincalacatalina.cr', codigo: '123456' });
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
+  it('POST /api/auth/restablecer con withCredentials', () => {
+    servicio
+      .restablecerContrasena({
+        correo: 'rodrigo@fincalacatalina.cr',
+        codigo: '123456',
+        contrasena: 'NuevaSegura1',
+      })
+      .subscribe();
+
+    const req = http.expectOne(`${environment.apiUrl}/api/auth/restablecer`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      correo: 'rodrigo@fincalacatalina.cr',
+      codigo: '123456',
+      contrasena: 'NuevaSegura1',
+    });
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush(null, { status: 204, statusText: 'No Content' });
+  });
+
   it('aplicarSesion hidrata CuentaService y SesionService', () => {
     servicio.aplicarSesion(cuentaApi);
 

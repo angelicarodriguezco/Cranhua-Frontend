@@ -32,6 +32,10 @@ export class IniciarSesionComponent {
   private readonly auth = inject(AuthService);
   private readonly googleIdentity = inject(GoogleIdentityService);
 
+  // Lo manda recuperar contraseña al terminar
+  protected readonly mensajeExito = signal<string | null>(
+    (this.router.getCurrentNavigation()?.extras.state?.['mensaje'] as string | undefined) ?? null,
+  );
   protected readonly enviando = signal(false);
   protected readonly errorGeneral = signal<string | null>(null);
   protected readonly erroresServidor = signal<Partial<Record<CampoLogin, string>>>({});

@@ -7,9 +7,12 @@ import {
   CuentaResponseApi,
   IniciarSesionGoogleRequest,
   IniciarSesionRequest,
+  RecuperarContrasenaRequest,
   RegistroGoogleRequest,
   RegistroRequest,
+  RestablecerContrasenaRequest,
   ROL_DESDE_API,
+  VerificarCodigoRequest,
 } from '../models/auth.model';
 import { Cuenta } from '../models/cuenta.model';
 import { usuarioDesdeNombreCompleto } from '../utils/nombre-usuario';
@@ -58,6 +61,19 @@ export class AuthService {
       request,
       opcionesCredenciales,
     );
+  }
+
+  solicitarRecuperacion(request: RecuperarContrasenaRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/recuperar`, request);
+  }
+
+  verificarCodigo(request: VerificarCodigoRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/verificarCodigo`, request);
+  }
+
+  // withCredentials para que el navegador aplique el borrado de la cookie de sesión
+  restablecerContrasena(request: RestablecerContrasenaRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/restablecer`, request, opcionesCredenciales);
   }
 
   aplicarSesion(cuentaApi: CuentaResponseApi): void {
