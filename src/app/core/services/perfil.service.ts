@@ -33,6 +33,22 @@ export class PerfilService {
       .pipe(map(mapearCuentaResponseAPerfil));
   }
 
+  actualizarFoto(archivo: File): Observable<PerfilUsuario> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http
+      .post<CuentaResponseApi>(`${this.base}/foto`, formData, opcionesCredenciales)
+      .pipe(map(mapearCuentaResponseAPerfil));
+  }
+
+  actualizarBanner(archivo: File): Observable<PerfilUsuario> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http
+      .post<CuentaResponseApi>(`${this.base}/banner`, formData, opcionesCredenciales)
+      .pipe(map(mapearCuentaResponseAPerfil));
+  }
+
   eliminarCuenta(): Observable<void> {
     return this.http.delete<void>(this.base, opcionesCredenciales);
   }

@@ -62,7 +62,7 @@ export function mapearCuentaResponseAPerfil(cuenta: CuentaResponseApi): PerfilUs
     telefono: cuenta.telefono ?? '',
     roles: cuenta.roles.map((rol) => ROL_DESDE_API[rol]),
     redes: mapearRedesDesdeApi(cuenta.redes ?? []),
-    portadaUrl: null,
+    portadaUrl: cuenta.bannerUrl ?? null,
     avatarUrl: cuenta.fotoUrl ?? null,
   };
 }

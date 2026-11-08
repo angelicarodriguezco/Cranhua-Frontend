@@ -122,6 +122,39 @@
           }
         </div>
 
+        <div class="campo">
+          <span class="campo__etiqueta" id="etiqueta-foto">Foto de perfil</span>
+          <button
+            type="button"
+            class="registro__foto"
+            [disabled]="enviando()"
+            [attr.aria-invalid]="!!errorFoto()"
+            [attr.aria-describedby]="errorFoto() ? 'error-foto' : null"
+            aria-labelledby="etiqueta-foto"
+            (click)="abrirSelectorFoto()"
+          >
+            @if (vistaPreviaFoto(); as url) {
+              <img class="registro__foto-preview" [src]="url" alt="" />
+              <span class="registro__foto-texto">Cambiar foto</span>
+            } @else {
+              <span class="registro__foto-texto">Subir foto</span>
+            }
+          </button>
+          <input
+            #inputFoto
+            id="foto"
+            class="registro__foto-input"
+            type="file"
+            [accept]="acceptImagen"
+            [disabled]="enviando()"
+            tabindex="-1"
+            (change)="alSeleccionarFoto($event)"
+          />
+          @if (errorFoto(); as mensajeFoto) {
+            <p id="error-foto" class="campo__error">{{ mensajeFoto }}</p>
+          }
+        </div>
+
         @if (errorGeneral(); as mensaje) {
           <p class="registro__error-general" role="alert">{{ mensaje }}</p>
         }

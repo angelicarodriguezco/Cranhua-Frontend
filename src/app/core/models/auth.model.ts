@@ -16,6 +16,7 @@ export interface CuentaResponseApi {
   roles: RolApi[];
   telefono?: string | null;
   fotoUrl?: string | null;
+  bannerUrl?: string | null;
   redes?: RedSocialApi[];
 }
 

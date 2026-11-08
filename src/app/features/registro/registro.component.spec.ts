@@ -71,13 +71,16 @@ describe('RegistroComponent', () => {
 
   it('muestra los tres roles y los campos del formulario', () => {
     expect(pagina.querySelectorAll('.roles__chip').length).toBe(3);
-    for (const id of ['nombre', 'correo', 'telefono', 'contrasena']) {
+    for (const id of ['nombre', 'correo', 'telefono', 'contrasena', 'foto']) {
       expect(pagina.querySelector(`#${id}`))
         .withContext(id)
         .not.toBeNull();
     }
     expect(pagina.querySelector('#instagram')).toBeNull();
-    expect(pagina.querySelector('#foto')).toBeNull();
+    const inputFoto = pagina.querySelector<HTMLInputElement>('#foto')!;
+    expect(inputFoto.type).toBe('file');
+    expect(inputFoto.accept).toBe('image/jpeg,image/png,image/webp');
+    expect(pagina.querySelector('.registro__foto')?.textContent?.trim()).toBe('Subir foto');
   });
 
   it('marca los campos obligatorios y no navega al enviar vacío', () => {
@@ -139,13 +142,16 @@ describe('RegistroComponent', () => {
       fixture.detectChanges();
       enviar();
 
-      expect(auth.registrar).toHaveBeenCalledWith({
-        nombreCompleto: 'Rodrigo Vargas Mora',
-        correo: 'rodrigo@fincalacatalina.cr',
-        contrasena: 'Cafe2026!',
-        roles: [rolApi],
-        telefono: '+506 8888-0000',
-      });
+      expect(auth.registrar).toHaveBeenCalledWith(
+        {
+          nombreCompleto: 'Rodrigo Vargas Mora',
+          correo: 'rodrigo@fincalacatalina.cr',
+          contrasena: 'Cafe2026!',
+          roles: [rolApi],
+          telefono: '+506 8888-0000',
+        },
+        null,
+      );
       expect(auth.aplicarSesion).toHaveBeenCalledWith(cuentaApi);
       expect(router.navigateByUrl).toHaveBeenCalledWith(ruta, jasmine.anything());
     });
@@ -163,10 +169,61 @@ describe('RegistroComponent', () => {
 
     expect(auth.registrar).toHaveBeenCalledWith(
       jasmine.objectContaining({ roles: ['CAFETERIA', 'CAFETALERO'] }),
+      null,
     );
     expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-finca', {
       state: { nombre: 'Rodrigo Vargas Mora', rolesPendientes: ['cafeteria'] },
     });
+  });
+
+  function seleccionarFoto(archivo: File): void {
+    const input = pagina.querySelector<HTMLInputElement>('#foto')!;
+    const transferencia = new DataTransfer();
+    transferencia.items.add(archivo);
+    input.files = transferencia.files;
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  }
+
+  it('con foto válida la pasa a registrar', () => {
+    const foto = new File([new Uint8Array([1, 2, 3])], 'avatar.png', { type: 'image/png' });
+    chip('Cafetalero').click();
+    llenarDatos();
+    seleccionarFoto(foto);
+    enviar();
+
+    expect(auth.registrar).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        correo: 'rodrigo@fincalacatalina.cr',
+        roles: ['CAFETALERO'],
+      }),
+      foto,
+    );
+    expect(pagina.querySelector('.registro__foto-preview')).not.toBeNull();
+    expect(pagina.querySelector('.registro__foto')?.textContent).toContain('Cambiar foto');
+  });
+
+  it('rechaza foto con tipo no permitido', () => {
+    const gif = new File([new Uint8Array([1])], 'avatar.gif', { type: 'image/gif' });
+    seleccionarFoto(gif);
+
+    expect(pagina.textContent).toContain('Solo se permiten imágenes JPG, PNG o WebP.');
+    expect(componente['archivoFoto']()).toBeNull();
+    expect(pagina.querySelector('.registro__foto-preview')).toBeNull();
+
+    chip('Cafetalero').click();
+    llenarDatos();
+    enviar();
+    expect(auth.registrar).toHaveBeenCalledWith(jasmine.anything(), null);
+  });
+
+  it('rechaza foto mayor a 5 MB', () => {
+    const grande = new File(['x'], 'avatar.png', { type: 'image/png' });
+    Object.defineProperty(grande, 'size', { value: 5 * 1024 * 1024 + 1 });
+    seleccionarFoto(grande);
+
+    expect(pagina.textContent).toContain('La imagen no puede superar 5 MB.');
+    expect(componente['archivoFoto']()).toBeNull();
   });
 
   it('muestra el error del backend al fallar el registro por correo', () => {

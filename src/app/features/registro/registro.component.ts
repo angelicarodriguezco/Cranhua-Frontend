@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, ElementRef, OnDestroy, inject, signal, viewChild } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -13,6 +13,7 @@ import { ROL_A_API } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleIdentityService } from '../../core/services/google-identity.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
+import { ACCEPT_IMAGEN_PERFIL, validarImagenPerfil } from '../../shared/utils/imagen';
 import { contrasenaConLetraYNumero } from '../../shared/validators/contrasena.validator';
 
 export type Rol = 'cafetalero' | 'tostador' | 'cafeteria';
@@ -49,15 +50,29 @@ function alMenosUnRol(control: AbstractControl<Rol[]>): ValidationErrors | null 
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.css',
 })
-export class RegistroComponent {
+export class RegistroComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly googleIdentity = inject(GoogleIdentityService);
 
   protected readonly roles = ROLES;
+  protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
   protected readonly enviando = signal(false);
   protected readonly errorGeneral = signal<string | null>(null);
   protected readonly erroresServidor = signal<Partial<Record<CampoRegistro, string>>>({});
+  protected readonly archivoFoto = signal<File | null>(null);
+  protected readonly vistaPreviaFoto = signal<string | null>(null);
+  protected readonly errorFoto = signal<string | null>(null);
+
+  private readonly inputFoto = viewChild<ElementRef<HTMLInputElement>>('inputFoto');
+
+  ngOnDestroy(): void {
+    this.revocarVistaPrevia();
+  }
+
+  protected abrirSelectorFoto(): void {
+    this.inputFoto()?.nativeElement.click();
+  }
 
   protected readonly form = new FormGroup({
     roles: new FormControl<Rol[]>([], { nonNullable: true, validators: [alMenosUnRol] }),
@@ -120,6 +135,28 @@ export class RegistroComponent {
     return 'Contraseña inválida';
   }
 
+  protected alSeleccionarFoto(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const archivo = input.files?.[0];
+    if (!archivo) {
+      return;
+    }
+
+    const error = validarImagenPerfil(archivo);
+    if (error) {
+      this.errorFoto.set(error);
+      this.archivoFoto.set(null);
+      this.revocarVistaPrevia();
+      input.value = '';
+      return;
+    }
+
+    this.errorFoto.set(null);
+    this.revocarVistaPrevia();
+    this.archivoFoto.set(archivo);
+    this.vistaPreviaFoto.set(URL.createObjectURL(archivo));
+  }
+
   protected enviar(): void {
     this.limpiarErrores();
     if (this.form.invalid) {
@@ -132,13 +169,16 @@ export class RegistroComponent {
 
     this.enviando.set(true);
     this.auth
-      .registrar({
-        nombreCompleto: this.form.controls.nombre.value.trim(),
-        correo: this.form.controls.correo.value.trim(),
-        contrasena: this.form.controls.contrasena.value,
-        roles: rolesApi,
-        ...(telefono ? { telefono } : {}),
-      })
+      .registrar(
+        {
+          nombreCompleto: this.form.controls.nombre.value.trim(),
+          correo: this.form.controls.correo.value.trim(),
+          contrasena: this.form.controls.contrasena.value,
+          roles: rolesApi,
+          ...(telefono ? { telefono } : {}),
+        },
+        this.archivoFoto(),
+      )
       .subscribe({
         next: (cuenta) => {
           this.auth.aplicarSesion(cuenta);
@@ -200,6 +240,14 @@ export class RegistroComponent {
   private limpiarErrores(): void {
     this.errorGeneral.set(null);
     this.erroresServidor.set({});
+  }
+
+  private revocarVistaPrevia(): void {
+    const actual = this.vistaPreviaFoto();
+    if (actual) {
+      URL.revokeObjectURL(actual);
+    }
+    this.vistaPreviaFoto.set(null);
   }
 
   private mostrarErrorAuth(error: unknown): void {

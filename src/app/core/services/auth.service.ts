@@ -32,7 +32,18 @@ export class AuthService {
     return `${environment.apiUrl}/api/auth`;
   }
 
-  registrar(request: RegistroRequest): Observable<CuentaResponseApi> {
+  registrar(request: RegistroRequest, foto?: File | null): Observable<CuentaResponseApi> {
+    if (foto) {
+      const formData = new FormData();
+      formData.append('datos', new Blob([JSON.stringify(request)], { type: 'application/json' }));
+      formData.append('foto', foto);
+      return this.http.post<CuentaResponseApi>(
+        `${this.base}/registro`,
+        formData,
+        opcionesCredenciales,
+      );
+    }
+
     return this.http.post<CuentaResponseApi>(
       `${this.base}/registro`,
       request,

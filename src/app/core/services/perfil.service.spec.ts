@@ -115,4 +115,40 @@ describe('PerfilService', () => {
     req.flush(null, { status: 204, statusText: 'No Content' });
     expect(completado).toBeTrue();
   });
+
+  it('POST /api/cuenta/foto envía FormData con part archivo y mapea la respuesta', () => {
+    const archivo = new File([new Uint8Array([1, 2, 3])], 'foto.jpg', { type: 'image/jpeg' });
+    let perfil: PerfilUsuario | undefined;
+    servicio.actualizarFoto(archivo).subscribe((r) => (perfil = r));
+
+    const req = http.expectOne(`${environment.apiUrl}/api/cuenta/foto`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body instanceof FormData).toBeTrue();
+    expect((req.request.body as FormData).get('archivo')).toBe(archivo);
+
+    req.flush({ ...cuentaApi, fotoUrl: 'https://cdn.ejemplo/foto.jpg' });
+    expect(perfil).toEqual({
+      ...perfilEsperado,
+      avatarUrl: 'https://cdn.ejemplo/foto.jpg',
+    });
+  });
+
+  it('POST /api/cuenta/banner envía FormData con part archivo y mapea la respuesta', () => {
+    const archivo = new File([new Uint8Array([1, 2, 3])], 'banner.png', { type: 'image/png' });
+    let perfil: PerfilUsuario | undefined;
+    servicio.actualizarBanner(archivo).subscribe((r) => (perfil = r));
+
+    const req = http.expectOne(`${environment.apiUrl}/api/cuenta/banner`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body instanceof FormData).toBeTrue();
+    expect((req.request.body as FormData).get('archivo')).toBe(archivo);
+
+    req.flush({ ...cuentaApi, bannerUrl: 'https://cdn.ejemplo/banner.jpg' });
+    expect(perfil).toEqual({
+      ...perfilEsperado,
+      portadaUrl: 'https://cdn.ejemplo/banner.jpg',
+    });
+  });
 });
