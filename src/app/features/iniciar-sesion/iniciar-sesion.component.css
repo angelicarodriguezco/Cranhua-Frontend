@@ -158,6 +158,17 @@
   text-align: center;
 }
 
+.login__exito {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(165, 112, 8, 0.45);
+  border-radius: 14px;
+  background: rgba(165, 112, 8, 0.12);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  color: var(--login-cream);
+}
+
 .login__olvidaste {
   align-self: flex-start;
   margin-top: 0.15rem;

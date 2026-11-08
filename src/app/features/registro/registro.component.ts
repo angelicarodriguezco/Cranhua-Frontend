@@ -13,6 +13,7 @@ import { ROL_A_API } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleIdentityService } from '../../core/services/google-identity.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
+import { contrasenaConLetraYNumero } from '../../shared/validators/contrasena.validator';
 
 export type Rol = 'cafetalero' | 'tostador' | 'cafeteria';
 
@@ -40,10 +41,6 @@ const CAMPO_API_A_FORM: Record<string, CampoRegistro> = {
 
 function alMenosUnRol(control: AbstractControl<Rol[]>): ValidationErrors | null {
   return control.value.length > 0 ? null : { sinRol: true };
-}
-
-function contrasenaConLetraYNumero(control: AbstractControl<string>): ValidationErrors | null {
-  return /^(?=.*\p{L})(?=.*\d).*$/u.test(control.value) ? null : { letraYNumero: true };
 }
 
 @Component({
