@@ -22,7 +22,10 @@
 
     @switch (paso()) {
       @case ('bienvenida') {
-        <app-bienvenida-cafeteria [nombre]="usuario()?.nombre ?? ''" (empezar)="paso.set('datos')" />
+        <app-bienvenida-cafeteria
+          [nombre]="usuario()?.nombre ?? ''"
+          (empezar)="paso.set('datos')"
+        />
       }
       @case ('datos') {
         <app-datos-cafeteria
