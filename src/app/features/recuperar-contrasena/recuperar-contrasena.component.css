@@ -254,8 +254,13 @@
   text-underline-offset: 0.15em;
 }
 
-.recuperar__reenvio-enlace:hover {
+.recuperar__reenvio-enlace:hover:not(:disabled) {
   color: var(--recuperar-accent);
+}
+
+.recuperar__reenvio-enlace:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .recuperar__reenvio-aviso {
@@ -280,16 +285,29 @@
   cursor: pointer;
   transition:
     filter 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
-.recuperar__cta:hover {
+.recuperar__cta:hover:not(:disabled) {
   filter: brightness(1.08);
   transform: translateY(-2px);
 }
 
-.recuperar__cta:active {
+.recuperar__cta:active:not(:disabled) {
   transform: scale(0.985);
+}
+
+.recuperar__cta:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.recuperar__error-general {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #e08a96;
+  text-align: center;
 }
 
 .recuperar__volver {
