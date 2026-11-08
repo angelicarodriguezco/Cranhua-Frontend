@@ -2,6 +2,13 @@ import { RolCuenta } from './cuenta.model';
 
 export type RolApi = 'CAFETALERO' | 'TOSTADOR' | 'CAFETERIA';
 
+export type TipoRedSocialApi = 'INSTAGRAM' | 'WHATSAPP' | 'FACEBOOK' | 'SITIO_WEB';
+
+export interface RedSocialApi {
+  tipo: TipoRedSocialApi;
+  valor: string;
+}
+
 export interface CuentaResponseApi {
   id: string;
   nombreCompleto: string;
@@ -9,7 +16,14 @@ export interface CuentaResponseApi {
   roles: RolApi[];
   telefono?: string | null;
   fotoUrl?: string | null;
-  redes?: { tipo: string; url: string }[];
+  redes?: RedSocialApi[];
+}
+
+export interface ActualizarCuentaRequest {
+  nombreCompleto?: string;
+  telefono?: string | null;
+  fotoUrl?: string | null;
+  redes?: RedSocialApi[];
 }
 
 export interface RegistroRequest {
