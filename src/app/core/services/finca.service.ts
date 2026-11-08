@@ -55,7 +55,7 @@ export class FincaService {
   }
 
   private aFinca(api: FincaResponseApi): Finca {
-    return fincaDesdeApi(api, this.sesion.usuario().id);
+    return fincaDesdeApi(api, this.sesion.usuario()?.id ?? '');
   }
 
   misFincas(): Observable<Finca[]> {

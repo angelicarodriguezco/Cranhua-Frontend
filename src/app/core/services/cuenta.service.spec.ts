@@ -16,6 +16,11 @@ describe('CuentaService', () => {
 
   it('permite cambiar la cuenta actual', () => {
     servicio.establecerCuenta(CUENTA_SOLO_CAFETALERO);
-    expect(servicio.cuenta().roles).toEqual(['cafetalero']);
+    expect(servicio.cuenta()?.roles).toEqual(['cafetalero']);
+  });
+
+  it('limpia la cuenta actual', () => {
+    servicio.limpiarCuenta();
+    expect(servicio.cuenta()).toBeNull();
   });
 });

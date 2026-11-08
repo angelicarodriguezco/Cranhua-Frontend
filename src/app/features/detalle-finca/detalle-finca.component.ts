@@ -43,7 +43,7 @@ export class DetalleFincaComponent {
 
   protected readonly tema = this.dashboard.tema;
 
-  protected readonly usuarioId = computed(() => this.usuario().id);
+  protected readonly usuarioId = computed(() => this.usuario()?.id ?? '');
   protected readonly cargando = signal(true);
   protected readonly finca = signal<Finca | undefined>(undefined);
   protected readonly cosechas = signal<Cosecha[]>([]);
@@ -62,7 +62,8 @@ export class DetalleFincaComponent {
       return [];
     }
     // Solo los dueños ven la finca, así que el usuario actual va primero
-    const actual = finca.propietarioId === this.usuario().id ? [this.usuario()] : [];
+    const usuario = this.usuario();
+    const actual = usuario && finca.propietarioId === usuario.id ? [usuario] : [];
     return [...actual, ...finca.duenosAdicionales];
   });
 
