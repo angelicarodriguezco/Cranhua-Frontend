@@ -36,24 +36,12 @@
   font-weight: 600;
 }
 
-.datos {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-}
-
 .nombre {
+  flex: 1;
+  min-width: 0;
   color: var(--text-heading);
   font-size: 0.875rem;
   font-weight: 600;
-}
-
-.correo {
-  overflow: hidden;
-  color: var(--text-muted);
-  font-size: 0.8125rem;
-  text-overflow: ellipsis;
 }
 
 .etiqueta {
