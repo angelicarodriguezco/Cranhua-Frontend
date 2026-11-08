@@ -1,7 +1,7 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import { ActualizarPerfilDatos } from '../../core/mappers/cuenta.mapper';
 import { PERFIL_EJEMPLO } from '../../core/mocks/perfil.mock';
@@ -47,6 +47,12 @@ describe('PerfilUsuarioComponent', () => {
     spyOn(perfilService, 'actualizar').and.callFake((datos: ActualizarPerfilDatos) =>
       of(perfilActualizado(datos)),
     );
+    spyOn(perfilService, 'actualizarFoto').and.callFake(() =>
+      of({ ...PERFIL_EJEMPLO, avatarUrl: 'https://cdn.ejemplo/foto.jpg' }),
+    );
+    spyOn(perfilService, 'actualizarBanner').and.callFake(() =>
+      of({ ...PERFIL_EJEMPLO, portadaUrl: 'https://cdn.ejemplo/banner.jpg' }),
+    );
 
     fixture = TestBed.createComponent(PerfilUsuarioComponent);
     pagina = fixture.nativeElement;
@@ -78,6 +84,15 @@ describe('PerfilUsuarioComponent', () => {
     const control = campo<HTMLInputElement>(selector);
     control.value = valor;
     control.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+  }
+
+  function seleccionarArchivo(ariaLabel: string, archivo: File): void {
+    const input = campo<HTMLInputElement>(`[aria-label="${ariaLabel}"]`);
+    const transferencia = new DataTransfer();
+    transferencia.items.add(archivo);
+    input.files = transferencia.files;
+    input.dispatchEvent(new Event('change'));
     fixture.detectChanges();
   }
 
@@ -179,6 +194,8 @@ describe('PerfilUsuarioComponent', () => {
     escribir('#nombre-perfil', 'Rodrigo Alvarado');
     clic('Guardar cambios');
 
+    expect(perfilService.actualizarFoto).not.toHaveBeenCalled();
+    expect(perfilService.actualizarBanner).not.toHaveBeenCalled();
     expect(perfilService.actualizar).toHaveBeenCalledWith({
       nombreCompleto: 'Rodrigo Alvarado',
       telefono: PERFIL_EJEMPLO.telefono,
@@ -186,6 +203,111 @@ describe('PerfilUsuarioComponent', () => {
     });
     expect(titulo()).toBe('Mi perfil');
     expect(campo('.identidad h2').textContent!.trim()).toBe('Rodrigo Alvarado');
+  });
+
+  it('los inputs de imagen aceptan solo JPG, PNG y WebP', () => {
+    clic('Editar perfil');
+    expect(campo('[aria-label="Elegir imagen de portada"]').accept).toBe(
+      'image/jpeg,image/png,image/webp',
+    );
+    expect(campo('[aria-label="Elegir foto de perfil"]').accept).toBe(
+      'image/jpeg,image/png,image/webp',
+    );
+  });
+
+  it('rechaza imágenes que no son JPG, PNG o WebP y no setea preview', () => {
+    clic('Editar perfil');
+    seleccionarArchivo(
+      'Elegir foto de perfil',
+      new File([new Uint8Array([1])], 'avatar.gif', { type: 'image/gif' }),
+    );
+
+    expect(pagina.textContent).toContain('Solo se permiten imágenes JPG, PNG o WebP.');
+    expect(pagina.querySelector('.avatar__imagen')).toBeNull();
+    expect(fixture.componentInstance['archivoAvatar']()).toBeNull();
+
+    seleccionarArchivo(
+      'Elegir imagen de portada',
+      new File([new Uint8Array([1])], 'portada.bmp', { type: 'image/bmp' }),
+    );
+    expect(pagina.textContent).toContain('Solo se permiten imágenes JPG, PNG o WebP.');
+    expect(fixture.componentInstance['archivoPortada']()).toBeNull();
+  });
+
+  it('rechaza imágenes mayores a 5 MB y no setea preview', () => {
+    clic('Editar perfil');
+    const grande = new File(['x'], 'avatar.png', { type: 'image/png' });
+    Object.defineProperty(grande, 'size', { value: 5 * 1024 * 1024 + 1 });
+    seleccionarArchivo('Elegir foto de perfil', grande);
+
+    expect(pagina.textContent).toContain('La imagen no puede superar 5 MB.');
+    expect(fixture.componentInstance['archivoAvatar']()).toBeNull();
+    expect(pagina.querySelector('.avatar__imagen')).toBeNull();
+  });
+
+  it('"Guardar cambios" sube foto y banner sucios antes de actualizar el texto', () => {
+    spyOn(URL, 'createObjectURL').and.returnValue('blob:preview');
+    spyOn(URL, 'revokeObjectURL');
+    const foto = new File([new Uint8Array([1, 2, 3])], 'avatar.png', { type: 'image/png' });
+    const banner = new File([new Uint8Array([4, 5, 6])], 'banner.webp', { type: 'image/webp' });
+
+    clic('Editar perfil');
+    seleccionarArchivo('Elegir foto de perfil', foto);
+    seleccionarArchivo('Elegir imagen de portada', banner);
+    escribir('#nombre-perfil', 'Rodrigo Alvarado');
+    clic('Guardar cambios');
+
+    expect(perfilService.actualizarFoto).toHaveBeenCalledWith(foto);
+    expect(perfilService.actualizarBanner).toHaveBeenCalledWith(banner);
+    expect(perfilService.actualizar).toHaveBeenCalledWith({
+      nombreCompleto: 'Rodrigo Alvarado',
+      telefono: PERFIL_EJEMPLO.telefono,
+      redes: PERFIL_EJEMPLO.redes,
+    });
+    expect(titulo()).toBe('Mi perfil');
+    expect(fixture.componentInstance['archivoAvatar']()).toBeNull();
+    expect(fixture.componentInstance['archivoPortada']()).toBeNull();
+  });
+
+  it('muestra el error 400 del servidor al guardar y permanece en edición', () => {
+    (perfilService.actualizar as jasmine.Spy).and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { mensaje: 'La imagen no es válida.' },
+          }),
+      ),
+    );
+
+    clic('Editar perfil');
+    escribir('#nombre-perfil', 'Rodrigo Alvarado');
+    clic('Guardar cambios');
+
+    expect(titulo()).toBe('Editar perfil');
+    expect(pagina.textContent).toContain('La imagen no es válida.');
+  });
+
+  it('muestra el error 400 al subir foto y permanece en edición', () => {
+    spyOn(URL, 'createObjectURL').and.returnValue('blob:preview');
+    (perfilService.actualizarFoto as jasmine.Spy).and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { mensaje: 'El archivo supera el tamaño máximo.' },
+          }),
+      ),
+    );
+    const foto = new File([new Uint8Array([1, 2, 3])], 'avatar.png', { type: 'image/png' });
+
+    clic('Editar perfil');
+    seleccionarArchivo('Elegir foto de perfil', foto);
+    clic('Guardar cambios');
+
+    expect(perfilService.actualizarFoto).toHaveBeenCalledWith(foto);
+    expect(titulo()).toBe('Editar perfil');
+    expect(pagina.textContent).toContain('El archivo supera el tamaño máximo.');
   });
 
   it('Cancelar y Volver descartan los cambios', () => {

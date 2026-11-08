@@ -35,21 +35,53 @@ describe('AuthService', () => {
     http.verify();
   });
 
-  it('POST /api/auth/registro con withCredentials', () => {
+  it('POST /api/auth/registro JSON sin foto con withCredentials', () => {
+    const body = {
+      nombreCompleto: 'Rodrigo Vargas Mora',
+      correo: 'rodrigo@fincalacatalina.cr',
+      contrasena: 'Cafe2026!',
+      roles: ['CAFETALERO'] as const,
+      telefono: '+506 8888-0000',
+    };
     let respuesta: CuentaResponseApi | undefined;
+    servicio.registrar({ ...body, roles: [...body.roles] }).subscribe((r) => (respuesta = r));
+
+    const req = http.expectOne(`${environment.apiUrl}/api/auth/registro`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body).toEqual({ ...body, roles: [...body.roles] });
+    expect(req.request.body instanceof FormData).toBeFalse();
+    req.flush(cuentaApi);
+    expect(respuesta).toEqual(cuentaApi);
+  });
+
+  it('POST /api/auth/registro multipart con foto y withCredentials', async () => {
+    const request = {
+      nombreCompleto: 'Rodrigo Vargas Mora',
+      correo: 'rodrigo@fincalacatalina.cr',
+      contrasena: 'Cafe2026!',
+      roles: ['CAFETALERO'] as const,
+      telefono: '+506 8888-0000',
+    };
+    const foto = new File([new Uint8Array([1, 2, 3])], 'avatar.png', { type: 'image/png' });
+    let respuesta: CuentaResponseApi | undefined;
+
     servicio
-      .registrar({
-        nombreCompleto: 'Rodrigo Vargas Mora',
-        correo: 'rodrigo@fincalacatalina.cr',
-        contrasena: 'Cafe2026!',
-        roles: ['CAFETALERO'],
-        telefono: '+506 8888-0000',
-      })
+      .registrar({ ...request, roles: [...request.roles] }, foto)
       .subscribe((r) => (respuesta = r));
 
     const req = http.expectOne(`${environment.apiUrl}/api/auth/registro`);
     expect(req.request.method).toBe('POST');
     expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body instanceof FormData).toBeTrue();
+
+    const formData = req.request.body as FormData;
+    expect(formData.get('foto')).toBe(foto);
+    const datos = formData.get('datos') as Blob;
+    expect(datos).toEqual(jasmine.any(Blob));
+    expect(datos.type).toBe('application/json');
+    expect(JSON.parse(await datos.text())).toEqual({ ...request, roles: [...request.roles] });
+
     req.flush(cuentaApi);
     expect(respuesta).toEqual(cuentaApi);
   });

@@ -52,7 +52,7 @@ describe('cuenta.mapper', () => {
     );
   });
 
-  it('mapea CuentaResponseApi a PerfilUsuario (avatarUrl ← fotoUrl) y a Cuenta', () => {
+  it('mapea CuentaResponseApi a PerfilUsuario (avatarUrl ← fotoUrl, portadaUrl ← bannerUrl) y a Cuenta', () => {
     const respuesta: CuentaResponseApi = {
       id: '11111111-1111-1111-1111-111111111111',
       nombreCompleto: 'Rodrigo Alvarado',
@@ -60,6 +60,7 @@ describe('cuenta.mapper', () => {
       roles: ['CAFETALERO', 'TOSTADOR'],
       telefono: null,
       fotoUrl: 'https://cdn.ejemplo/foto.jpg',
+      bannerUrl: 'https://cdn.ejemplo/banner.jpg',
       redes: [{ tipo: 'SITIO_WEB', valor: 'https://finca.cr' }],
     };
 
@@ -70,7 +71,7 @@ describe('cuenta.mapper', () => {
       telefono: '',
       roles: ['cafetalero', 'tostador'],
       redes: [{ tipo: 'sitio', valor: 'https://finca.cr' }],
-      portadaUrl: null,
+      portadaUrl: 'https://cdn.ejemplo/banner.jpg',
       avatarUrl: 'https://cdn.ejemplo/foto.jpg',
     });
 
@@ -80,6 +81,18 @@ describe('cuenta.mapper', () => {
       correo: 'rodrigo@fincalacatalina.cr',
       roles: ['cafetalero', 'tostador'],
     });
+  });
+
+  it('mapea portadaUrl a null cuando bannerUrl está ausente', () => {
+    const respuesta: CuentaResponseApi = {
+      id: '11111111-1111-1111-1111-111111111111',
+      nombreCompleto: 'Rodrigo Alvarado',
+      correo: 'rodrigo@fincalacatalina.cr',
+      roles: ['CAFETALERO'],
+      fotoUrl: null,
+    };
+
+    expect(mapearCuentaResponseAPerfil(respuesta).portadaUrl).toBeNull();
   });
 
   it('arma ActualizarCuentaRequest sin fotoUrl y con teléfono vacío como null', () => {

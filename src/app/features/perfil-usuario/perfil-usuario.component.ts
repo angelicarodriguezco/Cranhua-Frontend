@@ -20,6 +20,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Observable, concat, last } from 'rxjs';
 
 import { ActualizarPerfilDatos, etiquetaRoles } from '../../core/mappers/cuenta.mapper';
 import {
@@ -33,9 +34,11 @@ import { DashboardCafetaleroService } from '../../core/services/dashboard-cafeta
 import { PerfilService } from '../../core/services/perfil.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { TemaService } from '../../core/services/tema.service';
+import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
+import { ACCEPT_IMAGEN_PERFIL, validarImagenPerfil } from '../../shared/utils/imagen';
 
 const TELEFONO = /^(\+506[\s-]?)?\d{4}[\s-]?\d{4}$/;
 
@@ -177,6 +180,12 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected readonly portadaUrl = signal<string | null>(null);
   protected readonly avatarUrl = signal<string | null>(null);
+  protected readonly archivoPortada = signal<File | null>(null);
+  protected readonly archivoAvatar = signal<File | null>(null);
+  protected readonly errorPortada = signal<string | null>(null);
+  protected readonly errorAvatar = signal<string | null>(null);
+  protected readonly errorGuardar = signal<string | null>(null);
+  protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
   protected readonly modalEliminarAbierto = signal(false);
 
   protected readonly iniciales = computed(() =>
@@ -221,6 +230,11 @@ export class PerfilUsuarioComponent implements OnDestroy {
     this.selectorRedAbierto.set(false);
     this.portadaUrl.set(perfil.portadaUrl);
     this.avatarUrl.set(perfil.avatarUrl);
+    this.archivoPortada.set(null);
+    this.archivoAvatar.set(null);
+    this.errorPortada.set(null);
+    this.errorAvatar.set(null);
+    this.errorGuardar.set(null);
     this.intentoGuardar.set(false);
     this.modo.set('edicion');
   }
@@ -236,6 +250,7 @@ export class PerfilUsuarioComponent implements OnDestroy {
       return;
     }
     this.intentoGuardar.set(true);
+    this.errorGuardar.set(null);
     this.formulario.markAllAsTouched();
     if (this.formulario.invalid || this.redes().some((r) => validarRed(r))) {
       afterNextRender(() => this.irAlPrimerError(), { injector: this.injector });
@@ -247,10 +262,29 @@ export class PerfilUsuarioComponent implements OnDestroy {
       telefono: telefono.trim(),
       redes: this.redes().map((r) => ({ ...r, valor: r.valor.trim() })),
     };
-    this.perfilService.actualizar(datos).subscribe((guardado) => {
-      this.perfil.set(guardado);
-      this.modo.set('vista');
-    });
+    const archivoAvatar = this.archivoAvatar();
+    const archivoPortada = this.archivoPortada();
+    const pasos: Observable<PerfilUsuario>[] = [];
+    if (archivoAvatar) {
+      pasos.push(this.perfilService.actualizarFoto(archivoAvatar));
+    }
+    if (archivoPortada) {
+      pasos.push(this.perfilService.actualizarBanner(archivoPortada));
+    }
+    pasos.push(this.perfilService.actualizar(datos));
+
+    concat(...pasos)
+      .pipe(last())
+      .subscribe({
+        next: (guardado) => {
+          this.limpiarArchivosLocales();
+          this.perfil.set(guardado);
+          this.modo.set('vista');
+        },
+        error: (error: unknown) => {
+          this.errorGuardar.set(parsearErrorAuth(error).mensaje);
+        },
+      });
   }
 
   protected abrirSelectorRed(): void {
@@ -283,11 +317,23 @@ export class PerfilUsuarioComponent implements OnDestroy {
   }
 
   protected alSeleccionarPortada(evento: Event): void {
-    this.reemplazarVistaPrevia(this.portadaUrl, this.perfil()?.portadaUrl ?? null, evento);
+    this.reemplazarVistaPrevia(
+      this.portadaUrl,
+      this.archivoPortada,
+      this.errorPortada,
+      this.perfil()?.portadaUrl ?? null,
+      evento,
+    );
   }
 
   protected alSeleccionarAvatar(evento: Event): void {
-    this.reemplazarVistaPrevia(this.avatarUrl, this.perfil()?.avatarUrl ?? null, evento);
+    this.reemplazarVistaPrevia(
+      this.avatarUrl,
+      this.archivoAvatar,
+      this.errorAvatar,
+      this.perfil()?.avatarUrl ?? null,
+      evento,
+    );
   }
 
   protected abrirModalEliminar(): void {
@@ -314,22 +360,35 @@ export class PerfilUsuarioComponent implements OnDestroy {
   }
 
   private reemplazarVistaPrevia(
-    destino: WritableSignal<string | null>,
+    destinoUrl: WritableSignal<string | null>,
+    destinoArchivo: WritableSignal<File | null>,
+    errorDestino: WritableSignal<string | null>,
     guardada: string | null,
     evento: Event,
   ): void {
-    const archivo = (evento.target as HTMLInputElement).files?.[0];
+    const input = evento.target as HTMLInputElement;
+    const archivo = input.files?.[0];
     if (!archivo) {
       return;
     }
-    const anterior = destino();
+
+    const error = validarImagenPerfil(archivo);
+    if (error) {
+      errorDestino.set(error);
+      input.value = '';
+      return;
+    }
+
+    errorDestino.set(null);
+    const anterior = destinoUrl();
     if (anterior && anterior !== guardada) {
       URL.revokeObjectURL(anterior);
     }
-    destino.set(URL.createObjectURL(archivo));
+    destinoArchivo.set(archivo);
+    destinoUrl.set(URL.createObjectURL(archivo));
   }
 
-  private descartarVistasPrevias(): void {
+  private limpiarArchivosLocales(): void {
     const perfil = this.perfil();
     const portada = this.portadaUrl();
     const avatar = this.avatarUrl();
@@ -339,7 +398,25 @@ export class PerfilUsuarioComponent implements OnDestroy {
     if (avatar && avatar !== perfil?.avatarUrl) {
       URL.revokeObjectURL(avatar);
     }
+    this.archivoPortada.set(null);
+    this.archivoAvatar.set(null);
+    this.errorPortada.set(null);
+    this.errorAvatar.set(null);
+    this.errorGuardar.set(null);
+  }
+
+  private descartarVistasPrevias(): void {
+    this.limpiarArchivosLocales();
+    const perfil = this.perfil();
     this.portadaUrl.set(perfil?.portadaUrl ?? null);
     this.avatarUrl.set(perfil?.avatarUrl ?? null);
+    const inputPortada = this.inputPortada()?.nativeElement;
+    const inputAvatar = this.inputAvatar()?.nativeElement;
+    if (inputPortada) {
+      inputPortada.value = '';
+    }
+    if (inputAvatar) {
+      inputAvatar.value = '';
+    }
   }
 }

@@ -173,11 +173,16 @@
               #inputPortada
               class="oculto"
               type="file"
-              accept="image/*"
+              [accept]="acceptImagen"
               aria-label="Elegir imagen de portada"
+              [attr.aria-invalid]="!!errorPortada()"
+              [attr.aria-describedby]="errorPortada() ? 'error-portada' : null"
               (change)="alSeleccionarPortada($event)"
             />
           </div>
+          @if (errorPortada(); as mensajePortada) {
+            <p id="error-portada" class="campo__error">{{ mensajePortada }}</p>
+          }
 
           <div class="perfil">
             <div class="avatar">
@@ -198,12 +203,17 @@
                 #inputAvatar
                 class="oculto"
                 type="file"
-                accept="image/*"
+                [accept]="acceptImagen"
                 aria-label="Elegir foto de perfil"
+                [attr.aria-invalid]="!!errorAvatar()"
+                [attr.aria-describedby]="errorAvatar() ? 'error-avatar' : null"
                 (change)="alSeleccionarAvatar($event)"
               />
             </div>
           </div>
+          @if (errorAvatar(); as mensajeAvatar) {
+            <p id="error-avatar" class="campo__error">{{ mensajeAvatar }}</p>
+          }
 
           <div class="formulario">
             <div class="campo campo--ancho">
@@ -328,6 +338,9 @@
       </div>
 
       <div class="acciones">
+        @if (errorGuardar(); as mensajeGuardar) {
+          <p class="campo__error" role="alert">{{ mensajeGuardar }}</p>
+        }
         <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
         <button type="button" class="btn btn--filled" (click)="guardar()">Guardar cambios</button>
       </div>
