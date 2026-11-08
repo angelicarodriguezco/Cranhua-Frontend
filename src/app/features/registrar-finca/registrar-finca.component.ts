@@ -105,7 +105,7 @@ export class RegistrarFincaComponent {
         ubicacion: this.pin() ?? centroide(perimetro),
         canton: this.canton(),
         areaHectareas: areaHectareas(perimetro),
-        propietarioId: this.usuario().id,
+        propietarioId: this.usuario()!.id,
         duenosAdicionales: this.duenos(),
       })
       .subscribe((resultado) => {

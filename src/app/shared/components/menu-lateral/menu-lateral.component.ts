@@ -41,7 +41,7 @@ export class MenuLateralComponent {
   );
 
   protected readonly bloques = computed(() =>
-    armarBloques(this.cuenta().roles, this.cafeteria() !== undefined),
+    armarBloques(this.cuenta()?.roles ?? [], this.cafeteria() !== undefined),
   );
 
   protected readonly variosRoles = computed(() => this.bloques().length > 1);
@@ -52,6 +52,9 @@ export class MenuLateralComponent {
 
   protected readonly perfil = computed(() => {
     const cuenta = this.cuenta();
+    if (!cuenta) {
+      return { iniciales: '', nombreCompleto: '', roles: '' };
+    }
     return {
       iniciales: iniciales(cuenta.nombreCompleto),
       nombreCompleto: cuenta.nombreCompleto,

@@ -80,7 +80,7 @@ export class OnboardingCafeteriaComponent {
       canton: this.canton(),
       volumenMensual,
       estilos,
-      propietarioId: this.usuario().id,
+      propietarioId: this.usuario()!.id,
     };
     const registrada = this.registrada();
     const peticion = registrada

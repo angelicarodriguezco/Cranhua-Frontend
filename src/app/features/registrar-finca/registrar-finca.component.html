@@ -21,7 +21,7 @@
     <app-confirmacion-finca
       class="vidrio confirmacion"
       [finca]="registrada()!"
-      [nombrePropietario]="usuario().nombre"
+      [nombrePropietario]="usuario()?.nombre ?? ''"
       (irAlDashboard)="irAlDashboard()"
       (registrarOtra)="registrarOtra()"
     />
@@ -63,7 +63,7 @@
           <p>
             Tu dibujo se cruza con el perímetro de <strong>{{ finca.nombre }}</strong
             >,
-            @if (finca.propietarioId === usuario().id) {
+            @if (finca.propietarioId === usuario()?.id) {
               que ya registraste.
             } @else {
               registrada por otro cafetalero.
