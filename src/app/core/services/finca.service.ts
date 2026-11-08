@@ -11,6 +11,7 @@ import {
   ResultadoRegistro,
   Usuario,
 } from '../models/finca.model';
+import { listar, nombreCompleto } from '../../shared/utils/formato';
 import { distanciaKm, seSuperponen } from '../../shared/utils/geo';
 
 // Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
@@ -23,15 +24,32 @@ const normalizar = (texto: string) =>
     .trim()
     .toLowerCase();
 
+// Sin localeCompare para ordenar igual que String.compareTo en el backend
+const comparar = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+
 // Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class FincaService {
   private fincas = [...FINCAS_REGISTRADAS];
 
   registrar(nueva: NuevaFinca): Observable<ResultadoRegistro> {
-    const conflicto = this.fincas.find((f) => seSuperponen(nueva.perimetro, f.perimetro));
-    if (conflicto) {
-      return of({ registrada: false, conflicto });
+    const existente = this.fincas.find((f) => seSuperponen(nueva.perimetro, f.perimetro));
+    if (existente) {
+      const propietario = USUARIOS.filter((u) => u.id === existente.propietarioId);
+      const duenos = [...propietario, ...existente.duenosAdicionales]
+        .map((u) => ({ id: u.id, nombreCompleto: nombreCompleto(u) }))
+        .sort((a, b) => comparar(a.nombreCompleto, b.nombreCompleto) || comparar(a.id, b.id));
+      const nombres = listar(duenos.map((d) => d.nombreCompleto));
+      return of({
+        registrada: false,
+        conflicto: {
+          fincaId: existente.id,
+          nombre: existente.nombre,
+          duenos,
+          perimetro: existente.perimetro,
+        },
+        mensaje: `El terreno se sobrepone con la finca "${existente.nombre}" de ${nombres}.`,
+      });
     }
     const finca = { ...nueva, id: `f-${Date.now()}` };
     this.fincas.push(finca);

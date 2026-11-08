@@ -57,3 +57,7 @@ export function formatearMesAnio(fechaIso: string): string {
   const anio = partes.find((p) => p.type === 'year')?.value ?? '';
   return `${mes.charAt(0).toUpperCase()}${mes.slice(1)} ${anio}`;
 }
+
+export function nombreCompleto(usuario: Usuario): string {
+  return `${usuario.nombre} ${usuario.apellidos}`.trim();
+}

@@ -5,6 +5,8 @@ import { NEVER } from 'rxjs';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { Coordenada } from '../../core/models/finca.model';
+import { FincaService } from '../../core/services/finca.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
 
@@ -93,16 +95,97 @@ describe('RegistrarFincaComponent', () => {
     expect(pagina.querySelector('.confirmacion')).toBeNull();
   });
 
-  it('avisa de la superposición y permite corregir el dibujo', () => {
-    llenarYGuardar(FINCAS_REGISTRADAS[0].perimetro);
+  describe('superposición', () => {
+    const tucan = FINCAS_REGISTRADAS.find((f) => f.id === 'f-el-tucan')!;
 
-    expect(pagina.querySelector('.aviso')?.textContent).toContain('se sobrepone');
-    expect(pagina.querySelector('.conflicto')?.textContent).toContain('Finca El Tucán');
+    function textoConflicto(): string {
+      return pagina.querySelector('.conflicto')?.textContent?.replace(/\s+/g, ' ') ?? '';
+    }
 
-    boton('Corregir el dibujo').click();
-    fixture.detectChanges();
-    expect(pagina.querySelector('.conflicto')).toBeNull();
-    expect(componente['perimetro']()).toEqual(FINCAS_REGISTRADAS[0].perimetro);
+    it('dice con qué finca se cruza y de quién es, sin ofrecer revisión manual', () => {
+      llenarYGuardar(tucan.perimetro);
+
+      expect(pagina.querySelector('.aviso')?.textContent).toContain('se sobrepone');
+      expect(textoConflicto()).toContain(
+        'Tu dibujo se cruza con Finca El Tucán, de Andrés Vargas Quesada.',
+      );
+      expect(pagina.textContent).not.toContain('revise manualmente');
+      expect(boton('Corregir el dibujo')).toBeTruthy();
+    });
+
+    it('ordena a los dueños por nombre y los une con "y"', () => {
+      const brisas = FINCAS_REGISTRADAS.find((f) => f.id === 'f-las-brisas')!;
+      TestBed.inject(FincaService).agregarDueno(brisas.id, 'andres.vargas@ejemplo.cr').subscribe();
+      llenarYGuardar(brisas.perimetro);
+
+      expect(textoConflicto()).toContain('de Andrés Vargas Quesada y Lucía Mora Castro.');
+    });
+
+    it('avisa si la finca en conflicto es del mismo usuario', () => {
+      llenarYGuardar(FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza')!.perimetro);
+      expect(textoConflicto()).toContain('Finca La Esperanza, que ya registraste.');
+    });
+
+    it('solo cuenta como propia si coincide el id, aunque el nombre sea igual', () => {
+      const sesion = TestBed.inject(SesionService);
+      sesion.iniciarSesion({ ...USUARIOS[2], id: 'u-otro-andres', correo: 'otro.cr' });
+      llenarYGuardar(tucan.perimetro);
+      expect(textoConflicto()).toContain('Finca El Tucán, de Andrés Vargas Quesada.');
+      expect(textoConflicto()).not.toContain('que ya registraste');
+
+      boton('Corregir el dibujo').click();
+      sesion.iniciarSesion(USUARIOS[2]);
+      llenarYGuardar(tucan.perimetro);
+      expect(textoConflicto()).toContain('Finca El Tucán, que ya registraste.');
+    });
+
+    it('no guarda la finca', () => {
+      const servicio = TestBed.inject(FincaService);
+      spyOn(servicio, 'registrar').and.callThrough();
+      llenarYGuardar(tucan.perimetro);
+
+      expect(servicio.registrar).toHaveBeenCalledTimes(1);
+      let fincas = 0;
+      servicio.misFincas(componente['usuario']().id).subscribe((f) => (fincas = f.length));
+      expect(fincas).toBe(2);
+      expect(pagina.querySelector('.confirmacion')).toBeNull();
+    });
+
+    it('al corregir borra solo el polígono y se puede registrar de nuevo', () => {
+      componente['formulario'].setValue({
+        nombre: 'Finca La Catalina',
+        descripcion: 'Café de altura',
+        zona: 'Tarrazú',
+      });
+      componente['duenos'].set([USUARIOS[1]]);
+      dibujar(tucan.perimetro);
+      const pin = componente['pin']();
+      boton('Guardar finca').click();
+      fixture.detectChanges();
+
+      boton('Corregir el dibujo').click();
+      fixture.detectChanges();
+      expect(pagina.querySelector('.conflicto')).toBeNull();
+      expect(pagina.querySelector('.aviso')).toBeNull();
+      expect(componente['perimetro']()).toEqual([]);
+      expect(componente['formulario'].getRawValue()).toEqual({
+        nombre: 'Finca La Catalina',
+        descripcion: 'Café de altura',
+        zona: 'Tarrazú',
+      });
+      expect(componente['pin']()).toEqual(pin);
+      expect(componente['canton']()?.nombre).toBe('Tarrazú');
+      expect(componente['duenos']()).toEqual([USUARIOS[1]]);
+      expect(pagina.querySelector<HTMLInputElement>('#nombre-finca')?.value).toBe(
+        'Finca La Catalina',
+      );
+
+      componente['perimetro'].set(LIBRE);
+      fixture.detectChanges();
+      boton('Guardar finca').click();
+      fixture.detectChanges();
+      expect(pagina.querySelector('.resumen')?.textContent).toContain('Finca La Catalina');
+    });
   });
 
   it('muestra el resumen al guardar y va al dashboard', () => {
