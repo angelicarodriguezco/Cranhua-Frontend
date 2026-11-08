@@ -66,7 +66,7 @@ export class OnboardingFincaComponent {
 
   protected readonly conflicto = signal<ConflictoFinca | null>(null);
   protected readonly conflictoPropio = computed(
-    () => this.conflicto()?.duenos.some((d) => d.id === this.usuario().id) ?? false,
+    () => this.conflicto()?.duenos.some((d) => d.id === this.usuario()?.id) ?? false,
   );
   protected readonly nombresDuenos = computed(() =>
     listar(this.conflicto()?.duenos.map((d) => d.nombreCompleto) ?? []),
@@ -122,7 +122,7 @@ export class OnboardingFincaComponent {
         ubicacion: this.pin() ?? centroide(perimetro),
         canton: this.canton(),
         areaHectareas: areaHectareas(perimetro),
-        propietarioId: this.usuario().id,
+        propietarioId: this.usuario()!.id,
         duenosAdicionales: this.duenos(),
       })
       .subscribe((resultado) => {

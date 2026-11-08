@@ -23,7 +23,7 @@ export class MisFincasComponent {
   protected readonly tema = this.panel.tema;
   protected readonly rutaRegistrar = RUTA_REGISTRAR_FINCA;
 
-  protected readonly fincas = toSignal(inject(FincaService).misFincas(this.usuario().id), {
+  protected readonly fincas = toSignal(inject(FincaService).misFincas(this.usuario()?.id ?? ''), {
     initialValue: [],
   });
 }

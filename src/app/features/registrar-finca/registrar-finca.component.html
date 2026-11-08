@@ -21,7 +21,7 @@
     <app-confirmacion-finca
       class="vidrio confirmacion"
       [finca]="registrada()!"
-      [nombrePropietario]="usuario().nombre"
+      [nombrePropietario]="usuario()?.nombre ?? ''"
       (irAlDashboard)="irAlDashboard()"
       (registrarOtra)="registrarOtra()"
     />

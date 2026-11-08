@@ -21,22 +21,23 @@ import {
 } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import { ActualizarPerfilDatos, etiquetaRoles } from '../../core/mappers/cuenta.mapper';
 import {
   PerfilUsuario,
   RedSocial,
   TIPOS_RED_SOCIAL,
   TipoRedSocial,
 } from '../../core/models/perfil.model';
+import { CuentaService } from '../../core/services/cuenta.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { TemaService } from '../../core/services/tema.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
-// Mismos patrones que onboarding-cafeteria (allá no están exportados)
 const TELEFONO = /^(\+506[\s-]?)?\d{4}[\s-]?\d{4}$/;
-const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const DESCRIPCION_ELIMINAR_CUENTA =
   'Al eliminar tu cuenta se borran permanentemente tu perfil y tu acceso a Crán̈hua. Las fincas y cosechas ya publicadas se conservan de forma anónima para no romper la trazabilidad de otros usuarios.';
@@ -62,11 +63,6 @@ type Modo = 'vista' | 'edicion';
 
 type Campo = keyof ReturnType<typeof crearFormularioPerfil>['controls'];
 
-interface MensajeContrasena {
-  tipo: 'exito' | 'error';
-  texto: string;
-}
-
 function obligatorio(control: AbstractControl<string>): ValidationErrors | null {
   return control.value.trim() ? null : { required: true };
 }
@@ -77,19 +73,11 @@ function crearFormularioPerfil() {
       nonNullable: true,
       validators: [obligatorio, Validators.maxLength(80)],
     }),
-    correo: new FormControl('', {
-      nonNullable: true,
-      validators: [Validators.required, Validators.pattern(CORREO)],
-    }),
+    correo: new FormControl('', { nonNullable: true }),
     telefono: new FormControl('', {
       nonNullable: true,
       validators: [Validators.required, Validators.pattern(TELEFONO)],
     }),
-    ubicacion: new FormControl('', {
-      nonNullable: true,
-      validators: [obligatorio, Validators.maxLength(120)],
-    }),
-    biografia: new FormControl('', { nonNullable: true, validators: Validators.maxLength(300) }),
   });
 }
 
@@ -161,6 +149,8 @@ export class PerfilUsuarioComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardCafetaleroService);
   private readonly temas = inject(TemaService);
   private readonly perfilService = inject(PerfilService);
+  private readonly cuentaService = inject(CuentaService);
+  private readonly sesionService = inject(SesionService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -171,17 +161,13 @@ export class PerfilUsuarioComponent implements OnDestroy {
   protected readonly nombresRed = NOMBRES_RED_SOCIAL;
   protected readonly placeholdersRed = PLACEHOLDERS_RED_SOCIAL;
   protected readonly enlaceRed = enlaceRedSocial;
+  protected readonly etiquetaRoles = etiquetaRoles;
 
   protected readonly perfil = signal<PerfilUsuario | null>(null);
   protected readonly modo = signal<Modo>('vista');
   protected readonly intentoGuardar = signal(false);
 
   protected readonly formulario = crearFormularioPerfil();
-  protected readonly contrasena = new FormGroup({
-    actual: new FormControl('', { nonNullable: true }),
-    nueva: new FormControl('', { nonNullable: true }),
-  });
-  protected readonly mensajeContrasena = signal<MensajeContrasena | null>(null);
 
   protected readonly redes = signal<RedSocial[]>([]);
   protected readonly selectorRedAbierto = signal(false);
@@ -221,10 +207,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
     return control.invalid && control.touched;
   }
 
-  protected tieneError(campo: Campo, error: string): boolean {
-    return this.invalido(campo) && this.formulario.controls[campo].hasError(error);
-  }
-
   protected editar(): void {
     const perfil = this.perfil();
     if (!perfil) {
@@ -234,13 +216,9 @@ export class PerfilUsuarioComponent implements OnDestroy {
       nombreCompleto: perfil.nombreCompleto,
       correo: perfil.correo,
       telefono: perfil.telefono,
-      ubicacion: perfil.ubicacion,
-      biografia: perfil.biografia,
     });
     this.redes.set(perfil.redes.map((r) => ({ ...r })));
     this.selectorRedAbierto.set(false);
-    this.contrasena.reset();
-    this.mensajeContrasena.set(null);
     this.portadaUrl.set(perfil.portadaUrl);
     this.avatarUrl.set(perfil.avatarUrl);
     this.intentoGuardar.set(false);
@@ -263,20 +241,13 @@ export class PerfilUsuarioComponent implements OnDestroy {
       afterNextRender(() => this.irAlPrimerError(), { injector: this.injector });
       return;
     }
-    const { nombreCompleto, correo, telefono, ubicacion, biografia } =
-      this.formulario.getRawValue();
-    const actualizado: PerfilUsuario = {
-      ...perfil,
+    const { nombreCompleto, telefono } = this.formulario.getRawValue();
+    const datos: ActualizarPerfilDatos = {
       nombreCompleto: nombreCompleto.trim(),
-      correo: correo.trim(),
       telefono: telefono.trim(),
-      ubicacion: ubicacion.trim(),
-      biografia: biografia.trim(),
       redes: this.redes().map((r) => ({ ...r, valor: r.valor.trim() })),
-      portadaUrl: this.portadaUrl(),
-      avatarUrl: this.avatarUrl(),
     };
-    this.perfilService.actualizar(actualizado).subscribe((guardado) => {
+    this.perfilService.actualizar(datos).subscribe((guardado) => {
       this.perfil.set(guardado);
       this.modo.set('vista');
     });
@@ -301,29 +272,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
   protected cambiarRed(tipo: TipoRedSocial, evento: Event): void {
     const valor = (evento.target as HTMLInputElement).value;
     this.redes.update((lista) => lista.map((r) => (r.tipo === tipo ? { ...r, valor } : r)));
-  }
-
-  protected actualizarContrasena(): void {
-    const { actual, nueva } = this.contrasena.getRawValue();
-    if (!actual || !nueva) {
-      this.mensajeContrasena.set({
-        tipo: 'error',
-        texto: 'Completá la contraseña actual y la nueva.',
-      });
-    } else if (nueva.length < 8) {
-      this.mensajeContrasena.set({
-        tipo: 'error',
-        texto: 'La nueva contraseña debe tener al menos 8 caracteres.',
-      });
-    } else if (nueva === actual) {
-      this.mensajeContrasena.set({
-        tipo: 'error',
-        texto: 'La nueva contraseña tiene que ser distinta a la actual.',
-      });
-    } else {
-      this.contrasena.reset();
-      this.mensajeContrasena.set({ tipo: 'exito', texto: 'Tu contraseña se actualizó.' });
-    }
   }
 
   protected abrirSelectorPortada(): void {
@@ -352,8 +300,10 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected confirmarEliminar(): void {
     this.perfilService.eliminarCuenta().subscribe(() => {
+      this.cuentaService.limpiarCuenta();
+      this.sesionService.cerrarSesion();
       this.modalEliminarAbierto.set(false);
-      void this.router.navigateByUrl('/');
+      void this.router.navigateByUrl('/iniciar-sesion');
     });
   }
 
@@ -379,7 +329,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
     destino.set(URL.createObjectURL(archivo));
   }
 
-  // Libera las imágenes elegidas que no llegaron a guardarse
   private descartarVistasPrevias(): void {
     const perfil = this.perfil();
     const portada = this.portadaUrl();

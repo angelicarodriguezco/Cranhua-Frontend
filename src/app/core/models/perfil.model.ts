@@ -1,3 +1,5 @@
+import { RolCuenta } from './cuenta.model';
+
 export type TipoRedSocial = 'instagram' | 'whatsapp' | 'facebook' | 'sitio';
 
 export const TIPOS_RED_SOCIAL: TipoRedSocial[] = ['instagram', 'whatsapp', 'facebook', 'sitio'];
@@ -12,10 +14,7 @@ export interface PerfilUsuario {
   nombreCompleto: string;
   correo: string;
   telefono: string;
-  ubicacion: string;
-  biografia: string;
-  rol: string;
-  miembroDesde: number;
+  roles: RolCuenta[];
   redes: RedSocial[];
   portadaUrl: string | null;
   avatarUrl: string | null;

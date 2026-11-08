@@ -146,7 +146,7 @@ describe('RegistrarFincaComponent', () => {
 
       expect(servicio.registrar).toHaveBeenCalledTimes(1);
       let fincas = 0;
-      servicio.misFincas(componente['usuario']().id).subscribe((f) => (fincas = f.length));
+      servicio.misFincas(componente['usuario']()!.id).subscribe((f) => (fincas = f.length));
       expect(fincas).toBe(2);
       expect(pagina.querySelector('.confirmacion')).toBeNull();
     });

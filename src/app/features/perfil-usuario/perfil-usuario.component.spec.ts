@@ -1,10 +1,15 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { of } from 'rxjs';
 
+import { ActualizarPerfilDatos } from '../../core/mappers/cuenta.mapper';
 import { PERFIL_EJEMPLO } from '../../core/mocks/perfil.mock';
+import { PerfilUsuario } from '../../core/models/perfil.model';
+import { CuentaService } from '../../core/services/cuenta.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   DESCRIPCION_ELIMINAR_CUENTA,
@@ -20,15 +25,29 @@ describe('PerfilUsuarioComponent', () => {
   let perfilService: PerfilService;
   let dashboard: DashboardCafetaleroService;
 
+  function perfilActualizado(datos: ActualizarPerfilDatos): PerfilUsuario {
+    return {
+      ...PERFIL_EJEMPLO,
+      nombreCompleto: datos.nombreCompleto ?? PERFIL_EJEMPLO.nombreCompleto,
+      telefono: datos.telefono ?? PERFIL_EJEMPLO.telefono,
+      redes: datos.redes ?? PERFIL_EJEMPLO.redes,
+    };
+  }
+
   beforeEach(async () => {
     localStorage.removeItem(CLAVE_TEMA);
     await TestBed.configureTestingModule({
       imports: [PerfilUsuarioComponent],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideHttpClient()],
     }).compileComponents();
 
     perfilService = TestBed.inject(PerfilService);
     dashboard = TestBed.inject(DashboardCafetaleroService);
+    spyOn(perfilService, 'obtener').and.returnValue(of({ ...PERFIL_EJEMPLO }));
+    spyOn(perfilService, 'actualizar').and.callFake((datos: ActualizarPerfilDatos) =>
+      of(perfilActualizado(datos)),
+    );
+
     fixture = TestBed.createComponent(PerfilUsuarioComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -102,8 +121,6 @@ describe('PerfilUsuarioComponent', () => {
     expect(pagina.textContent).toContain('Así te ven los demás dentro de Crán̈hua.');
     expect(pagina.textContent).toContain(PERFIL_EJEMPLO.nombreCompleto);
     expect(campo('.badge').textContent).toContain('Cafetalero');
-    expect(pagina.textContent).toContain(PERFIL_EJEMPLO.ubicacion);
-    expect(pagina.textContent).toContain(PERFIL_EJEMPLO.biografia);
     expect(campo('.avatar__iniciales').textContent!.trim()).toBe('RA');
 
     const chips = [...pagina.querySelectorAll<HTMLAnchorElement>('.chips a')];
@@ -116,7 +133,6 @@ describe('PerfilUsuarioComponent', () => {
     expect(kpis).toEqual([
       `${indicadores.fincasRegistradas} Fincas registradas`,
       `${indicadores.cosechasActivas} Cosechas activas`,
-      '2024 Miembro desde',
     ]);
 
     const datos = campo('.datos').textContent!;
@@ -139,36 +155,40 @@ describe('PerfilUsuarioComponent', () => {
 
     expect(titulo()).toBe('Editar perfil');
     expect(pagina.textContent).toContain(
-      'Actualizá tu foto de portada, tu información y tus preferencias.',
+      'Actualizá tu foto de portada, tu información y tus redes sociales.',
     );
     expect(pagina.textContent).not.toContain('de 2)');
     expect(() => boton('Siguiente')).toThrow();
 
     expect(campo('#nombre-perfil').value).toBe(PERFIL_EJEMPLO.nombreCompleto);
     expect(campo('#correo-perfil').value).toBe(PERFIL_EJEMPLO.correo);
+    expect(campo('#correo-perfil').readOnly).toBeTrue();
     expect(campo('#telefono-perfil').value).toBe(PERFIL_EJEMPLO.telefono);
-    expect(campo('#ubicacion-perfil').value).toBe(PERFIL_EJEMPLO.ubicacion);
-    expect(campo<HTMLTextAreaElement>('#biografia-perfil').value).toBe(PERFIL_EJEMPLO.biografia);
+    expect(pagina.querySelector('#ubicacion-perfil')).toBeNull();
+    expect(pagina.querySelector('#biografia-perfil')).toBeNull();
+    expect(pagina.querySelector('.portada__cambiar')).toBeTruthy();
+    expect(pagina.querySelector('.avatar__camara')).toBeTruthy();
+    expect(pagina.querySelector('#contrasena-actual')).toBeNull();
 
-    expect(titulosSecciones()).toEqual(['Redes sociales', 'Seguridad', 'Zona de peligro']);
+    expect(titulosSecciones()).toEqual(['Redes sociales', 'Zona de peligro']);
     expect(boton('Guardar cambios')).toBeTruthy();
   });
 
-  it('"Guardar cambios" guarda y vuelve a la vista con el dato editado', () => {
-    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
-
+  it('"Guardar cambios" guarda sin foto y vuelve a la vista con el dato editado', () => {
     clic('Editar perfil');
     escribir('#nombre-perfil', 'Rodrigo Alvarado');
     clic('Guardar cambios');
 
-    expect(actualizar).toHaveBeenCalled();
+    expect(perfilService.actualizar).toHaveBeenCalledWith({
+      nombreCompleto: 'Rodrigo Alvarado',
+      telefono: PERFIL_EJEMPLO.telefono,
+      redes: PERFIL_EJEMPLO.redes,
+    });
     expect(titulo()).toBe('Mi perfil');
     expect(campo('.identidad h2').textContent!.trim()).toBe('Rodrigo Alvarado');
   });
 
   it('Cancelar y Volver descartan los cambios', () => {
-    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
-
     clic('Editar perfil');
     escribir('#nombre-perfil', 'Otro nombre');
     clic('Cancelar');
@@ -177,27 +197,24 @@ describe('PerfilUsuarioComponent', () => {
 
     clic('Editar perfil');
     expect(campo('#nombre-perfil').value).toBe(PERFIL_EJEMPLO.nombreCompleto);
-    escribir('#ubicacion-perfil', 'Dota, Costa Rica');
+    escribir('#nombre-perfil', 'Nombre temporal');
     clic('Quitar Instagram');
     clic('← Volver');
 
     expect(titulo()).toBe('Mi perfil');
-    expect(pagina.textContent).toContain(PERFIL_EJEMPLO.ubicacion);
+    expect(pagina.textContent).toContain(PERFIL_EJEMPLO.nombreCompleto);
     expect([...pagina.querySelectorAll('.chips a')].length).toBe(2);
-    expect(actualizar).not.toHaveBeenCalled();
+    expect(perfilService.actualizar).not.toHaveBeenCalled();
   });
 
   const invalidos: [string, string, string][] = [
     ['#nombre-perfil', '', 'Poné tu nombre completo.'],
     ['#nombre-perfil', '    ', 'Poné tu nombre completo.'],
-    ['#correo-perfil', 'rodrigo@finca', 'Ingresá un correo válido.'],
     ['#telefono-perfil', '8888-432', 'Ingresá un teléfono de 8 dígitos.'],
-    ['#ubicacion-perfil', '', 'Poné tu ubicación.'],
   ];
 
   invalidos.forEach(([selector, valor, mensaje]) => {
     it(`no guarda con ${selector} = "${valor}" y lleva al campo con error`, async () => {
-      const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
       const desplazar = spyOn(HTMLElement.prototype, 'scrollIntoView');
 
       clic('Editar perfil');
@@ -205,7 +222,7 @@ describe('PerfilUsuarioComponent', () => {
       clic('Guardar cambios');
       await fixture.whenStable();
 
-      expect(actualizar).not.toHaveBeenCalled();
+      expect(perfilService.actualizar).not.toHaveBeenCalled();
       expect(titulo()).toBe('Editar perfil');
       expect(pagina.textContent).toContain(mensaje);
       expect(campo(selector).getAttribute('aria-invalid')).toBe('true');
@@ -256,7 +273,6 @@ describe('PerfilUsuarioComponent', () => {
   });
 
   it('no guarda con una red vacía o inválida', async () => {
-    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
     spyOn(HTMLElement.prototype, 'scrollIntoView');
 
     clic('Editar perfil');
@@ -265,43 +281,15 @@ describe('PerfilUsuarioComponent', () => {
     clic('Guardar cambios');
     await fixture.whenStable();
 
-    expect(actualizar).not.toHaveBeenCalled();
+    expect(perfilService.actualizar).not.toHaveBeenCalled();
     expect(campo('#error-red-sitio').textContent).toContain('Completá el enlace o quitá esta red.');
     expect(campo('#red-sitio').getAttribute('aria-invalid')).toBe('true');
     expect(document.activeElement).toBe(campo('#red-sitio'));
 
     escribir('#red-sitio', 'lacatalina');
     clic('Guardar cambios');
-    expect(actualizar).not.toHaveBeenCalled();
+    expect(perfilService.actualizar).not.toHaveBeenCalled();
     expect(campo('#error-red-sitio').textContent).toContain('Ingresá un enlace válido');
-  });
-
-  it('valida la contraseña aparte y muestra error o éxito', () => {
-    const actualizar = spyOn(perfilService, 'actualizar').and.callThrough();
-    clic('Editar perfil');
-
-    const casos: [string, string, string][] = [
-      ['', '', 'Completá la contraseña actual y la nueva.'],
-      ['actual123', '', 'Completá la contraseña actual y la nueva.'],
-      ['actual123', 'corta', 'La nueva contraseña debe tener al menos 8 caracteres.'],
-      ['actual123', 'actual123', 'La nueva contraseña tiene que ser distinta a la actual.'],
-    ];
-    for (const [actual, nueva, mensaje] of casos) {
-      escribir('#contrasena-actual', actual);
-      escribir('#contrasena-nueva', nueva);
-      clic('Actualizar contraseña');
-      expect(campo('.mensaje').textContent!.trim()).withContext(nueva).toBe(mensaje);
-      expect(campo('.mensaje').classList).toContain('mensaje--error');
-    }
-
-    escribir('#contrasena-actual', 'actual123');
-    escribir('#contrasena-nueva', 'nueva12345');
-    clic('Actualizar contraseña');
-    expect(campo('.mensaje').classList).toContain('mensaje--exito');
-    expect(campo('#contrasena-actual').value).toBe('');
-    expect(campo('#contrasena-nueva').value).toBe('');
-    expect(actualizar).not.toHaveBeenCalled();
-    expect(titulo()).toBe('Editar perfil');
   });
 
   it('el switch de apariencia cambia el tema global y el data-theme del host', () => {
@@ -318,10 +306,12 @@ describe('PerfilUsuarioComponent', () => {
     expect(interruptor.getAttribute('aria-checked')).toBe('false');
   });
 
-  it('eliminar cuenta: cancelar cierra el modal y confirmar elimina y navega al inicio', async () => {
+  it('eliminar cuenta: cancelar cierra el modal y confirmar limpia sesión y navega a iniciar sesión', () => {
     const router = TestBed.inject(Router);
+    const cuentaService = TestBed.inject(CuentaService);
+    const sesionService = TestBed.inject(SesionService);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
-    const eliminar = spyOn(perfilService, 'eliminarCuenta').and.callThrough();
+    const eliminar = spyOn(perfilService, 'eliminarCuenta').and.returnValue(of(undefined));
 
     clic('Editar perfil');
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_CUENTA);
@@ -341,8 +331,9 @@ describe('PerfilUsuarioComponent', () => {
     fixture.detectChanges();
 
     expect(eliminar).toHaveBeenCalled();
-    expect(navegar).toHaveBeenCalledWith('/');
-    expect(await firstValueFrom(perfilService.obtener())).toBeNull();
+    expect(cuentaService.cuenta()).toBeNull();
+    expect(sesionService.usuario()).toBeNull();
+    expect(navegar).toHaveBeenCalledWith('/iniciar-sesion');
   });
 
   it('el modal de eliminar cuenta sigue el tema global', () => {

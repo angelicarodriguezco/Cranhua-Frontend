@@ -90,7 +90,7 @@ export class FormularioFincaComponent {
     this.fincaService.buscarUsuarioPorCorreo(correo).subscribe((usuario) => {
       if (!usuario) {
         this.errorDueno.set('No hay ninguna cuenta de Crán̈hua con ese correo.');
-      } else if (usuario.id === this.sesion.usuario().id) {
+      } else if (usuario.id === this.sesion.usuario()?.id) {
         this.errorDueno.set('Vos ya sos el dueño principal de esta finca.');
       } else if (this.duenos().some((d) => d.id === usuario.id)) {
         this.errorDueno.set(`${nombreCorto(usuario)} ya está en la lista.`);

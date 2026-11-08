@@ -29,12 +29,12 @@
   <main class="onboarding__contenido">
     @switch (paso()) {
       @case ('bienvenida') {
-        <app-paso-bienvenida [nombre]="usuario().nombre" (empezar)="empezar()" />
+        <app-paso-bienvenida [nombre]="usuario()?.nombre ?? ''" (empezar)="empezar()" />
       }
       @case ('confirmacion') {
         <app-paso-confirmacion
           [finca]="registrada()!"
-          [nombrePropietario]="usuario().nombre"
+          [nombrePropietario]="usuario()?.nombre ?? ''"
           (irAlDashboard)="irAlDashboard()"
           (registrarOtra)="registrarOtra()"
         />

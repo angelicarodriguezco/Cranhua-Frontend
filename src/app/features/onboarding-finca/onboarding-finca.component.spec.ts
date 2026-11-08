@@ -152,7 +152,7 @@ describe('OnboardingFincaComponent', () => {
       llenarYGuardar(tucan.perimetro);
 
       let fincas = 0;
-      servicio.misFincas(componente['usuario']().id).subscribe((f) => (fincas = f.length));
+      servicio.misFincas(componente['usuario']()!.id).subscribe((f) => (fincas = f.length));
       expect(fincas).toBe(2);
       expect(pasoActual()).toBe('Paso 3 de 4');
     });
