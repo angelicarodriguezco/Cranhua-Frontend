@@ -1,6 +1,6 @@
 import { Component, computed, input, output } from '@angular/core';
 
-import { Finca } from '../../../../core/models/finca.model';
+import { DuenoFallido, Finca } from '../../../../core/models/finca.model';
 import { formatearHectareas, listar, nombreCorto } from '../../../../shared/utils/formato';
 
 @Component({
@@ -11,6 +11,7 @@ import { formatearHectareas, listar, nombreCorto } from '../../../../shared/util
 export class PasoConfirmacionComponent {
   readonly finca = input.required<Finca>();
   readonly nombrePropietario = input.required<string>();
+  readonly duenosFallidos = input<DuenoFallido[]>([]);
   readonly irAlDashboard = output();
   readonly registrarOtra = output();
 

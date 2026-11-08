@@ -37,7 +37,7 @@
             <h2 id="titulo-perimetro">Perímetro</h2>
             <a [routerLink]="['/cafetalero/fincas', finca.id, 'editar']">Editar perímetro</a>
           </div>
-          <app-mapa-perimetro [perimetro]="finca.perimetro" />
+          <app-mapa-perimetro [perimetro]="finca.perimetro" [hectareas]="finca.areaHectareas" />
         </section>
 
         <section class="glass seccion" aria-labelledby="titulo-duenos">
@@ -46,7 +46,7 @@
           </div>
           <app-lista-duenos
             [duenos]="duenos()"
-            [propietarioId]="finca.propietarioId"
+            [usuarioId]="usuarioId()"
             [error]="errorDueno()"
             (agregar)="agregarDueno($event)"
           />

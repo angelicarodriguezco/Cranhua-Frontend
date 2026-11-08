@@ -35,6 +35,7 @@
         <app-paso-confirmacion
           [finca]="registrada()!"
           [nombrePropietario]="usuario()?.nombre ?? ''"
+          [duenosFallidos]="duenosFallidos()"
           (irAlDashboard)="irAlDashboard()"
           (registrarOtra)="registrarOtra()"
         />
@@ -74,16 +75,16 @@
                 No pudimos registrar la finca
               </h2>
               <p>
-                Tu dibujo se cruza con el perímetro de <strong>{{ finca.nombre }}</strong
+                Tu dibujo se cruza con <strong>{{ finca.nombre }}</strong
                 >,
-                @if (finca.propietarioId === usuario()?.id) {
+                @if (conflictoPropio()) {
                   que ya registraste.
                 } @else {
-                  registrada por otro cafetalero.
+                  de <strong>{{ nombresDuenos() }}</strong
+                  >.
                 }
                 Revisá el mapa: si el límite real es distinto, ajustá el dibujo.
               </p>
-              <p>Si creés que hay un error de registro, podés pedir que se revise manualmente.</p>
               <button type="button" class="conflicto__corregir" (click)="corregirDibujo()">
                 Corregir el dibujo
               </button>
@@ -96,6 +97,8 @@
               [hayPin]="pin() !== null"
               [errorPerimetro]="errorPerimetro()"
               [intentoGuardar]="intentoGuardar()"
+              [guardando]="guardando()"
+              [erroresServidor]="erroresServidor()"
               (guardar)="guardar()"
             />
           }

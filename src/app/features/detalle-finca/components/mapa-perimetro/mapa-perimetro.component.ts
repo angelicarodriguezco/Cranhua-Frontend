@@ -5,7 +5,7 @@ import { GoogleMap, MapPolygon } from '@angular/google-maps';
 import { Coordenada } from '../../../../core/models/finca.model';
 import { GoogleMapsService } from '../../../../core/services/google-maps.service';
 import { formatearHectareas } from '../../../../shared/utils/formato';
-import { areaHectareas, centroide } from '../../../../shared/utils/geo';
+import { centroide } from '../../../../shared/utils/geo';
 
 // Mapa de solo lectura: el perímetro se edita en el formulario de finca (CP3-22)
 @Component({
@@ -16,9 +16,11 @@ import { areaHectareas, centroide } from '../../../../shared/utils/geo';
 })
 export class MapaPerimetroComponent {
   readonly perimetro = input.required<Coordenada[]>();
+  // El área que guardó el backend, no la calculada en el navegador
+  readonly hectareas = input.required<number>();
 
   protected readonly apiCargada = toSignal(inject(GoogleMapsService).apiCargada);
-  protected readonly area = computed(() => formatearHectareas(areaHectareas(this.perimetro())));
+  protected readonly area = computed(() => formatearHectareas(this.hectareas()));
   protected readonly centro = computed(() => centroide(this.perimetro()));
 
   protected readonly opciones: google.maps.MapOptions = {

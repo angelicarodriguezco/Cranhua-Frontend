@@ -19,12 +19,14 @@ describe('MapaPerimetroComponent', () => {
 
     fixture = TestBed.createComponent(MapaPerimetroComponent);
     fixture.componentRef.setInput('perimetro', finca.perimetro);
+    fixture.componentRef.setInput('hectareas', 121.3);
     fixture.detectChanges();
   });
 
-  it('muestra el área del perímetro en hectáreas', () => {
+  it('muestra las hectáreas recibidas y no las calcula del perímetro', () => {
     const area: HTMLElement = fixture.nativeElement.querySelector('.area');
-    expect(area.textContent).toContain(formatearHectareas(finca.areaHectareas));
+    expect(area.textContent).toContain('121.3 hectáreas');
+    expect(area.textContent).not.toContain(formatearHectareas(finca.areaHectareas));
   });
 
   it('avisa cuando Google Maps no carga', () => {

@@ -200,3 +200,15 @@
     min-height: 8rem;
   }
 }
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.estado p {
+  margin: 0;
+}

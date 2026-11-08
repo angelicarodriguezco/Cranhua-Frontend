@@ -17,9 +17,9 @@ describe('Rutas del cafetalero', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
+        provideRouter(routes),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter(routes),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
@@ -53,9 +53,9 @@ describe('Rutas de la cafetería', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
+        provideRouter(routes),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideRouter(routes),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
