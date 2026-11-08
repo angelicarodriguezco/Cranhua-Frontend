@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom, timeout } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
@@ -20,6 +20,7 @@ import { CuentaService } from './cuenta.service';
 import { SesionService } from './sesion.service';
 
 const opcionesCredenciales = { withCredentials: true as const };
+const ESPERA_RESTAURAR_MS = 5000;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -87,5 +88,36 @@ export class AuthService {
     this.sesionService.iniciarSesion(
       usuarioDesdeNombreCompleto(cuentaApi.id, cuentaApi.nombreCompleto, cuentaApi.correo),
     );
+  }
+
+  cuentaActual(): Observable<CuentaResponseApi> {
+    return this.http.get<CuentaResponseApi>(
+      `${environment.apiUrl}/api/cuenta`,
+      opcionesCredenciales,
+    );
+  }
+
+  // Sin red o con timeout se arranca igual; solo un 401/403 confirma que no hay sesión
+  async restaurarSesion(): Promise<void> {
+    try {
+      const cuenta = await firstValueFrom(this.cuentaActual().pipe(timeout(ESPERA_RESTAURAR_MS)));
+      this.aplicarSesion(cuenta);
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && (error.status === 401 || error.status === 403)) {
+        this.limpiarSesion();
+      }
+    }
+  }
+
+  limpiarSesion(): void {
+    this.cuentaService.limpiarCuenta();
+    this.sesionService.cerrarSesion();
+  }
+
+  cerrarSesion(): void {
+    this.limpiarSesion();
+    this.http.post<void>(`${this.base}/cerrarSesion`, null, opcionesCredenciales).subscribe({
+      error: () => undefined,
+    });
   }
 }

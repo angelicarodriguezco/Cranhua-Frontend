@@ -10,6 +10,7 @@ import {
 } from '../../../core/mocks/cuenta.mock';
 import { CAFETERIA_EJEMPLO } from '../../../core/mocks/cafeteria.mock';
 import { Cuenta } from '../../../core/models/cuenta.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { CafeteriaService } from '../../../core/services/cafeteria.service';
 import { CuentaService } from '../../../core/services/cuenta.service';
 import { CLAVE_TEMA, TemaService } from '../../../core/services/tema.service';
@@ -33,6 +34,7 @@ describe('MenuLateralComponent', () => {
           provide: CafeteriaService,
           useValue: { obtenerActual: () => of(conCafeteria ? CAFETERIA_EJEMPLO : undefined) },
         },
+        { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', ['cerrarSesion']) },
       ],
     }).compileComponents();
 
@@ -140,6 +142,18 @@ describe('MenuLateralComponent', () => {
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(aside.getAttribute('data-tema')).toBe('claro');
+  });
+
+  it('"Cerrar sesión" llama a AuthService.cerrarSesion', async () => {
+    await crear(CUENTA_SOLO_CAFETALERO);
+    const auth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    const enlaces = [...pagina.querySelectorAll<HTMLAnchorElement>('.nav-cuenta a')];
+
+    enlaces.find((a) => a.textContent?.includes('Perfil y ajustes'))!.click();
+    expect(auth.cerrarSesion).not.toHaveBeenCalled();
+
+    enlaces.find((a) => a.textContent?.includes('Cerrar sesión'))!.click();
+    expect(auth.cerrarSesion).toHaveBeenCalledTimes(1);
   });
 });
 

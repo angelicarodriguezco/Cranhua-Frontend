@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
@@ -14,6 +16,8 @@ describe('DetalleFincaComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([{ path: 'cafetalero/fincas/:id', component: DetalleFincaComponent }]),
         // Sin cargar Google Maps
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },

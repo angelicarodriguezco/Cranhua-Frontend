@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
@@ -13,7 +15,7 @@ describe('HistorialCafetaleroComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [HistorialCafetaleroComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(HistorialCafetaleroComponent);

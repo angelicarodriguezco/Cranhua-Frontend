@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
 
+import { AuthService } from '../../../core/services/auth.service';
 import { CafeteriaService } from '../../../core/services/cafeteria.service';
 import { CuentaService } from '../../../core/services/cuenta.service';
 import { TemaService } from '../../../core/services/tema.service';
@@ -26,6 +27,7 @@ function iniciales(nombreCompleto: string): string {
 })
 export class MenuLateralComponent {
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthService);
   private readonly cuenta = inject(CuentaService).cuenta;
   private readonly cafeteria = toSignal(inject(CafeteriaService).obtenerActual());
 
@@ -63,4 +65,8 @@ export class MenuLateralComponent {
         .join(' · '),
     };
   });
+
+  protected cerrarSesion(): void {
+    this.auth.cerrarSesion();
+  }
 }

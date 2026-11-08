@@ -45,6 +45,7 @@
     [routerLink]="item.ruta"
     [class.activo]="activa() === item.ruta"
     [attr.aria-current]="activa() === item.ruta ? 'page' : null"
+    (click)="item.icono === 'logout' && cerrarSesion()"
   >
     <svg class="icono" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       @switch (item.icono) {
