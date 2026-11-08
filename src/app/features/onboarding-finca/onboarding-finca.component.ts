@@ -2,11 +2,17 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { ConflictoFinca, Coordenada, Finca, Usuario } from '../../core/models/finca.model';
+import {
+  ConflictoFinca,
+  Coordenada,
+  DuenoFallido,
+  ErrorRegistroFinca,
+  Finca,
+} from '../../core/models/finca.model';
 import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { listar } from '../../shared/utils/formato';
-import { areaHectareas, centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
+import { centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
 import {
   DetallesFincaComponent,
   crearFormularioFinca,
@@ -61,8 +67,11 @@ export class OnboardingFincaComponent {
   });
 
   protected readonly formulario = crearFormularioFinca();
-  protected readonly duenos = signal<Usuario[]>([]);
+  protected readonly duenos = signal<string[]>([]);
   protected readonly intentoGuardar = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly erroresServidor = signal<string[]>([]);
+  protected readonly duenosFallidos = signal<DuenoFallido[]>([]);
 
   protected readonly conflicto = signal<ConflictoFinca | null>(null);
   protected readonly conflictoPropio = computed(
@@ -108,32 +117,43 @@ export class OnboardingFincaComponent {
 
   protected guardar(): void {
     this.intentoGuardar.set(true);
-    if (this.formulario.invalid || this.errorPerimetro()) {
+    if (this.formulario.invalid || this.errorPerimetro() || this.guardando()) {
       return;
     }
+    this.guardando.set(true);
+    this.erroresServidor.set([]);
     const { nombre, descripcion, zona } = this.formulario.getRawValue();
     const perimetro = this.perimetro();
     this.fincaService
-      .registrar({
-        nombre: nombre.trim(),
-        descripcion: descripcion.trim() || null,
-        zona,
-        perimetro,
-        ubicacion: this.pin() ?? centroide(perimetro),
-        canton: this.canton(),
-        areaHectareas: areaHectareas(perimetro),
-        propietarioId: this.usuario()!.id,
-        duenosAdicionales: this.duenos(),
-      })
-      .subscribe((resultado) => {
-        if (resultado.registrada) {
-          this.registrada.set(resultado.finca);
-          this.paso.set('confirmacion');
-        } else {
-          this.conflicto.set(resultado.conflicto);
-          this.avisoVisible.set(true);
-          this.paso.set('conflicto');
-        }
+      .registrarConDuenos(
+        {
+          nombre: nombre.trim(),
+          descripcion: descripcion.trim() || null,
+          zona,
+          perimetro,
+          ubicacion: this.pin() ?? centroide(perimetro),
+          canton: this.canton(),
+        },
+        this.duenos(),
+      )
+      .subscribe({
+        next: (resultado) => {
+          this.guardando.set(false);
+          if (resultado.registrada) {
+            this.registrada.set(resultado.finca);
+            this.duenosFallidos.set(resultado.duenosFallidos);
+            this.paso.set('confirmacion');
+          } else {
+            this.conflicto.set(resultado.conflicto);
+            this.avisoVisible.set(true);
+            this.paso.set('conflicto');
+          }
+        },
+        error: (error: ErrorRegistroFinca) => {
+          this.guardando.set(false);
+          const porCampo = Object.values(error.errores);
+          this.erroresServidor.set(porCampo.length ? porCampo : [error.mensaje]);
+        },
       });
   }
 
@@ -154,6 +174,8 @@ export class OnboardingFincaComponent {
     this.pin.set(null);
     this.formulario.reset();
     this.duenos.set([]);
+    this.duenosFallidos.set([]);
+    this.erroresServidor.set([]);
     this.intentoGuardar.set(false);
     this.registrada.set(null);
     this.paso.set('dibujo');

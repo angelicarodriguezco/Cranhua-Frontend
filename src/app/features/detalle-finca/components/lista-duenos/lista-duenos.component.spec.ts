@@ -14,7 +14,7 @@ describe('ListaDuenosComponent', () => {
 
     fixture = TestBed.createComponent(ListaDuenosComponent);
     fixture.componentRef.setInput('duenos', USUARIOS.slice(0, 2));
-    fixture.componentRef.setInput('propietarioId', USUARIOS[0].id);
+    fixture.componentRef.setInput('usuarioId', USUARIOS[1].id);
     fixture.detectChanges();
     elemento = fixture.nativeElement;
   });
@@ -27,9 +27,21 @@ describe('ListaDuenosComponent', () => {
     fixture.detectChanges();
   }
 
-  it('lista los dueños y marca al propietario', () => {
-    expect(elemento.querySelectorAll('li').length).toBe(2);
-    expect(elemento.querySelectorAll('.etiqueta').length).toBe(1);
+  it('marca con "Vos" solo al dueño que es el usuario actual', () => {
+    const filas = elemento.querySelectorAll('li');
+    expect(filas.length).toBe(2);
+    expect(filas[0].querySelector('.etiqueta')).toBeNull();
+    expect(filas[1].querySelector('.etiqueta')?.textContent).toBe('Vos');
+  });
+
+  it('muestra solo iniciales y nombre de cada dueño, sin correo', () => {
+    const filas = [...elemento.querySelectorAll('li')];
+    expect(filas.map((f) => f.querySelector('.avatar')?.textContent)).toEqual(['RS', 'MJ']);
+    expect(filas.map((f) => f.querySelector('.nombre')?.textContent)).toEqual([
+      'Rodrigo Solís Ureña',
+      'María Jiménez Solano',
+    ]);
+    expect(elemento.querySelector('ul')?.textContent).not.toContain('@');
   });
 
   it('emite el correo escrito', () => {

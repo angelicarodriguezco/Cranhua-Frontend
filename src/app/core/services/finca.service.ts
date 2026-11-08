@@ -1,21 +1,42 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import {
+  Observable,
+  catchError,
+  concatMap,
+  from,
+  map,
+  of,
+  reduce,
+  switchMap,
+  throwError,
+} from 'rxjs';
 
-import { CANTONES, FINCAS_REGISTRADAS, USUARIOS } from '../mocks/finca.mock';
+import { environment } from '../../../environments/environment';
+import { CANTONES } from '../mocks/finca.mock';
 import {
   Canton,
   Coordenada,
+  DuenoFallido,
+  ErrorRegistroFinca,
   Finca,
+  FincaResponseApi,
   NuevaFinca,
   ResultadoAgregarDueno,
   ResultadoRegistro,
-  Usuario,
+  ResultadoRegistroConDuenos,
 } from '../models/finca.model';
-import { listar, nombreCompleto } from '../../shared/utils/formato';
-import { distanciaKm, seSuperponen } from '../../shared/utils/geo';
+import { fincaDesdeApi } from '../utils/finca-desde-api';
+import { distanciaKm } from '../../shared/utils/geo';
+import { SesionService } from './sesion.service';
 
 // Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
 const DISTANCIA_MAXIMA_CANTON_KM = 25;
+
+const ERROR_REGISTRO = 'No pudimos registrar la finca. Intentá de nuevo.';
+const ERROR_DUENO = 'No pudimos agregar a ese dueño. Intentá de nuevo.';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 const normalizar = (texto: string) =>
   texto
@@ -24,41 +45,120 @@ const normalizar = (texto: string) =>
     .trim()
     .toLowerCase();
 
-// Sin localeCompare para ordenar igual que String.compareTo en el backend
-const comparar = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
-
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class FincaService {
-  private fincas = [...FINCAS_REGISTRADAS];
+  private readonly http = inject(HttpClient);
+  private readonly sesion = inject(SesionService);
 
-  registrar(nueva: NuevaFinca): Observable<ResultadoRegistro> {
-    const existente = this.fincas.find((f) => seSuperponen(nueva.perimetro, f.perimetro));
-    if (existente) {
-      const propietario = USUARIOS.filter((u) => u.id === existente.propietarioId);
-      const duenos = [...propietario, ...existente.duenosAdicionales]
-        .map((u) => ({ id: u.id, nombreCompleto: nombreCompleto(u) }))
-        .sort((a, b) => comparar(a.nombreCompleto, b.nombreCompleto) || comparar(a.id, b.id));
-      const nombres = listar(duenos.map((d) => d.nombreCompleto));
-      return of({
-        registrada: false,
-        conflicto: {
-          fincaId: existente.id,
-          nombre: existente.nombre,
-          duenos,
-          perimetro: existente.perimetro,
-        },
-        mensaje: `El terreno se sobrepone con la finca "${existente.nombre}" de ${nombres}.`,
-      });
-    }
-    const finca = { ...nueva, id: `f-${Date.now()}` };
-    this.fincas.push(finca);
-    return of({ registrada: true, finca });
+  private get base(): string {
+    return `${environment.apiUrl}/api/fincas`;
   }
 
-  buscarUsuarioPorCorreo(correo: string): Observable<Usuario | undefined> {
-    const buscado = normalizar(correo);
-    return of(USUARIOS.find((u) => u.correo === buscado));
+  private aFinca(api: FincaResponseApi): Finca {
+    return fincaDesdeApi(api, this.sesion.usuario()?.id ?? '');
+  }
+
+  misFincas(): Observable<Finca[]> {
+    return this.http
+      .get<FincaResponseApi[]>(this.base, opcionesCredenciales)
+      .pipe(map((fincas) => fincas.map((f) => this.aFinca(f))));
+  }
+
+  obtener(id: string): Observable<Finca> {
+    return this.http
+      .get<FincaResponseApi>(`${this.base}/${id}`, opcionesCredenciales)
+      .pipe(map((f) => this.aFinca(f)));
+  }
+
+  registrar(nueva: NuevaFinca): Observable<ResultadoRegistro> {
+    const cuerpo = {
+      nombre: nueva.nombre,
+      descripcion: nueva.descripcion,
+      zonaCafetalera: nueva.zona,
+      perimetro: nueva.perimetro,
+      ubicacion: nueva.ubicacion,
+      canton: nueva.canton?.nombre ?? '',
+      provincia: nueva.canton?.provincia ?? '',
+    };
+    return this.http.post<FincaResponseApi>(this.base, cuerpo, opcionesCredenciales).pipe(
+      map((api): ResultadoRegistro => ({ registrada: true, finca: this.aFinca(api) })),
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 409) {
+          return of<ResultadoRegistro>({
+            registrada: false,
+            conflicto: error.error.conflicto,
+            mensaje: error.error.mensaje,
+          });
+        }
+        const fallo: ErrorRegistroFinca =
+          error.status === 400
+            ? {
+                mensaje: error.error?.mensaje ?? ERROR_REGISTRO,
+                errores: error.error?.errores ?? {},
+              }
+            : { mensaje: ERROR_REGISTRO, errores: {} };
+        return throwError(() => fallo);
+      }),
+    );
+  }
+
+  // Los dueños se agregan uno por uno después de crear la finca; si alguno falla la finca queda
+  registrarConDuenos(nueva: NuevaFinca, correos: string[]): Observable<ResultadoRegistroConDuenos> {
+    return this.registrar(nueva).pipe(
+      switchMap((resultado) => {
+        if (!resultado.registrada) {
+          return of(resultado);
+        }
+        const inicial = {
+          registrada: true as const,
+          finca: resultado.finca,
+          duenosFallidos: [] as DuenoFallido[],
+        };
+        return from(correos).pipe(
+          concatMap((correo) =>
+            this.agregarDueno(resultado.finca.id, correo).pipe(map((r) => ({ correo, r }))),
+          ),
+          reduce(
+            (acumulado, { correo, r }) =>
+              r.agregado
+                ? { ...acumulado, finca: r.finca }
+                : {
+                    ...acumulado,
+                    duenosFallidos: [...acumulado.duenosFallidos, { correo, mensaje: r.mensaje }],
+                  },
+            inicial,
+          ),
+        );
+      }),
+    );
+  }
+
+  agregarDueno(fincaId: string, correo: string): Observable<ResultadoAgregarDueno> {
+    return this.http
+      .post<FincaResponseApi>(`${this.base}/${fincaId}/duenos`, { correo }, opcionesCredenciales)
+      .pipe(
+        map((api): ResultadoAgregarDueno => ({ agregado: true, finca: this.aFinca(api) })),
+        catchError((error: HttpErrorResponse) =>
+          of<ResultadoAgregarDueno>({
+            agregado: false,
+            mensaje:
+              (error.status === 404 || error.status === 409) && error.error?.mensaje
+                ? error.error.mensaje
+                : ERROR_DUENO,
+          }),
+        ),
+      );
+  }
+
+  quitarDueno(fincaId: string, cuentaId: string): Observable<Finca> {
+    return this.http
+      .delete<FincaResponseApi>(`${this.base}/${fincaId}/duenos/${cuentaId}`, opcionesCredenciales)
+      .pipe(map((f) => this.aFinca(f)));
+  }
+
+  // Pendiente: el backend todavía no tiene DELETE /api/fincas/{id}
+  eliminar(id: string): Observable<boolean> {
+    return of(id.length > 0);
   }
 
   cantonDe(punto: Coordenada): Canton | null {
@@ -80,50 +180,5 @@ export class FincaService {
       CANTONES.find((c) => normalizar(c.nombre) === buscado) ??
       CANTONES.find((c) => normalizar(c.nombre).startsWith(buscado))
     );
-  }
-
-  misFincas(usuarioId: string): Observable<Finca[]> {
-    return of(
-      this.fincas.filter(
-        (f) => f.propietarioId === usuarioId || f.duenosAdicionales.some((u) => u.id === usuarioId),
-      ),
-    );
-  }
-
-  obtener(id: string): Observable<Finca | undefined> {
-    return of(this.fincas.find((f) => f.id === id));
-  }
-
-  usuarioPorId(id: string): Usuario | undefined {
-    return USUARIOS.find((u) => u.id === id);
-  }
-
-  eliminar(id: string): Observable<boolean> {
-    const existia = this.fincas.some((f) => f.id === id);
-    this.fincas = this.fincas.filter((f) => f.id !== id);
-    return of(existia);
-  }
-
-  // Se reemplaza la finca por una copia para no modificar los datos de ejemplo
-  agregarDueno(fincaId: string, correo: string): Observable<ResultadoAgregarDueno> {
-    const indice = this.fincas.findIndex((f) => f.id === fincaId);
-    if (indice === -1) {
-      return of({ agregado: false, error: 'finca-inexistente' });
-    }
-    const buscado = normalizar(correo);
-    const usuario = USUARIOS.find((u) => u.correo === buscado);
-    if (!usuario) {
-      return of({ agregado: false, error: 'correo-inexistente' });
-    }
-    const finca = this.fincas[indice];
-    if (
-      finca.propietarioId === usuario.id ||
-      finca.duenosAdicionales.some((u) => u.id === usuario.id)
-    ) {
-      return of({ agregado: false, error: 'ya-es-dueno' });
-    }
-    const actualizada = { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] };
-    this.fincas[indice] = actualizada;
-    return of({ agregado: true, finca: actualizada });
   }
 }

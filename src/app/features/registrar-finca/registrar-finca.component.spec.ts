@@ -1,16 +1,18 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
-import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
-import { Coordenada } from '../../core/models/finca.model';
-import { FincaService } from '../../core/services/finca.service';
-import { SesionService } from '../../core/services/sesion.service';
+import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
 
-// Cerca de la cabecera de Tarrazú y lejos de las fincas de ejemplo
+const BASE = `${environment.apiUrl}/api/fincas`;
+
+// Cerca de la cabecera de Tarrazú
 const LIBRE: Coordenada[] = [
   { lat: 9.67, lng: -84.04 },
   { lat: 9.67, lng: -84.039 },
@@ -18,16 +20,38 @@ const LIBRE: Coordenada[] = [
   { lat: 9.671, lng: -84.04 },
 ];
 
+const RODRIGO: DuenoApi = { id: 'u-rodrigo', nombreCompleto: 'Rodrigo Solís Ureña' };
+const MARIA: DuenoApi = { id: 'u-maria', nombreCompleto: 'María Jiménez Solano' };
+const ANDRES: DuenoApi = { id: 'u-andres', nombreCompleto: 'Andrés Vargas Quesada' };
+
+function fincaApi(duenos: DuenoApi[] = [RODRIGO]): FincaResponseApi {
+  return {
+    id: 'f-nueva',
+    nombre: 'Finca La Catalina',
+    descripcion: null,
+    zonaCafetalera: 'Tarrazú',
+    perimetro: LIBRE,
+    ubicacion: LIBRE[0],
+    canton: 'Tarrazú',
+    provincia: 'San José',
+    areaHectareas: 1.2,
+    duenos,
+  };
+}
+
 describe('RegistrarFincaComponent', () => {
   let fixture: ComponentFixture<RegistrarFincaComponent>;
   let componente: RegistrarFincaComponent;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegistrarFincaComponent],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
     }).compileComponents();
@@ -35,10 +59,14 @@ describe('RegistrarFincaComponent', () => {
     fixture = TestBed.createComponent(RegistrarFincaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
+    http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
   });
 
-  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+  afterEach(() => {
+    http.verify();
+    localStorage.removeItem(CLAVE_TEMA);
+  });
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -62,6 +90,21 @@ describe('RegistrarFincaComponent', () => {
     fixture.detectChanges();
     boton('Guardar finca').click();
     fixture.detectChanges();
+  }
+
+  function responder(cuerpo: object, status = 201) {
+    http.expectOne({ method: 'POST', url: BASE }).flush(cuerpo, { status, statusText: '' });
+    fixture.detectChanges();
+  }
+
+  function responderConflicto(nombre: string, duenos: DuenoApi[]) {
+    responder(
+      {
+        mensaje: `El terreno se sobrepone con la finca "${nombre}".`,
+        conflicto: { fincaId: 'f-otra', nombre, duenos, perimetro: LIBRE },
+      },
+      409,
+    );
   }
 
   it('muestra el menú del cafetalero y el formulario con la descripción', () => {
@@ -93,17 +136,50 @@ describe('RegistrarFincaComponent', () => {
     expect(pagina.textContent).toContain('Poné un nombre para tu finca.');
     expect(pagina.textContent).toContain('Marcá al menos tres esquinas en el mapa.');
     expect(pagina.querySelector('.confirmacion')).toBeNull();
+    http.expectNone(BASE);
+  });
+
+  it('crea la finca y después agrega los dueños; si uno falla la finca queda creada', () => {
+    componente['duenos'].set(['maria@ejemplo.cr', 'nadie@ejemplo.cr']);
+    llenarYGuardar(LIBRE);
+
+    expect(boton('Guardando…').disabled).toBeTrue();
+    responder(fincaApi());
+    http.expectOne(`${BASE}/f-nueva/duenos`).flush(fincaApi([RODRIGO, MARIA]));
+    http
+      .expectOne(`${BASE}/f-nueva/duenos`)
+      .flush(
+        { mensaje: 'No encontramos una cuenta de cafetalero con ese correo.' },
+        { status: 404, statusText: 'Not Found' },
+      );
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.resumen')?.textContent).toContain('Rodrigo y María Jiménez');
+    expect(pagina.querySelector('.fallidos')?.textContent?.replace(/\s+/g, ' ')).toContain(
+      'nadie@ejemplo.cr: No encontramos una cuenta de cafetalero con ese correo.',
+    );
+  });
+
+  it('muestra los errores por campo del backend en el formulario', () => {
+    llenarYGuardar(LIBRE);
+    responder(
+      { mensaje: 'Revisá los datos ingresados.', errores: { nombre: 'Ingresá el nombre.' } },
+      400,
+    );
+
+    expect(pagina.querySelector('.confirmacion')).toBeNull();
+    expect(pagina.textContent).toContain('Ingresá el nombre.');
+    expect(boton('Guardar finca').disabled).toBeFalse();
   });
 
   describe('superposición', () => {
-    const tucan = FINCAS_REGISTRADAS.find((f) => f.id === 'f-el-tucan')!;
-
     function textoConflicto(): string {
       return pagina.querySelector('.conflicto')?.textContent?.replace(/\s+/g, ' ') ?? '';
     }
 
     it('dice con qué finca se cruza y de quién es, sin ofrecer revisión manual', () => {
-      llenarYGuardar(tucan.perimetro);
+      llenarYGuardar(LIBRE);
+      responderConflicto('Finca El Tucán', [ANDRES]);
 
       expect(pagina.querySelector('.aviso')?.textContent).toContain('se sobrepone');
       expect(textoConflicto()).toContain(
@@ -113,42 +189,10 @@ describe('RegistrarFincaComponent', () => {
       expect(boton('Corregir el dibujo')).toBeTruthy();
     });
 
-    it('ordena a los dueños por nombre y los une con "y"', () => {
-      const brisas = FINCAS_REGISTRADAS.find((f) => f.id === 'f-las-brisas')!;
-      TestBed.inject(FincaService).agregarDueno(brisas.id, 'andres.vargas@ejemplo.cr').subscribe();
-      llenarYGuardar(brisas.perimetro);
-
-      expect(textoConflicto()).toContain('de Andrés Vargas Quesada y Lucía Mora Castro.');
-    });
-
     it('avisa si la finca en conflicto es del mismo usuario', () => {
-      llenarYGuardar(FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza')!.perimetro);
+      llenarYGuardar(LIBRE);
+      responderConflicto('Finca La Esperanza', [RODRIGO]);
       expect(textoConflicto()).toContain('Finca La Esperanza, que ya registraste.');
-    });
-
-    it('solo cuenta como propia si coincide el id, aunque el nombre sea igual', () => {
-      const sesion = TestBed.inject(SesionService);
-      sesion.iniciarSesion({ ...USUARIOS[2], id: 'u-otro-andres', correo: 'otro.cr' });
-      llenarYGuardar(tucan.perimetro);
-      expect(textoConflicto()).toContain('Finca El Tucán, de Andrés Vargas Quesada.');
-      expect(textoConflicto()).not.toContain('que ya registraste');
-
-      boton('Corregir el dibujo').click();
-      sesion.iniciarSesion(USUARIOS[2]);
-      llenarYGuardar(tucan.perimetro);
-      expect(textoConflicto()).toContain('Finca El Tucán, que ya registraste.');
-    });
-
-    it('no guarda la finca', () => {
-      const servicio = TestBed.inject(FincaService);
-      spyOn(servicio, 'registrar').and.callThrough();
-      llenarYGuardar(tucan.perimetro);
-
-      expect(servicio.registrar).toHaveBeenCalledTimes(1);
-      let fincas = 0;
-      servicio.misFincas(componente['usuario']()!.id).subscribe((f) => (fincas = f.length));
-      expect(fincas).toBe(2);
-      expect(pagina.querySelector('.confirmacion')).toBeNull();
     });
 
     it('al corregir borra solo el polígono y se puede registrar de nuevo', () => {
@@ -157,11 +201,11 @@ describe('RegistrarFincaComponent', () => {
         descripcion: 'Café de altura',
         zona: 'Tarrazú',
       });
-      componente['duenos'].set([USUARIOS[1]]);
-      dibujar(tucan.perimetro);
+      componente['duenos'].set(['maria@ejemplo.cr']);
+      dibujar(LIBRE);
       const pin = componente['pin']();
       boton('Guardar finca').click();
-      fixture.detectChanges();
+      responderConflicto('Finca El Tucán', [ANDRES]);
 
       boton('Corregir el dibujo').click();
       fixture.detectChanges();
@@ -175,7 +219,7 @@ describe('RegistrarFincaComponent', () => {
       });
       expect(componente['pin']()).toEqual(pin);
       expect(componente['canton']()?.nombre).toBe('Tarrazú');
-      expect(componente['duenos']()).toEqual([USUARIOS[1]]);
+      expect(componente['duenos']()).toEqual(['maria@ejemplo.cr']);
       expect(pagina.querySelector<HTMLInputElement>('#nombre-finca')?.value).toBe(
         'Finca La Catalina',
       );
@@ -183,19 +227,20 @@ describe('RegistrarFincaComponent', () => {
       componente['perimetro'].set(LIBRE);
       fixture.detectChanges();
       boton('Guardar finca').click();
+      responder(fincaApi());
+      http.expectOne(`${BASE}/f-nueva/duenos`).flush(fincaApi([RODRIGO, MARIA]));
       fixture.detectChanges();
       expect(pagina.querySelector('.resumen')?.textContent).toContain('Finca La Catalina');
     });
   });
 
   it('muestra el resumen al guardar y va al dashboard', () => {
-    componente['duenos'].set([USUARIOS[1]]);
     llenarYGuardar(LIBRE);
+    responder(fincaApi());
 
     const resumen = pagina.querySelector('.resumen')!.textContent!;
     expect(resumen).toContain('Finca La Catalina');
     expect(resumen).toContain('Tarrazú');
-    expect(resumen).toContain('Rodrigo y María Jiménez');
     expect(pagina.querySelector('.encabezado__texto')).toBeNull();
 
     const router = TestBed.inject(Router);
@@ -206,6 +251,7 @@ describe('RegistrarFincaComponent', () => {
 
   it('reinicia el formulario para registrar otra finca', () => {
     llenarYGuardar(LIBRE);
+    responder(fincaApi());
     boton('Registrar otra finca').click();
     fixture.detectChanges();
 

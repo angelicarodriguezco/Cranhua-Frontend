@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
@@ -16,6 +18,8 @@ describe('Rutas del cafetalero', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
@@ -50,6 +54,8 @@ describe('Rutas de la cafetería', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });

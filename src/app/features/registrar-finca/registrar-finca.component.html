@@ -22,6 +22,7 @@
       class="vidrio confirmacion"
       [finca]="registrada()!"
       [nombrePropietario]="usuario()?.nombre ?? ''"
+      [duenosFallidos]="duenosFallidos()"
       (irAlDashboard)="irAlDashboard()"
       (registrarOtra)="registrarOtra()"
     />
@@ -84,6 +85,8 @@
           [hayPin]="pin() !== null"
           [errorPerimetro]="errorPerimetro()"
           [intentoGuardar]="intentoGuardar()"
+          [guardando]="guardando()"
+          [erroresServidor]="erroresServidor()"
           (guardar)="guardar()"
         />
       }
