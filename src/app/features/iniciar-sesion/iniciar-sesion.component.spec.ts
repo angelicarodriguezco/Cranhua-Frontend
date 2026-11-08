@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { Navigation, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { CuentaResponseApi } from '../../core/models/auth.model';
@@ -61,6 +61,23 @@ describe('IniciarSesionComponent', () => {
       contrasena: 'Cafe2026!',
     });
   }
+
+  it('no muestra mensaje de éxito al entrar directo', () => {
+    expect(pagina.querySelector('.login__exito')).toBeNull();
+  });
+
+  it('muestra el mensaje de éxito que llega en el state de la navegación', () => {
+    const router = TestBed.inject(Router);
+    spyOn(router, 'getCurrentNavigation').and.returnValue({
+      extras: { state: { mensaje: 'Tu contraseña se cambió.' } },
+    } as unknown as Navigation);
+
+    const otro = TestBed.createComponent(IniciarSesionComponent);
+    otro.detectChanges();
+
+    const aviso = (otro.nativeElement as HTMLElement).querySelector('.login__exito');
+    expect(aviso?.textContent).toContain('Tu contraseña se cambió.');
+  });
 
   it('marca correo y contraseña como requeridos al enviar vacío', () => {
     enviar();
