@@ -65,9 +65,7 @@ export class DatosCafeteriaComponent {
     const canton = this.canton();
     return canton ? `${canton.nombre}, ${canton.provincia}` : '';
   });
-  protected readonly ubicacionInvalida = computed(
-    () => this.intentoContinuar() && !this.canton(),
-  );
+  protected readonly ubicacionInvalida = computed(() => this.intentoContinuar() && !this.canton());
 
   protected invalido(campo: keyof FormularioDatos['controls']): boolean {
     const control = this.formulario().controls[campo];

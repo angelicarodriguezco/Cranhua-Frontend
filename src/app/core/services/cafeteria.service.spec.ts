@@ -4,11 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
 import { CAFETERIA_EJEMPLO } from '../mocks/cafeteria.mock';
-import {
-  Cafeteria,
-  CafeteriaResponseApi,
-  NuevaCafeteria,
-} from '../models/cafeteria.model';
+import { Cafeteria, CafeteriaResponseApi, NuevaCafeteria } from '../models/cafeteria.model';
 import { cafeteriaDesdeApi, cuerpoRegistro } from '../utils/cafeteria-desde-api';
 import { CafeteriaService } from './cafeteria.service';
 
@@ -137,7 +133,8 @@ describe('CafeteriaService', () => {
 
   describe('registrarActual', () => {
     it('hace POST con credenciales y el cuerpo de registro', () => {
-      const { propietarioId: _propietarioId, ...sinPropietario } = NUEVA;
+      const { propietarioId, ...sinPropietario } = NUEVA;
+      void propietarioId;
       let registrada: Cafeteria | undefined;
       servicio.registrarActual(sinPropietario).subscribe((cafeteria) => (registrada = cafeteria));
 
@@ -150,7 +147,8 @@ describe('CafeteriaService', () => {
     });
 
     it('deja la cafetería registrada en caché para obtenerActual', () => {
-      const { propietarioId: _propietarioId, ...sinPropietario } = NUEVA;
+      const { propietarioId, ...sinPropietario } = NUEVA;
+      void propietarioId;
       servicio.registrarActual(sinPropietario).subscribe();
       http.expectOne(BASE).flush(cafeteriaApi(), { status: 201, statusText: 'Created' });
 
@@ -175,7 +173,9 @@ describe('CafeteriaService', () => {
       const req = http.expectOne(`${BASE}/${actualizada.id}`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.withCredentials).toBeTrue();
-      const { id: _id, propietarioId: _propietarioId, ...datos } = actualizada;
+      const { id, propietarioId, ...datos } = actualizada;
+      void id;
+      void propietarioId;
       expect(req.request.body).toEqual(cuerpoRegistro(datos));
       req.flush(
         cafeteriaApi({

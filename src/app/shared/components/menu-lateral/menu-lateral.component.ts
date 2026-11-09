@@ -36,7 +36,9 @@ export class MenuLateralComponent {
   private readonly auth = inject(AuthService);
   private readonly cuenta = inject(CuentaService).cuenta;
   private readonly cafeteria = toSignal(
-    inject(CafeteriaService).obtenerActual().pipe(map((cafeteria) => cafeteria ?? null)),
+    inject(CafeteriaService)
+      .obtenerActual()
+      .pipe(map((cafeteria) => cafeteria ?? null)),
   );
 
   protected readonly tema = inject(TemaService).tema;
@@ -51,10 +53,7 @@ export class MenuLateralComponent {
   );
 
   protected readonly bloques = computed(() =>
-    armarBloques(
-      this.cuenta()?.roles ?? [],
-      tieneCafeteriaParaMenu(this.cafeteria(), this.url()),
-    ),
+    armarBloques(this.cuenta()?.roles ?? [], tieneCafeteriaParaMenu(this.cafeteria(), this.url())),
   );
 
   protected readonly variosRoles = computed(() => this.bloques().length > 1);

@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { ActualizarPerfilDatos } from '../../core/mappers/cuenta.mapper';
 import { PERFIL_EJEMPLO } from '../../core/mocks/perfil.mock';
 import { PerfilUsuario } from '../../core/models/perfil.model';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CuentaService } from '../../core/services/cuenta.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
@@ -38,7 +39,11 @@ describe('PerfilUsuarioComponent', () => {
     localStorage.removeItem(CLAVE_TEMA);
     await TestBed.configureTestingModule({
       imports: [PerfilUsuarioComponent],
-      providers: [provideRouter([]), provideHttpClient()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
+      ],
     }).compileComponents();
 
     perfilService = TestBed.inject(PerfilService);

@@ -144,7 +144,9 @@ export class RegistrarCafeteriaComponent {
             | null
             | undefined;
           const porCampo = Object.values(cuerpo?.errores ?? {});
-          this.erroresServidor.set(porCampo.length ? porCampo : [cuerpo?.mensaje ?? ERROR_REGISTRO]);
+          this.erroresServidor.set(
+            porCampo.length ? porCampo : [cuerpo?.mensaje ?? ERROR_REGISTRO],
+          );
         },
       });
   }

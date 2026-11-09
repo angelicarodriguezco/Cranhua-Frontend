@@ -2,9 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { FincaResponseApi } from '../../core/models/finca.model';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { MisFincasComponent, RUTA_REGISTRAR_FINCA } from './mis-fincas.component';
 
@@ -37,7 +39,12 @@ describe('MisFincasComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MisFincasComponent],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MisFincasComponent);

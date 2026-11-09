@@ -70,9 +70,7 @@ export function cafeteriaDesdeApi(api: CafeteriaResponseApi): Cafeteria {
   };
 }
 
-export function cuerpoRegistro(
-  nueva: Omit<NuevaCafeteria, 'propietarioId'>,
-): CafeteriaRegistroApi {
+export function cuerpoRegistro(nueva: Omit<NuevaCafeteria, 'propietarioId'>): CafeteriaRegistroApi {
   return {
     nombre: nueva.nombre,
     nombreContacto: nueva.contacto,

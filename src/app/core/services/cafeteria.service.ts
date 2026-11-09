@@ -31,7 +31,8 @@ export class CafeteriaService {
   }
 
   registrar(nueva: NuevaCafeteria): Observable<Cafeteria> {
-    const { propietarioId: _propietarioId, ...datos } = nueva;
+    const { propietarioId, ...datos } = nueva;
+    void propietarioId;
     return this.crear(datos);
   }
 
@@ -49,9 +50,14 @@ export class CafeteriaService {
   }
 
   actualizar(cafeteria: Cafeteria): Observable<Cafeteria> {
-    const { id, propietarioId: _propietarioId, ...datos } = cafeteria;
+    const { id, propietarioId, ...datos } = cafeteria;
+    void propietarioId;
     return this.http
-      .patch<CafeteriaResponseApi>(`${this.base}/${id}`, cuerpoRegistro(datos), opcionesCredenciales)
+      .patch<CafeteriaResponseApi>(
+        `${this.base}/${id}`,
+        cuerpoRegistro(datos),
+        opcionesCredenciales,
+      )
       .pipe(
         map(cafeteriaDesdeApi),
         tap((guardada) => this.guardarCache(guardada)),
@@ -81,7 +87,8 @@ export class CafeteriaService {
     this.actual$ = of(cafeteria).pipe(shareReplay({ bufferSize: 1, refCount: false }));
   }
 
-  eliminar(_id: string): Observable<boolean> {
+  eliminar(id: string): Observable<boolean> {
+    void id;
     return of(false);
   }
 
