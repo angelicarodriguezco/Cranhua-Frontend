@@ -8,7 +8,13 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CafeteriaService } from '../../../core/services/cafeteria.service';
 import { CuentaService } from '../../../core/services/cuenta.service';
 import { TemaService } from '../../../core/services/tema.service';
-import { armarBloques, NAV_CUENTA, rutaActiva, TITULO_ROL } from './menu-lateral.config';
+import {
+  armarBloques,
+  NAV_CUENTA,
+  rutaActiva,
+  tieneCafeteriaParaMenu,
+  TITULO_ROL,
+} from './menu-lateral.config';
 
 function iniciales(nombreCompleto: string): string {
   return nombreCompleto
@@ -29,7 +35,9 @@ export class MenuLateralComponent {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly cuenta = inject(CuentaService).cuenta;
-  private readonly cafeteria = toSignal(inject(CafeteriaService).obtenerActual());
+  private readonly cafeteria = toSignal(
+    inject(CafeteriaService).obtenerActual().pipe(map((cafeteria) => cafeteria ?? null)),
+  );
 
   protected readonly tema = inject(TemaService).tema;
   protected readonly navCuenta = NAV_CUENTA;
@@ -43,7 +51,10 @@ export class MenuLateralComponent {
   );
 
   protected readonly bloques = computed(() =>
-    armarBloques(this.cuenta()?.roles ?? [], this.cafeteria() !== undefined),
+    armarBloques(
+      this.cuenta()?.roles ?? [],
+      tieneCafeteriaParaMenu(this.cafeteria(), this.url()),
+    ),
   );
 
   protected readonly variosRoles = computed(() => this.bloques().length > 1);

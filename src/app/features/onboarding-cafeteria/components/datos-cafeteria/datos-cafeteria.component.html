@@ -85,12 +85,16 @@
         [value]="ubicacion()"
         placeholder="Ej. Escazú, San José"
         readonly
-        [attr.aria-invalid]="faltaPin()"
-        [attr.aria-describedby]="faltaPin() ? 'error-ubicacion-cafeteria' : null"
+        [attr.aria-invalid]="ubicacionInvalida()"
+        [attr.aria-describedby]="ubicacionInvalida() ? 'error-ubicacion-cafeteria' : null"
       />
-      @if (faltaPin()) {
+      @if (ubicacionInvalida()) {
         <p id="error-ubicacion-cafeteria" class="campo__error">
-          Marcá en el mapa dónde está tu local.
+          @if (pin()) {
+            El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.
+          } @else {
+            Marcá en el mapa dónde está tu local.
+          }
         </p>
       } @else if (pin() && !canton()) {
         <p class="campo__ayuda" aria-live="polite">El pin está fuera de los cantones de ejemplo.</p>
@@ -133,6 +137,14 @@
       autocomplete="off"
     />
   </div>
+
+  @if (erroresServidor().length) {
+    <ul class="campo__error" role="alert">
+      @for (error of erroresServidor(); track $index) {
+        <li>{{ error }}</li>
+      }
+    </ul>
+  }
 
   <div class="acciones">
     <button type="button" class="btn btn--texto" (click)="atras.emit()">← Atrás</button>

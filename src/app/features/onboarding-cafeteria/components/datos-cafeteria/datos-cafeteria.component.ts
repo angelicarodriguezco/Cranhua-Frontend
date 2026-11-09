@@ -56,6 +56,7 @@ export class DatosCafeteriaComponent {
   readonly formulario = input.required<FormularioDatos>();
   readonly canton = input<CantonReferencia | null>(null);
   readonly intentoContinuar = input(false);
+  readonly erroresServidor = input<string[]>([]);
   readonly pin = model<Coordenada | null>(null);
   readonly continuar = output();
   readonly atras = output();
@@ -64,7 +65,9 @@ export class DatosCafeteriaComponent {
     const canton = this.canton();
     return canton ? `${canton.nombre}, ${canton.provincia}` : '';
   });
-  protected readonly faltaPin = computed(() => this.intentoContinuar() && !this.pin());
+  protected readonly ubicacionInvalida = computed(
+    () => this.intentoContinuar() && !this.canton(),
+  );
 
   protected invalido(campo: keyof FormularioDatos['controls']): boolean {
     const control = this.formulario().controls[campo];

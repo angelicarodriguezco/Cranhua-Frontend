@@ -50,10 +50,22 @@
     }
   </div>
 
+  @if (erroresServidor().length) {
+    <ul class="campo__error" role="alert">
+      @for (error of erroresServidor(); track $index) {
+        <li>{{ error }}</li>
+      }
+    </ul>
+  }
+
   <div class="acciones">
     <button type="button" class="btn btn--texto" (click)="atras.emit()">← Atrás</button>
-    <button type="submit" class="btn btn--filled">
-      {{ editando() ? 'Guardar cambios' : 'Crear cuenta de cafetería' }}
+    <button type="submit" class="btn btn--filled" [disabled]="guardando()">
+      @if (guardando()) {
+        Guardando…
+      } @else {
+        {{ editando() ? 'Guardar cambios' : 'Crear cuenta de cafetería' }}
+      }
     </button>
   </div>
 </form>
