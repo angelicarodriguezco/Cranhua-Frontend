@@ -2,9 +2,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
@@ -53,6 +54,7 @@ describe('RegistrarFincaComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
+        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
       ],
     }).compileComponents();
 

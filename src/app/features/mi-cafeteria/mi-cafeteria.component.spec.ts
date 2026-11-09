@@ -2,7 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 
 import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { Coordenada } from '../../core/models/finca.model';
@@ -42,6 +42,8 @@ describe('MiCafeteriaComponent', () => {
 
     cafeteriaService = TestBed.inject(CafeteriaService);
     dashboard = TestBed.inject(DashboardCafeteriaService);
+    spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
+
     fixture = TestBed.createComponent(MiCafeteriaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
@@ -73,7 +75,7 @@ describe('MiCafeteriaComponent', () => {
     expect(inicialesCafeteria('Brumas')).toBe('BR');
   });
 
-  it('carga los datos mock de la cafetería actual', () => {
+  it('carga los datos de la cafetería actual', () => {
     expect(campo('h1').textContent).toContain('Mi cafetería');
     expect(pagina.textContent).toContain('Así ven tu local los tostadores dentro de Cránhua.');
     expect(boton('Publicar en el menú')).toBeTruthy();
@@ -169,7 +171,7 @@ describe('MiCafeteriaComponent', () => {
   it('muestra la zona de peligro y confirma la eliminación', () => {
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
-    const eliminar = spyOn(cafeteriaService, 'eliminar').and.callThrough();
+    const eliminar = spyOn(cafeteriaService, 'eliminar').and.returnValue(of(true));
 
     expect(pagina.querySelector('app-zona-peligro')).toBeTruthy();
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_CAFETERIA);
@@ -189,8 +191,10 @@ describe('MiCafeteriaComponent', () => {
     expect(navegar).toHaveBeenCalledWith(RUTA_DASHBOARD_CAFETERIA);
   });
 
-  it('guarda cambios en el mock de la cafetería', () => {
-    const actualizar = spyOn(cafeteriaService, 'actualizar').and.callThrough();
+  it('guarda cambios en la cafetería', () => {
+    const actualizar = spyOn(cafeteriaService, 'actualizar').and.callFake((cafeteria) =>
+      of(cafeteria),
+    );
 
     campo<HTMLInputElement>('#nombre-cafeteria').value = 'Café Brumas Norte';
     campo<HTMLInputElement>('#nombre-cafeteria').dispatchEvent(new Event('input'));

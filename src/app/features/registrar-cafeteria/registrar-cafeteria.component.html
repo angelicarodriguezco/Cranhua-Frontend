@@ -190,12 +190,26 @@
               <p class="campo__error">Elegí al menos un estilo de café.</p>
             }
           </div>
+
+          @if (erroresServidor().length) {
+            <ul class="campo__error" role="alert">
+              @for (error of erroresServidor(); track $index) {
+                <li>{{ error }}</li>
+              }
+            </ul>
+          }
         </div>
       </div>
 
       <div class="acciones">
         <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
-        <button type="submit" class="btn btn--filled">Registrar cafetería</button>
+        <button type="submit" class="btn btn--filled" [disabled]="guardando()">
+          @if (guardando()) {
+            Guardando…
+          } @else {
+            Registrar cafetería
+          }
+        </button>
       </div>
     </form>
   }
