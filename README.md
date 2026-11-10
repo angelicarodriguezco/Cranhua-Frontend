@@ -29,11 +29,11 @@ copy .env.example .env    # PowerShell / CMD
 
 Copiar `.env.example` a `.env` y completar los valores. No pegar secretos en el README, issues o PRs.
 
-| Variable              | Obligatoria | Para qué sirve                                                                                         |
-| --------------------- | ----------- | ------------------------------------------------------------------------------------------------------ |
-| `GOOGLE_MAPS_API_KEY` | Sí\*        | Llave de la Maps JavaScript API. Sin ella la app corre, pero los mapas no cargan.                      |
-| `GOOGLE_CLIENT_ID`    | Sí\*        | Client ID de Google Identity Services (inicio de sesión / registro con Google).                        |
-| `API_URL`             | No          | URL base del backend. Si se omite, el script usa el valor por defecto local del `.env.example`.        |
+| Variable              | Obligatoria | Para qué sirve                                                                                  |
+| --------------------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| `GOOGLE_MAPS_API_KEY` | Sí\*        | Llave de la Maps JavaScript API. Sin ella la app corre, pero los mapas no cargan.               |
+| `GOOGLE_CLIENT_ID`    | Sí\*        | Client ID de Google Identity Services (inicio de sesión / registro con Google).                 |
+| `API_URL`             | No          | URL base del backend. Si se omite, el script usa el valor por defecto local del `.env.example`. |
 
 \*La app arranca sin ellas, pero mapas y login/registro con Google no funcionan.
 
@@ -59,30 +59,30 @@ Servicios y proyectos fuera de este repo que el frontend usa. No hace falta pega
 
 ### Google Maps JavaScript API
 
-| | |
-| --- | --- |
-| **Para qué** | Mapas en perfiles, registro de finca/cafetería y vistas de explorar. |
-| **Qué necesitás** | Una API key con la _Maps JavaScript API_ habilitada → variable `GOOGLE_MAPS_API_KEY`. |
+|                    |                                                                                                                                                                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Para qué**       | Mapas en perfiles, registro de finca/cafetería y vistas de explorar.                                                                                                                                                                                                                                                            |
+| **Qué necesitás**  | Una API key con la _Maps JavaScript API_ habilitada → variable `GOOGLE_MAPS_API_KEY`.                                                                                                                                                                                                                                           |
 | **Cómo obtenerla** | 1. Entrá a [Google Cloud Console](https://console.cloud.google.com/). 2. Creá o elegí un proyecto. 3. Activá **Maps JavaScript API**. 4. En _APIs y servicios → Credenciales_, creá una **clave de API**. 5. Restringila a HTTP referrers (`http://localhost:4200/*` en local). 6. Pegala en `.env` como `GOOGLE_MAPS_API_KEY`. |
 
 Sin esta llave la app corre, pero los mapas no cargan.
 
 ### Google Identity Services (OAuth)
 
-| | |
-| --- | --- |
-| **Para qué** | Botones de iniciar sesión y registrarse con Google. |
-| **Qué necesitás** | Un **Client ID** de tipo aplicación web → variable `GOOGLE_CLIENT_ID`. |
+|                    |                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Para qué**       | Botones de iniciar sesión y registrarse con Google.                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Qué necesitás**  | Un **Client ID** de tipo aplicación web → variable `GOOGLE_CLIENT_ID`.                                                                                                                                                                                                                                                                                                                                                                         |
 | **Cómo obtenerlo** | 1. En [Google Cloud Console](https://console.cloud.google.com/), mismo proyecto o uno del equipo. 2. Activá la pantalla de consentimiento OAuth si pide. 3. En _APIs y servicios → Credenciales_, creá un **ID de cliente OAuth** de tipo **Aplicación web**. 4. En orígenes autorizados de JavaScript agregá `http://localhost:4200`. 5. Pegá el Client ID en `.env` como `GOOGLE_CLIENT_ID` (no hace falta el Client Secret en el frontend). |
 
 Sin este Client ID, el login/registro con correo sigue disponible; el flujo con Google no.
 
 ### Cranhua Backend
 
-| | |
-| --- | --- |
-| **Para qué** | Auth, cuenta, fincas, cafeterías y el resto de la API. |
-| **Qué necesitás** | El repo backend corriendo en local (o la URL del entorno) → variable `API_URL`. |
+|                    |                                                                                                                                                                                                                                                                                                 |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Para qué**       | Auth, cuenta, fincas, cafeterías y el resto de la API.                                                                                                                                                                                                                                          |
+| **Qué necesitás**  | El repo backend corriendo en local (o la URL del entorno) → variable `API_URL`.                                                                                                                                                                                                                 |
 | **Cómo obtenerlo** | 1. Cloná [Cranhua-Backend](https://github.com/angelicarodriguezco/Cranhua-Backend). 2. Seguí su README para instalar y levantar el servidor. 3. Por defecto queda en `http://localhost:8080` y acepta CORS desde `http://localhost:4200`. 4. Si usás otra URL, ponela en `.env` como `API_URL`. |
 
 Varias pantallas todavía usan mocks en `src/app/core/mocks/`; para esas no hace falta el backend. Las que ya llaman a la API sí lo necesitan.
