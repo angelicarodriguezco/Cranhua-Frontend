@@ -96,6 +96,18 @@
             {{ enviando() ? 'Enviando…' : 'Mandar OTP' }}
           </button>
         </form>
+
+        <p class="recuperar__reenvio">
+          ¿Ya te llegó el código?
+          <button
+            type="button"
+            class="recuperar__reenvio-enlace"
+            (click)="irAlPasoCodigo()"
+            [disabled]="enviando()"
+          >
+            Ya tengo el código
+          </button>
+        </p>
       } @else if (paso() === 2) {
         <h1 class="recuperar__titulo">Ingresá el código</h1>
         <p class="recuperar__descripcion">

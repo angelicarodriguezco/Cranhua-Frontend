@@ -111,6 +111,18 @@ describe('RecuperarContrasenaComponent', () => {
     expect(pagina.textContent).toContain('No se pudo completar la solicitud');
   });
 
+  it('paso 1 permite continuar si ya llegó el código', () => {
+    componente['formCorreo'].setValue({ correo: 'ana@ejemplo.cr' });
+    fixture.detectChanges();
+
+    pagina.querySelector<HTMLButtonElement>('button.recuperar__reenvio-enlace')!.click();
+    fixture.detectChanges();
+
+    expect(auth.solicitarRecuperacion).not.toHaveBeenCalled();
+    expect(componente['paso']()).toBe(2);
+    expect(pagina.textContent).toContain('ana@ejemplo.cr');
+  });
+
   it('paso 2 exige los 6 dígitos antes de llamar al backend', () => {
     irAlPaso2();
     enviar();

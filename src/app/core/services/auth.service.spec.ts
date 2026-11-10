@@ -129,7 +129,8 @@ describe('AuthService', () => {
     const req = http.expectOne(`${environment.apiUrl}/api/auth/recuperar`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ correo: 'rodrigo@fincalacatalina.cr' });
-    req.flush(null, { status: 204, statusText: 'No Content' });
+    expect(req.request.responseType).toBe('text');
+    req.flush('', { status: 204, statusText: 'No Content' });
   });
 
   it('POST /api/auth/verificarCodigo con correo y código', () => {
@@ -140,7 +141,8 @@ describe('AuthService', () => {
     const req = http.expectOne(`${environment.apiUrl}/api/auth/verificarCodigo`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ correo: 'rodrigo@fincalacatalina.cr', codigo: '123456' });
-    req.flush(null, { status: 204, statusText: 'No Content' });
+    expect(req.request.responseType).toBe('text');
+    req.flush('', { status: 204, statusText: 'No Content' });
   });
 
   it('POST /api/auth/restablecer con withCredentials', () => {
@@ -160,7 +162,8 @@ describe('AuthService', () => {
       contrasena: 'NuevaSegura1',
     });
     expect(req.request.withCredentials).toBeTrue();
-    req.flush(null, { status: 204, statusText: 'No Content' });
+    expect(req.request.responseType).toBe('text');
+    req.flush('', { status: 204, statusText: 'No Content' });
   });
 
   it('aplicarSesion hidrata CuentaService y SesionService', () => {
@@ -244,7 +247,7 @@ describe('AuthService', () => {
       const req = http.expectOne(urlCerrar);
       expect(req.request.method).toBe('POST');
       expect(req.request.withCredentials).toBeTrue();
-      req.flush(null, { status: 204, statusText: 'No Content' });
+      req.flush('', { status: 204, statusText: 'No Content' });
     });
 
     it('si el backend falla no lanza excepción', () => {

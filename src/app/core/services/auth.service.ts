@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, firstValueFrom, timeout } from 'rxjs';
+import { Observable, firstValueFrom, map, timeout } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import {
@@ -76,16 +76,25 @@ export class AuthService {
   }
 
   solicitarRecuperacion(request: RecuperarContrasenaRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/recuperar`, request);
+    return this.postSinCuerpo(`${this.base}/recuperar`, request);
   }
 
   verificarCodigo(request: VerificarCodigoRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/verificarCodigo`, request);
+    return this.postSinCuerpo(`${this.base}/verificarCodigo`, request);
   }
 
-  // withCredentials para que el navegador aplique el borrado de la cookie de sesión
   restablecerContrasena(request: RestablecerContrasenaRequest): Observable<void> {
-    return this.http.post<void>(`${this.base}/restablecer`, request, opcionesCredenciales);
+    return this.postSinCuerpo(`${this.base}/restablecer`, request, opcionesCredenciales);
+  }
+
+  private postSinCuerpo(
+    url: string,
+    body: unknown,
+    opciones: { withCredentials?: boolean } = {},
+  ): Observable<void> {
+    return this.http
+      .post(url, body, { ...opciones, responseType: 'text' })
+      .pipe(map(() => undefined));
   }
 
   aplicarSesion(cuentaApi: CuentaResponseApi): void {
@@ -127,7 +136,7 @@ export class AuthService {
 
   cerrarSesion(): void {
     this.limpiarSesion();
-    this.http.post<void>(`${this.base}/cerrarSesion`, null, opcionesCredenciales).subscribe({
+    this.postSinCuerpo(`${this.base}/cerrarSesion`, null, opcionesCredenciales).subscribe({
       error: () => undefined,
     });
   }
