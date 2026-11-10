@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -18,6 +19,8 @@ import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-
 type Vista = 'vacia' | 'formulario';
 
 type Campo = keyof FormularioDatos['controls'];
+
+const ERROR_REGISTRO = 'No pudimos registrar la cafetería. Intentá de nuevo.';
 
 @Component({
   selector: 'app-registrar-cafeteria',
@@ -54,6 +57,8 @@ export class RegistrarCafeteriaComponent {
   });
 
   protected readonly intentoRegistrar = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly erroresServidor = signal<string[]>([]);
 
   protected invalido(campo: Campo): boolean {
     const control = this.formulario.controls[campo];
@@ -86,6 +91,7 @@ export class RegistrarCafeteriaComponent {
   }
 
   protected abrirFormulario(): void {
+    this.erroresServidor.set([]);
     this.vista.set('formulario');
   }
 
@@ -94,6 +100,7 @@ export class RegistrarCafeteriaComponent {
     this.estilos.reset([]);
     this.pin.set(null);
     this.intentoRegistrar.set(false);
+    this.erroresServidor.set([]);
     this.vista.set('vacia');
   }
 
@@ -103,10 +110,12 @@ export class RegistrarCafeteriaComponent {
     this.estilos.markAsTouched();
     const canton = this.canton();
     const pin = this.pin();
-    if (this.formulario.invalid || this.estilos.invalid || !canton || !pin) {
+    if (this.formulario.invalid || this.estilos.invalid || !canton || !pin || this.guardando()) {
       return;
     }
 
+    this.guardando.set(true);
+    this.erroresServidor.set([]);
     const { nombre, descripcion, horario, contacto, telefono, correo } =
       this.formulario.getRawValue();
     this.cafeteriaService
@@ -123,6 +132,22 @@ export class RegistrarCafeteriaComponent {
         estilos: [...this.estilos.value],
         portadaUrl: null,
       })
-      .subscribe(() => void this.router.navigateByUrl(RUTA_DASHBOARD_CAFETERIA));
+      .subscribe({
+        next: () => {
+          this.guardando.set(false);
+          void this.router.navigateByUrl(RUTA_DASHBOARD_CAFETERIA);
+        },
+        error: (error: HttpErrorResponse) => {
+          this.guardando.set(false);
+          const cuerpo = error.error as
+            | { mensaje?: string; errores?: Record<string, string> }
+            | null
+            | undefined;
+          const porCampo = Object.values(cuerpo?.errores ?? {});
+          this.erroresServidor.set(
+            porCampo.length ? porCampo : [cuerpo?.mensaje ?? ERROR_REGISTRO],
+          );
+        },
+      });
   }
 }

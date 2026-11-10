@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterLink, provideRouter } from '@angular/router';
@@ -11,7 +13,7 @@ describe('MisTostadosComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [MisTostadosComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MisTostadosComponent);

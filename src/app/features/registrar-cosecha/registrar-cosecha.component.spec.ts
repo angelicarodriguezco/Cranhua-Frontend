@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { convertToParamMap, provideRouter, ActivatedRoute, Router } from '@angular/router';
@@ -22,6 +24,8 @@ describe('RegistrarCosechaComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RegistrarCosechaComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         {
           provide: ActivatedRoute,

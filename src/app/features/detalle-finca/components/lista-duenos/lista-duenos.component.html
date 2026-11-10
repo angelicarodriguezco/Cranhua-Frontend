@@ -2,12 +2,9 @@
   @for (dueno of duenos(); track dueno.id) {
     <li>
       <span class="avatar" aria-hidden="true">{{ iniciales(dueno) }}</span>
-      <div class="datos">
-        <span class="nombre">{{ dueno.nombre }} {{ dueno.apellidos }}</span>
-        <span class="correo">{{ dueno.correo }}</span>
-      </div>
-      @if (dueno.id === propietarioId()) {
-        <span class="etiqueta">Propietario</span>
+      <span class="nombre">{{ dueno.nombre }} {{ dueno.apellidos }}</span>
+      @if (dueno.id === usuarioId()) {
+        <span class="etiqueta">Vos</span>
       }
     </li>
   }

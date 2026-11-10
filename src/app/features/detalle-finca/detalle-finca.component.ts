@@ -1,26 +1,20 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { forkJoin, map, switchMap } from 'rxjs';
+import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { Cosecha } from '../../core/models/cosecha.model';
-import { ErrorAgregarDueno, Finca, Usuario } from '../../core/models/finca.model';
+import { Finca, Usuario } from '../../core/models/finca.model';
 import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { FincaService } from '../../core/services/finca.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { ListaDuenosComponent } from './components/lista-duenos/lista-duenos.component';
 import { MapaPerimetroComponent } from './components/mapa-perimetro/mapa-perimetro.component';
 import { TablaCosechasComponent } from './components/tabla-cosechas/tabla-cosechas.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
-
-// Mensajes según los errores que define CP3-43
-const MENSAJES_ERROR_DUENO: Record<ErrorAgregarDueno, string> = {
-  'finca-inexistente': 'No encontramos esta finca.',
-  'correo-inexistente': 'No hay ninguna cuenta de cafetalero con ese correo.',
-  'ya-es-dueno': 'Esa persona ya es dueña de esta finca.',
-};
 
 export const AVISO_ELIMINAR_FINCA =
   'Esta finca ya tiene un lote (CRH-2026-0103) comprado por un tostador, con código de trazabilidad visible para consumidores. Eliminar la finca no borra ese código, pero ya no vas a poder editar su información.';
@@ -43,11 +37,13 @@ export class DetalleFincaComponent {
   private readonly fincaService = inject(FincaService);
   private readonly cosechaService = inject(CosechaService);
   private readonly router = inject(Router);
+  private readonly usuario = inject(SesionService).usuario;
   // El tema y el perfil del menú se comparten con el dashboard del cafetalero
   private readonly dashboard = inject(DashboardCafetaleroService);
 
   protected readonly tema = this.dashboard.tema;
 
+  protected readonly usuarioId = computed(() => this.usuario()?.id ?? '');
   protected readonly cargando = signal(true);
   protected readonly finca = signal<Finca | undefined>(undefined);
   protected readonly cosechas = signal<Cosecha[]>([]);
@@ -65,8 +61,10 @@ export class DetalleFincaComponent {
     if (!finca) {
       return [];
     }
-    const propietario = this.fincaService.usuarioPorId(finca.propietarioId);
-    return [...(propietario ? [propietario] : []), ...finca.duenosAdicionales];
+    // Solo los dueños ven la finca, así que el usuario actual va primero
+    const usuario = this.usuario();
+    const actual = usuario && finca.propietarioId === usuario.id ? [usuario] : [];
+    return [...actual, ...finca.duenosAdicionales];
   });
 
   protected readonly indicadores = computed(() => {
@@ -85,7 +83,7 @@ export class DetalleFincaComponent {
         map((parametros) => parametros.get('id') ?? ''),
         switchMap((id) =>
           forkJoin({
-            finca: this.fincaService.obtener(id),
+            finca: this.fincaService.obtener(id).pipe(catchError(() => of(undefined))),
             cosechas: this.cosechaService.deFinca(id),
           }),
         ),
@@ -129,7 +127,7 @@ export class DetalleFincaComponent {
         this.finca.set(resultado.finca);
         this.errorDueno.set(null);
       } else {
-        this.errorDueno.set(MENSAJES_ERROR_DUENO[resultado.error]);
+        this.errorDueno.set(resultado.mensaje);
       }
     });
   }

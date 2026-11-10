@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { provideRouter } from '@angular/router';
@@ -16,6 +18,8 @@ describe('Rutas del cafetalero', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
@@ -45,24 +49,30 @@ describe('Rutas del cafetalero', () => {
 
 describe('Rutas de la cafetería', () => {
   let harness: RouterTestingHarness;
+  let cafeteriaService: CafeteriaService;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
+    cafeteriaService = TestBed.inject(CafeteriaService);
     harness = await RouterTestingHarness.create();
   });
 
   it('con cafetería registrada, el registro redirige al dashboard', async () => {
+    spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
+
     await harness.navigateByUrl('/cafeteria/registrar');
     expect(TestBed.inject(Location).path()).toBe('/cafeteria/dashboard');
   });
 
   it('sin cafetería, las vistas de cafetería redirigen al registro', async () => {
-    TestBed.inject(CafeteriaService).eliminar(CAFETERIA_EJEMPLO.id).subscribe();
+    spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(undefined));
 
     for (const ruta of ['/cafeteria/dashboard', '/cafeteria/pedidos', '/cafeteria/mi-cafeteria']) {
       await harness.navigateByUrl(ruta);

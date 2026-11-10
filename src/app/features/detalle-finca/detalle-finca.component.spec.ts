@@ -1,12 +1,38 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
+import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
+
+const SIN_CUENTA = 'No encontramos una cuenta de cafetalero con ese correo.';
+
+// Responde como el backend con las fincas de ejemplo
+const fincaServiceFalso = {
+  obtener: (id: string) => {
+    const finca = FINCAS_REGISTRADAS.find((f) => f.id === id);
+    return finca ? of(finca) : throwError(() => new Error('404'));
+  },
+  agregarDueno: (id: string, correo: string) => {
+    const finca = FINCAS_REGISTRADAS.find((f) => f.id === id)!;
+    const usuario = USUARIOS.find((u) => u.correo === correo);
+    return of(
+      usuario
+        ? {
+            agregado: true,
+            finca: { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] },
+          }
+        : { agregado: false, mensaje: SIN_CUENTA },
+    );
+  },
+  eliminar: () => of(true),
+};
 
 describe('DetalleFincaComponent', () => {
   let harness: RouterTestingHarness;
@@ -14,9 +40,12 @@ describe('DetalleFincaComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([{ path: 'cafetalero/fincas/:id', component: DetalleFincaComponent }]),
         // Sin cargar Google Maps
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
+        { provide: FincaService, useValue: fincaServiceFalso },
       ],
     });
     harness = await RouterTestingHarness.create();
@@ -51,8 +80,31 @@ describe('DetalleFincaComponent', () => {
   it('lista los dueños y las cosechas con su código de lote', async () => {
     const pagina = await abrir('f-la-esperanza');
 
-    expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
+    expect(textos(pagina, 'app-lista-duenos .nombre')).toEqual([
+      'Rodrigo Solís Ureña',
+      'María Jiménez Solano',
+    ]);
     expect(textos(pagina, 'app-tabla-cosechas .lote')).toEqual(['LE-2026-001', 'LE-2026-002']);
+  });
+
+  it('marca con "Vos" al usuario actual y no muestra "Propietario"', async () => {
+    const pagina = await abrir('f-la-esperanza');
+
+    expect(textos(pagina, 'app-lista-duenos .etiqueta')).toEqual(['Vos']);
+    expect(pagina.querySelector('app-lista-duenos')?.textContent).not.toContain('Propietario');
+  });
+
+  it('el mapa usa las hectáreas de la API', async () => {
+    const finca = FINCAS_REGISTRADAS.find((f) => f.id === 'f-la-esperanza')!;
+    spyOn(TestBed.inject(FincaService), 'obtener').and.returnValue(
+      of({ ...finca, areaHectareas: 121.3 }),
+    );
+
+    const pagina = await abrir('f-la-esperanza');
+
+    expect(pagina.querySelector('app-mapa-perimetro .area')?.textContent).toContain(
+      '121.3 hectáreas',
+    );
   });
 
   it('agrega un dueño por correo y actualiza el indicador', async () => {
@@ -64,14 +116,12 @@ describe('DetalleFincaComponent', () => {
     expect(textos(pagina, '.indicadores strong')[3]).toBe('3');
   });
 
-  it('muestra el error si el correo no tiene cuenta', async () => {
+  it('muestra el mensaje del backend si el correo no tiene cuenta', async () => {
     const pagina = await abrir('f-la-esperanza');
 
     agregarDueno(pagina, 'nadie@ejemplo.cr');
 
-    expect(pagina.querySelector('app-lista-duenos .error')?.textContent).toContain(
-      'No hay ninguna cuenta',
-    );
+    expect(pagina.querySelector('app-lista-duenos .error')?.textContent).toContain(SIN_CUENTA);
     expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
   });
 

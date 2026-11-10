@@ -1,9 +1,12 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NEVER } from 'rxjs';
 
-import { CAFETERIA_ACTUAL, CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
-import { Cafeteria } from '../../core/models/cafeteria.model';
+import { environment } from '../../../environments/environment';
+import { CAFETERIA_ACTUAL } from '../../core/mocks/cafeteria.mock';
+import { CafeteriaResponseApi } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
@@ -11,33 +14,67 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { CLAVE_TEMA } from '../../core/services/tema.service';
 import { RegistrarCafeteriaComponent } from './registrar-cafeteria.component';
 
+const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
+
+function cafeteriaApi(cambios: Partial<CafeteriaResponseApi> = {}): CafeteriaResponseApi {
+  return {
+    id: 'c-cafe-montana',
+    cuentaId: CAFETERIA_ACTUAL.id,
+    nombre: 'Café Montaña',
+    nombreContacto: 'Andrés Solano',
+    telefono: '+506 8899-4410',
+    correo: 'hola@cafemontana.cr',
+    descripcion: null,
+    horario: null,
+    ubicacion: ESCAZU,
+    canton: 'Escazú',
+    provincia: 'San José',
+    estilos: ['MEDIO'],
+    volumenMensual: null,
+    portadaUrl: null,
+    ...cambios,
+  };
+}
 
 describe('RegistrarCafeteriaComponent', () => {
   let fixture: ComponentFixture<RegistrarCafeteriaComponent>;
   let componente: RegistrarCafeteriaComponent;
   let pagina: HTMLElement;
-  let cafeteriaService: CafeteriaService;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegistrarCafeteriaComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
     }).compileComponents();
 
-    cafeteriaService = TestBed.inject(CafeteriaService);
-    cafeteriaService.eliminar(CAFETERIA_EJEMPLO.id).subscribe();
     fixture = TestBed.createComponent(RegistrarCafeteriaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
+    http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    sinCafeteria();
   });
 
-  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+  afterEach(() => {
+    http.verify();
+    localStorage.removeItem(CLAVE_TEMA);
+  });
+
+  function sinCafeteria(): void {
+    http.expectOne({ method: 'GET', url: `${BASE}/actual` }).flush(null, {
+      status: 404,
+      statusText: 'Not Found',
+    });
+    fixture.detectChanges();
+  }
 
   function campo<T extends HTMLElement>(selector: string): T {
     return pagina.querySelector<T>(selector)!;
@@ -81,6 +118,11 @@ describe('RegistrarCafeteriaComponent', () => {
     escribir('#correo-cafeteria', 'hola@cafemontana.cr');
     componente['pin'].set(ESCAZU);
     boton('Medio').click();
+    fixture.detectChanges();
+  }
+
+  function responder(cuerpo: object, status = 201): void {
+    http.expectOne({ method: 'POST', url: BASE }).flush(cuerpo, { status, statusText: '' });
     fixture.detectChanges();
   }
 
@@ -138,7 +180,7 @@ describe('RegistrarCafeteriaComponent', () => {
   });
 
   it('no registra si faltan campos obligatorios', () => {
-    const registrar = spyOn(cafeteriaService, 'registrarActual').and.callThrough();
+    const registrar = spyOn(TestBed.inject(CafeteriaService), 'registrarActual').and.callThrough();
     abrirFormulario();
 
     boton('Registrar cafetería').click();
@@ -156,7 +198,6 @@ describe('RegistrarCafeteriaComponent', () => {
   });
 
   it('no registra si el pin queda fuera de los cantones', () => {
-    const registrar = spyOn(cafeteriaService, 'registrarActual');
     abrirFormulario();
     completarObligatorios();
     componente['pin'].set(OCEANO);
@@ -164,7 +205,7 @@ describe('RegistrarCafeteriaComponent', () => {
     boton('Registrar cafetería').click();
     fixture.detectChanges();
 
-    expect(registrar).not.toHaveBeenCalled();
+    http.expectNone({ method: 'POST', url: BASE });
     expect(errores()).toContain(
       'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
     );
@@ -176,21 +217,50 @@ describe('RegistrarCafeteriaComponent', () => {
     completarObligatorios();
 
     boton('Registrar cafetería').click();
-
-    expect(navegar).toHaveBeenCalledWith('/cafeteria/dashboard');
-    let registrada: Cafeteria | undefined;
-    cafeteriaService.obtenerActual().subscribe((c) => (registrada = c));
-    expect(registrada).toEqual(
+    const peticion = http.expectOne({ method: 'POST', url: BASE });
+    expect(peticion.request.body).toEqual(
       jasmine.objectContaining({
         nombre: 'Café Montaña',
+        nombreContacto: 'Andrés Solano',
         telefono: '+506 8899-4410',
+        correo: 'hola@cafemontana.cr',
         descripcion: null,
         horario: null,
-        canton: jasmine.objectContaining({ nombre: 'Escazú', provincia: 'San José' }),
-        estilos: ['Medio'],
-        propietarioId: CAFETERIA_ACTUAL.id,
+        canton: 'Escazú',
+        provincia: 'San José',
+        estilos: ['MEDIO'],
+        volumenMensual: null,
       }),
     );
+    peticion.flush(cafeteriaApi());
+    fixture.detectChanges();
+
+    expect(navegar).toHaveBeenCalledWith('/cafeteria/dashboard');
+  });
+
+  it('muestra los errores por campo del backend en el formulario', () => {
+    abrirFormulario();
+    completarObligatorios();
+
+    boton('Registrar cafetería').click();
+    responder(
+      { mensaje: 'Revisá los datos ingresados.', errores: { canton: 'Ingresá el cantón.' } },
+      400,
+    );
+
+    expect(pagina.textContent).toContain('Ingresá el cantón.');
+    expect(boton('Registrar cafetería').disabled).toBeFalse();
+  });
+
+  it('muestra el mensaje genérico del backend si no hay errores por campo', () => {
+    abrirFormulario();
+    completarObligatorios();
+
+    boton('Registrar cafetería').click();
+    responder({ mensaje: 'No tenés permiso para registrar una cafetería.' }, 400);
+
+    expect(pagina.textContent).toContain('No tenés permiso para registrar una cafetería.');
+    expect(boton('Registrar cafetería').disabled).toBeFalse();
   });
 
   it('cancelar vuelve a la pantalla vacía y limpia el formulario', () => {

@@ -64,7 +64,6 @@ export const NAV_POR_ROL: Record<RolCuenta, ItemNav[]> = {
   ],
 };
 
-// CP3-91: con rol cafetería pero sin cafetería activa, el bloque solo ofrece registrarla
 export const NAV_CAFETERIA_SIN_REGISTRO: ItemNav[] = [
   { etiqueta: 'Registrar cafetería', ruta: '/cafeteria/registrar', icono: 'registrar' },
 ];
@@ -82,11 +81,21 @@ export function armarBloques(roles: readonly RolCuenta[], tieneCafeteria: boolea
   }));
 }
 
+export function tieneCafeteriaParaMenu(
+  cafeteria: { id: string } | null | undefined,
+  url: string,
+): boolean {
+  if (cafeteria === undefined) {
+    const limpia = url.split(/[?#]/)[0];
+    return limpia.startsWith('/cafeteria/') && !limpia.startsWith('/cafeteria/registrar');
+  }
+  return cafeteria !== null;
+}
+
 function coincide(url: string, ruta: string, exacto: boolean): boolean {
   return url === ruta || (!exacto && url.startsWith(`${ruta}/`));
 }
 
-// Devuelve la ruta de la única sección activa: la coincidencia más larga gana
 export function rutaActiva(url: string, items: readonly ItemNav[]): string | null {
   const limpia = url.split(/[?#]/)[0].replace(/\/+$/, '') || '/';
   let mejor: { ruta: string; largo: number } | null = null;

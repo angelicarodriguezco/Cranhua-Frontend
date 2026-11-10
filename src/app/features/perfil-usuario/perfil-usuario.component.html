@@ -65,12 +65,8 @@
         <div class="identidad">
           <div class="identidad__nombre">
             <h2>{{ perfil.nombreCompleto }}</h2>
-            <span class="badge">{{ perfil.rol }}</span>
+            <span class="badge">{{ etiquetaRoles(perfil.roles) }}</span>
           </div>
-          <p class="identidad__ubicacion">{{ perfil.ubicacion }}</p>
-          @if (perfil.biografia) {
-            <p class="identidad__biografia">{{ perfil.biografia }}</p>
-          }
         </div>
       </section>
 
@@ -82,10 +78,6 @@
         <article class="vidrio">
           <strong>{{ indicadores().cosechasActivas }}</strong>
           <span>Cosechas activas</span>
-        </article>
-        <article class="vidrio">
-          <strong>{{ perfil.miembroDesde }}</strong>
-          <span>Miembro desde</span>
         </article>
       </section>
 
@@ -102,7 +94,7 @@
           </div>
           <div>
             <dt>Rol</dt>
-            <dd>{{ perfil.rol }}</dd>
+            <dd>{{ etiquetaRoles(perfil.roles) }}</dd>
           </div>
         </dl>
       </section>
@@ -157,7 +149,7 @@
       <header class="encabezado">
         <div>
           <h1>Editar perfil</h1>
-          <p>Actualizá tu foto de portada, tu información y tus preferencias.</p>
+          <p>Actualizá tu foto de portada, tu información y tus redes sociales.</p>
         </div>
         <button type="button" class="btn btn--volver" (click)="cancelar()">← Volver</button>
       </header>
@@ -181,11 +173,16 @@
               #inputPortada
               class="oculto"
               type="file"
-              accept="image/*"
+              [accept]="acceptImagen"
               aria-label="Elegir imagen de portada"
+              [attr.aria-invalid]="!!errorPortada()"
+              [attr.aria-describedby]="errorPortada() ? 'error-portada' : null"
               (change)="alSeleccionarPortada($event)"
             />
           </div>
+          @if (errorPortada(); as mensajePortada) {
+            <p id="error-portada" class="campo__error">{{ mensajePortada }}</p>
+          }
 
           <div class="perfil">
             <div class="avatar">
@@ -206,12 +203,17 @@
                 #inputAvatar
                 class="oculto"
                 type="file"
-                accept="image/*"
+                [accept]="acceptImagen"
                 aria-label="Elegir foto de perfil"
+                [attr.aria-invalid]="!!errorAvatar()"
+                [attr.aria-describedby]="errorAvatar() ? 'error-avatar' : null"
                 (change)="alSeleccionarAvatar($event)"
               />
             </div>
           </div>
+          @if (errorAvatar(); as mensajeAvatar) {
+            <p id="error-avatar" class="campo__error">{{ mensajeAvatar }}</p>
+          }
 
           <div class="formulario">
             <div class="campo campo--ancho">
@@ -238,14 +240,8 @@
                 type="email"
                 formControlName="correo"
                 autocomplete="email"
-                [attr.aria-invalid]="invalido('correo')"
-                [attr.aria-describedby]="invalido('correo') ? 'error-correo-perfil' : null"
+                readonly
               />
-              @if (tieneError('correo', 'required')) {
-                <p id="error-correo-perfil" class="campo__error">Poné tu correo electrónico.</p>
-              } @else if (invalido('correo')) {
-                <p id="error-correo-perfil" class="campo__error">Ingresá un correo válido.</p>
-              }
             </div>
 
             <div class="campo">
@@ -265,40 +261,6 @@
                   Ingresá un teléfono de 8 dígitos.
                 </p>
               }
-            </div>
-
-            <div class="campo campo--ancho">
-              <label class="campo__etiqueta" for="ubicacion-perfil">Ubicación</label>
-              <input
-                id="ubicacion-perfil"
-                class="campo__control"
-                formControlName="ubicacion"
-                maxlength="120"
-                autocomplete="off"
-                [attr.aria-invalid]="invalido('ubicacion')"
-                [attr.aria-describedby]="invalido('ubicacion') ? 'error-ubicacion-perfil' : null"
-              />
-              @if (invalido('ubicacion')) {
-                <p id="error-ubicacion-perfil" class="campo__error">Poné tu ubicación.</p>
-              }
-            </div>
-
-            <div class="campo campo--ancho">
-              <label class="campo__etiqueta" for="biografia-perfil">
-                Biografía <span class="campo__opcional">(opcional)</span>
-              </label>
-              <textarea
-                id="biografia-perfil"
-                class="campo__control campo__control--area"
-                formControlName="biografia"
-                rows="3"
-                maxlength="300"
-                [attr.aria-invalid]="invalido('biografia')"
-                aria-describedby="contador-biografia-perfil"
-              ></textarea>
-              <p id="contador-biografia-perfil" class="campo__ayuda campo__ayuda--derecha">
-                {{ formulario.controls.biografia.value.length }}/300
-              </p>
             </div>
           </div>
         </form>
@@ -368,51 +330,6 @@
           }
         </section>
 
-        <form
-          class="vidrio seccion"
-          aria-labelledby="titulo-seguridad"
-          [formGroup]="contrasena"
-          (ngSubmit)="actualizarContrasena()"
-          novalidate
-        >
-          <h2 id="titulo-seguridad" class="seccion__titulo">Seguridad</h2>
-          <div class="formulario formulario--compacto">
-            <div class="campo">
-              <label class="campo__etiqueta" for="contrasena-actual">Contraseña actual</label>
-              <input
-                id="contrasena-actual"
-                class="campo__control"
-                type="password"
-                formControlName="actual"
-                autocomplete="current-password"
-              />
-            </div>
-            <div class="campo">
-              <label class="campo__etiqueta" for="contrasena-nueva">Nueva contraseña</label>
-              <input
-                id="contrasena-nueva"
-                class="campo__control"
-                type="password"
-                formControlName="nueva"
-                autocomplete="new-password"
-              />
-            </div>
-          </div>
-          <div class="seguridad__pie">
-            @if (mensajeContrasena(); as mensaje) {
-              <p
-                class="mensaje"
-                [class.mensaje--exito]="mensaje.tipo === 'exito'"
-                [class.mensaje--error]="mensaje.tipo === 'error'"
-                role="status"
-              >
-                {{ mensaje.texto }}
-              </p>
-            }
-            <button type="submit" class="btn btn--borde">Actualizar contraseña</button>
-          </div>
-        </form>
-
         <app-zona-peligro
           [descripcion]="descripcionEliminar"
           accion="Eliminar mi cuenta"
@@ -421,6 +338,9 @@
       </div>
 
       <div class="acciones">
+        @if (errorGuardar(); as mensajeGuardar) {
+          <p class="campo__error" role="alert">{{ mensajeGuardar }}</p>
+        }
         <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
         <button type="button" class="btn btn--filled" (click)="guardar()">Guardar cambios</button>
       </div>

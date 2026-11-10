@@ -10,11 +10,12 @@ import {
 } from '../../../core/mocks/cuenta.mock';
 import { CAFETERIA_EJEMPLO } from '../../../core/mocks/cafeteria.mock';
 import { Cuenta } from '../../../core/models/cuenta.model';
+import { AuthService } from '../../../core/services/auth.service';
 import { CafeteriaService } from '../../../core/services/cafeteria.service';
 import { CuentaService } from '../../../core/services/cuenta.service';
 import { CLAVE_TEMA, TemaService } from '../../../core/services/tema.service';
 import { MenuLateralComponent } from './menu-lateral.component';
-import { NAV_POR_ROL, rutaActiva } from './menu-lateral.config';
+import { NAV_POR_ROL, rutaActiva, tieneCafeteriaParaMenu } from './menu-lateral.config';
 
 @Component({ template: '' })
 class VistaVaciaComponent {}
@@ -33,6 +34,7 @@ describe('MenuLateralComponent', () => {
           provide: CafeteriaService,
           useValue: { obtenerActual: () => of(conCafeteria ? CAFETERIA_EJEMPLO : undefined) },
         },
+        { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', ['cerrarSesion']) },
       ],
     }).compileComponents();
 
@@ -141,6 +143,18 @@ describe('MenuLateralComponent', () => {
     fixture.detectChanges();
     expect(aside.getAttribute('data-tema')).toBe('claro');
   });
+
+  it('"Cerrar sesión" llama a AuthService.cerrarSesion', async () => {
+    await crear(CUENTA_SOLO_CAFETALERO);
+    const auth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    const enlaces = [...pagina.querySelectorAll<HTMLAnchorElement>('.nav-cuenta a')];
+
+    enlaces.find((a) => a.textContent?.includes('Perfil y ajustes'))!.click();
+    expect(auth.cerrarSesion).not.toHaveBeenCalled();
+
+    enlaces.find((a) => a.textContent?.includes('Cerrar sesión'))!.click();
+    expect(auth.cerrarSesion).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('rutaActiva', () => {
@@ -157,5 +171,22 @@ describe('rutaActiva', () => {
 
   it('no confunde rutas con el mismo prefijo de texto', () => {
     expect(rutaActiva('/tostador/cosechas-viejas', items)).toBeNull();
+  });
+});
+
+describe('tieneCafeteriaParaMenu', () => {
+  it('mientras carga en una sección de cafetería asume que sí tiene', () => {
+    expect(tieneCafeteriaParaMenu(undefined, '/cafeteria/dashboard')).toBeTrue();
+    expect(tieneCafeteriaParaMenu(undefined, '/cafeteria/tostadores')).toBeTrue();
+  });
+
+  it('mientras carga en registrar o fuera de cafetería no asume que tiene', () => {
+    expect(tieneCafeteriaParaMenu(undefined, '/cafeteria/registrar')).toBeFalse();
+    expect(tieneCafeteriaParaMenu(undefined, '/perfil')).toBeFalse();
+  });
+
+  it('con respuesta confirmada respeta si hay o no cafetería', () => {
+    expect(tieneCafeteriaParaMenu(null, '/cafeteria/dashboard')).toBeFalse();
+    expect(tieneCafeteriaParaMenu({ id: '1' }, '/cafeteria/registrar')).toBeTrue();
   });
 });

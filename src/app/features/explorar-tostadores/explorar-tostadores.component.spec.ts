@@ -1,7 +1,12 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
+import { of } from 'rxjs';
 
+import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarTostadoresComponent } from './explorar-tostadores.component';
 
@@ -12,8 +17,10 @@ describe('ExplorarTostadoresComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ExplorarTostadoresComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
+
+    spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
     fixture = TestBed.createComponent(ExplorarTostadoresComponent);
     pagina = fixture.nativeElement;

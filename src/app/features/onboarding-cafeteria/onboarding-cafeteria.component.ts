@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 
@@ -20,7 +21,9 @@ type Paso = 'bienvenida' | 'datos' | 'preferencias' | 'confirmacion';
 
 const PASOS: Paso[] = ['bienvenida', 'datos', 'preferencias', 'confirmacion'];
 
-export const RUTA_DASHBOARD = '/cafetalero/dashboard';
+const ERROR_REGISTRO = 'No pudimos registrar la cafetería. Intentá de nuevo.';
+
+export const RUTA_DASHBOARD = '/cafeteria/dashboard';
 
 @Component({
   selector: 'app-onboarding-cafeteria',
@@ -51,22 +54,34 @@ export class OnboardingCafeteriaComponent {
     return pin ? this.cafeteriaService.cantonDe(pin) : null;
   });
   protected readonly intentoContinuar = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly erroresServidor = signal<string[]>([]);
 
   protected readonly registrada = signal<Cafeteria | null>(null);
 
   protected continuar(): void {
     this.intentoContinuar.set(true);
-    if (this.formularioDatos.valid && this.pin()) {
+    if (this.formularioDatos.valid && this.pin() && this.canton()) {
+      this.erroresServidor.set([]);
       this.paso.set('preferencias');
     }
   }
 
   protected guardar(): void {
     const pin = this.pin();
+    const canton = this.canton();
     const { volumenMensual, estilos } = this.formularioPreferencias.getRawValue();
-    if (this.formularioPreferencias.invalid || !volumenMensual || !pin) {
+    if (
+      this.formularioPreferencias.invalid ||
+      !volumenMensual ||
+      !pin ||
+      !canton ||
+      this.guardando()
+    ) {
       return;
     }
+    this.guardando.set(true);
+    this.erroresServidor.set([]);
     const { nombre, contacto, telefono, correo, descripcion, horario } =
       this.formularioDatos.getRawValue();
     const datos = {
@@ -77,10 +92,10 @@ export class OnboardingCafeteriaComponent {
       descripcion: descripcion.trim() || null,
       horario: horario.trim() || null,
       ubicacion: pin,
-      canton: this.canton(),
+      canton,
       volumenMensual,
       estilos,
-      propietarioId: this.usuario().id,
+      propietarioId: this.usuario()!.id,
     };
     const registrada = this.registrada();
     const peticion = registrada
@@ -90,9 +105,21 @@ export class OnboardingCafeteriaComponent {
           portadaUrl: registrada.portadaUrl,
         })
       : this.cafeteriaService.registrar(datos);
-    peticion.subscribe((cafeteria) => {
-      this.registrada.set(cafeteria);
-      this.paso.set('confirmacion');
+    peticion.subscribe({
+      next: (cafeteria) => {
+        this.guardando.set(false);
+        this.registrada.set(cafeteria);
+        this.paso.set('confirmacion');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.guardando.set(false);
+        const cuerpo = error.error as
+          | { mensaje?: string; errores?: Record<string, string> }
+          | null
+          | undefined;
+        const porCampo = Object.values(cuerpo?.errores ?? {});
+        this.erroresServidor.set(porCampo.length ? porCampo : [cuerpo?.mensaje ?? ERROR_REGISTRO]);
+      },
     });
   }
 

@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
 
@@ -22,7 +23,10 @@ describe('MapaFincaComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MapaFincaComponent],
       // Sin cargar Google Maps: se prueba la lógica de dibujo
-      providers: [{ provide: GoogleMapsService, useValue: { apiCargada: NEVER } }],
+      providers: [
+        provideHttpClient(),
+        { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MapaFincaComponent);

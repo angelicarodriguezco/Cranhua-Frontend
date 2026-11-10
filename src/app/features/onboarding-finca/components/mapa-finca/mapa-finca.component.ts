@@ -13,7 +13,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { GoogleMap, MapAdvancedMarker, MapPolygon, MapPolyline } from '@angular/google-maps';
 
 import { GoogleMapsService } from '../../../../core/services/google-maps.service';
-import { Coordenada, Finca } from '../../../../core/models/finca.model';
+import { ConflictoFinca, Coordenada } from '../../../../core/models/finca.model';
 import { FincaService } from '../../../../core/services/finca.service';
 import { formatearHectareas } from '../../../../shared/utils/formato';
 import { areaHectareas, centroide, distanciaKm } from '../../../../shared/utils/geo';
@@ -52,7 +52,7 @@ export class MapaFincaComponent {
   readonly perimetro = model<Coordenada[]>([]);
   readonly pin = model<Coordenada | null>(null);
   /** Finca con la que se superpone el dibujo. Mientras haya conflicto el mapa es de solo lectura. */
-  readonly conflicto = input<Finca | null>(null);
+  readonly conflicto = input<ConflictoFinca | null>(null);
 
   protected readonly apiCargada = toSignal(inject(GoogleMapsService).apiCargada);
   private readonly mapa = viewChild(GoogleMap);
