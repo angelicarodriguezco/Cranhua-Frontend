@@ -9,12 +9,16 @@ import {
   Validators,
 } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TimeoutError, finalize, timeout } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { contrasenaConLetraYNumero } from '../../shared/validators/contrasena.validator';
 
 const OTP_LENGTH = 6;
+const ESPERA_AUTH_MS = 15_000;
+const MENSAJE_RESPUESTA_LENTA =
+  'La respuesta tarda demasiado. Si te llegó el código, usá “Ya tengo el código”.';
 
 export const MENSAJE_CONTRASENA_RESTABLECIDA =
   'Tu contraseña se cambió. Iniciá sesión con la nueva.';
@@ -133,43 +137,67 @@ export class RecuperarContrasenaComponent {
     }
 
     this.enviando.set(true);
-    this.auth.solicitarRecuperacion({ correo: this.correo }).subscribe({
-      next: () => {
-        this.enviando.set(false);
-        this.limpiarOtp();
-        this.otpError.set(null);
-        this.otpReenviado.set(false);
-        this.paso.set(2);
-      },
-      error: (error: unknown) => {
-        this.enviando.set(false);
-        const parseado = parsearErrorAuth(error);
-        this.errorGeneral.set(parseado.errores?.['correo'] ?? parseado.mensaje);
-      },
-    });
+    this.auth
+      .solicitarRecuperacion({ correo: this.correo })
+      .pipe(
+        timeout(ESPERA_AUTH_MS),
+        finalize(() => this.enviando.set(false)),
+      )
+      .subscribe({
+        next: () => this.irAlPasoCodigo(),
+        error: (error: unknown) => {
+          if (error instanceof TimeoutError) {
+            this.errorGeneral.set(MENSAJE_RESPUESTA_LENTA);
+            return;
+          }
+          const parseado = parsearErrorAuth(error);
+          this.errorGeneral.set(parseado.errores?.['correo'] ?? parseado.mensaje);
+        },
+      });
+  }
+
+  protected irAlPasoCodigo(): void {
+    this.errorGeneral.set(null);
+    if (this.formCorreo.invalid) {
+      this.formCorreo.markAllAsTouched();
+      return;
+    }
+
+    this.enviando.set(false);
+    this.limpiarOtp();
+    this.otpError.set(null);
+    this.otpReenviado.set(false);
+    this.paso.set(2);
   }
 
   protected reenviarOtp(): void {
     this.otpError.set(null);
     this.otpReenviado.set(false);
     this.enviando.set(true);
-    this.auth.solicitarRecuperacion({ correo: this.correo }).subscribe({
-      next: () => {
-        this.enviando.set(false);
-        this.limpiarOtp();
-        this.otpReenviado.set(true);
-      },
-      error: (error: unknown) => {
-        this.enviando.set(false);
-        this.otpError.set(parsearErrorAuth(error).mensaje);
-      },
-    });
+    this.auth
+      .solicitarRecuperacion({ correo: this.correo })
+      .pipe(
+        timeout(ESPERA_AUTH_MS),
+        finalize(() => this.enviando.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.limpiarOtp();
+          this.otpReenviado.set(true);
+        },
+        error: (error: unknown) => {
+          this.otpError.set(
+            error instanceof TimeoutError
+              ? MENSAJE_RESPUESTA_LENTA
+              : parsearErrorAuth(error).mensaje,
+          );
+        },
+      });
   }
 
   protected onOtpInput(index: number, event: Event): void {
     const input = event.target as HTMLInputElement;
     const escrito = ((event as InputEvent).data ?? input.value).replace(/\D/g, '');
-    // El autocompletado del código mete los 6 dígitos de una vez en una casilla
     if (escrito.length > 1) {
       this.llenarOtp(escrito);
       return;
@@ -219,18 +247,26 @@ export class RecuperarContrasenaComponent {
 
     this.otpError.set(null);
     this.enviando.set(true);
-    this.auth.verificarCodigo({ correo: this.correo, codigo: this.codigo }).subscribe({
-      next: () => {
-        this.enviando.set(false);
-        this.errorGeneral.set(null);
-        this.paso.set(3);
-      },
-      error: (error: unknown) => {
-        this.enviando.set(false);
-        const parseado = parsearErrorAuth(error);
-        this.otpError.set(parseado.errores?.['codigo'] ?? parseado.mensaje);
-      },
-    });
+    this.auth
+      .verificarCodigo({ correo: this.correo, codigo: this.codigo })
+      .pipe(
+        timeout(ESPERA_AUTH_MS),
+        finalize(() => this.enviando.set(false)),
+      )
+      .subscribe({
+        next: () => {
+          this.errorGeneral.set(null);
+          this.paso.set(3);
+        },
+        error: (error: unknown) => {
+          if (error instanceof TimeoutError) {
+            this.otpError.set(MENSAJE_RESPUESTA_LENTA);
+            return;
+          }
+          const parseado = parsearErrorAuth(error);
+          this.otpError.set(parseado.errores?.['codigo'] ?? parseado.mensaje);
+        },
+      });
   }
 
   protected cambiarContrasena(): void {
@@ -248,15 +284,21 @@ export class RecuperarContrasenaComponent {
         codigo: this.codigo,
         contrasena: this.formContrasena.controls.nueva.value,
       })
+      .pipe(
+        timeout(ESPERA_AUTH_MS),
+        finalize(() => this.enviando.set(false)),
+      )
       .subscribe({
         next: () => {
-          this.enviando.set(false);
           void this.router.navigateByUrl('/iniciar-sesion', {
             state: { mensaje: MENSAJE_CONTRASENA_RESTABLECIDA },
           });
         },
         error: (error: unknown) => {
-          this.enviando.set(false);
+          if (error instanceof TimeoutError) {
+            this.errorGeneral.set(MENSAJE_RESPUESTA_LENTA);
+            return;
+          }
           this.mostrarErrorRestablecer(error);
         },
       });
@@ -271,7 +313,6 @@ export class RecuperarContrasenaComponent {
       return;
     }
 
-    // Un 400 sin errores por campo es del código (incorrecto o vencido): se vuelve a pedirlo
     const esErrorDeCodigo =
       error instanceof HttpErrorResponse &&
       error.status === 400 &&
