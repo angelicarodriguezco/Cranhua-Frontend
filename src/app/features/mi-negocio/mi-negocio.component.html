@@ -1,8 +1,4 @@
-<app-menu-lateral-tostador
-  [perfil]="perfilSidebar"
-  [tema]="tema()"
-  (alternarTema)="alternarTema()"
-/>
+<app-menu-lateral />
 
 <main class="contenido">
   <header class="encabezado">
@@ -223,9 +219,8 @@
 
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
-    titulo="¿Eliminar negocio?"
-    mensaje="Se eliminará el perfil público de tu tostaduría. Tu cuenta de Cránhua sigue activa. Esta acción no se puede deshacer."
-    etiquetaConfirmar="Eliminar negocio"
+    [nombre]="negocio()?.nombre"
+    [aviso]="avisoEliminar"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

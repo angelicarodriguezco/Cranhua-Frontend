@@ -1,6 +1,6 @@
 /* Tema claro (Figma). El oscuro solo cambia estos valores. */
 :host {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --fondo-imagen: url('/images/bg-claro.jpg');
   --fondo-fallback: #6f8fa8;
   --overlay: linear-gradient(
     180deg,
@@ -31,7 +31,7 @@
 }
 
 :host([data-theme='oscuro']) {
-  --fondo-imagen: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --fondo-imagen: url('/images/bg-oscuro.jpg');
   --fondo-fallback: #1d1b45;
   --overlay: linear-gradient(
     180deg,
@@ -184,15 +184,6 @@
 
 :host([data-theme='oscuro']) .panel--exito {
   background: color-mix(in srgb, var(--vidrio-fondo) 88%, #000000 12%);
-}
-
-app-modal-confirmacion {
-  --color-surface: var(--vidrio-fondo);
-  --color-border: var(--vidrio-borde);
-  --color-text: var(--vidrio-texto);
-  --color-text-muted: var(--vidrio-texto-suave);
-  --color-error: var(--vidrio-error);
-  --color-gold: var(--vidrio-dorado);
 }
 
 @media (max-width: 900px) {

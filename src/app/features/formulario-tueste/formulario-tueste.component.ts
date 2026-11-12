@@ -17,7 +17,7 @@ import { ESTILOS_TUESTE, EstiloTueste } from '../../core/models/negocio-tueste.m
 import { Tueste } from '../../core/models/tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { TuesteService, calcularMerma } from '../../core/services/tueste.service';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_MIS_TOSTADOS = '/tostador/tostados';
 
@@ -113,7 +113,7 @@ export function errorPesoTostado(formulario: FormularioTueste): string | null {
 // Crear y editar tueste comparten pantalla; la ruta de edición trae el id del tueste
 @Component({
   selector: 'app-formulario-tueste',
-  imports: [MenuLateralTostadorComponent, ReactiveFormsModule],
+  imports: [MenuLateralComponent, ReactiveFormsModule],
   templateUrl: './formulario-tueste.component.html',
   styleUrls: ['./campos-tueste.css', './formulario-tueste.component.css'],
   host: { '[attr.data-theme]': 'tema()' },
@@ -123,7 +123,6 @@ export class FormularioTuesteComponent {
   private readonly tuesteService = inject(TuesteService);
   private readonly router = inject(Router);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
   private readonly ruta = inject(ActivatedRoute).snapshot;
@@ -179,10 +178,6 @@ export class FormularioTuesteComponent {
     if (this.lotes().some((l) => l.id === loteId)) {
       this.formulario.controls.loteId.setValue(loteId);
     }
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected invalido(control: AbstractControl): boolean {

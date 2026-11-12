@@ -12,7 +12,7 @@ import { iniciales } from '../../../../shared/utils/formato';
 })
 export class ListaDuenosComponent {
   readonly duenos = input.required<Usuario[]>();
-  readonly propietarioId = input.required<string>();
+  readonly usuarioId = input.required<string>();
   /** Mensaje del último intento fallido de agregar un dueño */
   readonly error = input<string | null>(null);
   readonly agregar = output<string>();

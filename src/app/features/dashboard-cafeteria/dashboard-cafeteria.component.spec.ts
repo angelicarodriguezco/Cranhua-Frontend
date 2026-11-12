@@ -1,7 +1,13 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
+import { of } from 'rxjs';
 
+import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardCafeteriaComponent } from './dashboard-cafeteria.component';
 
 describe('DashboardCafeteriaComponent', () => {
@@ -11,23 +17,17 @@ describe('DashboardCafeteriaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardCafeteriaComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
+
+    spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
     fixture = TestBed.createComponent(DashboardCafeteriaComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
 
-  function boton(texto: string): HTMLButtonElement {
-    const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes(texto),
-    );
-    if (!encontrado) {
-      throw new Error(`No hay botón "${texto}"`);
-    }
-    return encontrado;
-  }
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function rutasDe(enlaceSelector: string): string[] {
     return fixture.debugElement
@@ -78,27 +78,32 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
-    expect(rutasDe('app-menu-lateral-cafeteria a')).toEqual([
-      '/cafeteria/dashboard',
-      '/cafeteria/tostadores',
-      '/cafeteria/pedidos',
-      '/cafeteria/mi-cafeteria',
-      '/perfil',
-    ]);
+    expect(rutasDe('app-menu-lateral a')).toEqual(
+      jasmine.arrayContaining([
+        '/cafeteria/dashboard',
+        '/cafeteria/tostadores',
+        '/cafeteria/pedidos',
+        '/cafeteria/mi-cafeteria',
+        '/perfil',
+        '/iniciar-sesion',
+      ]),
+    );
   });
 
-  it('muestra el perfil del sidebar y permite alternar el tema', () => {
-    expect(pagina.textContent).toContain('Andrés Solano');
-    expect(pagina.textContent).toContain('AS');
-    expect(pagina.textContent).toContain('Cafetería - Café Brumas');
+  it('muestra el perfil del sidebar y sigue el tema global', () => {
+    const temas = TestBed.inject(TemaService);
+    expect(pagina.querySelector('app-menu-lateral .perfil-rol')?.textContent).toContain(
+      'Cafetería',
+    );
+    expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
-    boton('Tema claro').click();
+    temas.alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
-    boton('Tema oscuro').click();
+    temas.alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');

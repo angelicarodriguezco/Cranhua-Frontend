@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 import {
   COSECHAS_DASHBOARD,
@@ -40,6 +40,8 @@ function calcularIndicadores(
 }
 
 // Simula el backend en memoria; Aprobar/Rechazar mutan el estado local.
+import { TemaService } from './tema.service';
+
 @Injectable({ providedIn: 'root' })
 export class DashboardCafetaleroService {
   private readonly fincas = signal<FincaResumen[]>(FINCAS_DASHBOARD.map((f) => ({ ...f })));
@@ -47,7 +49,7 @@ export class DashboardCafetaleroService {
   private readonly solicitudes = signal<SolicitudTostador[]>(
     clonarSolicitudes(SOLICITUDES_DASHBOARD),
   );
-  private readonly temaActual = signal<TemaDashboard>('oscuro');
+  private readonly temas = inject(TemaService);
 
   readonly perfilSidebar: PerfilCafetaleroSidebar = PERFIL_CAFETALERO_SIDEBAR;
 
@@ -59,14 +61,14 @@ export class DashboardCafetaleroService {
   readonly indicadores = computed(() =>
     calcularIndicadores(this.fincas(), this.cosechas(), this.solicitudes()),
   );
-  readonly tema = this.temaActual.asReadonly();
+  readonly tema = this.temas.tema;
 
   alternarTema(): void {
-    this.temaActual.update((actual) => (actual === 'oscuro' ? 'claro' : 'oscuro'));
+    this.temas.alternarTema();
   }
 
   establecerTema(tema: TemaDashboard): void {
-    this.temaActual.set(tema);
+    this.temas.establecerTema(tema);
   }
 
   aprobarSolicitud(id: string): void {

@@ -23,17 +23,20 @@ import { DashboardTostadorService } from '../../core/services/dashboard-tostador
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
 import { MapaUbicacionComponent } from '../onboarding-tostador/components/mapa-ubicacion/mapa-ubicacion.component';
 import {
   crearFormularioNegocio,
   FormularioNegocio,
 } from '../onboarding-tostador/components/formulario-negocio/formulario-negocio.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
 
 export const DESCRIPCION_ELIMINAR_NEGOCIO =
   'Eliminar tu negocio borra su perfil público. Tu cuenta de Cránhua sigue activa.';
+
+export const AVISO_ELIMINAR_NEGOCIO =
+  'Ya tostaste lotes con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu negocio no borra esos códigos, pero ya no vas a poder editar tu información ni generar nuevos tuestes.';
 
 type Campo = keyof FormularioNegocio['controls'];
 
@@ -65,7 +68,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 @Component({
   selector: 'app-mi-negocio',
   imports: [
-    MenuLateralTostadorComponent,
+    MenuLateralComponent,
     ReactiveFormsModule,
     MapaUbicacionComponent,
     ZonaPeligroComponent,
@@ -80,10 +83,10 @@ export class MiNegocioComponent implements OnDestroy {
   private readonly negocioService = inject(NegocioTuesteService);
   private readonly router = inject(Router);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly estilos = ESTILOS_TUESTE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_NEGOCIO;
+  protected readonly avisoEliminar = AVISO_ELIMINAR_NEGOCIO;
 
   protected readonly formulario = crearFormularioNegocio();
   protected readonly pin = signal<Coordenada | null>(null);
@@ -129,10 +132,6 @@ export class MiNegocioComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.revocarPortadaObjectUrl();
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected invalido(campo: Campo): boolean {

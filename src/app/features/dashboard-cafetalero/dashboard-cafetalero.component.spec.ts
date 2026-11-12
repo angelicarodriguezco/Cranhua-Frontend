@@ -1,8 +1,11 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
 import { SesionService } from '../../core/services/sesion.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { DashboardCafetaleroComponent } from './dashboard-cafetalero.component';
 
@@ -13,13 +16,15 @@ describe('DashboardCafetaleroComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [DashboardCafetaleroComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
     fixture = TestBed.createComponent(DashboardCafetaleroComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -140,7 +145,7 @@ describe('DashboardCafetaleroComponent', () => {
     expect(detalles).toContain('/cafetalero/fincas/finca-la-catalina');
     expect(detalles).toContain('/cafetalero/fincas/finca-monte-alto');
 
-    const nav = rutasDe('app-menu-lateral-cafetalero a');
+    const nav = rutasDe('app-menu-lateral a');
     expect(nav).toEqual(
       jasmine.arrayContaining([
         '/cafetalero/dashboard',
@@ -153,12 +158,15 @@ describe('DashboardCafetaleroComponent', () => {
     );
   });
 
-  it('muestra el perfil del sidebar y permite alternar el tema', () => {
-    expect(pagina.textContent).toContain('Rodrigo Alvarado');
-    expect(pagina.textContent).toContain('RC');
+  it('muestra el perfil del sidebar y sigue el tema global', () => {
+    expect(pagina.querySelector('app-menu-lateral .perfil')?.textContent).toContain(
+      'Rodrigo Alvarado',
+    );
+    expect(pagina.querySelector('app-menu-lateral .avatar')?.textContent?.trim()).toBe('RA');
+    expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
 
-    boton('Tema claro').click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');

@@ -68,15 +68,15 @@
     </span>
     @if (duenos().length) {
       <ul class="duenos">
-        @for (dueno of duenos(); track dueno.id) {
+        @for (correo of duenos(); track $index) {
           <li class="dueno">
-            <span class="dueno__iniciales" aria-hidden="true">{{ iniciales(dueno) }}</span>
-            <span class="dueno__nombre">{{ dueno.nombre }} {{ dueno.apellidos }}</span>
+            <span class="dueno__iniciales" aria-hidden="true">{{ correo[0].toUpperCase() }}</span>
+            <span class="dueno__nombre">{{ correo }}</span>
             <button
               type="button"
               class="dueno__quitar"
-              [attr.aria-label]="'Quitar a ' + nombreCorto(dueno)"
-              (click)="quitarDueno(dueno)"
+              [attr.aria-label]="'Quitar a ' + correo"
+              (click)="quitarDueno($index)"
             >
               ×
             </button>
@@ -124,5 +124,15 @@
     <p class="campo__error" role="alert">{{ error }}</p>
   }
 
-  <button type="submit" class="btn btn--filled detalles__guardar">Guardar finca</button>
+  @if (erroresServidor().length) {
+    <ul class="campo__error" role="alert">
+      @for (error of erroresServidor(); track $index) {
+        <li>{{ error }}</li>
+      }
+    </ul>
+  }
+
+  <button type="submit" class="btn btn--filled detalles__guardar" [disabled]="guardando()">
+    {{ guardando() ? 'Guardando…' : 'Guardar finca' }}
+  </button>
 </form>

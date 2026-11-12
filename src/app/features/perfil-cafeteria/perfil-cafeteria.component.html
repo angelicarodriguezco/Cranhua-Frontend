@@ -1,0 +1,107 @@
+<div class="pagina">
+  <header class="barra">
+    <img class="marca" [src]="logo()" alt="Crán̈hua" width="160" height="29" />
+
+    <div class="toggle-tema" role="group" aria-label="Tema de la vista">
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+        [attr.aria-pressed]="tema() === 'claro'"
+        (click)="establecerTema('claro')"
+      >
+        Claro
+      </button>
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+        [attr.aria-pressed]="tema() === 'oscuro'"
+        (click)="establecerTema('oscuro')"
+      >
+        Oscuro
+      </button>
+    </div>
+  </header>
+
+  @if (perfil(); as cafeteria) {
+    <article class="tarjeta" aria-labelledby="nombre-cafeteria">
+      <div class="portada" aria-hidden="true"></div>
+      <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
+
+      <div class="cuerpo">
+        <div class="intro">
+          <span class="pill-rol">Cafetería</span>
+          <h1 id="nombre-cafeteria">{{ cafeteria.nombre }}</h1>
+          <p class="ubicacion">{{ cafeteria.ubicacion }}</p>
+          <p class="descripcion">{{ cafeteria.descripcion }}</p>
+        </div>
+
+        <dl class="datos">
+          @for (dato of datos(); track dato.etiqueta) {
+            <div class="fila-dato">
+              <dt>{{ dato.etiqueta }}</dt>
+              <dd>{{ dato.valor }}</dd>
+            </div>
+          }
+        </dl>
+
+        <div class="mapa" aria-label="Ubicación de la cafetería">
+          @switch (apiCargada()) {
+            @case (true) {
+              <google-map
+                width="100%"
+                height="100%"
+                [center]="cafeteria.coordenada"
+                [zoom]="zoom"
+                [options]="opcionesMapa()"
+              >
+                <map-advanced-marker
+                  [position]="cafeteria.coordenada"
+                  [content]="pin()"
+                  [title]="cafeteria.nombre"
+                />
+              </google-map>
+            }
+            @case (false) {
+              <p class="mapa__aviso">No se pudo cargar el mapa.</p>
+            }
+            @default {
+              <p class="mapa__aviso">Cargando mapa…</p>
+            }
+          }
+        </div>
+
+        <section class="fincas">
+          <h2>Fincas de origen de sus cafés</h2>
+          <ul class="chips">
+            @for (finca of cafeteria.fincas; track finca.id) {
+              <li>
+                <a class="chip" [routerLink]="['/explorar/finca', finca.id]">
+                  {{ finca.nombre }} · {{ finca.ubicacion }} →
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <div class="acciones">
+          <a class="volver" routerLink="/explorar">← Volver al directorio</a>
+          <a class="btn-primario" [routerLink]="['/explorar/cafeteria', cafeteria.id, 'menu']">
+            Ver menú público
+          </a>
+        </div>
+      </div>
+    </article>
+  } @else {
+    <article class="tarjeta tarjeta--vacia" role="alert">
+      <h1>No encontramos esta cafetería</h1>
+      <p class="descripcion">
+        Puede que el enlace esté mal o que la cafetería ya no esté en Cránhua.
+      </p>
+      <p class="descripcion">
+        <a class="volver" routerLink="/explorar">← Volver al directorio</a>
+      </p>
+    </article>
+  }
+</div>

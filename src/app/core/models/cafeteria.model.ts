@@ -26,10 +26,51 @@ export interface Cafeteria {
   horario: string | null;
   ubicacion: Coordenada;
   canton: CantonReferencia | null;
-  volumenMensual: VolumenMensual;
+  volumenMensual: VolumenMensual | null;
   estilos: EstiloCafe[];
   propietarioId: string;
   portadaUrl?: string | null;
 }
 
 export type NuevaCafeteria = Omit<Cafeteria, 'id'>;
+
+export type EstiloCafeApi = 'CLARO' | 'MEDIO' | 'OSCURO';
+
+export type VolumenMensualApi =
+  | 'MENOS_DE_10'
+  | 'DE_10_A_25'
+  | 'DE_25_A_50'
+  | 'DE_50_A_100'
+  | 'MAS_DE_100';
+
+export interface CafeteriaResponseApi {
+  id: string;
+  cuentaId: string;
+  nombre: string;
+  nombreContacto: string;
+  telefono: string;
+  correo: string;
+  descripcion: string | null;
+  horario: string | null;
+  ubicacion: Coordenada;
+  canton: string;
+  provincia: string;
+  estilos: EstiloCafeApi[];
+  volumenMensual: VolumenMensualApi | null;
+  portadaUrl: string | null;
+}
+
+export interface CafeteriaRegistroApi {
+  nombre: string;
+  nombreContacto: string;
+  telefono: string;
+  correo: string;
+  descripcion: string | null;
+  horario: string | null;
+  ubicacion: Coordenada;
+  canton: string;
+  provincia: string;
+  estilos: EstiloCafeApi[];
+  volumenMensual: VolumenMensualApi | null;
+  portadaUrl: string | null;
+}

@@ -1,0 +1,143 @@
+<div class="perfil">
+  <header class="barra">
+    <a routerLink="/" class="marca" aria-label="Cránhua — inicio">
+      <img class="marca__logo" [src]="logoSrc()" width="140" height="36" alt="Cránhua" />
+    </a>
+
+    <div class="toggle-tema" role="group" aria-label="Tema">
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+        [attr.aria-pressed]="tema() === 'claro'"
+        (click)="establecerTema('claro')"
+      >
+        Claro
+      </button>
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+        [attr.aria-pressed]="tema() === 'oscuro'"
+        (click)="establecerTema('oscuro')"
+      >
+        Oscuro
+      </button>
+    </div>
+  </header>
+
+  <main class="contenido">
+    @if (finca(); as f) {
+      <article class="tarjeta" aria-labelledby="nombre-finca">
+        <div
+          class="portada"
+          [class.portada--placeholder]="!f.imagenPortada"
+          [style.background-image]="f.imagenPortada ? 'url(' + f.imagenPortada + ')' : null"
+          role="img"
+          [attr.aria-label]="'Portada de ' + f.nombre"
+        ></div>
+
+        <div class="cuerpo">
+          <span class="badge">{{ f.etiqueta }}</span>
+          <h1 id="nombre-finca">{{ f.nombre }}</h1>
+          <p class="ubicacion">{{ f.ubicacionLabel }}</p>
+          <p class="descripcion">{{ f.descripcion }}</p>
+
+          <div class="panel">
+            <dl class="datos">
+              <div>
+                <dt>Propietario</dt>
+                <dd>{{ f.propietario }}</dd>
+              </div>
+              <div>
+                <dt>Altitud</dt>
+                <dd>{{ f.altitudMsnm }} msnm</dd>
+              </div>
+              <div>
+                <dt>Variedades</dt>
+                <dd>{{ unirLista(f.variedades) }}</dd>
+              </div>
+              <div>
+                <dt>Procesos</dt>
+                <dd>{{ unirLista(f.procesos) }}</dd>
+              </div>
+              <div class="cosecha" [class.cosecha--resaltada]="cosechaResaltada()">
+                <dt>Cosecha activa</dt>
+                <dd>
+                  <span
+                    >{{ f.cosechaActiva.variedad }} · {{ f.cosechaActiva.proceso }} ·
+                    {{ kg(f.cosechaActiva.kilos) }}</span
+                  >
+                  @if (cosechaResaltada()) {
+                    <strong class="cosecha__codigo">{{ f.cosechaActiva.codigo }}</strong>
+                  }
+                </dd>
+              </div>
+              <div>
+                <dt>En Cránhua desde</dt>
+                <dd>{{ f.enCranhuaDesde }}</dd>
+              </div>
+            </dl>
+
+            <div class="mini-mapa" aria-label="Ubicación de la finca en el mapa">
+              @switch (apiCargada()) {
+                @case (true) {
+                  <google-map
+                    width="100%"
+                    height="100%"
+                    [center]="f.coordenada"
+                    [zoom]="zoomMini"
+                    [options]="opciones()"
+                  >
+                    <map-advanced-marker
+                      [position]="f.coordenada"
+                      [content]="contenidoPin"
+                      [title]="f.nombre"
+                    />
+                  </google-map>
+                }
+                @case (false) {
+                  <p class="aviso-mapa">No se pudo cargar el mapa.</p>
+                }
+                @default {
+                  <p class="aviso-mapa">Cargando mapa…</p>
+                }
+              }
+            </div>
+          </div>
+
+          <section class="cafeterias" aria-labelledby="titulo-cafeterias">
+            <h2 id="titulo-cafeterias">Cafeterías que sirven este café</h2>
+            @if (f.cafeterias.length) {
+              <ul class="cafeterias__lista">
+                @for (cafe of f.cafeterias; track cafe.id) {
+                  <li>
+                    <a class="chip" [routerLink]="cafe.rutaPerfil">
+                      <strong>{{ cafe.nombre }}</strong>
+                      <span>{{ cafe.ubicacionLabel }}</span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="cafeterias__vacio">Todavía no hay cafeterías vinculadas.</p>
+            }
+          </section>
+
+          <div class="acciones">
+            <a class="enlace-volver" routerLink="/explorar">← Volver al directorio</a>
+            <a class="cta" routerLink="/explorar" [queryParams]="{ centrar: f.id, resaltar: f.id }">
+              Ver lotes trazables
+            </a>
+          </div>
+        </div>
+      </article>
+    } @else {
+      <section class="vacio" aria-labelledby="titulo-vacio">
+        <h1 id="titulo-vacio">No encontramos esta finca</h1>
+        <p>Es posible que el enlace esté desactualizado o que el perfil aún no esté publicado.</p>
+        <a class="cta" routerLink="/explorar">Volver al directorio</a>
+      </section>
+    }
+  </main>
+</div>

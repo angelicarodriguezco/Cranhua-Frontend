@@ -23,25 +23,24 @@ import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
+import { formatearTelefono } from '../../shared/utils/formato';
 import {
   crearFormularioDatos,
   FormularioDatos,
 } from '../onboarding-cafeteria/components/datos-cafeteria/datos-cafeteria.component';
 import { MapaCafeteriaComponent } from '../onboarding-cafeteria/components/mapa-cafeteria/mapa-cafeteria.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_DASHBOARD_CAFETERIA = '/cafeteria/dashboard';
 export const RUTA_PUBLICAR_MENU = '/cafeteria/menu';
 
 export const DESCRIPCION_ELIMINAR_CAFETERIA =
-  'Eliminar tu cafetería borra su perfil público. Tu cuenta de Cránhua sigue activa.';
+  'Eliminar tu cafetería borra su perfil público y su menú. Tu cuenta de Cránhua sigue activa.';
+
+export const AVISO_ELIMINAR_CAFETERIA =
+  'Esta cafetería ya vendió bebidas con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu cafetería no borra esos códigos, pero ya no vas a poder editar tu menú ni recibir nuevos pedidos.';
 
 type Campo = keyof FormularioDatos['controls'];
-
-function formatearTelefono(telefono: string): string {
-  const digitos = telefono.replace(/\D/g, '').slice(-8);
-  return `+506 ${digitos.slice(0, 4)}-${digitos.slice(4)}`;
-}
 
 export function inicialesCafeteria(nombre: string): string {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);
@@ -68,7 +67,7 @@ function clonarCafeteria(cafeteria: Cafeteria): Cafeteria {
 @Component({
   selector: 'app-mi-cafeteria',
   imports: [
-    MenuLateralCafeteriaComponent,
+    MenuLateralComponent,
     ReactiveFormsModule,
     MapaCafeteriaComponent,
     ZonaPeligroComponent,
@@ -83,10 +82,10 @@ export class MiCafeteriaComponent implements OnDestroy {
   private readonly cafeteriaService = inject(CafeteriaService);
   private readonly router = inject(Router);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly estilosDisponibles = ESTILOS_CAFE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CAFETERIA;
+  protected readonly avisoEliminar = AVISO_ELIMINAR_CAFETERIA;
 
   protected readonly formulario = crearFormularioDatos();
   protected readonly estilos = new FormControl<EstiloCafe[]>([], {
@@ -137,10 +136,6 @@ export class MiCafeteriaComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.revocarPortadaObjectUrl();
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected invalido(campo: Campo): boolean {

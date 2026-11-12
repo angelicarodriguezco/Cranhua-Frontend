@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { COSECHAS_DASHBOARD, SOLICITUDES_DASHBOARD } from '../mocks/dashboard-cafetalero.mock';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
+import { CLAVE_TEMA } from './tema.service';
 
 describe('DashboardCafetaleroService', () => {
   let servicio: DashboardCafetaleroService;
@@ -10,6 +11,8 @@ describe('DashboardCafetaleroService', () => {
     TestBed.configureTestingModule({});
     servicio = TestBed.inject(DashboardCafetaleroService);
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   it('expone los indicadores del prototipo unificado', () => {
     const indicadores = servicio.indicadores();

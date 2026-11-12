@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NEVER } from 'rxjs';
@@ -7,7 +9,9 @@ import { Coordenada } from '../../core/models/negocio-tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
+  AVISO_ELIMINAR_NEGOCIO,
   DESCRIPCION_ELIMINAR_NEGOCIO,
   inicialesNegocio,
   MiNegocioComponent,
@@ -28,6 +32,8 @@ describe('MiNegocioComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MiNegocioComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
@@ -40,6 +46,8 @@ describe('MiNegocioComponent', () => {
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function campo<T extends HTMLElement>(selector: string): T {
     return pagina.querySelector<T>(selector)!;
@@ -132,7 +140,11 @@ describe('MiNegocioComponent', () => {
 
     boton('Eliminar negocio').click();
     fixture.detectChanges();
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
+    expect(campo('.modal__titulo').textContent).toBe(`¿Eliminar ${NEGOCIO_EJEMPLO.nombre}?`);
+    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_NEGOCIO);
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
@@ -170,11 +182,11 @@ describe('MiNegocioComponent', () => {
     expect(campo<HTMLInputElement>('#nombre-negocio').value).toBe(NEGOCIO_EJEMPLO.nombre);
   });
 
-  it('alterna el tema claro/oscuro desde el menú', () => {
+  it('sigue el tema global claro/oscuro', () => {
     expect(dashboard.tema()).toBe('oscuro');
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
 
-    componente['alternarTema']();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(dashboard.tema()).toBe('claro');
     expect(pagina.getAttribute('data-theme')).toBe('claro');

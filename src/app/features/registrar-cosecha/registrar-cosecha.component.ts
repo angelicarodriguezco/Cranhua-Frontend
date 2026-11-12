@@ -9,7 +9,6 @@ import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { MenuLateralCafetaleroComponent } from '../dashboard-cafetalero/components/menu-lateral-cafetalero/menu-lateral-cafetalero.component';
 import {
   DatosPasoCosecha,
   PasoDatosCosechaComponent,
@@ -19,13 +18,14 @@ import {
   PasoSeleccionCatacionComponent,
 } from './components/paso-seleccion-catacion/paso-seleccion-catacion.component';
 import { ResumenCosechaComponent } from './components/resumen-cosecha/resumen-cosecha.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 type Paso = 'datos' | 'seleccion' | 'exito';
 
 @Component({
   selector: 'app-registrar-cosecha',
   imports: [
-    MenuLateralCafetaleroComponent,
+    MenuLateralComponent,
     PasoDatosCosechaComponent,
     PasoSeleccionCatacionComponent,
     ResumenCosechaComponent,
@@ -43,7 +43,6 @@ export class RegistrarCosechaComponent {
   private readonly router = inject(Router);
   private readonly location = inject(Location);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
   private readonly idRuta = toSignal(this.route.paramMap.pipe(map((params) => params.get('id'))), {
@@ -74,6 +73,18 @@ export class RegistrarCosechaComponent {
   protected readonly datosPaso2 = signal<DatosPasoSeleccion | null>(null);
   protected readonly cosechaGuardada = signal<Cosecha | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
+
+  protected readonly cosechaAEliminar = computed(() => {
+    const id = this.cosechaId();
+    return id ? (this.cosechaService.obtener(id) ?? null) : null;
+  });
+
+  protected readonly avisoEliminar = computed(() => {
+    const codigo = this.cosechaAEliminar()?.codigoLote;
+    return codigo
+      ? `Esta cosecha ya tiene el lote ${codigo}, con código de trazabilidad visible para tostadores y consumidores. Eliminar la cosecha no borra ese código, pero ya no vas a poder editar su información.`
+      : null;
+  });
 
   protected readonly valorInicialPaso1 = computed((): Partial<DatosPasoCosecha> | null => {
     const borrador = this.datosPaso1();
@@ -132,10 +143,6 @@ export class RegistrarCosechaComponent {
     const paso1 = this.datosPaso1();
     return paso1?.cantidadTotalKg ?? null;
   });
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
 
   protected volver(): void {
     if (this.paso() === 'seleccion') {

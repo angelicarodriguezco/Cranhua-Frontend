@@ -22,7 +22,10 @@
 
     @switch (paso()) {
       @case ('bienvenida') {
-        <app-bienvenida-cafeteria [nombre]="usuario().nombre" (empezar)="paso.set('datos')" />
+        <app-bienvenida-cafeteria
+          [nombre]="usuario()?.nombre ?? ''"
+          (empezar)="paso.set('datos')"
+        />
       }
       @case ('datos') {
         <app-datos-cafeteria
@@ -30,6 +33,7 @@
           [(pin)]="pin"
           [canton]="canton()"
           [intentoContinuar]="intentoContinuar()"
+          [erroresServidor]="erroresServidor()"
           (continuar)="continuar()"
           (atras)="paso.set('bienvenida')"
         />
@@ -38,6 +42,8 @@
         <app-preferencias-cafeteria
           [formulario]="formularioPreferencias"
           [editando]="registrada() !== null"
+          [guardando]="guardando()"
+          [erroresServidor]="erroresServidor()"
           (guardar)="guardar()"
           (atras)="paso.set('datos')"
         />

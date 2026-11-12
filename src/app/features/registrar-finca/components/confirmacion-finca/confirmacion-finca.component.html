@@ -36,6 +36,20 @@
   </div>
 </dl>
 
+@if (duenosFallidos().length) {
+  <div class="fallidos" role="alert">
+    <p>No pudimos agregar a estos dueños:</p>
+    <ul>
+      @for (fallido of duenosFallidos(); track $index) {
+        <li>
+          <strong>{{ fallido.correo }}</strong
+          >: {{ fallido.mensaje }}
+        </li>
+      }
+    </ul>
+  </div>
+}
+
 <button type="button" class="btn btn--filled" (click)="irAlDashboard.emit()">
   Ir a mi dashboard
 </button>

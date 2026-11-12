@@ -1,13 +1,17 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { NEVER, of } from 'rxjs';
 
 import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { Coordenada } from '../../core/models/finca.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
+  AVISO_ELIMINAR_CAFETERIA,
   DESCRIPCION_ELIMINAR_CAFETERIA,
   inicialesCafeteria,
   MiCafeteriaComponent,
@@ -29,6 +33,8 @@ describe('MiCafeteriaComponent', () => {
     await TestBed.configureTestingModule({
       imports: [MiCafeteriaComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
@@ -36,11 +42,15 @@ describe('MiCafeteriaComponent', () => {
 
     cafeteriaService = TestBed.inject(CafeteriaService);
     dashboard = TestBed.inject(DashboardCafeteriaService);
+    spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
+
     fixture = TestBed.createComponent(MiCafeteriaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function campo<T extends HTMLElement>(selector: string): T {
     return pagina.querySelector<T>(selector)!;
@@ -65,7 +75,7 @@ describe('MiCafeteriaComponent', () => {
     expect(inicialesCafeteria('Brumas')).toBe('BR');
   });
 
-  it('carga los datos mock de la cafetería actual', () => {
+  it('carga los datos de la cafetería actual', () => {
     expect(campo('h1').textContent).toContain('Mi cafetería');
     expect(pagina.textContent).toContain('Así ven tu local los tostadores dentro de Cránhua.');
     expect(boton('Publicar en el menú')).toBeTruthy();
@@ -161,14 +171,18 @@ describe('MiCafeteriaComponent', () => {
   it('muestra la zona de peligro y confirma la eliminación', () => {
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
-    const eliminar = spyOn(cafeteriaService, 'eliminar').and.callThrough();
+    const eliminar = spyOn(cafeteriaService, 'eliminar').and.returnValue(of(true));
 
     expect(pagina.querySelector('app-zona-peligro')).toBeTruthy();
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_CAFETERIA);
 
     boton('Eliminar cafetería').click();
     fixture.detectChanges();
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
+    expect(campo('.modal__titulo').textContent).toBe('¿Eliminar Cafetería Café Brumas?');
+    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_CAFETERIA);
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
@@ -177,8 +191,10 @@ describe('MiCafeteriaComponent', () => {
     expect(navegar).toHaveBeenCalledWith(RUTA_DASHBOARD_CAFETERIA);
   });
 
-  it('guarda cambios en el mock de la cafetería', () => {
-    const actualizar = spyOn(cafeteriaService, 'actualizar').and.callThrough();
+  it('guarda cambios en la cafetería', () => {
+    const actualizar = spyOn(cafeteriaService, 'actualizar').and.callFake((cafeteria) =>
+      of(cafeteria),
+    );
 
     campo<HTMLInputElement>('#nombre-cafeteria').value = 'Café Brumas Norte';
     campo<HTMLInputElement>('#nombre-cafeteria').dispatchEvent(new Event('input'));
@@ -207,11 +223,11 @@ describe('MiCafeteriaComponent', () => {
     expect(campo<HTMLInputElement>('#nombre-cafeteria').value).toBe(CAFETERIA_EJEMPLO.nombre);
   });
 
-  it('alterna el tema claro/oscuro desde el menú', () => {
+  it('sigue el tema global claro/oscuro', () => {
     expect(dashboard.tema()).toBe('oscuro');
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
 
-    componente['alternarTema']();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(dashboard.tema()).toBe('claro');
     expect(pagina.getAttribute('data-theme')).toBe('claro');

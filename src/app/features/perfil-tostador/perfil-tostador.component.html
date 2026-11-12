@@ -1,0 +1,118 @@
+<div class="pagina">
+  <header class="barra">
+    <img class="marca" src="/images/logo-cranhua.png" alt="Crán̈hua" width="160" height="29" />
+
+    <div class="toggle-tema" role="group" aria-label="Tema de la vista">
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+        [attr.aria-pressed]="tema() === 'claro'"
+        (click)="establecerTema('claro')"
+      >
+        Claro
+      </button>
+      <button
+        type="button"
+        class="toggle-tema__opcion"
+        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+        [attr.aria-pressed]="tema() === 'oscuro'"
+        (click)="establecerTema('oscuro')"
+      >
+        Oscuro
+      </button>
+    </div>
+  </header>
+
+  @if (perfil(); as tostador) {
+    <article class="tarjeta" aria-labelledby="nombre-tostador">
+      <div class="portada" aria-hidden="true"></div>
+      <span class="avatar" aria-hidden="true">{{ iniciales() }}</span>
+
+      <div class="cuerpo">
+        <span class="pill-rol">Tostador</span>
+        <h1 id="nombre-tostador">{{ tostador.nombre }}</h1>
+        <p class="ubicacion">{{ tostador.ubicacion }}</p>
+        <p class="descripcion">{{ tostador.descripcion }}</p>
+
+        <div class="fila-info">
+          <dl class="datos">
+            @for (dato of datos(); track dato.etiqueta) {
+              <div class="fila-dato">
+                <dt>{{ dato.etiqueta }}</dt>
+                <dd>{{ dato.valor }}</dd>
+              </div>
+            }
+          </dl>
+
+          <div class="mapa" aria-label="Ubicación del tostador">
+            @switch (apiCargada()) {
+              @case (true) {
+                <google-map
+                  width="100%"
+                  height="100%"
+                  [center]="tostador.coordenada"
+                  [zoom]="zoom"
+                  [options]="opcionesMapa()"
+                >
+                  <map-advanced-marker
+                    [position]="tostador.coordenada"
+                    [content]="pin()"
+                    [title]="tostador.nombre"
+                  />
+                </google-map>
+              }
+              @case (false) {
+                <p class="mapa__aviso">No se pudo cargar el mapa.</p>
+              }
+              @default {
+                <p class="mapa__aviso">Cargando mapa…</p>
+              }
+            }
+          </div>
+        </div>
+
+        <section class="seccion-cruzada">
+          <h2>Fincas con las que trabaja</h2>
+          <ul class="chips">
+            @for (finca of tostador.fincas; track finca.id) {
+              <li>
+                <a class="chip" [routerLink]="['/explorar/finca', finca.id]">
+                  {{ finca.nombre }} · {{ finca.ubicacion }} →
+                </a>
+              </li>
+            }
+          </ul>
+
+          <h2>Dónde comprar su café</h2>
+          <ul class="chips">
+            @for (punto of tostador.puntosVenta; track punto.id) {
+              <li>
+                <a class="chip" [routerLink]="['/explorar/cafeteria', punto.id]">
+                  {{ punto.nombre }} · {{ punto.ubicacion }} →
+                </a>
+              </li>
+            }
+          </ul>
+        </section>
+
+        <div class="acciones">
+          <a class="volver" routerLink="/explorar">← Volver al directorio</a>
+          <a class="btn-primario" routerLink="/explorar" [queryParams]="{ resaltar: idsFincas() }">
+            Ver fincas con las que trabaja
+          </a>
+        </div>
+      </div>
+    </article>
+  } @else {
+    <article class="tarjeta tarjeta--vacia" role="alert">
+      <h1>No encontramos este tostador</h1>
+      <p class="descripcion">
+        Puede que el enlace esté mal o que el tostador ya no esté en Cránhua.
+      </p>
+      <div class="acciones">
+        <a class="volver" routerLink="/explorar">← Volver al directorio</a>
+      </div>
+    </article>
+  }
+</div>

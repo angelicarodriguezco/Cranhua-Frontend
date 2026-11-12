@@ -1,14 +1,19 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { convertToParamMap, provideRouter, ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 
 import { CosechaService } from '../../core/services/cosecha.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { PasoDatosCosechaComponent } from './components/paso-datos-cosecha/paso-datos-cosecha.component';
 import { PasoSeleccionCatacionComponent } from './components/paso-seleccion-catacion/paso-seleccion-catacion.component';
 import { RegistrarCosechaComponent } from './registrar-cosecha.component';
 
 describe('RegistrarCosechaComponent', () => {
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+
   let fixture: ComponentFixture<RegistrarCosechaComponent>;
   let pagina: HTMLElement;
 
@@ -19,6 +24,8 @@ describe('RegistrarCosechaComponent', () => {
     await TestBed.configureTestingModule({
       imports: [RegistrarCosechaComponent],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         provideRouter([]),
         {
           provide: ActivatedRoute,
@@ -123,7 +130,7 @@ describe('RegistrarCosechaComponent', () => {
     expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#7fda9f');
     expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#e3b65b');
 
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
     expect(pagina.getAttribute('data-theme')).toBe('claro');
@@ -272,8 +279,11 @@ describe('RegistrarCosechaComponent', () => {
     pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
     fixture.detectChanges();
 
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeTruthy();
-    expect(pagina.textContent).toContain('¿Eliminar cosecha?');
+    expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha Caturra?');
+    expect(pagina.querySelector('.modal__aviso')?.textContent).toContain('LC-2025-001');
+    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
+      'rgba(8, 28, 38, 0.96)',
+    );
 
     pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
     fixture.detectChanges();

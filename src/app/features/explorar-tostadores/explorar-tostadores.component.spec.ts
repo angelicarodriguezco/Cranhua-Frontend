@@ -1,7 +1,13 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
+import { of } from 'rxjs';
 
+import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
+import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarTostadoresComponent } from './explorar-tostadores.component';
 
 describe('ExplorarTostadoresComponent', () => {
@@ -11,13 +17,17 @@ describe('ExplorarTostadoresComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ExplorarTostadoresComponent],
-      providers: [provideRouter([])],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
+
+    spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
     fixture = TestBed.createComponent(ExplorarTostadoresComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
   function chip(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll<HTMLButtonElement>('.filtros button')].find(
@@ -96,19 +106,22 @@ describe('ExplorarTostadoresComponent', () => {
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
-    expect(rutasDe('app-menu-lateral-cafeteria a')).toEqual([
-      '/cafeteria/dashboard',
-      '/cafeteria/tostadores',
-      '/cafeteria/pedidos',
-      '/cafeteria/mi-cafeteria',
-      '/perfil',
-    ]);
+    expect(rutasDe('app-menu-lateral a')).toEqual(
+      jasmine.arrayContaining([
+        '/cafeteria/dashboard',
+        '/cafeteria/tostadores',
+        '/cafeteria/pedidos',
+        '/cafeteria/mi-cafeteria',
+        '/perfil',
+        '/iniciar-sesion',
+      ]),
+    );
   });
 
   it('arranca en tema oscuro y alterna a claro en el host', () => {
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
 
-    pagina.querySelector<HTMLButtonElement>('.toggle-tema')!.click();
+    TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
   });

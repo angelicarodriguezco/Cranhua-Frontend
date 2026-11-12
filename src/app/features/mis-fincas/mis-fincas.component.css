@@ -23,7 +23,7 @@
 }
 
 .mis-fincas[data-theme='oscuro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-oscuro.jpg');
+  --bg-image: url('/images/bg-oscuro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.6) 0%,
@@ -46,7 +46,7 @@
 }
 
 .mis-fincas[data-theme='claro'] {
-  --bg-image: url('/images/dashboard-cafetalero-bg-claro.jpg');
+  --bg-image: url('/images/bg-claro.jpg');
   --overlay: linear-gradient(
     180deg,
     rgba(5, 8, 20, 0.28) 0%,
@@ -199,4 +199,16 @@
   .nueva-finca {
     min-height: 8rem;
   }
+}
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.estado p {
+  margin: 0;
 }

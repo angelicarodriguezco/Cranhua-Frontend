@@ -1,9 +1,5 @@
 <div class="detalle" [attr.data-theme]="tema()">
-  <app-menu-lateral-cafetalero
-    [perfil]="perfilSidebar"
-    [tema]="tema()"
-    (alternarTema)="alternarTema()"
-  />
+  <app-menu-lateral />
 
   <main class="contenido">
     @if (finca(); as finca) {
@@ -41,7 +37,7 @@
             <h2 id="titulo-perimetro">Perímetro</h2>
             <a [routerLink]="['/cafetalero/fincas', finca.id, 'editar']">Editar perímetro</a>
           </div>
-          <app-mapa-perimetro [perimetro]="finca.perimetro" />
+          <app-mapa-perimetro [perimetro]="finca.perimetro" [hectareas]="finca.areaHectareas" />
         </section>
 
         <section class="glass seccion" aria-labelledby="titulo-duenos">
@@ -50,7 +46,7 @@
           </div>
           <app-lista-duenos
             [duenos]="duenos()"
-            [propietarioId]="finca.propietarioId"
+            [usuarioId]="usuarioId()"
             [error]="errorDueno()"
             (agregar)="agregarDueno($event)"
           />
@@ -65,11 +61,20 @@
         <app-tabla-cosechas [cosechas]="cosechas()" />
       </section>
 
-      <!-- El modal de confirmación de "Eliminar finca" es CP3-32 -->
       <app-zona-peligro
-        descripcion="La finca deja de aparecer en tu cuenta. Sus cosechas y códigos de trazabilidad se conservan."
+        descripcion="Eliminar esta finca borra su perfil y sus cosechas registradas de tu cuenta."
         accion="Eliminar finca"
+        (confirmar)="abrirModalEliminar()"
       />
+
+      @if (modalEliminarAbierto()) {
+        <app-modal-confirmacion
+          [nombre]="finca.nombre"
+          [aviso]="avisoEliminar"
+          (confirmar)="confirmarEliminar()"
+          (cancelar)="cerrarModalEliminar()"
+        />
+      }
     } @else if (!cargando()) {
       <section class="glass no-encontrada">
         <a routerLink="/cafetalero/fincas" class="volver">← Mis fincas</a>

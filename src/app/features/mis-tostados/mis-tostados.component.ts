@@ -14,9 +14,9 @@ import { RouterLink } from '@angular/router';
 import { LoteComprado, Tueste } from '../../core/models/tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { TuesteService, calcularMerma } from '../../core/services/tueste.service';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
 import { EditarTuesteComponent } from './components/editar-tueste/editar-tueste.component';
 import { etiquetaSvg } from './etiqueta-trazabilidad';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export const RUTA_CREAR_TUESTE = '/tostador/tostados/nuevo';
 export const RUTA_EXPLORAR_COSECHAS = '/tostador/cosechas';
@@ -39,7 +39,7 @@ function formatearFecha(iso: string): string {
 
 @Component({
   selector: 'app-mis-tostados',
-  imports: [EditarTuesteComponent, MenuLateralTostadorComponent, RouterLink],
+  imports: [EditarTuesteComponent, MenuLateralComponent, RouterLink],
   templateUrl: './mis-tostados.component.html',
   styleUrl: './mis-tostados.component.css',
   host: { '[attr.data-theme]': 'tema()' },
@@ -51,7 +51,6 @@ export class MisTostadosComponent {
   private readonly documento = inject(DOCUMENT);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
   protected readonly nombreTostador = `${this.dashboard.tostador.nombre} ${this.dashboard.tostador.apellidos}`;
 
@@ -85,10 +84,6 @@ export class MisTostadosComponent {
       .subscribe((lotes) =>
         this.lotes.set([...lotes].sort((a, b) => b.fechaCompra.localeCompare(a.fechaCompra))),
       );
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected merma(tueste: Tueste): string {

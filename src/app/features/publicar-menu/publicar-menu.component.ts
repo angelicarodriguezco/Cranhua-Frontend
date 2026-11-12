@@ -4,7 +4,7 @@ import { CATEGORIAS_MENU, CategoriaMenu, ItemMenu } from '../../core/models/menu
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
 import { formatearColones } from '../../shared/utils/formato';
-import { MenuLateralCafeteriaComponent } from '../dashboard-cafeteria/components/menu-lateral-cafeteria/menu-lateral-cafeteria.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 export function crearFormularioItemMenu() {
   return new FormGroup({
@@ -25,7 +25,7 @@ export type FormularioItemMenu = ReturnType<typeof crearFormularioItemMenu>;
 
 @Component({
   selector: 'app-publicar-menu',
-  imports: [MenuLateralCafeteriaComponent, ReactiveFormsModule],
+  imports: [MenuLateralComponent, ReactiveFormsModule],
   templateUrl: './publicar-menu.component.html',
   styleUrl: './publicar-menu.component.css',
   host: { '[attr.data-theme]': 'tema()' },
@@ -34,7 +34,6 @@ export class PublicarMenuComponent {
   private readonly panel = inject(DashboardCafeteriaService);
   private readonly menuService = inject(MenuCafeteriaService);
 
-  protected readonly perfilSidebar = this.panel.perfilSidebar;
   protected readonly tema = this.panel.tema;
 
   protected readonly categorias = CATEGORIAS_MENU;
@@ -44,10 +43,6 @@ export class PublicarMenuComponent {
 
   constructor() {
     this.menuService.listar().subscribe((items) => this.items.set(items));
-  }
-
-  protected alternarTema(): void {
-    this.panel.alternarTema();
   }
 
   protected errorNombre(): string | null {

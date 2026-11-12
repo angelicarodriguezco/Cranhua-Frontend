@@ -1,19 +1,48 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER, Observable, of } from 'rxjs';
 
-import { ESTILOS_CAFE } from '../../core/models/cafeteria.model';
+import { environment } from '../../../environments/environment';
+import { CafeteriaResponseApi, ESTILOS_CAFE } from '../../core/models/cafeteria.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { OnboardingCafeteriaComponent, RUTA_DASHBOARD } from './onboarding-cafeteria.component';
 
+const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU = { lat: 9.919, lng: -84.1395 };
 const LEJOS = { lat: 11.2, lng: -85.6 };
+
+function cafeteriaApi(cambios: Partial<CafeteriaResponseApi> = {}): CafeteriaResponseApi {
+  return {
+    id: 'c-cafe-brumas',
+    cuentaId: 'u-rodrigo',
+    nombre: 'Café Brumas',
+    nombreContacto: 'Andrés Solano',
+    telefono: '+506 8888-1234',
+    correo: 'contacto@brumas.cr',
+    descripcion: null,
+    horario: null,
+    ubicacion: ESCAZU,
+    canton: 'Escazú',
+    provincia: 'San José',
+    estilos: ['CLARO', 'MEDIO'],
+    volumenMensual: 'DE_25_A_50',
+    portadaUrl: null,
+    ...cambios,
+  };
+}
 
 function crear(apiCargada: Observable<boolean>) {
   TestBed.configureTestingModule({
     imports: [OnboardingCafeteriaComponent],
-    providers: [provideRouter([]), { provide: GoogleMapsService, useValue: { apiCargada } }],
+    providers: [
+      provideRouter([]),
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      { provide: GoogleMapsService, useValue: { apiCargada } },
+    ],
   });
   const fixture = TestBed.createComponent(OnboardingCafeteriaComponent);
   fixture.detectChanges();
@@ -24,12 +53,16 @@ describe('OnboardingCafeteriaComponent', () => {
   let fixture: ComponentFixture<OnboardingCafeteriaComponent>;
   let componente: OnboardingCafeteriaComponent;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(() => {
     fixture = crear(NEVER);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
+    http = TestBed.inject(HttpTestingController);
   });
+
+  afterEach(() => http.verify());
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -82,11 +115,21 @@ describe('OnboardingCafeteriaComponent', () => {
     clic('Continuar');
   }
 
+  function responder(cuerpo: object, status = 201) {
+    http.expectOne({ method: 'POST', url: BASE }).flush(cuerpo, { status, statusText: '' });
+    fixture.detectChanges();
+  }
+
   function registrar() {
     irAPreferencias();
     llenarPreferencias();
     clic('Crear cuenta de cafetería');
+    responder(cafeteriaApi());
   }
+
+  it('usa la ruta del dashboard de cafetería', () => {
+    expect(RUTA_DASHBOARD).toBe('/cafeteria/dashboard');
+  });
 
   it('recorre los cuatro pasos y el indicador acompaña', () => {
     expect(pasoActual()).toBe('Paso 1 de 4');
@@ -103,6 +146,7 @@ describe('OnboardingCafeteriaComponent', () => {
 
     llenarPreferencias();
     clic('Crear cuenta de cafetería');
+    responder(cafeteriaApi());
     expect(pasoActual()).toBe('Paso 4 de 4');
     expect(pagina.textContent).toContain('¡Tu cafetería quedó registrada!');
   });
@@ -158,6 +202,20 @@ describe('OnboardingCafeteriaComponent', () => {
     expect(campo('ubicacion-cafeteria').getAttribute('aria-invalid')).toBe('true');
   });
 
+  it('no avanza del paso 2 sin cantón', () => {
+    clic('Empezar a registrar');
+    llenarDatos();
+    componente['pin'].set(LEJOS);
+    fixture.detectChanges();
+    clic('Continuar');
+
+    expect(pasoActual()).toBe('Paso 2 de 4');
+    expect(pagina.textContent).toContain(
+      'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
+    );
+    expect(campo('ubicacion-cafeteria').getAttribute('aria-invalid')).toBe('true');
+  });
+
   it('valida el teléfono de Costa Rica', () => {
     const telefono = datos().telefono;
     for (const valido of ['88887777', '8888-7777', '+506 8888 7777']) {
@@ -196,7 +254,7 @@ describe('OnboardingCafeteriaComponent', () => {
     expect(campo('ubicacion-cafeteria').value).toBe('San José, San José');
   });
 
-  it('avisa si el pin está fuera de los cantones y aun así deja continuar', () => {
+  it('avisa si el pin está fuera de los cantones antes de intentar continuar', () => {
     clic('Empezar a registrar');
     llenarDatos();
     componente['pin'].set(LEJOS);
@@ -204,9 +262,6 @@ describe('OnboardingCafeteriaComponent', () => {
 
     expect(campo('ubicacion-cafeteria').value).toBe('');
     expect(pagina.textContent).toContain('El pin está fuera de los cantones de ejemplo.');
-
-    clic('Continuar');
-    expect(pasoActual()).toBe('Paso 3 de 4');
   });
 
   it('vuelve a la bienvenida con Atrás desde el paso 2', () => {
@@ -272,6 +327,30 @@ describe('OnboardingCafeteriaComponent', () => {
     expect(componente['formularioPreferencias'].controls.estilos.value).toEqual(['Oscuro']);
   });
 
+  it('muestra los errores por campo del backend en el formulario', () => {
+    irAPreferencias();
+    llenarPreferencias();
+    clic('Crear cuenta de cafetería');
+    responder(
+      { mensaje: 'Revisá los datos ingresados.', errores: { canton: 'Ingresá el cantón.' } },
+      400,
+    );
+
+    expect(pasoActual()).toBe('Paso 3 de 4');
+    expect(pagina.textContent).toContain('Ingresá el cantón.');
+    expect(boton('Crear cuenta de cafetería').disabled).toBeFalse();
+  });
+
+  it('muestra el mensaje genérico del backend si no hay errores por campo', () => {
+    irAPreferencias();
+    llenarPreferencias();
+    clic('Crear cuenta de cafetería');
+    responder({ mensaje: 'No tenés permiso para registrar una cafetería.' }, 400);
+
+    expect(pasoActual()).toBe('Paso 3 de 4');
+    expect(pagina.textContent).toContain('No tenés permiso para registrar una cafetería.');
+  });
+
   it('muestra los datos en la confirmación y permite editarlos', () => {
     registrar();
 
@@ -294,6 +373,10 @@ describe('OnboardingCafeteriaComponent', () => {
     datos().nombre.setValue('Café Brumas Escazú');
     clic('Continuar');
     clic('Guardar cambios');
+    http
+      .expectOne({ method: 'PATCH', url: `${BASE}/c-cafe-brumas` })
+      .flush(cafeteriaApi({ nombre: 'Café Brumas Escazú' }));
+    fixture.detectChanges();
 
     expect(servicio.actualizar).toHaveBeenCalled();
     expect(servicio.registrar).not.toHaveBeenCalled();
@@ -307,15 +390,25 @@ describe('OnboardingCafeteriaComponent', () => {
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
     clic('Ir a mi dashboard');
-    expect(router.navigateByUrl).toHaveBeenCalledWith(RUTA_DASHBOARD);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/cafeteria/dashboard');
   });
 });
 
 describe('OnboardingCafeteriaComponent sin Google Maps', () => {
   it('avisa que el mapa no cargó y el paso 2 sigue funcionando', () => {
-    const fixture = crear(of(false));
+    TestBed.configureTestingModule({
+      imports: [OnboardingCafeteriaComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
+      ],
+    });
+    const fixture = TestBed.createComponent(OnboardingCafeteriaComponent);
     const componente = fixture.componentInstance;
     const pagina: HTMLElement = fixture.nativeElement;
+    fixture.detectChanges();
     const clic = (texto: string) => {
       [...pagina.querySelectorAll('button')].find((b) => b.textContent?.includes(texto))!.click();
       fixture.detectChanges();

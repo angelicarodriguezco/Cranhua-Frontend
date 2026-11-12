@@ -1,14 +1,10 @@
 <div class="dashboard" [attr.data-theme]="tema()">
-  <app-menu-lateral-cafetalero
-    [perfil]="perfilSidebar"
-    [tema]="tema()"
-    (alternarTema)="alternarTema()"
-  />
+  <app-menu-lateral />
 
   <main class="contenido">
     <header class="cabecera">
       <div>
-        <h1>Hola, {{ usuario().nombre }}</h1>
+        <h1>Hola, {{ usuario()?.nombre }}</h1>
         <p>Esto es lo que está pasando en tus fincas hoy.</p>
       </div>
       <a routerLink="/cafetalero/registrar-cosecha" class="cta">+ Registrar cosecha</a>

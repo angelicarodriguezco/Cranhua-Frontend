@@ -14,7 +14,7 @@ import { switchMap } from 'rxjs';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { DetalleCosechaService } from '../../core/services/detalle-cosecha.service';
 import { iniciales, nombreCorto } from '../../shared/utils/formato';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 const colones = new Intl.NumberFormat('es-CR', {
   style: 'currency',
@@ -24,7 +24,7 @@ const colones = new Intl.NumberFormat('es-CR', {
 
 @Component({
   selector: 'app-detalle-cosecha',
-  imports: [MenuLateralTostadorComponent, ReactiveFormsModule, RouterLink],
+  imports: [MenuLateralComponent, ReactiveFormsModule, RouterLink],
   templateUrl: './detalle-cosecha.component.html',
   styleUrl: './detalle-cosecha.component.css',
 })
@@ -35,7 +35,6 @@ export class DetalleCosechaComponent {
   private readonly dashboard = inject(DashboardTostadorService);
 
   protected readonly tema = this.dashboard.tema;
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
 
   protected readonly cosecha = toSignal(
     inject(ActivatedRoute).paramMap.pipe(
@@ -66,10 +65,6 @@ export class DetalleCosechaComponent {
 
   protected colones(monto: number): string {
     return colones.format(monto);
-  }
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
   }
 
   protected enviar(): void {

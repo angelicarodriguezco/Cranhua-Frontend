@@ -1,14 +1,15 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import { INDICADORES_TOSTADOR } from '../mocks/dashboard-tostador.mock';
 import { TOSTADOR_ACTUAL } from '../mocks/negocio-tueste.mock';
-import { TemaDashboard } from '../models/dashboard-cafetalero.model';
 import { IndicadoresTostador, PerfilTostadorSidebar } from '../models/dashboard-tostador.model';
 import { iniciales, nombreCorto } from '../../shared/utils/formato';
 
+import { TemaService } from './tema.service';
+
 @Injectable({ providedIn: 'root' })
 export class DashboardTostadorService {
-  private readonly temaActual = signal<TemaDashboard>('oscuro');
+  private readonly temas = inject(TemaService);
 
   readonly tostador = TOSTADOR_ACTUAL;
   readonly perfilSidebar: PerfilTostadorSidebar = {
@@ -17,9 +18,9 @@ export class DashboardTostadorService {
     rol: 'Tostador',
   };
   readonly indicadores: IndicadoresTostador = INDICADORES_TOSTADOR;
-  readonly tema = this.temaActual.asReadonly();
+  readonly tema = this.temas.tema;
 
   alternarTema(): void {
-    this.temaActual.update((actual) => (actual === 'oscuro' ? 'claro' : 'oscuro'));
+    this.temas.alternarTema();
   }
 }

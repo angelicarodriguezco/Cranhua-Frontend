@@ -1,0 +1,467 @@
+:host {
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --radio-vidrio: 1.15rem;
+  --blur-vidrio: 13px;
+  display: grid;
+  grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
+  height: 100dvh;
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+
+.contenido {
+  min-height: 0;
+  padding: 2rem 4% 2rem;
+  overflow-y: auto;
+  color: var(--texto);
+  color-scheme: var(--esquema);
+  background-color: #061f27;
+  background-image: var(--fondo-velo), var(--fondo-imagen);
+  background-size: cover;
+  background-position: center;
+}
+
+.encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  color: var(--encabezado-texto);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.encabezado h1 {
+  margin: 0 0 0.25rem;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.encabezado p {
+  margin: 0;
+  font-size: 0.95rem;
+  opacity: 0.92;
+}
+
+.vidrio {
+  border: 1px solid var(--vidrio-borde);
+  border-radius: var(--radio-vidrio);
+  background: var(--vidrio-fondo);
+  box-shadow: var(--vidrio-sombra);
+  backdrop-filter: blur(var(--blur-vidrio));
+  -webkit-backdrop-filter: blur(var(--blur-vidrio));
+}
+
+.tarjeta {
+  padding: 0 1.75rem 1.5rem;
+  overflow: hidden;
+}
+
+.portada {
+  position: relative;
+  height: clamp(7.5rem, 16vw, 10rem);
+  margin: 0 -1.75rem;
+  overflow: hidden;
+  background: var(--portada-placeholder);
+}
+
+.portada::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--portada-velo);
+  pointer-events: none;
+}
+
+.portada__imagen {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.portada__cambiar {
+  position: absolute;
+  z-index: 1;
+  top: 0.85rem;
+  right: 0.85rem;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  background: rgba(8, 20, 28, 0.55);
+  color: #fff;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.portada__cambiar:hover {
+  background: rgba(8, 20, 28, 0.72);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.perfil {
+  position: relative;
+  z-index: 1;
+  height: 0;
+}
+
+.avatar {
+  position: absolute;
+  top: -3rem;
+  left: 0.15rem;
+  display: grid;
+  place-items: center;
+  width: 6rem;
+  height: 6rem;
+  border: 3px solid var(--avatar-anillo);
+  border-radius: 50%;
+  background: var(--avatar-fondo);
+  color: var(--avatar-texto);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.32);
+}
+
+.avatar__imagen {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar__iniciales {
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.avatar__camara {
+  position: absolute;
+  right: -0.1rem;
+  bottom: -0.05rem;
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border: 2px solid var(--avatar-anillo);
+  border-radius: 50%;
+  background: var(--camara-fondo);
+  color: #fff;
+  cursor: pointer;
+}
+
+.avatar__camara svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  fill: currentColor;
+}
+
+.identidad {
+  margin-top: 3.75rem;
+}
+
+.identidad__nombre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.identidad__nombre h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  background: var(--badge-fondo);
+  color: var(--acento);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--chip-borde);
+  border-radius: 999px;
+  background: var(--chip-fondo);
+  color: var(--texto);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--seleccion-borde);
+  background: var(--chip-hover);
+}
+
+.icono-red {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chip .icono-red {
+  color: var(--acento);
+}
+
+.icono-red .relleno {
+  fill: currentColor;
+  stroke: none;
+}
+
+.indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.indicadores article {
+  display: flex;
+  flex: 0 1 calc((100% - 1.5rem) / 3);
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.9rem 1.1rem;
+}
+
+.indicadores strong {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.indicadores span {
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.seccion {
+  margin: 0;
+  padding: 1.15rem 1.5rem 1.25rem;
+}
+
+.indicadores + .seccion,
+.seccion + .seccion {
+  margin-top: 1rem;
+}
+
+.seccion__titulo {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.seccion__texto {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.datos {
+  margin: 0.5rem 0 0;
+}
+
+.datos div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--separador);
+}
+
+.datos div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.datos dt {
+  color: var(--texto-suave);
+  font-size: 0.875rem;
+}
+
+.datos dd {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+app-zona-peligro {
+  --text-muted: var(--texto-suave);
+  --card-bg: var(--vidrio-fondo);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.acciones .btn--texto {
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 2rem;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.btn--filled {
+  background: var(--btn-dorado);
+  color: var(--btn-dorado-texto);
+  font-weight: 600;
+  text-shadow: none;
+  box-shadow: 0 10px 24px rgba(165, 112, 8, 0.28);
+}
+
+.btn--filled:hover {
+  background: var(--btn-dorado-hover);
+}
+
+.btn--texto,
+.btn--volver {
+  padding-inline: 1rem;
+  background: none;
+  color: var(--acento);
+}
+
+.btn--volver {
+  color: #fff;
+  font-weight: 500;
+}
+
+.btn--texto:hover,
+.btn--volver:hover {
+  text-decoration: underline;
+}
+
+.btn--borde {
+  padding: 0.6rem 1.25rem;
+  border: 1px solid var(--seleccion-borde);
+  background: transparent;
+  color: var(--acento);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.btn--borde:hover {
+  background: var(--chip-hover);
+}
+
+:host
+  :is(
+    .btn,
+    .chip,
+    .portada__cambiar,
+    .avatar__camara,
+    .campo__control,
+    .red__quitar,
+    .agregar-red,
+    .switch
+  ):focus-visible {
+  outline: 2px solid var(--seleccion-borde);
+  outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  :host {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .contenido {
+    overflow: visible;
+    padding: 1.25rem 1rem 2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .indicadores {
+    flex-direction: column;
+  }
+
+  .indicadores article {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .tarjeta {
+    padding: 0 1rem 1.25rem;
+  }
+
+  .portada {
+    margin: 0 -1rem;
+  }
+
+  .avatar {
+    top: -2.5rem;
+    width: 5rem;
+    height: 5rem;
+  }
+
+  .identidad {
+    margin-top: 3.25rem;
+  }
+
+  .seccion {
+    padding: 1rem;
+  }
+
+  .acciones {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

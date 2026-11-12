@@ -1,0 +1,180 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background:
+    var(--fondo-velo),
+    var(--fondo-imagen) center / cover;
+  color: var(--texto);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.pagina {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 90rem;
+  margin: 0 auto 1.5rem;
+}
+
+.marca {
+  display: block;
+  width: 10rem;
+  height: auto;
+}
+
+.toggle-tema {
+  display: inline-flex;
+  gap: 0.2rem;
+  padding: 0.28rem;
+  border-radius: 999px;
+  background: var(--toggle-fondo);
+}
+
+.toggle-tema__opcion {
+  height: 2rem;
+  padding: 0 0.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--toggle-texto);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.toggle-tema__opcion--activa {
+  background: #c9a227;
+  color: #142320;
+}
+
+.tarjeta {
+  width: 100%;
+  max-width: 42rem;
+  margin: auto;
+  padding: 2rem 2rem 1.5rem;
+  border: 1px solid var(--vidrio-borde);
+  border-radius: 1.4rem;
+  background: var(--vidrio-fondo);
+  box-shadow: var(--vidrio-sombra);
+  backdrop-filter: blur(13px);
+}
+
+.pill-rol {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--pill-fondo);
+  color: var(--pill-texto);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+h1 {
+  margin: 0.5rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.ubicacion {
+  margin: 0.15rem 0 0;
+  color: var(--texto-suave);
+  font-size: 0.9rem;
+}
+
+.seccion {
+  margin-top: 1.5rem;
+}
+
+h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fila {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--separador);
+}
+
+.fila:last-child {
+  border-bottom: 0;
+}
+
+.fila__info {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.fila__nombre {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.fila__detalle {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+}
+
+.fila__precio {
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  text-align: right;
+}
+
+.ver-origen,
+.volver {
+  justify-self: start;
+  color: var(--enlace);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ver-origen:hover,
+.volver:hover {
+  text-decoration: underline;
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--separador);
+}
+
+.volver {
+  font-size: 0.875rem;
+}
+
+:is(a, button):focus-visible {
+  outline: 2px solid #d9a441;
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .tarjeta {
+    padding: 1.5rem 1.25rem 1rem;
+  }
+}

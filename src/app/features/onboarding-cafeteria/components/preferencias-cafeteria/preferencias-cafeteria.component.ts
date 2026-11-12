@@ -29,6 +29,8 @@ export type FormularioPreferencias = ReturnType<typeof crearFormularioPreferenci
 export class PreferenciasCafeteriaComponent {
   readonly formulario = input.required<FormularioPreferencias>();
   readonly editando = input(false);
+  readonly guardando = input(false);
+  readonly erroresServidor = input<string[]>([]);
   readonly guardar = output();
   readonly atras = output();
 

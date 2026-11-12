@@ -1,6 +1,6 @@
 /* Tema claro (prototipo de día). El oscuro solo cambia estos valores. */
 :host {
-  --fondo: url('/images/dashboard-cafetalero-bg-claro.jpg') center / cover #6f8fa8;
+  --fondo: url('/images/bg-claro.jpg') center / cover #6f8fa8;
   --vidrio-fondo: rgba(255, 255, 255, 0.55);
   --vidrio-borde: rgba(255, 255, 255, 0.7);
   --vidrio-texto: #1c2a26;
@@ -19,7 +19,7 @@
 }
 
 :host([data-theme='oscuro']) {
-  --fondo: url('/images/dashboard-cafetalero-bg-oscuro.jpg') center / cover #1d1b45;
+  --fondo: url('/images/bg-oscuro.jpg') center / cover #1d1b45;
   --vidrio-fondo: rgba(10, 32, 42, 0.72);
   --vidrio-borde: rgba(255, 255, 255, 0.12);
   --vidrio-texto: #ffffff;

@@ -6,7 +6,7 @@ import { EstadoSolicitud } from '../../core/models/solicitud.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { SolicitudesService, calcularIndicadores } from '../../core/services/solicitudes.service';
 import { formatearFecha, formatearKg } from '../../shared/utils/formato';
-import { MenuLateralTostadorComponent } from '../dashboard-tostador/components/menu-lateral-tostador/menu-lateral-tostador.component';
+import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 const CLASE_ESTADO: Record<EstadoSolicitud, string> = {
   Pendiente: 'pill pill--pendiente',
@@ -16,7 +16,7 @@ const CLASE_ESTADO: Record<EstadoSolicitud, string> = {
 
 @Component({
   selector: 'app-mis-solicitudes',
-  imports: [MenuLateralTostadorComponent, RouterLink],
+  imports: [MenuLateralComponent, RouterLink],
   templateUrl: './mis-solicitudes.component.html',
   styleUrl: './mis-solicitudes.component.css',
   host: { '[attr.data-theme]': 'tema()' },
@@ -24,7 +24,6 @@ const CLASE_ESTADO: Record<EstadoSolicitud, string> = {
 export class MisSolicitudesComponent {
   private readonly dashboard = inject(DashboardTostadorService);
 
-  protected readonly perfilSidebar = this.dashboard.perfilSidebar;
   protected readonly tema = this.dashboard.tema;
 
   protected readonly solicitudes = toSignal(inject(SolicitudesService).listar(), {
@@ -36,8 +35,4 @@ export class MisSolicitudesComponent {
   protected readonly claseEstado = CLASE_ESTADO;
   protected readonly fecha = formatearFecha;
   protected readonly kg = formatearKg;
-
-  protected alternarTema(): void {
-    this.dashboard.alternarTema();
-  }
 }

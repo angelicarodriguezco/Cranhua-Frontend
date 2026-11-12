@@ -1,11 +1,15 @@
 import { Routes } from '@angular/router';
 
+import { conCafeteriaGuard, sinCafeteriaGuard } from './core/guards/cafeteria.guard';
 import { DashboardCafeteriaComponent } from './features/dashboard-cafeteria/dashboard-cafeteria.component';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
+import { DashboardConsumidorComponent } from './features/dashboard-consumidor/dashboard-consumidor.component';
 import { DashboardTostadorComponent } from './features/dashboard-tostador/dashboard-tostador.component';
 import { DetalleCosechaComponent } from './features/detalle-cosecha/detalle-cosecha.component';
 import { DetalleFincaComponent } from './features/detalle-finca/detalle-finca.component';
+import { DetalleTostadorComponent } from './features/detalle-tostador/detalle-tostador.component';
 import { ExplorarCosechasComponent } from './features/explorar-cosechas/explorar-cosechas.component';
+import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
 import { FormularioTuesteComponent } from './features/formulario-tueste/formulario-tueste.component';
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
@@ -13,25 +17,38 @@ import { InicioComponent } from './features/inicio/inicio.component';
 import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
 import { MiCafeteriaComponent } from './features/mi-cafeteria/mi-cafeteria.component';
 import { MiNegocioComponent } from './features/mi-negocio/mi-negocio.component';
-import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
-import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
-import { RegistroComponent } from './features/registro/registro.component';
-import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
-import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
-import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
-import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
-import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
-import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
 import { MisPedidosComponent } from './features/mis-pedidos/mis-pedidos.component';
 import { MisSolicitudesComponent } from './features/mis-solicitudes/mis-solicitudes.component';
-import { ExplorarTostadoresComponent } from './features/explorar-tostadores/explorar-tostadores.component';
+import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.component';
+import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
+import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
+import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
+import { PerfilCafeteriaComponent } from './features/perfil-cafeteria/perfil-cafeteria.component';
+import { PerfilFincaPublicoComponent } from './features/perfil-finca-publico/perfil-finca-publico.component';
+import { PerfilTostadorComponent } from './features/perfil-tostador/perfil-tostador.component';
+import { PerfilUsuarioComponent } from './features/perfil-usuario/perfil-usuario.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
+import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
+import { RegistrarCafeteriaComponent } from './features/registrar-cafeteria/registrar-cafeteria.component';
+import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
+import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
+import { RegistroComponent } from './features/registro/registro.component';
+import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
+import { MenuPublicoComponent } from './features/menu-publico/menu-publico.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
   { path: 'registro', component: RegistroComponent },
-  { path: 'explorar', component: PaginaMockComponent, data: { title: 'Explorar' } },
+  { path: 'explorar', component: DashboardConsumidorComponent },
+  {
+    path: 'explorar/finca/:id',
+    component: PerfilFincaPublicoComponent,
+    data: { title: 'Perfil público de finca' },
+  },
+  { path: 'explorar/tostador/:id', component: PerfilTostadorComponent },
+  { path: 'explorar/cafeteria/:id', component: PerfilCafeteriaComponent },
+  { path: 'explorar/cafeteria/:id/menu', component: MenuPublicoComponent },
   {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,
@@ -46,7 +63,7 @@ export const routes: Routes = [
   { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
   { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
-  { path: 'perfil', component: PaginaMockComponent, data: { title: 'Perfil y ajustes' } },
+  { path: 'perfil', component: PerfilUsuarioComponent },
   { path: 'cafetalero/dashboard', component: DashboardCafetaleroComponent },
   { path: 'cafetalero/fincas', component: MisFincasComponent },
   { path: 'cafetalero/fincas/registrar', component: RegistrarFincaComponent },
@@ -75,19 +92,26 @@ export const routes: Routes = [
   { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
   { path: 'tostador/negocio', component: MiNegocioComponent },
 
-  { path: 'cafeteria/dashboard', component: DashboardCafeteriaComponent },
-  { path: 'cafeteria/tostadores', component: ExplorarTostadoresComponent },
   {
-    path: 'cafeteria/tostadores/:id',
-    component: PaginaMockComponent,
-    data: { title: 'Detalle del tostador' },
+    path: 'cafeteria/registrar',
+    component: RegistrarCafeteriaComponent,
+    canActivate: [sinCafeteriaGuard],
   },
-  { path: 'cafeteria/pedidos', component: MisPedidosComponent },
-  { path: 'cafeteria/mi-cafeteria', component: MiCafeteriaComponent },
   {
-    path: 'cafeteria/menu',
-    component: PaginaMockComponent,
-    data: { title: 'Publicar en el menú' },
+    path: 'cafeteria',
+    canActivateChild: [conCafeteriaGuard],
+    children: [
+      { path: 'dashboard', component: DashboardCafeteriaComponent },
+      { path: 'tostadores', component: ExplorarTostadoresComponent },
+      { path: 'tostadores/:id', component: DetalleTostadorComponent },
+      { path: 'pedidos', component: MisPedidosComponent },
+      { path: 'mi-cafeteria', component: MiCafeteriaComponent },
+      {
+        path: 'menu',
+        component: PaginaMockComponent,
+        data: { title: 'Publicar en el menú' },
+      },
+      { path: 'menu', component: PublicarMenuComponent },
+    ],
   },
-  { path: 'cafeteria/menu', component: PublicarMenuComponent },
 ];
