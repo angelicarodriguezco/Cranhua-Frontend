@@ -1,11 +1,46 @@
 .portada {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 4rem 1.5rem 5rem;
+  min-height: 100dvh;
+  padding: 4.5rem 1.5rem 5rem;
+  overflow: hidden;
+  color: var(--brand-bg);
   text-align: center;
+}
+
+.portada__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.portada__foto {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  animation: portada-zoom 18s ease-out both;
+}
+
+.portada__velo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(28, 52, 38, 0.55) 0%, rgba(28, 52, 38, 0.78) 55%, rgba(28, 52, 38, 0.92) 100%),
+    linear-gradient(90deg, rgba(28, 52, 38, 0.35) 0%, transparent 40%, transparent 60%, rgba(28, 52, 38, 0.35) 100%);
+}
+
+.portada__contenido {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 48rem;
 }
 
 .portada__marca {
@@ -15,40 +50,41 @@
 
 .portada__logo {
   display: block;
-  width: min(72vw, 28rem);
+  width: min(84vw, 30rem);
   height: auto;
   mix-blend-mode: screen;
 }
 
 .portada__lema {
-  margin: 1.25rem 0 0;
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-headline-medium-size);
-  font-weight: var(--md-sys-typescale-headline-medium-weight);
-  line-height: var(--md-sys-typescale-headline-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-headline-medium-tracking);
-  color: var(--color-gold-light);
+  margin: 1.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 3.6vw, 2.25rem);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: 0.04em;
+  color: #f0d9a8;
   animation: portada-entrada 0.9s ease-out 0.12s both;
 }
 
 .portada__desc {
   margin: 1.5rem 0 0;
-  max-width: 34rem;
-  font-size: var(--md-sys-typescale-body-large-size);
-  font-weight: var(--md-sys-typescale-body-large-weight);
-  line-height: var(--md-sys-typescale-body-large-line-height);
-  letter-spacing: var(--md-sys-typescale-body-large-tracking);
-  color: rgba(255, 255, 255, 0.92);
+  max-width: 40rem;
+  font-size: clamp(1.125rem, 2vw, 1.3rem);
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.01em;
+  color: rgba(246, 240, 231, 0.92);
   animation: portada-entrada 0.9s ease-out 0.22s both;
 }
 
 .portada__origen {
-  margin: 1rem 0 0;
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: var(--md-sys-typescale-label-large-weight);
-  line-height: var(--md-sys-typescale-label-large-line-height);
-  letter-spacing: var(--md-sys-typescale-label-large-tracking);
-  color: var(--color-gold);
+  margin: 1.15rem 0 0;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  font-weight: 500;
+  line-height: 1.45;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(240, 217, 168, 0.85);
   animation: portada-entrada 0.9s ease-out 0.3s both;
 }
 
@@ -56,8 +92,8 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.85rem;
-  margin-top: 2.75rem;
+  gap: 0.95rem;
+  margin-top: 2.85rem;
   animation: portada-entrada 0.9s ease-out 0.4s both;
 }
 
@@ -65,14 +101,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 10.5rem;
-  padding: 0.85rem 1.6rem;
-  border-radius: 999px;
+  min-width: 11.5rem;
+  padding: 0.95rem 1.7rem;
+  border-radius: 0.4rem;
   font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: var(--md-sys-typescale-label-large-weight);
-  line-height: var(--md-sys-typescale-label-large-line-height);
-  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
   text-decoration: none;
   transition:
     background-color 0.2s ease,
@@ -85,35 +121,34 @@
   transform: translateY(-2px);
 }
 
-.btn--outline {
-  border: 1.5px solid var(--color-gold);
-  color: var(--color-text);
+.btn--ghost {
+  border: 1.5px solid rgba(246, 240, 231, 0.65);
+  color: var(--brand-bg);
   background: transparent;
 }
 
-.btn--outline:hover {
-  background: rgba(201, 162, 39, 0.15);
-  border-color: var(--color-gold-light);
+.btn--ghost:hover {
+  background: rgba(246, 240, 231, 0.12);
+  border-color: var(--brand-bg);
 }
 
 .btn--filled {
-  border: 1.5px solid var(--color-gold);
-  background: var(--color-gold);
-  color: #1a1408;
+  border: 1.5px solid var(--brand-button);
+  background: var(--brand-button);
+  color: #fff8ee;
 }
 
 .btn--filled:hover {
-  background: var(--color-gold-light);
-  border-color: var(--color-gold-light);
+  background: #b88410;
+  border-color: #b88410;
 }
 
 .portada__explorar {
-  margin-top: 1.5rem;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  font-weight: var(--md-sys-typescale-body-medium-weight);
-  line-height: var(--md-sys-typescale-body-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
-  color: rgba(255, 255, 255, 0.75);
+  margin-top: 1.65rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: rgba(246, 240, 231, 0.78);
   text-decoration: underline;
   text-underline-offset: 0.3em;
   animation: portada-entrada 0.9s ease-out 0.5s both;
@@ -121,17 +156,26 @@
 }
 
 .portada__explorar:hover {
-  color: var(--color-gold-light);
+  color: #f0d9a8;
 }
 
 @keyframes portada-entrada {
   from {
     opacity: 0;
-    transform: translateY(1.25rem);
+    transform: translateY(1.15rem);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes portada-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
   }
 }
 
@@ -146,5 +190,17 @@
   .btn {
     min-width: 0;
     width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portada__foto,
+  .portada__marca,
+  .portada__lema,
+  .portada__desc,
+  .portada__origen,
+  .portada__acciones,
+  .portada__explorar {
+    animation: none;
   }
 }

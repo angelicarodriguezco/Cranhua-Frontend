@@ -5,19 +5,31 @@
 @import './app/features/menu-publico/menu-publico.tema.css';
 
 :root {
-  --color-gold: #c9a227;
-  --color-gold-light: #d4af37;
+  /* Paleta Crán̈hua (landing y páginas migradas) */
+  --brand-bg: #f6f0e7;
+  --brand-surface: #ffffff;
+  --brand-bg-secondary: #e8dccb;
+  --brand-text: #292b27;
+  --brand-nav: #1c3426;
+  --brand-accent: #912316;
+  --brand-heading: #6d320a;
+  --brand-button: #a57008;
+  --font-display: 'Aboreto', 'Figtree', serif;
+
+  /* Legacy (páginas aún no migradas) */
+  --color-gold: #a57008;
+  --color-gold-light: #c48a1a;
   --color-text: #ffffff;
-  --color-overlay: rgba(8, 50, 62, 0.6);
+  --color-overlay: rgba(28, 52, 38, 0.72);
   --color-text-muted: rgba(255, 255, 255, 0.7);
   --color-surface: rgba(255, 255, 255, 0.05);
   --color-border: rgba(255, 255, 255, 0.1);
-  --color-control: #0e3b47;
+  --color-control: #1c3426;
   --color-field: #a9b3ae;
   --color-field-text: #142320;
   --color-error: #f2a7b5;
   --color-error-bg: #4b0311;
-  --font-family: 'Roboto', system-ui, sans-serif;
+  --font-family: 'Figtree', 'Segoe UI', sans-serif;
 
   --md-sys-typescale-headline-large-size: 2rem;
   --md-sys-typescale-headline-large-line-height: 2.5rem;
@@ -92,8 +104,8 @@ body {
   font-weight: var(--md-sys-typescale-body-large-weight);
   line-height: var(--md-sys-typescale-body-large-line-height);
   letter-spacing: var(--md-sys-typescale-body-large-tracking);
-  color: var(--color-text);
-  background-color: #08323e;
+  color: var(--brand-text);
+  background-color: var(--brand-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
