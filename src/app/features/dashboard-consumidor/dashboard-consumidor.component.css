@@ -48,11 +48,14 @@
   flex: 1 1 100%;
   min-width: 0;
   height: 100%;
-  transition: flex-basis 0.35s ease;
+  transition:
+    flex-basis 0.35s ease,
+    min-width 0.35s ease;
 }
 
 .dashboard-consumidor--panel .mapa-zona {
-  flex: 1 1 50%;
+  flex: 1 1 58%;
+  min-width: min(100%, 22rem);
 }
 
 .mapa,
@@ -80,11 +83,11 @@
 }
 
 .dashboard-consumidor--panel .barra-busqueda {
-  width: min(34rem, calc(100% - 2.3rem));
+  width: min(32rem, calc(100% - 2.3rem));
 }
 
 .dashboard-consumidor--panel .barra-busqueda__error {
-  width: min(34rem, calc(100% - 2.3rem));
+  width: min(32rem, calc(100% - 2.3rem));
 }
 
 .overlays > * {
@@ -367,9 +370,11 @@
   position: relative;
   z-index: 4;
   display: flex;
-  flex: 1 1 50%;
+  flex: 0 1 clamp(22rem, 42vw, 30rem);
   flex-direction: column;
-  min-width: 0;
+  width: 100%;
+  min-width: min(100%, 20rem);
+  max-width: 32rem;
   height: 100%;
   padding: 0;
   overflow: auto;
@@ -385,7 +390,7 @@
 .panel-negocio__portada {
   position: relative;
   flex: 0 0 auto;
-  height: 10.5rem;
+  height: clamp(7.5rem, 14vh, 10.5rem);
   background-color: var(--portada-color, var(--brand-nav));
   background-position: center;
   background-size: cover;
@@ -805,6 +810,140 @@
   }
 }
 
+/* Laptops / pantallas medianas */
+@media (max-width: 1280px) {
+  .dashboard-consumidor--panel .mapa-zona {
+    flex: 1 1 55%;
+  }
+
+  .panel-negocio {
+    flex-basis: clamp(20rem, 40vw, 26rem);
+    max-width: 26rem;
+  }
+
+  .panel-negocio__cuerpo {
+    padding: 1.15rem 1.35rem 1.35rem;
+  }
+
+  .panel-negocio__titulo {
+    font-size: clamp(1.3rem, 1.8vw, 1.55rem);
+  }
+
+  .panel-negocio__desc {
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .panel-negocio__datos {
+    gap: 0.7rem 1rem;
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda {
+    width: min(28rem, calc(100% - 2rem));
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda__error {
+    width: min(28rem, calc(100% - 2rem));
+  }
+}
+
+/* Laptops compactas / tablets landscape */
+@media (max-width: 1024px) {
+  .dashboard-consumidor--panel .mapa-zona {
+    flex: 1 1 52%;
+  }
+
+  .panel-negocio {
+    flex: 0 1 clamp(18.5rem, 44vw, 24rem);
+    min-width: min(100%, 18rem);
+    max-width: 24rem;
+  }
+
+  .panel-negocio__portada {
+    height: clamp(6.5rem, 12vh, 8.5rem);
+  }
+
+  .panel-negocio__cuerpo {
+    padding: 1rem 1.15rem 1.2rem;
+    gap: 0.2rem;
+  }
+
+  .panel-negocio__datos {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    margin-top: 1.1rem;
+    padding-top: 0.9rem;
+  }
+
+  .panel-negocio__relacionados {
+    margin-top: 1.1rem;
+  }
+
+  .panel-negocio__relacionados ul {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda {
+    left: 50%;
+    width: min(24rem, calc(100% - 1.8rem));
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda__marca {
+    display: none;
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda__error {
+    left: 50%;
+    width: min(24rem, calc(100% - 1.8rem));
+  }
+
+  .dashboard-consumidor--panel .leyenda {
+    left: 0.85rem;
+    right: auto;
+    max-width: calc(100% - 6rem);
+  }
+}
+
+/* Tablets portrait / laptops muy angostas: apilar antes del móvil */
+@media (max-width: 900px) {
+  .dashboard-consumidor {
+    flex-direction: column;
+  }
+
+  .dashboard-consumidor--panel .mapa-zona {
+    flex: 1 1 44%;
+    min-height: 12rem;
+    min-width: 0;
+  }
+
+  .panel-negocio {
+    flex: 1 1 56%;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    border-left: 0;
+    border-top: 1px solid rgba(41, 43, 39, 0.12);
+    animation-name: panel-entrada-movil;
+  }
+
+  :host([data-theme='oscuro']) .panel-negocio {
+    border-top-color: rgba(246, 240, 231, 0.12);
+  }
+
+  .dashboard-consumidor--panel .leyenda,
+  .dashboard-consumidor--panel .toggle-tema {
+    display: none;
+  }
+
+  .dashboard-consumidor--panel .barra-busqueda,
+  .dashboard-consumidor--panel .barra-busqueda__error {
+    left: 0.85rem;
+    right: 0.85rem;
+    width: auto;
+    transform: none;
+  }
+}
+
 @media (max-width: 720px) {
   .volver-inicio {
     top: 0.85rem;
@@ -847,43 +986,22 @@
     bottom: 0.85rem;
   }
 
-  .dashboard-consumidor {
-    flex-direction: column;
-  }
-
   .dashboard-consumidor--panel .mapa-zona {
-    flex: 1 1 42%;
-    min-height: 0;
-  }
-
-  .dashboard-consumidor--panel .leyenda,
-  .dashboard-consumidor--panel .toggle-tema {
-    display: none;
+    flex: 1 1 40%;
+    min-height: 10rem;
   }
 
   .panel-negocio {
-    flex: 1 1 58%;
+    flex: 1 1 60%;
     min-height: 0;
-    border-left: 0;
-    border-top: 1px solid rgba(41, 43, 39, 0.12);
-    animation-name: panel-entrada-movil;
   }
 
   .panel-negocio__cuerpo {
-    padding: 1.1rem 1.15rem 1.25rem;
+    padding: 1rem 1.05rem 1.15rem;
   }
 
-  .panel-negocio__datos {
-    grid-template-columns: 1fr;
-    gap: 0.7rem;
-  }
-
-  .panel-negocio__relacionados ul {
-    grid-template-columns: 1fr;
-  }
-
-  :host([data-theme='oscuro']) .panel-negocio {
-    border-top-color: rgba(246, 240, 231, 0.12);
+  .panel-negocio__portada {
+    height: 6.5rem;
   }
 
   .panel-menu {
