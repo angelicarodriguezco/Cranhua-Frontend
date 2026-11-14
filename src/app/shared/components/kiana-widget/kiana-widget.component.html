@@ -1,20 +1,32 @@
 @if (!abierto()) {
   <div class="kiana-fab">
-    <button
-      type="button"
-      class="kiana-fab__burbuja"
-      (click)="abrir()"
-      [attr.aria-label]="textoPrompter"
-    >
-      {{ textoPrompter }}
-    </button>
+    @if (prompterVisible()) {
+      <div class="kiana-fab__prompter">
+        <button
+          type="button"
+          class="kiana-fab__burbuja"
+          (click)="abrir()"
+          [attr.aria-label]="textoPrompter"
+        >
+          {{ textoPrompter }}
+        </button>
+        <button
+          type="button"
+          class="kiana-fab__cerrar-prompter"
+          (click)="ocultarPrompter($event)"
+          aria-label="Cerrar mensaje de Kiana"
+        >
+          ×
+        </button>
+      </div>
+    }
     <button
       type="button"
       class="kiana-fab__avatar"
       (click)="abrir()"
       aria-label="Abrir chat con Kiana"
     >
-      <img [src]="avatarIdle" alt="" width="80" height="80" />
+      <img [src]="avatarIdle" alt="" width="64" height="64" />
     </button>
   </div>
 } @else {
@@ -52,8 +64,8 @@
               class="kiana-msg__avatar"
               [src]="avatarMensaje(msg)"
               alt=""
-              width="64"
-              height="64"
+              width="52"
+              height="52"
             />
             <p class="kiana-msg__burbuja">{{ msg.texto }}</p>
           </div>
@@ -62,7 +74,7 @@
 
       @if (pensando()) {
         <div class="kiana-msg kiana-msg--kiana kiana-msg--pensando">
-          <img class="kiana-msg__avatar" [src]="avatarPensando" alt="" width="64" height="64" />
+          <img class="kiana-msg__avatar" [src]="avatarPensando" alt="" width="52" height="52" />
           <p class="kiana-msg__burbuja">{{ textoPensando }}</p>
         </div>
       }

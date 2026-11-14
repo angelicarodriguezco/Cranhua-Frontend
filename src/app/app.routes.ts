@@ -24,9 +24,6 @@ import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.compo
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
-import { PerfilCafeteriaComponent } from './features/perfil-cafeteria/perfil-cafeteria.component';
-import { PerfilFincaPublicoComponent } from './features/perfil-finca-publico/perfil-finca-publico.component';
-import { PerfilTostadorComponent } from './features/perfil-tostador/perfil-tostador.component';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/perfil-usuario.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
@@ -35,7 +32,6 @@ import { RegistrarCosechaComponent } from './features/registrar-cosecha/registra
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { RegistroComponent } from './features/registro/registro.component';
 import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
-import { MenuPublicoComponent } from './features/menu-publico/menu-publico.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -43,12 +39,20 @@ export const routes: Routes = [
   { path: 'explorar', component: DashboardConsumidorComponent },
   {
     path: 'explorar/finca/:id',
-    component: PerfilFincaPublicoComponent,
-    data: { title: 'Perfil público de finca' },
+    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
   },
-  { path: 'explorar/tostador/:id', component: PerfilTostadorComponent },
-  { path: 'explorar/cafeteria/:id', component: PerfilCafeteriaComponent },
-  { path: 'explorar/cafeteria/:id/menu', component: MenuPublicoComponent },
+  {
+    path: 'explorar/tostador/:id',
+    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
+  },
+  {
+    path: 'explorar/cafeteria/:id/menu',
+    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}&menu=1`,
+  },
+  {
+    path: 'explorar/cafeteria/:id',
+    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
+  },
   {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,

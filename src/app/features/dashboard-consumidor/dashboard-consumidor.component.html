@@ -1,92 +1,225 @@
-<div class="dashboard-consumidor">
-  <div class="mapa" aria-label="Mapa de fincas, tostadores y cafeterías">
-    @switch (apiCargada()) {
-      @case (true) {
-        <google-map
-          width="100%"
-          height="100%"
-          [center]="centro()"
-          [zoom]="zoom()"
-          [options]="opciones()"
-        >
-          @for (punto of puntos; track punto.id) {
-            <map-advanced-marker
-              [position]="punto.coordenada"
-              [content]="contenidoPin(punto)"
-              [title]="punto.nombre"
-              (mapClick)="abrirPerfil(punto)"
-            />
-          }
-        </google-map>
+<div class="dashboard-consumidor" [class.dashboard-consumidor--panel]="panelAbierto()">
+  <div class="mapa-zona">
+    <div class="mapa" aria-label="Mapa de fincas, tostadores y cafeterías">
+      @switch (apiCargada()) {
+        @case (true) {
+          <google-map
+            width="100%"
+            height="100%"
+            [center]="centro()"
+            [zoom]="zoom()"
+            [options]="opciones()"
+          >
+            @for (punto of puntos; track punto.id) {
+              <map-advanced-marker
+                [position]="punto.coordenada"
+                [content]="contenidoPin(punto)"
+                [title]="punto.nombre"
+                (mapClick)="abrirPerfil(punto)"
+              />
+            }
+          </google-map>
+        }
+        @case (false) {
+          <p class="aviso-carga">
+            No se pudo cargar Google Maps. Revisá que <code>GOOGLE_MAPS_API_KEY</code> esté en el
+            <code>.env</code>.
+          </p>
+        }
+        @default {
+          <p class="aviso-carga">Cargando mapa…</p>
+        }
       }
-      @case (false) {
-        <p class="aviso-carga">
-          No se pudo cargar Google Maps. Revisá que <code>GOOGLE_MAPS_API_KEY</code> esté en el
-          <code>.env</code>.
-        </p>
-      }
-      @default {
-        <p class="aviso-carga">Cargando mapa…</p>
-      }
-    }
-  </div>
-
-  <div class="overlays">
-    <a routerLink="/" class="volver-inicio" aria-label="Volver al inicio">
-      <span class="volver-inicio__flecha" aria-hidden="true">←</span>
-      Volver al inicio
-    </a>
-
-    <form class="barra-busqueda" (submit)="$event.preventDefault(); buscar()" autocomplete="off">
-      <img class="barra-busqueda__marca" [src]="logoSrc()" width="110" height="28" alt="Cránhua" />
-      <input
-        class="barra-busqueda__input"
-        type="search"
-        [formControl]="codigo"
-        placeholder="Ingresá tu código de trazabilidad — Ej. CRH-2026-0103"
-        aria-label="Código de trazabilidad"
-        [attr.aria-invalid]="errorBusqueda() ? true : null"
-        [attr.aria-describedby]="errorBusqueda() ? 'error-codigo' : null"
-      />
-      <button class="barra-busqueda__boton" type="submit">Buscar</button>
-    </form>
-
-    @if (errorBusqueda(); as mensaje) {
-      <p id="error-codigo" class="barra-busqueda__error" role="alert">{{ mensaje }}</p>
-    }
-
-    <div class="toggle-tema" role="group" aria-label="Tema del mapa">
-      <button
-        type="button"
-        class="toggle-tema__opcion"
-        [class.toggle-tema__opcion--activa]="tema() === 'claro'"
-        [attr.aria-pressed]="tema() === 'claro'"
-        (click)="establecerTema('claro')"
-      >
-        Claro
-      </button>
-      <button
-        type="button"
-        class="toggle-tema__opcion"
-        [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
-        [attr.aria-pressed]="tema() === 'oscuro'"
-        (click)="establecerTema('oscuro')"
-      >
-        Oscuro
-      </button>
     </div>
 
-    <ul class="leyenda" aria-label="Leyenda de tipos">
-      @for (item of leyenda; track item.tipo) {
-        <li class="leyenda__item">
-          <span
-            class="leyenda__punto"
-            [style.background]="colorTipo(item.tipo)"
-            aria-hidden="true"
-          ></span>
-          <span>{{ item.etiqueta }}</span>
-        </li>
+    <div class="overlays">
+      <a routerLink="/" class="volver-inicio" aria-label="Volver al inicio">
+        <span class="volver-inicio__flecha" aria-hidden="true">←</span>
+        Volver al inicio
+      </a>
+
+      <form class="barra-busqueda" (submit)="$event.preventDefault(); buscar()" autocomplete="off">
+        <img class="barra-busqueda__marca" [src]="logoSrc()" width="110" height="28" alt="Cránhua" />
+        <input
+          class="barra-busqueda__input"
+          type="search"
+          [formControl]="codigo"
+          placeholder="Ingresá tu código de trazabilidad — Ej. CRH-2026-0103"
+          aria-label="Código de trazabilidad"
+          [attr.aria-invalid]="errorBusqueda() ? true : null"
+          [attr.aria-describedby]="errorBusqueda() ? 'error-codigo' : null"
+        />
+        <button class="barra-busqueda__boton" type="submit">Buscar</button>
+      </form>
+
+      @if (errorBusqueda(); as mensaje) {
+        <p id="error-codigo" class="barra-busqueda__error" role="alert">{{ mensaje }}</p>
       }
-    </ul>
+
+      <div class="toggle-tema" role="group" aria-label="Tema del mapa">
+        <button
+          type="button"
+          class="toggle-tema__opcion"
+          [class.toggle-tema__opcion--activa]="tema() === 'claro'"
+          [attr.aria-pressed]="tema() === 'claro'"
+          (click)="establecerTema('claro')"
+        >
+          Claro
+        </button>
+        <button
+          type="button"
+          class="toggle-tema__opcion"
+          [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
+          [attr.aria-pressed]="tema() === 'oscuro'"
+          (click)="establecerTema('oscuro')"
+        >
+          Oscuro
+        </button>
+      </div>
+
+      <ul class="leyenda" aria-label="Leyenda de tipos">
+        @for (item of leyenda; track item.tipo) {
+          <li class="leyenda__item">
+            <span
+              class="leyenda__punto"
+              [style.background]="colorTipo(item.tipo)"
+              aria-hidden="true"
+            ></span>
+            <span>{{ item.etiqueta }}</span>
+          </li>
+        }
+      </ul>
+    </div>
   </div>
+
+  @if (resumenPanel(); as panel) {
+    <aside
+      class="panel-negocio"
+      [attr.data-tipo]="panel.punto.tipo"
+      aria-labelledby="panel-negocio-titulo"
+    >
+      <div
+        class="panel-negocio__portada"
+        [class.panel-negocio__portada--placeholder]="!panel.imagenPortada"
+        [style.background-image]="panel.imagenPortada ? 'url(' + panel.imagenPortada + ')' : null"
+        [style.--portada-color]="colorTipo(panel.punto.tipo)"
+        role="img"
+        [attr.aria-label]="'Portada de ' + panel.punto.nombre"
+      >
+        <button
+          type="button"
+          class="panel-negocio__cerrar panel-negocio__cerrar--portada"
+          aria-label="Cerrar panel"
+          (click)="cerrarPanel()"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="panel-negocio__cuerpo">
+      <div class="panel-negocio__cabecera">
+        <span class="panel-negocio__rol" [style.--rol-color]="colorTipo(panel.punto.tipo)">
+          {{ panel.rol }}
+        </span>
+      </div>
+
+      <h2 id="panel-negocio-titulo" class="panel-negocio__titulo">{{ panel.punto.nombre }}</h2>
+      <p class="panel-negocio__ubicacion">{{ panel.punto.ubicacionLabel }}</p>
+      <p class="panel-negocio__desc">{{ panel.descripcion }}</p>
+
+      @if (panel.codigoResaltado) {
+        <p class="panel-negocio__codigo">
+          Código encontrado:
+          <strong>{{ panel.codigoResaltado }}</strong>
+        </p>
+      }
+
+      <dl class="panel-negocio__datos">
+        @for (dato of panel.datos; track dato.etiqueta) {
+          <div class="panel-negocio__dato">
+            <dt>{{ dato.etiqueta }}</dt>
+            <dd>{{ dato.valor }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (panel.enlaces.length) {
+        <section class="panel-negocio__relacionados" [attr.aria-label]="panel.tituloEnlaces">
+          <h3>{{ panel.tituloEnlaces }}</h3>
+          <ul>
+            @for (enlace of panel.enlaces; track enlace.id) {
+              <li>
+                <button
+                  type="button"
+                  class="panel-negocio__chip"
+                  (click)="abrirDesdePanel(enlace.id)"
+                >
+                  <span class="panel-negocio__chip-nombre">{{ enlace.nombre }}</span>
+                  <span class="panel-negocio__chip-detalle">{{ enlace.detalle }}</span>
+                </button>
+              </li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (panel.menu; as menu) {
+        <section class="panel-menu" [class.panel-menu--abierto]="menuAbierto()">
+          <button
+            type="button"
+            class="panel-menu__toggle"
+            [attr.aria-expanded]="menuAbierto()"
+            aria-controls="panel-menu-contenido"
+            (click)="alternarMenu()"
+          >
+            <span>{{ menuAbierto() ? 'Ocultar menú' : 'Ver menú' }}</span>
+            <span class="panel-menu__chevron" aria-hidden="true"></span>
+          </button>
+
+          @if (menuAbierto()) {
+            <div id="panel-menu-contenido" class="panel-menu__contenido">
+              <div class="panel-menu__bloque">
+                <h3>Cafés</h3>
+                <ul class="panel-menu__lista">
+                  @for (cafe of menu.cafes; track cafe.id) {
+                    <li class="panel-menu__item">
+                      <div class="panel-menu__info">
+                        <p class="panel-menu__nombre">{{ cafe.nombre }}</p>
+                        <p class="panel-menu__detalle">
+                          Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
+                        </p>
+                        <button
+                          type="button"
+                          class="panel-menu__origen"
+                          (click)="abrirDesdePanel(cafe.fincaOrigen.id)"
+                        >
+                          Ver origen →
+                        </button>
+                      </div>
+                      <span class="panel-menu__precio">{{ precio(cafe.precio) }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              @if (menu.otrasComidas.length) {
+                <div class="panel-menu__bloque">
+                  <h3>Otras comidas</h3>
+                  <ul class="panel-menu__lista">
+                    @for (comida of menu.otrasComidas; track comida.id) {
+                      <li class="panel-menu__item">
+                        <p class="panel-menu__nombre">{{ comida.nombre }}</p>
+                        <span class="panel-menu__precio">{{ precio(comida.precio) }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      }
+      </div>
+    </aside>
+  }
 </div>

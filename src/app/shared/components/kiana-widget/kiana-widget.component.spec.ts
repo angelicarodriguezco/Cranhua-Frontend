@@ -59,6 +59,25 @@ describe('KianaWidgetComponent', () => {
     );
   });
 
+  it('oculta el prompter al cerrarlo o tras unos segundos', fakeAsync(() => {
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    pagina.querySelector<HTMLButtonElement>('.kiana-fab__cerrar-prompter')!.click();
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+
+    fixture = TestBed.createComponent(KianaWidgetComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    tick(6000);
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+  }));
+
   it('abre el panel con saludo, chips, disclaimer y maxlength 500', () => {
     abrirChat();
 

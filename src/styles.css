@@ -1,3 +1,4 @@
+@import './styles/paleta.css';
 @import './app/features/mi-negocio/mi-negocio.tema.css';
 @import './app/features/mi-cafeteria/mi-cafeteria.tema.css';
 @import './app/features/perfil-tostador/perfil-tostador.tema.css';
@@ -5,15 +6,6 @@
 @import './app/features/menu-publico/menu-publico.tema.css';
 
 :root {
-  /* Paleta Crán̈hua (landing y páginas migradas) */
-  --brand-bg: #f6f0e7;
-  --brand-surface: #ffffff;
-  --brand-bg-secondary: #e8dccb;
-  --brand-text: #292b27;
-  --brand-nav: #1c3426;
-  --brand-accent: #912316;
-  --brand-heading: #6d320a;
-  --brand-button: #a57008;
   --font-display: 'Aboreto', 'Figtree', serif;
 
   /* Legacy (páginas aún no migradas) */

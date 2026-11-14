@@ -12,7 +12,7 @@ import { PerfilFincaPublicoService } from '../../core/services/perfil-finca-publ
 import { formatearKg } from '../../shared/utils/formato';
 
 const ZOOM_MINI = 13;
-const COLOR_PIN_FINCA = '#3f7a4f';
+const COLOR_PIN_FINCA = '#1c3426';
 
 @Component({
   selector: 'app-perfil-finca-publico',
@@ -57,7 +57,7 @@ export class PerfilFincaPublicoComponent {
     clickableIcons: false,
     gestureHandling: 'none',
     keyboardShortcuts: false,
-    backgroundColor: this.tema() === 'oscuro' ? '#0b2b33' : '#d7e8dc',
+    backgroundColor: this.tema() === 'oscuro' ? '#1c3426' : '#e8dccb',
   }));
 
   protected readonly zoomMini = ZOOM_MINI;

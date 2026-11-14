@@ -68,7 +68,7 @@ export class PerfilCafeteriaComponent {
     zoomControl: true,
     clickableIcons: false,
     gestureHandling: 'cooperative',
-    backgroundColor: this.tema() === 'oscuro' ? '#10263b' : '#cfe0c8',
+    backgroundColor: this.tema() === 'oscuro' ? '#1c3426' : '#e8dccb',
   }));
 
   protected readonly zoom = ZOOM_PERFIL;

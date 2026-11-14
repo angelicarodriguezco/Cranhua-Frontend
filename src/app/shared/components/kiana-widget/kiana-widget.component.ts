@@ -30,6 +30,7 @@ const TEXTO_PENSANDO = '... (Pensando)';
 const TEXTO_PROMPTER = '¿Necesitás ayuda? Preguntame lo que sea !';
 const PLACEHOLDER_INPUT = 'Escribí tu mensaje...';
 const DISCLAIMER_KIANA = 'Kiana puede cometer errores. Verificá la información importante.';
+const MS_AUTO_OCULTAR_PROMPTER = 6000;
 
 @Component({
   selector: 'app-kiana-widget',
@@ -46,9 +47,11 @@ export class KianaWidgetComponent {
   private readonly hilo = viewChild<ElementRef<HTMLElement>>('hilo');
   private contadorIds = 0;
   private saludoAgregado = false;
+  private timerPrompter: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly tema = this.temas.tema;
   protected readonly abierto = signal(false);
+  protected readonly prompterVisible = signal(true);
   protected readonly mensaje = signal('');
   protected readonly mensajes = signal<MensajeKiana[]>([]);
   protected readonly pensando = signal(false);
@@ -66,6 +69,20 @@ export class KianaWidgetComponent {
     () => !this.pensando() && this.mensaje().trim().length > 0,
   );
 
+  constructor() {
+    afterNextRender(
+      () => {
+        this.timerPrompter = setTimeout(() => {
+          this.prompterVisible.set(false);
+          this.timerPrompter = null;
+        }, MS_AUTO_OCULTAR_PROMPTER);
+      },
+      { injector: this.injector },
+    );
+
+    this.destroyRef.onDestroy(() => this.limpiarTimerPrompter());
+  }
+
   protected avatarMensaje(mensaje: MensajeKiana): string {
     if (mensaje.rol === 'error') {
       return AVATAR_PENSANDO;
@@ -78,6 +95,7 @@ export class KianaWidgetComponent {
   }
 
   protected abrir(): void {
+    this.ocultarPrompter();
     this.abierto.set(true);
     this.asegurarSaludo();
     this.scrollAlFinal();
@@ -85,6 +103,12 @@ export class KianaWidgetComponent {
 
   protected cerrar(): void {
     this.abierto.set(false);
+  }
+
+  protected ocultarPrompter(event?: Event): void {
+    event?.stopPropagation();
+    this.prompterVisible.set(false);
+    this.limpiarTimerPrompter();
   }
 
   protected onMensajeInput(event: Event): void {
@@ -106,6 +130,13 @@ export class KianaWidgetComponent {
     }
     event.preventDefault();
     this.onEnviar();
+  }
+
+  private limpiarTimerPrompter(): void {
+    if (this.timerPrompter !== null) {
+      clearTimeout(this.timerPrompter);
+      this.timerPrompter = null;
+    }
   }
 
   private asegurarSaludo(): void {
