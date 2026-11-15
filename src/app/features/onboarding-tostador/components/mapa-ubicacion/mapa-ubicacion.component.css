@@ -2,9 +2,11 @@
   display: block;
   height: 13rem;
   overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: #17332c;
+  border: 1px solid color-mix(in srgb, var(--brand-on-dark) 28%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--brand-nav) 85%, black);
+  font-family: var(--font-family);
+  color: var(--brand-on-dark);
 }
 
 google-map {
@@ -18,8 +20,8 @@ google-map {
   height: 100%;
   margin: 0;
   padding: 1.5rem;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
   text-align: center;
 }
 
@@ -27,9 +29,9 @@ google-map {
 :host ::ng-deep .pin-mapa {
   width: 1.625rem;
   height: 1.625rem;
-  border: 2px solid var(--color-text);
+  border: 2px solid var(--brand-on-dark);
   border-radius: 50% 50% 50% 0;
-  background: var(--color-gold);
+  background: var(--brand-button);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   transform: translateY(-4px) rotate(-45deg);
   cursor: grab;
