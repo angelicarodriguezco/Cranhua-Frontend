@@ -19,6 +19,7 @@ export interface ItemNav {
   etiqueta: string;
   ruta: string;
   icono: IconoNav;
+  descripcion: string;
   exacto?: boolean;
   rutasRelacionadas?: string[];
 }
@@ -39,38 +40,117 @@ export const TITULO_ROL: Record<RolCuenta, string> = {
 
 export const NAV_POR_ROL: Record<RolCuenta, ItemNav[]> = {
   cafetalero: [
-    { etiqueta: 'Dashboard', ruta: '/cafetalero/dashboard', icono: 'home', exacto: true },
-    { etiqueta: 'Mis fincas', ruta: '/cafetalero/fincas', icono: 'fincas' },
-    { etiqueta: 'Registrar cosecha', ruta: '/cafetalero/registrar-cosecha', icono: 'cosecha' },
-    { etiqueta: 'Historial', ruta: '/cafetalero/historial', icono: 'historial' },
+    {
+      etiqueta: 'Dashboard',
+      ruta: '/cafetalero/dashboard',
+      icono: 'home',
+      exacto: true,
+      descripcion: 'Resumen de fincas y solicitudes.',
+    },
+    {
+      etiqueta: 'Mis fincas',
+      ruta: '/cafetalero/fincas',
+      icono: 'fincas',
+      descripcion: 'Administrá tus fincas.',
+    },
+    {
+      etiqueta: 'Registrar cosecha',
+      ruta: '/cafetalero/registrar-cosecha',
+      icono: 'cosecha',
+      descripcion: 'Publicá una cosecha a la venta.',
+    },
+    {
+      etiqueta: 'Historial',
+      ruta: '/cafetalero/historial',
+      icono: 'historial',
+      descripcion: 'Historial de cosechas.',
+    },
   ],
   tostador: [
-    { etiqueta: 'Dashboard', ruta: '/tostador/dashboard', icono: 'home', exacto: true },
-    { etiqueta: 'Explorar cosechas', ruta: '/tostador/cosechas', icono: 'explorar' },
-    { etiqueta: 'Mis solicitudes', ruta: '/tostador/solicitudes', icono: 'solicitudes' },
-    { etiqueta: 'Mis tostados', ruta: '/tostador/tostados', icono: 'tostados' },
-    { etiqueta: 'Mi negocio', ruta: '/tostador/negocio', icono: 'negocio' },
+    {
+      etiqueta: 'Dashboard',
+      ruta: '/tostador/dashboard',
+      icono: 'home',
+      exacto: true,
+      descripcion: 'Resumen de compras y cosechas.',
+    },
+    {
+      etiqueta: 'Explorar cosechas',
+      ruta: '/tostador/cosechas',
+      icono: 'explorar',
+      descripcion: 'Cosechas a la venta en todo el país.',
+    },
+    {
+      etiqueta: 'Mis solicitudes',
+      ruta: '/tostador/solicitudes',
+      icono: 'solicitudes',
+      descripcion: 'Estado de tus solicitudes.',
+    },
+    {
+      etiqueta: 'Mis tostados',
+      ruta: '/tostador/tostados',
+      icono: 'tostados',
+      descripcion: 'Lotes que ya tostaste.',
+    },
+    {
+      etiqueta: 'Mi negocio',
+      ruta: '/tostador/negocio',
+      icono: 'negocio',
+      descripcion: 'Perfil de tu tostaduría.',
+    },
   ],
   cafeteria: [
-    { etiqueta: 'Dashboard', ruta: '/cafeteria/dashboard', icono: 'home', exacto: true },
-    { etiqueta: 'Explorar tostadores', ruta: '/cafeteria/tostadores', icono: 'explorar' },
-    { etiqueta: 'Mis pedidos', ruta: '/cafeteria/pedidos', icono: 'pedidos' },
+    {
+      etiqueta: 'Dashboard',
+      ruta: '/cafeteria/dashboard',
+      icono: 'home',
+      exacto: true,
+      descripcion: 'Resumen de tu cafetería.',
+    },
+    {
+      etiqueta: 'Explorar tostadores',
+      ruta: '/cafeteria/tostadores',
+      icono: 'explorar',
+      descripcion: 'Tostadores y lotes para pedir.',
+    },
+    {
+      etiqueta: 'Mis pedidos',
+      ruta: '/cafeteria/pedidos',
+      icono: 'pedidos',
+      descripcion: 'Estado de tus pedidos.',
+    },
     {
       etiqueta: 'Mi cafetería',
       ruta: '/cafeteria/mi-cafeteria',
       icono: 'cafeteria',
       rutasRelacionadas: ['/cafeteria/menu'],
+      descripcion: 'Perfil y menú del local.',
     },
   ],
 };
 
 export const NAV_CAFETERIA_SIN_REGISTRO: ItemNav[] = [
-  { etiqueta: 'Registrar cafetería', ruta: '/cafeteria/registrar', icono: 'registrar' },
+  {
+    etiqueta: 'Registrar cafetería',
+    ruta: '/cafeteria/registrar',
+    icono: 'registrar',
+    descripcion: 'Registrá tu cafetería.',
+  },
 ];
 
 export const NAV_CUENTA: ItemNav[] = [
-  { etiqueta: 'Perfil y ajustes', ruta: '/perfil', icono: 'perfil' },
-  { etiqueta: 'Cerrar sesión', ruta: '/iniciar-sesion', icono: 'logout' },
+  {
+    etiqueta: 'Perfil y ajustes',
+    ruta: '/perfil',
+    icono: 'perfil',
+    descripcion: 'Tu información y preferencias.',
+  },
+  {
+    etiqueta: 'Cerrar sesión',
+    ruta: '/iniciar-sesion',
+    icono: 'logout',
+    descripcion: 'Salí de tu cuenta.',
+  },
 ];
 
 export function armarBloques(roles: readonly RolCuenta[], tieneCafeteria: boolean): BloqueRol[] {

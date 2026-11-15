@@ -29,7 +29,7 @@
   <main class="onboarding__contenido">
     @switch (paso()) {
       @case ('bienvenida') {
-        <app-bienvenida-tostador [nombre]="usuario.nombre" (empezar)="empezar()" />
+        <app-bienvenida-tostador [nombre]="usuario()?.nombre ?? ''" (empezar)="empezar()" />
       }
       @case ('formulario') {
         <app-formulario-negocio

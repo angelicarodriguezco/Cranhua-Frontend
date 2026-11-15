@@ -4,11 +4,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NEVER } from 'rxjs';
 
-import { NEGOCIO_EJEMPLO } from '../../core/mocks/negocio-tueste.mock';
+import { NEGOCIO_EJEMPLO, TOSTADOR_ACTUAL } from '../../core/mocks/negocio-tueste.mock';
 import { Coordenada } from '../../core/models/negocio-tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   AVISO_ELIMINAR_NEGOCIO,
@@ -41,6 +42,7 @@ describe('MiNegocioComponent', () => {
 
     negocioService = TestBed.inject(NegocioTuesteService);
     dashboard = TestBed.inject(DashboardTostadorService);
+    TestBed.inject(SesionService).iniciarSesion(TOSTADOR_ACTUAL);
     fixture = TestBed.createComponent(MiNegocioComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
