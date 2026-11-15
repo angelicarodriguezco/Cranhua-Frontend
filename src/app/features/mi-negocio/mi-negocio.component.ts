@@ -39,6 +39,7 @@ export const AVISO_ELIMINAR_NEGOCIO =
   'Ya tostaste lotes con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu negocio no borra esos códigos, pero ya no vas a poder editar tu información ni generar nuevos tuestes.';
 
 type Campo = keyof FormularioNegocio['controls'];
+type Modo = 'vista' | 'edicion';
 
 function formatearTelefono(telefono: string): string {
   const digitos = telefono.replace(/\D/g, '').slice(-8);
@@ -100,6 +101,7 @@ export class MiNegocioComponent implements OnDestroy {
   });
 
   protected readonly negocio = signal<NegocioTueste | null>(null);
+  protected readonly modo = signal<Modo>('vista');
   protected readonly noEncontrado = signal(false);
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
@@ -116,9 +118,12 @@ export class MiNegocioComponent implements OnDestroy {
     { initialValue: '' },
   );
 
-  protected readonly iniciales = computed(() =>
-    inicialesNegocio(this.nombreActual() || this.negocio()?.nombre || ''),
-  );
+  protected readonly iniciales = computed(() => {
+    if (this.modo() === 'edicion') {
+      return inicialesNegocio(this.nombreActual() || this.negocio()?.nombre || '');
+    }
+    return inicialesNegocio(this.negocio()?.nombre || '');
+  });
 
   constructor() {
     this.negocioService.obtenerActual().subscribe((negocio) => {
@@ -127,6 +132,7 @@ export class MiNegocioComponent implements OnDestroy {
         return;
       }
       this.aplicar(negocio);
+      this.modo.set('vista');
     });
   }
 
@@ -160,6 +166,15 @@ export class MiNegocioComponent implements OnDestroy {
     control.markAsTouched();
   }
 
+  protected editar(): void {
+    const guardado = this.negocio();
+    if (!guardado) {
+      return;
+    }
+    this.aplicar(guardado);
+    this.modo.set('edicion');
+  }
+
   protected abrirSelectorPortada(): void {
     this.inputPortada()?.nativeElement.click();
   }
@@ -180,6 +195,7 @@ export class MiNegocioComponent implements OnDestroy {
       return;
     }
     this.aplicar(guardado);
+    this.modo.set('vista');
   }
 
   protected guardar(): void {
@@ -210,6 +226,7 @@ export class MiNegocioComponent implements OnDestroy {
 
     this.negocioService.actualizar(actualizado).subscribe((negocio) => {
       this.aplicar(negocio);
+      this.modo.set('vista');
     });
   }
 

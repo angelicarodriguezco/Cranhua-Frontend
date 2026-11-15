@@ -7,7 +7,7 @@
   background: none;
   color: var(--texto);
   color-scheme: var(--esquema);
-  font-family: var(--font-ui);
+  font-family: var(--font-family);
 }
 
 .dialogo::backdrop {
@@ -17,7 +17,7 @@
 
 .vidrio {
   border: 1px solid var(--vidrio-borde);
-  border-radius: 1.25rem;
+  border-radius: 0.75rem;
   box-shadow: var(--vidrio-sombra);
 }
 

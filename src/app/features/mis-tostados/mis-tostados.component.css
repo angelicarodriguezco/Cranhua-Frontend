@@ -1,82 +1,65 @@
-/* Tema claro (prototipo de Figma). El oscuro solo cambia estos valores. */
 :host {
-  --font-ui: 'Inter', system-ui, sans-serif;
-  --fondo-imagen: url('/images/bg-claro.jpg');
-  --fondo-velo: linear-gradient(
-    180deg,
-    rgba(5, 8, 20, 0.28) 0%,
-    rgba(5, 8, 20, 0.08) 28%,
-    rgba(255, 255, 255, 0.08) 55%,
-    rgba(8, 50, 62, 0.18) 100%
-  );
-  --vidrio-fondo: rgba(255, 255, 255, 0.62);
-  --vidrio-borde: rgba(255, 255, 255, 0.7);
-  --vidrio-sombra: 0 24px 60px rgba(8, 50, 62, 0.16);
-  --dialogo-fondo: rgba(255, 255, 255, 0.92);
-  --texto: #1c3426;
-  --texto-suave: #4f5d56;
-  --encabezado-tabla: #6b7a70;
-  --divisor: rgba(28, 52, 38, 0.1);
-  --fila-abierta: rgba(201, 162, 39, 0.1);
-  --acento: #946c00;
-  --foco: #c9a227;
-  --merma-fondo: rgba(201, 162, 39, 0.14);
-  --merma-borde: rgba(201, 162, 39, 0.3);
-  --pill-codigo-fondo: rgba(63, 122, 84, 0.14);
-  --pill-codigo-texto: #2f6b45;
-  --pill-pendiente-fondo: rgba(165, 112, 8, 0.14);
-  --pill-pendiente-texto: #8a5a06;
-  --borde-btn: rgba(28, 52, 38, 0.25);
-  /* Campos del popup de edición (campos-tueste.css). Sobre el fondo casi blanco del popup los
-     campos llevan un tinte para que se distingan; en el formulario van blancos sobre vidrio. */
-  --campo-fondo: rgba(28, 52, 38, 0.04);
-  --campo-borde: rgba(28, 52, 38, 0.16);
-  --select-fondo: #ffffff;
-  --seleccion-fondo: rgba(201, 162, 39, 0.18);
-  --seleccion-borde: #c9a227;
-  --error: #a3243b;
+  --page-bg: var(--brand-surface);
+  --vidrio-fondo: var(--brand-bg);
+  --vidrio-borde: color-mix(in srgb, var(--brand-nav) 10%, transparent);
+  --vidrio-sombra: 0 1px 0 color-mix(in srgb, var(--brand-nav) 6%, transparent);
+  --dialogo-fondo: var(--brand-surface);
+  --texto: var(--brand-text);
+  --texto-suave: color-mix(in srgb, var(--brand-text) 78%, transparent);
+  --encabezado-tabla: var(--brand-heading);
+  --divisor: color-mix(in srgb, var(--brand-nav) 12%, transparent);
+  --fila-abierta: color-mix(in srgb, var(--brand-button) 10%, transparent);
+  --acento: var(--brand-heading);
+  --foco: var(--brand-button);
+  --merma-fondo: color-mix(in srgb, var(--brand-button) 12%, transparent);
+  --merma-borde: color-mix(in srgb, var(--brand-button) 35%, transparent);
+  --pill-codigo-fondo: color-mix(in srgb, var(--brand-nav) 12%, transparent);
+  --pill-codigo-texto: var(--brand-nav);
+  --pill-pendiente-fondo: color-mix(in srgb, var(--brand-button) 14%, transparent);
+  --pill-pendiente-texto: var(--brand-heading);
+  --borde-btn: color-mix(in srgb, var(--brand-nav) 22%, transparent);
+  --campo-fondo: var(--brand-surface);
+  --campo-borde: color-mix(in srgb, var(--brand-nav) 14%, transparent);
+  --select-fondo: var(--brand-surface);
+  --seleccion-fondo: color-mix(in srgb, var(--brand-button) 16%, transparent);
+  --seleccion-borde: var(--brand-button);
+  --error: var(--brand-accent);
   --esquema: light;
 
   display: grid;
   grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
-  font-family: var(--font-ui);
+  font-family: var(--font-family);
+  background: var(--page-bg);
 }
 
 :host([data-theme='oscuro']) {
-  --fondo-imagen: url('/images/bg-oscuro.jpg');
-  --fondo-velo: linear-gradient(
-    180deg,
-    rgba(5, 8, 20, 0.6) 0%,
-    rgba(5, 8, 20, 0.2) 22%,
-    rgba(8, 10, 28, 0.08) 45%,
-    rgba(10, 14, 32, 0.28) 100%
-  );
-  --vidrio-fondo: rgba(8, 28, 38, 0.62);
-  --vidrio-borde: rgba(255, 255, 255, 0.12);
-  --vidrio-sombra: 0 32px 70px rgba(0, 0, 0, 0.45);
-  --dialogo-fondo: rgba(8, 28, 38, 0.92);
-  --texto: #f5efe3;
-  --texto-suave: #aec0bc;
-  --encabezado-tabla: #8fa39d;
-  --divisor: rgba(255, 255, 255, 0.1);
-  --fila-abierta: rgba(217, 164, 65, 0.08);
-  --acento: #e3b65b;
-  --foco: #d9a441;
-  --merma-fondo: rgba(217, 164, 65, 0.12);
-  --merma-borde: rgba(217, 164, 65, 0.3);
-  --pill-codigo-fondo: rgba(111, 203, 143, 0.16);
-  --pill-codigo-texto: #7fda9f;
-  --pill-pendiente-fondo: rgba(217, 164, 65, 0.18);
-  --pill-pendiente-texto: #e3b65b;
-  --borde-btn: rgba(255, 255, 255, 0.22);
-  --campo-fondo: rgba(255, 255, 255, 0.07);
-  --campo-borde: rgba(255, 255, 255, 0.14);
-  --select-fondo: #0b2a33;
-  --seleccion-fondo: rgba(217, 164, 65, 0.16);
-  --seleccion-borde: #d9a441;
-  --error: #f2a7b5;
+  --page-bg: var(--brand-nav);
+  --vidrio-fondo: color-mix(in srgb, var(--brand-on-dark) 6%, var(--brand-nav));
+  --vidrio-borde: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --vidrio-sombra: none;
+  --dialogo-fondo: color-mix(in srgb, var(--brand-nav) 92%, #0a1c14);
+  --texto: var(--brand-on-dark);
+  --texto-suave: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
+  --encabezado-tabla: var(--brand-button-hover);
+  --divisor: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --fila-abierta: color-mix(in srgb, var(--brand-button) 12%, transparent);
+  --acento: var(--brand-button-hover);
+  --foco: var(--brand-button-hover);
+  --merma-fondo: color-mix(in srgb, var(--brand-button) 18%, transparent);
+  --merma-borde: color-mix(in srgb, var(--brand-button) 40%, transparent);
+  --pill-codigo-fondo: color-mix(in srgb, var(--brand-button) 18%, transparent);
+  --pill-codigo-texto: var(--brand-on-dark);
+  --pill-pendiente-fondo: color-mix(in srgb, var(--brand-button) 22%, transparent);
+  --pill-pendiente-texto: var(--brand-button-hover);
+  --borde-btn: color-mix(in srgb, var(--brand-on-dark) 22%, transparent);
+  --campo-fondo: color-mix(in srgb, var(--brand-on-dark) 7%, transparent);
+  --campo-borde: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --select-fondo: color-mix(in srgb, var(--brand-nav) 90%, #0a1c14);
+  --seleccion-fondo: color-mix(in srgb, var(--brand-button) 20%, transparent);
+  --seleccion-borde: var(--brand-button-hover);
+  --error: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
   --esquema: dark;
 }
 
@@ -85,43 +68,41 @@
   flex-direction: column;
   gap: 0.9rem;
   min-height: 0;
-  padding: 2.25rem 4% 2rem;
+  padding: 1.5rem 4% 2rem;
   overflow-y: auto;
   color: var(--texto);
   color-scheme: var(--esquema);
-  background-color: #061f27;
-  background-image: var(--fondo-velo), var(--fondo-imagen);
-  background-size: cover;
-  background-position: center;
+  background: var(--page-bg);
 }
 
-/* El encabezado queda sobre la foto, en ambos temas */
 .encabezado {
-  margin-bottom: 0.6rem;
-  color: #ffffff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  margin-bottom: 0.35rem;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) .encabezado {
+  color: var(--brand-on-dark);
 }
 
 .encabezado h1 {
   margin: 0 0 0.25rem;
+  font-family: var(--font-display);
   font-size: clamp(1.6rem, 2.4vw, 2rem);
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 
 .encabezado p {
   margin: 0;
+  color: var(--texto-suave);
   font-size: 0.95rem;
-  opacity: 0.92;
 }
 
 .vidrio {
   border: 1px solid var(--vidrio-borde);
-  border-radius: 1.25rem;
+  border-radius: 0.75rem;
   background: var(--vidrio-fondo);
   box-shadow: var(--vidrio-sombra);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
 }
 
 .indicadores {
@@ -135,13 +116,22 @@
   flex-direction: column;
   gap: 0.2rem;
   padding: 0.95rem 1.2rem;
+  background: var(--brand-bg);
+  border: 1px solid var(--divisor);
+  border-radius: 0.75rem;
+}
+
+:host([data-theme='oscuro']) .indicadores article {
+  background: color-mix(in srgb, var(--brand-on-dark) 10%, var(--brand-nav));
 }
 
 .indicadores strong {
+  font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   line-height: 1.15;
+  color: var(--brand-accent);
   font-variant-numeric: tabular-nums;
 }
 
@@ -165,8 +155,15 @@
 
 .seccion__titulo {
   margin: 0 0 0.75rem;
-  font-size: 1.05rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) .seccion__titulo {
+  color: var(--brand-on-dark);
 }
 
 .seccion__cabecera .seccion__titulo {
@@ -362,14 +359,14 @@ tr.abierto td {
 
 .btn--filled,
 .btn--chico {
-  background: #b8860b;
-  color: #ffffff;
+  background: var(--brand-button);
+  color: var(--brand-on-button);
   font-weight: 600;
 }
 
 .btn--filled:hover,
 .btn--chico:hover {
-  background: #c9952a;
+  background: var(--brand-button-hover);
 }
 
 .btn--chico {
@@ -419,8 +416,11 @@ tr.abierto td {
 
 .ficha__titulo {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 1.3rem;
   font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--brand-heading);
 }
 
 .ficha__sub {
@@ -489,11 +489,9 @@ tr.abierto td {
     overflow: visible;
   }
 
-  /* Sin scroll propio la foto se estiraría a lo alto de toda la página */
   .contenido {
     overflow: visible;
     padding: 1.25rem 1rem 2rem;
-    background-attachment: fixed;
   }
 }
 

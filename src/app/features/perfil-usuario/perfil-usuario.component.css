@@ -1,12 +1,11 @@
 :host {
-  --font-ui: 'Inter', system-ui, sans-serif;
-  --radio-vidrio: 1.15rem;
-  --blur-vidrio: 13px;
+  --radio-vidrio: 0.75rem;
   display: grid;
   grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
-  font-family: var(--font-ui);
+  font-family: var(--font-family);
+  background: var(--page-bg);
 }
 
 .contenido {
@@ -15,10 +14,7 @@
   overflow-y: auto;
   color: var(--texto);
   color-scheme: var(--esquema);
-  background-color: #061f27;
-  background-image: var(--fondo-velo), var(--fondo-imagen);
-  background-size: cover;
-  background-position: center;
+  background: var(--page-bg);
 }
 
 .encabezado {
@@ -29,14 +25,14 @@
   gap: 0.75rem;
   margin-bottom: 1.25rem;
   color: var(--encabezado-texto);
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
 }
 
 .encabezado h1 {
   margin: 0 0 0.25rem;
+  font-family: var(--font-display);
   font-size: clamp(1.6rem, 2.4vw, 2rem);
   font-weight: 400;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.02em;
 }
 
 .encabezado p {
@@ -50,8 +46,6 @@
   border-radius: var(--radio-vidrio);
   background: var(--vidrio-fondo);
   box-shadow: var(--vidrio-sombra);
-  backdrop-filter: blur(var(--blur-vidrio));
-  -webkit-backdrop-filter: blur(var(--blur-vidrio));
 }
 
 .tarjeta {
@@ -169,31 +163,34 @@
 }
 
 .identidad {
-  margin-top: 3.75rem;
+  margin-top: 4rem;
 }
 
 .identidad__nombre {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.6rem;
+  align-items: baseline;
+  gap: 0.75rem 0.9rem;
 }
 
 .identidad__nombre h2 {
   margin: 0;
-  font-size: 1.35rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.8vw, 2.15rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  color: var(--brand-heading);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.7rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 999px;
-  background: var(--badge-fondo);
-  color: var(--acento);
-  font-size: 0.75rem;
+  background: color-mix(in srgb, var(--brand-nav) 10%, transparent);
+  color: var(--brand-nav);
+  font-size: 0.78rem;
   font-weight: 600;
 }
 
@@ -246,48 +243,25 @@
   stroke: none;
 }
 
-.indicadores {
-  display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-.indicadores article {
-  display: flex;
-  flex: 0 1 calc((100% - 1.5rem) / 3);
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.9rem 1.1rem;
-}
-
-.indicadores strong {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-.indicadores span {
-  color: var(--texto-suave);
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
 .seccion {
-  margin: 0;
+  margin: 1rem 0 0;
   padding: 1.15rem 1.5rem 1.25rem;
 }
 
-.indicadores + .seccion,
+.tarjeta + .seccion {
+  margin-top: 1rem;
+}
+
 .seccion + .seccion {
   margin-top: 1rem;
 }
 
 .seccion__titulo {
   margin: 0 0 0.35rem;
-  font-size: 1rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .seccion__texto {
@@ -341,8 +315,7 @@ app-zona-peligro {
 }
 
 .acciones .btn--texto {
-  color: #fff;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  color: var(--acento);
 }
 
 .btn {
@@ -361,8 +334,6 @@ app-zona-peligro {
   background: var(--btn-dorado);
   color: var(--btn-dorado-texto);
   font-weight: 600;
-  text-shadow: none;
-  box-shadow: 0 10px 24px rgba(165, 112, 8, 0.28);
 }
 
 .btn--filled:hover {
@@ -377,7 +348,7 @@ app-zona-peligro {
 }
 
 .btn--volver {
-  color: #fff;
+  color: var(--acento);
   font-weight: 500;
 }
 
@@ -429,15 +400,6 @@ app-zona-peligro {
 }
 
 @media (max-width: 560px) {
-  .indicadores {
-    flex-direction: column;
-  }
-
-  .indicadores article {
-    flex: 1 1 auto;
-    width: 100%;
-  }
-
   .tarjeta {
     padding: 0 1rem 1.25rem;
   }

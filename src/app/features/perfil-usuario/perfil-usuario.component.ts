@@ -30,7 +30,6 @@ import {
   TipoRedSocial,
 } from '../../core/models/perfil.model';
 import { CuentaService } from '../../core/services/cuenta.service';
-import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { TemaService } from '../../core/services/tema.service';
@@ -149,7 +148,6 @@ export function enlaceRedSocial(red: RedSocial): string {
   host: { '[attr.data-theme]': 'tema()' },
 })
 export class PerfilUsuarioComponent implements OnDestroy {
-  private readonly dashboard = inject(DashboardCafetaleroService);
   private readonly temas = inject(TemaService);
   private readonly perfilService = inject(PerfilService);
   private readonly cuentaService = inject(CuentaService);
@@ -159,7 +157,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly tema = this.temas.tema;
-  protected readonly indicadores = this.dashboard.indicadores;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CUENTA;
   protected readonly nombresRed = NOMBRES_RED_SOCIAL;
   protected readonly placeholdersRed = PLACEHOLDERS_RED_SOCIAL;

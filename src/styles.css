@@ -105,7 +105,7 @@ body {
 /* Scroll compartido en toda la app */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #6f857f transparent;
+  scrollbar-color: color-mix(in srgb, var(--brand-nav) 55%, var(--brand-bg-secondary)) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -114,19 +114,19 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  background: rgba(8, 50, 62, 0.25);
+  background: color-mix(in srgb, var(--brand-nav) 12%, transparent);
   border-radius: 999px;
 }
 
 *::-webkit-scrollbar-thumb {
-  background: #6f857f;
+  background: color-mix(in srgb, var(--brand-nav) 55%, var(--brand-bg-secondary));
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-  background: #8aa09a;
+  background: color-mix(in srgb, var(--brand-nav) 72%, var(--brand-button));
   background-clip: padding-box;
 }
 

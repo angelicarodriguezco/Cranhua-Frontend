@@ -36,7 +36,7 @@
   min-height: 2.9rem;
   padding: 0.6rem 1rem;
   border: 1px solid var(--campo-borde);
-  border-radius: 0.6rem;
+  border-radius: 0.55rem;
   background: var(--campo-fondo);
   color: var(--texto);
   font: inherit;

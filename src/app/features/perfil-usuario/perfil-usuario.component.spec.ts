@@ -135,8 +135,6 @@ describe('PerfilUsuarioComponent', () => {
   });
 
   it('la vista muestra los datos, redes, apariencia y la cuenta, sin zona de peligro', () => {
-    const indicadores = dashboard.indicadores();
-
     expect(titulo()).toBe('Mi perfil');
     expect(pagina.textContent).toContain('Así te ven los demás dentro de Crán̈hua.');
     expect(pagina.textContent).toContain(PERFIL_EJEMPLO.nombreCompleto);
@@ -147,13 +145,7 @@ describe('PerfilUsuarioComponent', () => {
     expect(chips.map((c) => c.textContent!.trim())).toEqual(['Instagram', 'WhatsApp']);
     expect(chips.every((c) => c.target === '_blank')).toBeTrue();
 
-    const kpis = [...pagina.querySelectorAll('.indicadores article')].map(
-      (a) => `${a.querySelector('strong')!.textContent} ${a.querySelector('span')!.textContent}`,
-    );
-    expect(kpis).toEqual([
-      `${indicadores.fincasRegistradas} Fincas registradas`,
-      `${indicadores.cosechasActivas} Cosechas activas`,
-    ]);
+    expect(pagina.querySelector('.indicadores')).toBeNull();
 
     const datos = campo('.datos').textContent!;
     expect(datos).toContain('rodrigo@fincalacatalina.cr');
@@ -422,15 +414,15 @@ describe('PerfilUsuarioComponent', () => {
   it('el switch de apariencia cambia el tema global y el data-theme del host', () => {
     const temas = TestBed.inject(TemaService);
     const interruptor = campo<HTMLButtonElement>('[role="switch"]');
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    expect(interruptor.getAttribute('aria-checked')).toBe('true');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(interruptor.getAttribute('aria-checked')).toBe('false');
 
     interruptor.click();
     fixture.detectChanges();
-    expect(temas.tema()).toBe('claro');
-    expect(dashboard.tema()).toBe('claro');
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
-    expect(interruptor.getAttribute('aria-checked')).toBe('false');
+    expect(temas.tema()).toBe('oscuro');
+    expect(dashboard.tema()).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(interruptor.getAttribute('aria-checked')).toBe('true');
   });
 
   it('eliminar cuenta: cancelar cierra el modal y confirmar limpia sesión y navega a iniciar sesión', () => {
@@ -467,11 +459,11 @@ describe('PerfilUsuarioComponent', () => {
     clic('Editar perfil');
     clic('Eliminar mi cuenta');
     const fondo = () => getComputedStyle(campo('.modal__dialogo')).backgroundColor;
-    expect(fondo()).toBe('rgba(8, 28, 38, 0.96)');
+    expect(fondo()).toBe('rgb(255, 255, 255)');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
-    expect(fondo()).toBe('rgb(255, 255, 255)');
+    expect(fondo()).toBe('rgba(8, 28, 38, 0.96)');
   });
 });

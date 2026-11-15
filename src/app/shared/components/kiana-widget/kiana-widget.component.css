@@ -61,27 +61,27 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.4rem;
+  gap: 0.6rem;
 }
 
 .kiana-fab__prompter {
   position: relative;
-  max-width: 9.5rem;
+  max-width: 13.5rem;
 }
 
 .kiana-fab__burbuja {
   width: 100%;
   margin: 0;
-  padding: 0.45rem 1.55rem 0.45rem 0.65rem;
+  padding: 0.7rem 1.85rem 0.7rem 0.9rem;
   border: 1px solid var(--kiana-fab-borde);
   /* Figma: 26 26 4 26 — esquina inferior derecha apuntando al avatar */
-  border-radius: 0.7rem 0.7rem 0.125rem 0.7rem;
+  border-radius: 0.75rem 0.75rem 0.125rem 0.75rem;
   background: var(--kiana-fab-burbuja);
   color: var(--kiana-texto);
   font: inherit;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.4;
   text-align: left;
   box-shadow: var(--kiana-sombra-fab);
   cursor: pointer;
@@ -400,11 +400,12 @@
   }
 
   .kiana-fab__prompter {
-    max-width: 8.5rem;
+    max-width: 11.5rem;
   }
 
   .kiana-fab__burbuja {
-    font-size: 0.64rem;
+    font-size: 0.75rem;
+    padding: 0.6rem 1.7rem 0.6rem 0.8rem;
   }
 
   .kiana-fab__avatar,
