@@ -21,6 +21,32 @@
       <option [value]="zona" [selected]="zona === filtros().zona">{{ zona }}</option>
     }
   </select>
+  <select
+    class="chip chip-select"
+    aria-label="Variedad"
+    [class.activo]="filtros().variedad"
+    (change)="elegirVariedad($event)"
+  >
+    <option value="" [selected]="!filtros().variedad">Variedad</option>
+    @for (variedad of variedades(); track variedad) {
+      <option [value]="variedad" [selected]="variedad === filtros().variedad">
+        {{ variedad }}
+      </option>
+    }
+  </select>
+  <select
+    class="chip chip-select"
+    aria-label="Precio"
+    [class.activo]="filtros().rangoPrecio"
+    (change)="elegirPrecio($event)"
+  >
+    <option value="" [selected]="!filtros().rangoPrecio">Precio</option>
+    @for (rango of rangosPrecio; track rango.id) {
+      <option [value]="rango.id" [selected]="rango.id === filtros().rangoPrecio">
+        {{ rango.etiqueta }}
+      </option>
+    }
+  </select>
   <button
     type="button"
     class="chip"

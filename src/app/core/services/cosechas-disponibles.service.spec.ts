@@ -32,6 +32,25 @@ describe('filtrarCosechas', () => {
     ]);
   });
 
+  it('filtra por variedad', () => {
+    expect(ids({ variedad: 'Catuaí' })).toEqual([
+      'cosecha-catuai-los-robles',
+      'cosecha-catuai-la-esperanza',
+    ]);
+  });
+
+  it('filtra por rango de precio', () => {
+    expect(ids({ rangoPrecio: 'bajo' })).toEqual([
+      'cosecha-caturra-catalina',
+      'cosecha-catuai-los-robles',
+      'cosecha-catuai-la-esperanza',
+    ]);
+    expect(ids({ rangoPrecio: 'alto' })).toEqual([
+      'cosecha-geisha-monte-alto',
+      'cosecha-bourbon-cerro-verde',
+    ]);
+  });
+
   it('combina filtros', () => {
     expect(ids({ soloHoney: true, soloDisponibles: true })).toEqual([
       'cosecha-caturra-catalina',

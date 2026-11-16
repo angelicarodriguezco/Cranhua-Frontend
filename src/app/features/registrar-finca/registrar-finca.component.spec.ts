@@ -117,10 +117,10 @@ describe('RegistrarFincaComponent', () => {
   });
 
   it('sigue el tema global oscuro/claro', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 
   it('toma el cantón y la provincia del pin', () => {

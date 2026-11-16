@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { TOSTADOR_ACTUAL } from '../mocks/negocio-tueste.mock';
 import { LOTES_COMPRADOS, TUESTES_REGISTRADOS } from '../mocks/tueste.mock';
 import { LoteComprado, NuevoTueste, Tueste } from '../models/tueste.model';
 import { iniciales } from '../../shared/utils/formato';
+import { SesionService } from './sesion.service';
 
 /** Porcentaje de peso que pierde el café al tostarse; null si los pesos no alcanzan para calcularlo. */
 export function calcularMerma(
@@ -23,6 +23,7 @@ export function calcularMerma(
 // Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
 @Injectable({ providedIn: 'root' })
 export class TuesteService {
+  private readonly sesion = inject(SesionService);
   private lotes = LOTES_COMPRADOS.map((l) => ({ ...l }));
   private tuestes = TUESTES_REGISTRADOS.map((t) => ({ ...t }));
 
@@ -42,7 +43,9 @@ export class TuesteService {
       return of(actual);
     }
     const numero = actual.codigoLote.split('-').at(-1);
-    const lote = { ...actual, codigoTrazabilidad: `TRZ-${numero}-${iniciales(TOSTADOR_ACTUAL)}` };
+    const usuario = this.sesion.usuario();
+    const sufijo = usuario ? iniciales(usuario) : 'XX';
+    const lote = { ...actual, codigoTrazabilidad: `TRZ-${numero}-${sufijo}` };
     this.lotes = this.lotes.map((l) => (l.id === loteId ? lote : l));
     return of(lote);
   }

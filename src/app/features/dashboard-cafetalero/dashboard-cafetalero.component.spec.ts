@@ -164,11 +164,11 @@ describe('DashboardCafetaleroComponent', () => {
     );
     expect(pagina.querySelector('app-menu-lateral .avatar')?.textContent?.trim()).toBe('RA');
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
   });
 });

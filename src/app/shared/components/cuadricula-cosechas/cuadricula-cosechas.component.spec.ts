@@ -19,12 +19,16 @@ describe('CuadriculaCosechasComponent', () => {
     pagina = fixture.nativeElement;
   });
 
-  it('muestra finca, ubicación, variedad, proceso y precio desde por kg', () => {
+  it('muestra finca, foto, ubicación, variedad, proceso y precio desde por kg', () => {
     fixture.componentRef.setInput('cosechas', [COSECHAS_DISPONIBLES[1]]);
     fixture.detectChanges();
 
     const tarjeta = pagina.querySelector('.tarjeta')!;
     expect(tarjeta.querySelector('h3')?.textContent).toBe('Finca Monte Alto');
+    expect(tarjeta.querySelector('.zona')?.textContent).toBe('Tarrazú');
+    expect(tarjeta.querySelector('.tarjeta__imagen')?.getAttribute('src')).toBe(
+      '/images/landing-cerezas.jpg',
+    );
     expect(tarjeta.querySelector('.ubicacion')?.textContent).toBe('Copey, Dota');
     expect(tarjeta.querySelector('.datos')?.textContent).toContain('Geisha');
     expect(tarjeta.querySelector('.datos')?.textContent).toContain('Lavado');

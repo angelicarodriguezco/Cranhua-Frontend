@@ -1,23 +1,21 @@
 :host {
   display: block;
   min-height: 100dvh;
-  background:
-    var(--fondo-velo),
-    var(--fondo-imagen) center / cover;
+  background: var(--pagina-fondo);
   color: var(--texto);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-family);
 }
 
 .pagina {
-  padding: 1.25rem 1rem;
+  padding: 1.25rem 1rem 2.5rem;
 }
 
 .barra {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  max-width: 90rem;
-  margin: 0 auto 1rem;
+  max-width: 64rem;
+  margin: 0 auto 1.25rem;
 }
 
 .marca {
@@ -30,7 +28,7 @@
   display: inline-flex;
   gap: 0.2rem;
   padding: 0.28rem;
-  border-radius: 999px;
+  border-radius: 0.5rem;
   background: var(--toggle-fondo);
 }
 
@@ -38,7 +36,7 @@
   height: 2rem;
   padding: 0 0.85rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0.35rem;
   background: none;
   color: var(--toggle-texto);
   font: inherit;
@@ -48,8 +46,9 @@
 }
 
 .toggle-tema__opcion--activa {
-  background: #c9a227;
-  color: #142320;
+  background: var(--cta);
+  color: var(--cta-texto);
+  font-weight: 600;
 }
 
 .tarjeta {
@@ -58,10 +57,9 @@
   margin: 0 auto;
   overflow: hidden;
   border: 1px solid var(--vidrio-borde);
-  border-radius: 1.4rem;
+  border-radius: 0.75rem;
   background: var(--vidrio-fondo);
   box-shadow: var(--vidrio-sombra);
-  backdrop-filter: blur(var(--vidrio-blur));
 }
 
 .tarjeta--vacia {
@@ -79,14 +77,16 @@
   left: 2rem;
   display: grid;
   place-items: center;
-  width: 5.75rem;
-  height: 5.75rem;
-  border: 4px solid var(--avatar-anillo);
+  width: 5.5rem;
+  height: 5.5rem;
+  border: 3px solid var(--avatar-anillo);
   border-radius: 50%;
   background: var(--avatar-fondo);
-  color: #fff;
-  font-size: 2rem;
-  font-weight: 600;
+  color: var(--brand-on-button);
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
 .cuerpo {
@@ -96,8 +96,8 @@
     'intro datos'
     'fincas mapa'
     'acciones acciones';
-  gap: 1rem 2.25rem;
-  padding: 1.25rem 2rem 1.5rem;
+  gap: 1.25rem 2.25rem;
+  padding: 1.35rem 2rem 1.75rem;
 }
 
 .intro {
@@ -107,31 +107,40 @@
 
 .pill-rol {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.3rem;
   background: var(--pill-fondo);
   color: var(--pill-texto);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 h1 {
-  margin: 0.4rem 0 0;
-  font-size: 1.6rem;
+  margin: 0.55rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 3vw, 1.95rem);
   font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) h1 {
+  color: var(--brand-on-dark);
 }
 
 .ubicacion {
-  margin: 0.25rem 0 0;
+  margin: 0.35rem 0 0;
   color: var(--texto-suave);
-  font-size: 0.85rem;
+  font-size: 0.95rem;
 }
 
 .descripcion {
-  margin: 0.75rem 0 0;
+  margin: 0.85rem 0 0;
   color: var(--texto-cuerpo);
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
 .datos {
@@ -145,7 +154,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 2.6rem;
+  min-height: 2.7rem;
   border-bottom: 1px solid var(--separador);
 }
 
@@ -161,16 +170,16 @@ h1 {
 .fila-dato dd {
   margin: 0;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: right;
 }
 
 .mapa {
   grid-area: mapa;
-  min-height: 10.5rem;
+  min-height: 11rem;
   overflow: hidden;
   border: 1px solid var(--mapa-borde);
-  border-radius: 1rem;
+  border-radius: 0.5rem;
   background: var(--mapa-fondo);
 }
 
@@ -185,20 +194,26 @@ h1 {
 
 .fincas {
   grid-area: fincas;
-  padding-top: 0.25rem;
+  padding-top: 0.35rem;
   border-top: 1px solid var(--separador-seccion);
 }
 
 h2 {
-  margin: 0.75rem 0 0.6rem;
-  font-size: 0.95rem;
+  margin: 0.75rem 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
   font-weight: 400;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) h2 {
+  color: #f0d9a8;
 }
 
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
+  gap: 0.55rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -206,13 +221,14 @@ h2 {
 
 .chip {
   display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.35rem;
   background: var(--chip-fondo);
   color: var(--chip-texto);
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.15s ease;
 }
 
 .chip:hover {
@@ -232,27 +248,28 @@ h2 {
 
 .volver {
   color: var(--volver);
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   text-decoration: none;
 }
 
 .btn-primario {
-  padding: 0.85rem 1.4rem;
-  border-radius: 999px;
-  background: #a57008;
-  color: #fff;
+  padding: 0.85rem 1.35rem;
+  border-radius: 0.4rem;
+  background: var(--cta);
+  color: var(--cta-texto);
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.2s ease;
 }
 
 .btn-primario:hover {
-  background: #b67d0e;
+  background: var(--brand-button-hover);
 }
 
 :is(a, button):focus-visible {
-  outline: 2px solid #d9a441;
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -270,9 +287,9 @@ h2 {
 :host ::ng-deep .pin-cafeteria__etiqueta {
   padding: 0.3rem 0.65rem;
   border: 1px solid var(--pin-borde);
-  border-radius: 999px;
+  border-radius: 0.35rem;
   background: var(--pin-fondo);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 20px rgba(28, 52, 38, 0.18);
   color: var(--texto);
   font-size: 0.7rem;
   font-weight: 700;
@@ -297,5 +314,11 @@ h2 {
 
   .acciones {
     flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .btn-primario,
+  .volver {
+    text-align: center;
   }
 }

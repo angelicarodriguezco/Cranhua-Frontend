@@ -4,11 +4,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { NEVER } from 'rxjs';
 
-import { NEGOCIO_EJEMPLO } from '../../core/mocks/negocio-tueste.mock';
+import { NEGOCIO_EJEMPLO, TOSTADOR_ACTUAL } from '../../core/mocks/negocio-tueste.mock';
 import { Coordenada } from '../../core/models/negocio-tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   AVISO_ELIMINAR_NEGOCIO,
@@ -41,6 +42,7 @@ describe('MiNegocioComponent', () => {
 
     negocioService = TestBed.inject(NegocioTuesteService);
     dashboard = TestBed.inject(DashboardTostadorService);
+    TestBed.inject(SesionService).iniciarSesion(TOSTADOR_ACTUAL);
     fixture = TestBed.createComponent(MiNegocioComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
@@ -63,6 +65,11 @@ describe('MiNegocioComponent', () => {
     return encontrado;
   }
 
+  function entrarAEdicion(): void {
+    boton('Editar negocio').click();
+    fixture.detectChanges();
+  }
+
   function errores(): string[] {
     return [...pagina.querySelectorAll('.campo__error')].map((e) => e.textContent!.trim());
   }
@@ -72,20 +79,38 @@ describe('MiNegocioComponent', () => {
     expect(inicialesNegocio('Volcán')).toBe('VO');
   });
 
-  it('carga los datos mock del negocio actual', () => {
+  it('muestra la vista de solo lectura del negocio', () => {
     expect(campo('h1').textContent).toContain('Mi negocio');
     expect(pagina.textContent).toContain(
       'Así ven tu tostaduría los cafetaleros que exploran cosechas.',
     );
+    const valores = [...pagina.querySelectorAll('.campo__valor')].map((v) => v.textContent!.trim());
+    expect(valores).toContain(NEGOCIO_EJEMPLO.nombre);
+    expect(valores).toContain(NEGOCIO_EJEMPLO.contacto);
+    expect(valores).toContain(NEGOCIO_EJEMPLO.correo);
+    expect(valores.some((v) => v.includes('San José'))).toBeTrue();
+    expect(campo('.avatar__iniciales').textContent!.trim()).toBe('TV');
+    expect(pagina.querySelector('.mapa--solo-lectura')).toBeTruthy();
+    expect(pagina.textContent).toContain('Claro');
+    expect(pagina.textContent).toContain('Medio');
+    expect(pagina.querySelector('#nombre-negocio')).toBeNull();
+    expect(pagina.querySelector('app-zona-peligro')).toBeNull();
+    expect(boton('Editar negocio')).toBeTruthy();
+  });
+
+  it('entra a edición y carga los datos del negocio', () => {
+    entrarAEdicion();
+
+    expect(campo('h1').textContent).toContain('Editar negocio');
     expect(campo<HTMLInputElement>('#nombre-negocio').value).toBe(NEGOCIO_EJEMPLO.nombre);
     expect(campo<HTMLInputElement>('#contacto-negocio').value).toBe(NEGOCIO_EJEMPLO.contacto);
     expect(campo<HTMLInputElement>('#correo-negocio').value).toBe(NEGOCIO_EJEMPLO.correo);
-    expect(campo('.avatar__iniciales').textContent!.trim()).toBe('TV');
     expect(campo<HTMLInputElement>('#ubicacion-negocio').value).toContain('San José');
     expect(campo<HTMLInputElement>('#ubicacion-negocio').readOnly).toBeTrue();
   });
 
   it('muestra errores al guardar con campos vacíos', () => {
+    entrarAEdicion();
     componente['formulario'].reset({
       nombre: '',
       descripcion: '',
@@ -107,6 +132,7 @@ describe('MiNegocioComponent', () => {
   });
 
   it('permite alternar estilos de tueste', () => {
+    entrarAEdicion();
     expect(componente['seleccionado']('Claro')).toBeTrue();
     expect(componente['seleccionado']('Medio')).toBeTrue();
     expect(componente['seleccionado']('Oscuro')).toBeFalse();
@@ -121,6 +147,7 @@ describe('MiNegocioComponent', () => {
   });
 
   it('actualiza el texto de ubicación desde el pin', () => {
+    entrarAEdicion();
     componente['pin'].set(TIBAS);
     fixture.detectChanges();
     expect(campo<HTMLInputElement>('#ubicacion-negocio').value).toContain('Tibás');
@@ -131,6 +158,7 @@ describe('MiNegocioComponent', () => {
   });
 
   it('muestra la zona de peligro y confirma la eliminación', () => {
+    entrarAEdicion();
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
     const eliminar = spyOn(negocioService, 'eliminar').and.callThrough();
@@ -142,9 +170,6 @@ describe('MiNegocioComponent', () => {
     fixture.detectChanges();
     expect(campo('.modal__titulo').textContent).toBe(`¿Eliminar ${NEGOCIO_EJEMPLO.nombre}?`);
     expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_NEGOCIO);
-    expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
-      'rgba(8, 28, 38, 0.96)',
-    );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
@@ -153,7 +178,8 @@ describe('MiNegocioComponent', () => {
     expect(navegar).toHaveBeenCalledWith(RUTA_DASHBOARD_TOSTADOR);
   });
 
-  it('guarda cambios en el mock del negocio', () => {
+  it('guarda cambios y vuelve a la vista', () => {
+    entrarAEdicion();
     const actualizar = spyOn(negocioService, 'actualizar').and.callThrough();
 
     campo<HTMLInputElement>('#nombre-negocio').value = 'Tostaduría Volcán Sur';
@@ -167,11 +193,12 @@ describe('MiNegocioComponent', () => {
     const guardado = actualizar.calls.mostRecent().args[0];
     expect(guardado.id).toBe(NEGOCIO_EJEMPLO.id);
     expect(guardado.nombre).toBe('Tostaduría Volcán Sur');
-    expect(campo<HTMLInputElement>('#nombre-negocio').value).toBe('Tostaduría Volcán Sur');
-    expect(campo('.avatar__iniciales').textContent!.trim()).toBe('TV');
+    expect(pagina.querySelector('.campo__valor')?.textContent).toContain('Tostaduría Volcán Sur');
+    expect(pagina.querySelector('#nombre-negocio')).toBeNull();
   });
 
-  it('cancela y restaura el último estado guardado', () => {
+  it('cancela y vuelve a la vista con el estado guardado', () => {
+    entrarAEdicion();
     campo<HTMLInputElement>('#nombre-negocio').value = 'Otro nombre';
     campo<HTMLInputElement>('#nombre-negocio').dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -179,16 +206,17 @@ describe('MiNegocioComponent', () => {
 
     boton('Cancelar').click();
     fixture.detectChanges();
-    expect(campo<HTMLInputElement>('#nombre-negocio').value).toBe(NEGOCIO_EJEMPLO.nombre);
+    expect(pagina.querySelector('.campo__valor')?.textContent).toContain(NEGOCIO_EJEMPLO.nombre);
+    expect(pagina.querySelector('#nombre-negocio')).toBeNull();
   });
 
   it('sigue el tema global claro/oscuro', () => {
-    expect(dashboard.tema()).toBe('oscuro');
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(dashboard.tema()).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(dashboard.tema()).toBe('claro');
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(dashboard.tema()).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 });

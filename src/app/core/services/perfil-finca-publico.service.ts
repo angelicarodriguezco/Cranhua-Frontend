@@ -7,6 +7,10 @@ import { PerfilFincaPublico } from '../models/perfil-finca-publico.model';
 @Injectable({ providedIn: 'root' })
 export class PerfilFincaPublicoService {
   obtener(id: string): Observable<PerfilFincaPublico | undefined> {
-    return of(PERFILES_FINCA_PUBLICO.find((f) => f.id === id));
+    return of(this.obtenerSync(id));
+  }
+
+  obtenerSync(id: string): PerfilFincaPublico | undefined {
+    return PERFILES_FINCA_PUBLICO.find((f) => f.id === id);
   }
 }

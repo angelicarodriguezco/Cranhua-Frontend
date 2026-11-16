@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { CANTONES, NEGOCIO_EJEMPLO, TOSTADOR_ACTUAL } from '../mocks/negocio-tueste.mock';
+import { CANTONES, NEGOCIO_EJEMPLO } from '../mocks/negocio-tueste.mock';
 import {
   Canton,
   Coordenada,
   NegocioTueste,
   NuevoNegocioTueste,
 } from '../models/negocio-tueste.model';
+import { SesionService } from './sesion.service';
 
 const DISTANCIA_MAXIMA_CANTON_KM = 25;
 
@@ -23,6 +24,7 @@ function distanciaKm(a: Coordenada, b: Coordenada): number {
 
 @Injectable({ providedIn: 'root' })
 export class NegocioTuesteService {
+  private readonly sesion = inject(SesionService);
   private negocios: NegocioTueste[] = [
     { ...NEGOCIO_EJEMPLO, estilos: [...NEGOCIO_EJEMPLO.estilos] },
   ];
@@ -43,7 +45,8 @@ export class NegocioTuesteService {
   }
 
   obtenerActual(): Observable<NegocioTueste | undefined> {
-    return this.obtenerPorPropietario(TOSTADOR_ACTUAL.id);
+    const propietarioId = this.sesion.usuario()?.id;
+    return propietarioId ? this.obtenerPorPropietario(propietarioId) : of(undefined);
   }
 
   eliminar(id: string): Observable<boolean> {

@@ -134,14 +134,14 @@ describe('MenuLateralComponent', () => {
     );
   });
 
-  it('sigue el tema global (modo oscuro por defecto)', async () => {
+  it('sigue el tema global (modo claro por defecto)', async () => {
     await crear(CUENTA_SOLO_CAFETALERO);
     const aside = pagina.querySelector('aside')!;
-    expect(aside.getAttribute('data-tema')).toBe('oscuro');
+    expect(aside.getAttribute('data-tema')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(aside.getAttribute('data-tema')).toBe('claro');
+    expect(aside.getAttribute('data-tema')).toBe('oscuro');
   });
 
   it('"Cerrar sesión" llama a AuthService.cerrarSesion', async () => {

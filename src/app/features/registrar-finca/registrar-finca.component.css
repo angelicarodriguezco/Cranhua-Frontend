@@ -1,40 +1,44 @@
-/* Tema claro (prototipo de día). El oscuro solo cambia estos valores. */
 :host {
-  --fondo: url('/images/bg-claro.jpg') center / cover #6f8fa8;
-  --vidrio-fondo: rgba(255, 255, 255, 0.55);
-  --vidrio-borde: rgba(255, 255, 255, 0.7);
-  --vidrio-texto: #1c2a26;
-  --vidrio-texto-suave: rgba(28, 42, 38, 0.72);
-  --vidrio-campo: rgba(255, 255, 255, 0.8);
-  --vidrio-error: #a3243b;
-  --vidrio-dorado: #946c00;
+  --page-bg: var(--brand-surface);
+  --vidrio-fondo: var(--brand-bg);
+  --vidrio-borde: color-mix(in srgb, var(--brand-nav) 10%, transparent);
+  --vidrio-sombra: 0 1px 0 color-mix(in srgb, var(--brand-nav) 6%, transparent);
+  --vidrio-texto: var(--brand-text);
+  --vidrio-texto-suave: color-mix(in srgb, var(--brand-text) 78%, transparent);
+  --vidrio-campo: var(--brand-surface);
+  --vidrio-error: var(--brand-accent);
+  --vidrio-dorado: var(--brand-button);
   --vidrio-esquema: light;
-  --aviso-fondo: rgba(255, 255, 255, 0.55);
+  --aviso-fondo: color-mix(in srgb, var(--brand-button) 12%, transparent);
 
-  /* Mismo armado que el dashboard: el menú queda fijo y solo el contenido hace scroll */
   display: grid;
   grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
   height: 100dvh;
   overflow: hidden;
+  font-family: var(--font-family);
+  background: var(--page-bg);
 }
 
 :host([data-theme='oscuro']) {
-  --fondo: url('/images/bg-oscuro.jpg') center / cover #1d1b45;
-  --vidrio-fondo: rgba(10, 32, 42, 0.72);
-  --vidrio-borde: rgba(255, 255, 255, 0.12);
-  --vidrio-texto: #ffffff;
-  --vidrio-texto-suave: rgba(255, 255, 255, 0.7);
-  --vidrio-campo: rgba(255, 255, 255, 0.08);
-  --vidrio-error: #f2a7b5;
-  --vidrio-dorado: var(--color-gold-light);
+  --page-bg: var(--brand-nav);
+  --vidrio-fondo: color-mix(in srgb, var(--brand-on-dark) 6%, var(--brand-nav));
+  --vidrio-borde: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --vidrio-sombra: none;
+  --vidrio-texto: var(--brand-on-dark);
+  --vidrio-texto-suave: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
+  --vidrio-campo: color-mix(in srgb, var(--brand-on-dark) 7%, transparent);
+  --vidrio-error: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
+  --vidrio-dorado: var(--brand-button-hover);
   --vidrio-esquema: dark;
-  --aviso-fondo: rgba(75, 3, 17, 0.55);
+  --aviso-fondo: color-mix(in srgb, var(--brand-accent) 22%, transparent);
 }
 
 .contenido {
   overflow-y: auto;
-  padding: 2rem 2.5rem 2.5rem;
-  background: var(--fondo);
+  padding: 1.5rem 4% 2rem;
+  color: var(--vidrio-texto);
+  color-scheme: var(--vidrio-esquema);
+  background: var(--page-bg);
 }
 
 /* Las piezas del onboarding leen estas variables, así que se redefinen sobre el vidrio */
@@ -49,10 +53,9 @@
   --color-error: var(--vidrio-error);
   --color-gold-light: var(--vidrio-dorado);
 
-  border-radius: 14px;
+  border-radius: 0.75rem;
   color: var(--color-text);
   color-scheme: var(--vidrio-esquema);
-  backdrop-filter: blur(18px);
 }
 
 .encabezado {
@@ -61,20 +64,27 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.75rem;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) .encabezado {
+  color: var(--brand-on-dark);
 }
 
 .encabezado__titulo {
   margin: 0;
-  font-size: var(--md-sys-typescale-headline-small-size);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
   font-weight: 400;
-  line-height: var(--md-sys-typescale-headline-small-line-height);
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  color: inherit;
 }
 
 .encabezado__texto {
   margin: 0.25rem 0 0;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  color: var(--color-text-muted);
+  font-size: 0.95rem;
+  color: var(--vidrio-texto-suave);
 }
 
 .volver {
@@ -84,7 +94,7 @@
   padding: 0.375rem 0.25rem;
   border: 0;
   background: none;
-  color: var(--color-text);
+  color: var(--vidrio-texto);
   font-family: var(--font-family);
   font-size: var(--md-sys-typescale-label-large-size);
   font-weight: 500;
@@ -119,6 +129,7 @@
   margin-bottom: 1rem;
   padding: 0.5rem 0.5rem 0.5rem 1rem;
   border: 1px solid var(--vidrio-borde);
+  border-radius: 0.75rem;
   background: var(--aviso-fondo);
   font-size: var(--md-sys-typescale-body-medium-size);
 }
@@ -141,7 +152,12 @@
 
 .aviso__cerrar:hover,
 .conflicto__corregir:hover {
-  background: rgba(127, 127, 127, 0.2);
+  background: color-mix(in srgb, var(--brand-nav) 10%, transparent);
+}
+
+:host([data-theme='oscuro']) .aviso__cerrar:hover,
+:host([data-theme='oscuro']) .conflicto__corregir:hover {
+  background: color-mix(in srgb, var(--brand-on-dark) 10%, transparent);
 }
 
 .editor {
@@ -161,7 +177,9 @@
   gap: 1.1rem;
   padding: 1.4rem 1.25rem;
   border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
   background: var(--color-surface);
+  box-shadow: var(--vidrio-sombra);
   font-size: var(--md-sys-typescale-body-medium-size);
   line-height: var(--md-sys-typescale-body-medium-line-height);
 }
@@ -175,8 +193,10 @@
   align-items: center;
   gap: 0.375rem;
   margin: 0;
-  font-size: var(--md-sys-typescale-title-medium-size);
+  font-family: var(--font-display);
+  font-size: 1.15rem;
   font-weight: 400;
+  letter-spacing: 0.02em;
   color: var(--color-error);
 }
 
@@ -197,7 +217,9 @@
   margin: 1rem auto 0;
   padding: 2rem 2.25rem;
   border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
   background: var(--color-surface);
+  box-shadow: var(--vidrio-sombra);
 }
 
 @media (max-width: 900px) {

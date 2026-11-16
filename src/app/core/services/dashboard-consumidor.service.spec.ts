@@ -51,11 +51,11 @@ describe('DashboardConsumidorService', () => {
     expect(servicio.buscarCodigo('CRH-9999-0000')).toBeNull();
   });
 
-  it('alterna el tema entre oscuro y claro', () => {
-    expect(servicio.tema()).toBe('oscuro');
-    servicio.establecerTema('claro');
+  it('alterna el tema entre claro y oscuro', () => {
     expect(servicio.tema()).toBe('claro');
     servicio.establecerTema('oscuro');
     expect(servicio.tema()).toBe('oscuro');
+    servicio.establecerTema('claro');
+    expect(servicio.tema()).toBe('claro');
   });
 });

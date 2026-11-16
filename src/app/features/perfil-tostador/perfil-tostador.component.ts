@@ -28,6 +28,9 @@ export class PerfilTostadorComponent {
 
   protected readonly apiCargada = toSignal(inject(GoogleMapsService).apiCargada);
   protected readonly tema = this.temas.tema;
+  protected readonly logo = computed(() =>
+    this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',
+  );
   private readonly id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id') ?? '')), {
     initialValue: this.route.snapshot.paramMap.get('id') ?? '',
   });
@@ -73,7 +76,7 @@ export class PerfilTostadorComponent {
     zoomControl: true,
     clickableIcons: false,
     gestureHandling: 'cooperative',
-    backgroundColor: this.tema() === 'oscuro' ? '#10263b' : '#cfe0c8',
+    backgroundColor: this.tema() === 'oscuro' ? '#1c3426' : '#e8dccb',
   }));
 
   protected readonly zoom = ZOOM_PERFIL;

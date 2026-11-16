@@ -4,13 +4,13 @@ import { TemaDashboard } from '../models/dashboard-cafetalero.model';
 
 export const CLAVE_TEMA = 'cranhua-tema';
 
-// localStorage puede fallar (modo privado, cookies bloqueadas); en ese caso se usa el oscuro
+// Por defecto claro (fondo blanco / paneles crema). localStorage puede fallar en modo privado.
 function temaGuardado(): TemaDashboard {
   try {
     const guardado = localStorage.getItem(CLAVE_TEMA);
-    return guardado === 'claro' || guardado === 'oscuro' ? guardado : 'oscuro';
+    return guardado === 'claro' || guardado === 'oscuro' ? guardado : 'claro';
   } catch {
-    return 'oscuro';
+    return 'claro';
   }
 }
 

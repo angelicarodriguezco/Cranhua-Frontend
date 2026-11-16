@@ -1,6 +1,11 @@
 import { Component, computed, inject, signal } from '@angular/core';
 
-import { FiltrosCosechas, SIN_FILTROS } from '../../../core/models/cosecha-disponible.model';
+import {
+  FiltrosCosechas,
+  RANGOS_PRECIO_COSECHA,
+  RangoPrecioCosecha,
+  SIN_FILTROS,
+} from '../../../core/models/cosecha-disponible.model';
 import { ZONAS_CAFETALERAS, ZonaCafetalera } from '../../../core/models/finca.model';
 import {
   CosechasDisponiblesService,
@@ -21,14 +26,31 @@ export class ExploradorCosechasComponent {
   private readonly cosechas = inject(CosechasDisponiblesService).cosechas;
 
   protected readonly filtros = signal<FiltrosCosechas>(SIN_FILTROS);
+  protected readonly rangosPrecio = (
+    Object.entries(RANGOS_PRECIO_COSECHA) as [RangoPrecioCosecha, { etiqueta: string }][]
+  ).map(([id, rango]) => ({ id, etiqueta: rango.etiqueta }));
+
   protected readonly sinFiltros = computed(() => {
     const f = this.filtros();
-    return !f.soloDisponibles && !f.zona && !f.soloFlorales && !f.soloHoney;
+    return (
+      !f.soloDisponibles &&
+      !f.zona &&
+      !f.variedad &&
+      !f.rangoPrecio &&
+      !f.soloFlorales &&
+      !f.soloHoney
+    );
   });
+
   // Solo las zonas que tienen cosechas, en el orden de la lista del ICAFE
   protected readonly zonas = computed(() =>
     ZONAS_CAFETALERAS.filter((zona) => this.cosechas().some((c) => c.zona === zona)),
   );
+
+  protected readonly variedades = computed(() =>
+    [...new Set(this.cosechas().map((c) => c.variedad))].sort((a, b) => a.localeCompare(b, 'es')),
+  );
+
   protected readonly cosechasFiltradas = computed(() =>
     filtrarCosechas(this.cosechas(), this.filtros()),
   );
@@ -44,5 +66,15 @@ export class ExploradorCosechasComponent {
   protected elegirZona(evento: Event): void {
     const valor = (evento.target as HTMLSelectElement).value;
     this.filtros.update((f) => ({ ...f, zona: (valor || null) as ZonaCafetalera | null }));
+  }
+
+  protected elegirVariedad(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value;
+    this.filtros.update((f) => ({ ...f, variedad: valor || null }));
+  }
+
+  protected elegirPrecio(evento: Event): void {
+    const valor = (evento.target as HTMLSelectElement).value as RangoPrecioCosecha | '';
+    this.filtros.update((f) => ({ ...f, rangoPrecio: valor || null }));
   }
 }

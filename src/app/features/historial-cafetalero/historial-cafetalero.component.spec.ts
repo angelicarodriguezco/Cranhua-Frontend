@@ -85,12 +85,12 @@ describe('HistorialCafetaleroComponent', () => {
 
   it('comparte el tema global con el panel', () => {
     const contenedor = () => pagina.querySelector('.historial')?.getAttribute('data-theme');
-    expect(contenedor()).toBe('oscuro');
+    expect(contenedor()).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
-    expect(contenedor()).toBe('claro');
-    expect(TestBed.inject(DashboardCafetaleroService).tema()).toBe('claro');
+    expect(contenedor()).toBe('oscuro');
+    expect(TestBed.inject(DashboardCafetaleroService).tema()).toBe('oscuro');
   });
 });

@@ -1,11 +1,13 @@
 import {
   afterNextRender,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
   ElementRef,
   inject,
   Injector,
+  NgZone,
   signal,
   viewChild,
 } from '@angular/core';
@@ -20,7 +22,6 @@ import {
   SALUDO_KIANA,
 } from '../../../core/models/kiana-chat.model';
 import { KianaChatService } from '../../../core/services/kiana-chat.service';
-import { TemaService } from '../../../core/services/tema.service';
 
 const AVATAR_IDLE = '/images/kiana/idle.png';
 const AVATAR_PENSANDO = '/images/kiana/pensando.png';
@@ -30,25 +31,28 @@ const TEXTO_PENSANDO = '... (Pensando)';
 const TEXTO_PROMPTER = '¿Necesitás ayuda? Preguntame lo que sea !';
 const PLACEHOLDER_INPUT = 'Escribí tu mensaje...';
 const DISCLAIMER_KIANA = 'Kiana puede cometer errores. Verificá la información importante.';
+const MS_AUTO_OCULTAR_PROMPTER = 6000;
 
 @Component({
   selector: 'app-kiana-widget',
   templateUrl: './kiana-widget.component.html',
   styleUrl: './kiana-widget.component.css',
-  host: { '[attr.data-theme]': 'tema()' },
+  host: { '[attr.data-theme]': "'claro'" },
 })
 export class KianaWidgetComponent {
   private readonly chat = inject(KianaChatService);
-  private readonly temas = inject(TemaService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
+  private readonly zone = inject(NgZone);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   private readonly hilo = viewChild<ElementRef<HTMLElement>>('hilo');
   private contadorIds = 0;
   private saludoAgregado = false;
+  private timerPrompter: ReturnType<typeof setTimeout> | null = null;
 
-  protected readonly tema = this.temas.tema;
   protected readonly abierto = signal(false);
+  protected readonly prompterVisible = signal(true);
   protected readonly mensaje = signal('');
   protected readonly mensajes = signal<MensajeKiana[]>([]);
   protected readonly pensando = signal(false);
@@ -66,6 +70,23 @@ export class KianaWidgetComponent {
     () => !this.pensando() && this.mensaje().trim().length > 0,
   );
 
+  constructor() {
+    afterNextRender(
+      () => {
+        this.timerPrompter = setTimeout(() => {
+          this.zone.run(() => {
+            this.prompterVisible.set(false);
+            this.timerPrompter = null;
+            this.cdr.detectChanges();
+          });
+        }, MS_AUTO_OCULTAR_PROMPTER);
+      },
+      { injector: this.injector },
+    );
+
+    this.destroyRef.onDestroy(() => this.limpiarTimerPrompter());
+  }
+
   protected avatarMensaje(mensaje: MensajeKiana): string {
     if (mensaje.rol === 'error') {
       return AVATAR_PENSANDO;
@@ -78,13 +99,23 @@ export class KianaWidgetComponent {
   }
 
   protected abrir(): void {
+    this.ocultarPrompter();
     this.abierto.set(true);
     this.asegurarSaludo();
+    this.cdr.detectChanges();
     this.scrollAlFinal();
   }
 
   protected cerrar(): void {
     this.abierto.set(false);
+    this.cdr.detectChanges();
+  }
+
+  protected ocultarPrompter(event?: Event): void {
+    event?.stopPropagation();
+    this.prompterVisible.set(false);
+    this.limpiarTimerPrompter();
+    this.cdr.detectChanges();
   }
 
   protected onMensajeInput(event: Event): void {
@@ -106,6 +137,13 @@ export class KianaWidgetComponent {
     }
     event.preventDefault();
     this.onEnviar();
+  }
+
+  private limpiarTimerPrompter(): void {
+    if (this.timerPrompter !== null) {
+      clearTimeout(this.timerPrompter);
+      this.timerPrompter = null;
+    }
   }
 
   private asegurarSaludo(): void {
@@ -130,6 +168,7 @@ export class KianaWidgetComponent {
     this.mensaje.set('');
     this.mensajes.update((actuales) => [...actuales, this.crearMensaje('usuario', normalizado)]);
     this.pensando.set(true);
+    this.cdr.detectChanges();
     this.scrollAlFinal();
 
     this.chat
@@ -137,20 +176,26 @@ export class KianaWidgetComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
-          this.pensando.set(false);
-          this.mensajes.update((actuales) => [
-            ...actuales,
-            this.crearMensaje('kiana', respuesta.texto),
-          ]);
-          this.scrollAlFinal();
+          this.zone.run(() => {
+            this.pensando.set(false);
+            this.mensajes.update((actuales) => [
+              ...actuales,
+              this.crearMensaje('kiana', respuesta.texto),
+            ]);
+            this.cdr.detectChanges();
+            this.scrollAlFinal();
+          });
         },
         error: (error: ErrorKiana) => {
-          this.pensando.set(false);
-          this.mensajes.update((actuales) => [
-            ...actuales,
-            this.crearMensaje('error', error?.mensaje ?? MENSAJE_ERROR_KIANA),
-          ]);
-          this.scrollAlFinal();
+          this.zone.run(() => {
+            this.pensando.set(false);
+            this.mensajes.update((actuales) => [
+              ...actuales,
+              this.crearMensaje('error', error?.mensaje ?? MENSAJE_ERROR_KIANA),
+            ]);
+            this.cdr.detectChanges();
+            this.scrollAlFinal();
+          });
         },
       });
   }

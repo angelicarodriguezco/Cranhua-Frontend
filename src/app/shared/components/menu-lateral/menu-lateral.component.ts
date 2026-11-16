@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, map } from 'rxjs';
@@ -31,7 +31,7 @@ function iniciales(nombreCompleto: string): string {
   templateUrl: './menu-lateral.component.html',
   styleUrl: './menu-lateral.component.css',
 })
-export class MenuLateralComponent {
+export class MenuLateralComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly cuenta = inject(CuentaService).cuenta;
@@ -40,6 +40,7 @@ export class MenuLateralComponent {
       .obtenerActual()
       .pipe(map((cafeteria) => cafeteria ?? null)),
   );
+  private nodoTooltip: HTMLDivElement | null = null;
 
   protected readonly tema = inject(TemaService).tema;
   protected readonly navCuenta = NAV_CUENTA;
@@ -76,7 +77,40 @@ export class MenuLateralComponent {
     };
   });
 
+  ngOnDestroy(): void {
+    this.ocultarTooltip();
+  }
+
   protected cerrarSesion(): void {
+    this.ocultarTooltip();
     this.auth.cerrarSesion();
+  }
+
+  protected mostrarTooltip(evento: Event, texto: string): void {
+    const destino = evento.currentTarget as HTMLElement | null;
+    if (!destino || !texto) {
+      return;
+    }
+
+    const rect = destino.getBoundingClientRect();
+    const margen = 10;
+    const abajo = window.innerWidth <= 900;
+
+    this.ocultarTooltip();
+    const nodo = document.createElement('div');
+    nodo.className = abajo
+      ? 'menu-lateral-tooltip menu-lateral-tooltip--abajo'
+      : 'menu-lateral-tooltip';
+    nodo.setAttribute('role', 'tooltip');
+    nodo.textContent = texto;
+    nodo.style.top = `${abajo ? rect.bottom + 6 : rect.top + rect.height / 2}px`;
+    nodo.style.left = `${abajo ? rect.left : rect.right + margen}px`;
+    document.body.appendChild(nodo);
+    this.nodoTooltip = nodo;
+  }
+
+  protected ocultarTooltip(): void {
+    this.nodoTooltip?.remove();
+    this.nodoTooltip = null;
   }
 }

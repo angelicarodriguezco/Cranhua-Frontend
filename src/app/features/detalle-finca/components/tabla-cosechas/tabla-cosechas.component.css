@@ -4,6 +4,9 @@
 
 .tabla-wrap {
   overflow-x: auto;
+  border: 1px solid var(--divider);
+  border-radius: 0.65rem;
+  background: var(--item-bg, var(--brand-surface));
 }
 
 table {
@@ -14,27 +17,38 @@ table {
 
 th,
 td {
-  padding: 0.55rem 0.5rem;
+  padding: 0.8rem 1rem;
   border-bottom: 1px solid var(--divider);
-  font-size: 0.8125rem;
+  font-size: 0.9rem;
   text-align: left;
   white-space: nowrap;
+  vertical-align: middle;
 }
 
 th {
   color: var(--table-header);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  background: color-mix(in srgb, var(--brand-bg) 55%, var(--brand-surface));
 }
 
 td {
   color: var(--text);
 }
 
+td:first-child {
+  font-weight: 600;
+  color: var(--text-heading);
+}
+
 tbody tr:last-child td {
   border-bottom: none;
+}
+
+tbody tr:hover td {
+  background: color-mix(in srgb, var(--brand-button) 5%, transparent);
 }
 
 .lote {
