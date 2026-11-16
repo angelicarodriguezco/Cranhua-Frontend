@@ -197,4 +197,3 @@ describe('DashboardConsumidorComponent', () => {
     expect(componente['zoom']()).toBe(zoomInicial);
   });
 });
-

@@ -16,7 +16,12 @@ import { MenuPublicoService } from '../../core/services/menu-publico.service';
 import { PerfilCafeteriaService } from '../../core/services/perfil-cafeteria.service';
 import { PerfilFincaPublicoService } from '../../core/services/perfil-finca-publico.service';
 import { PerfilTostadorService } from '../../core/services/perfil-tostador.service';
-import { formatearColones, formatearKg, formatearMesAnio, listar } from '../../shared/utils/formato';
+import {
+  formatearColones,
+  formatearKg,
+  formatearMesAnio,
+  listar,
+} from '../../shared/utils/formato';
 
 const COLORES_TIPO: Record<TipoPuntoMapaConsumidor, string> = {
   finca: '#1c3426',

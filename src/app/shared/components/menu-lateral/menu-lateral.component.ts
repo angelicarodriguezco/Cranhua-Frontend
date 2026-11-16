@@ -98,7 +98,9 @@ export class MenuLateralComponent implements OnDestroy {
 
     this.ocultarTooltip();
     const nodo = document.createElement('div');
-    nodo.className = abajo ? 'menu-lateral-tooltip menu-lateral-tooltip--abajo' : 'menu-lateral-tooltip';
+    nodo.className = abajo
+      ? 'menu-lateral-tooltip menu-lateral-tooltip--abajo'
+      : 'menu-lateral-tooltip';
     nodo.setAttribute('role', 'tooltip');
     nodo.textContent = texto;
     nodo.style.top = `${abajo ? rect.bottom + 6 : rect.top + rect.height / 2}px`;

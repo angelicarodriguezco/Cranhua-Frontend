@@ -85,13 +85,6 @@ describe('PerfilFincaPublicoComponent', () => {
   });
 
   it('el toggle cambia data-theme en el host', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    expect(pagina.querySelector<HTMLImageElement>('.marca__logo')?.getAttribute('src')).toBe(
-      '/images/logo-cranhua.png',
-    );
-
-    boton('Claro').click();
-    fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
     expect(pagina.querySelector<HTMLImageElement>('.marca__logo')?.getAttribute('src')).toBe(
       '/images/logo-cranhua-negro.png',
@@ -100,6 +93,13 @@ describe('PerfilFincaPublicoComponent', () => {
     boton('Oscuro').click();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.querySelector<HTMLImageElement>('.marca__logo')?.getAttribute('src')).toBe(
+      '/images/logo-cranhua.png',
+    );
+
+    boton('Claro').click();
+    fixture.detectChanges();
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
   });
 
   it('muestra estado vacío si el id no existe', () => {

@@ -30,8 +30,19 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(28, 52, 38, 0.55) 0%, rgba(28, 52, 38, 0.78) 55%, rgba(28, 52, 38, 0.92) 100%),
-    linear-gradient(90deg, rgba(28, 52, 38, 0.35) 0%, transparent 40%, transparent 60%, rgba(28, 52, 38, 0.35) 100%);
+    linear-gradient(
+      180deg,
+      rgba(28, 52, 38, 0.55) 0%,
+      rgba(28, 52, 38, 0.78) 55%,
+      rgba(28, 52, 38, 0.92) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(28, 52, 38, 0.35) 0%,
+      transparent 40%,
+      transparent 60%,
+      rgba(28, 52, 38, 0.35) 100%
+    );
 }
 
 .portada__contenido {

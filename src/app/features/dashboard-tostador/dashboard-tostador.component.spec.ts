@@ -100,14 +100,14 @@ describe('DashboardTostadorComponent', () => {
     ]);
   });
 
-  it('muestra el rol tostador en el perfil y alterna entre tema oscuro y claro', () => {
+  it('muestra el rol tostador en el perfil y alterna entre tema claro y oscuro', () => {
     expect(pagina.querySelector('.perfil-rol')?.textContent).toContain('Tostador');
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     const dashboard = pagina.querySelector('.dashboard')!;
-    expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
+    expect(dashboard.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(dashboard.getAttribute('data-theme')).toBe('claro');
+    expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
   });
 });

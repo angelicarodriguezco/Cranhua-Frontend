@@ -39,7 +39,13 @@
       </a>
 
       <form class="barra-busqueda" (submit)="$event.preventDefault(); buscar()" autocomplete="off">
-        <img class="barra-busqueda__marca" [src]="logoSrc()" width="110" height="28" alt="Cránhua" />
+        <img
+          class="barra-busqueda__marca"
+          [src]="logoSrc()"
+          width="110"
+          height="28"
+          alt="Cránhua"
+        />
         <input
           class="barra-busqueda__input"
           type="search"
@@ -96,108 +102,108 @@
       </div>
 
       <div class="panel-negocio__cuerpo">
-      <div class="panel-negocio__cabecera">
-        <span class="panel-negocio__rol" [style.--rol-color]="colorTipo(panel.punto.tipo)">
-          {{ panel.rol }}
-        </span>
-      </div>
+        <div class="panel-negocio__cabecera">
+          <span class="panel-negocio__rol" [style.--rol-color]="colorTipo(panel.punto.tipo)">
+            {{ panel.rol }}
+          </span>
+        </div>
 
-      <h2 id="panel-negocio-titulo" class="panel-negocio__titulo">{{ panel.punto.nombre }}</h2>
-      <p class="panel-negocio__ubicacion">{{ panel.punto.ubicacionLabel }}</p>
-      <p class="panel-negocio__desc">{{ panel.descripcion }}</p>
+        <h2 id="panel-negocio-titulo" class="panel-negocio__titulo">{{ panel.punto.nombre }}</h2>
+        <p class="panel-negocio__ubicacion">{{ panel.punto.ubicacionLabel }}</p>
+        <p class="panel-negocio__desc">{{ panel.descripcion }}</p>
 
-      @if (panel.codigoResaltado) {
-        <p class="panel-negocio__codigo">
-          Código encontrado:
-          <strong>{{ panel.codigoResaltado }}</strong>
-        </p>
-      }
-
-      <dl class="panel-negocio__datos">
-        @for (dato of panel.datos; track dato.etiqueta) {
-          <div class="panel-negocio__dato">
-            <dt>{{ dato.etiqueta }}</dt>
-            <dd>{{ dato.valor }}</dd>
-          </div>
+        @if (panel.codigoResaltado) {
+          <p class="panel-negocio__codigo">
+            Código encontrado:
+            <strong>{{ panel.codigoResaltado }}</strong>
+          </p>
         }
-      </dl>
 
-      @if (panel.enlaces.length) {
-        <section class="panel-negocio__relacionados" [attr.aria-label]="panel.tituloEnlaces">
-          <h3>{{ panel.tituloEnlaces }}</h3>
-          <ul>
-            @for (enlace of panel.enlaces; track enlace.id) {
-              <li>
-                <button
-                  type="button"
-                  class="panel-negocio__chip"
-                  (click)="abrirDesdePanel(enlace.id)"
-                >
-                  <span class="panel-negocio__chip-nombre">{{ enlace.nombre }}</span>
-                  <span class="panel-negocio__chip-detalle">{{ enlace.detalle }}</span>
-                </button>
-              </li>
-            }
-          </ul>
-        </section>
-      }
+        <dl class="panel-negocio__datos">
+          @for (dato of panel.datos; track dato.etiqueta) {
+            <div class="panel-negocio__dato">
+              <dt>{{ dato.etiqueta }}</dt>
+              <dd>{{ dato.valor }}</dd>
+            </div>
+          }
+        </dl>
 
-      @if (panel.menu; as menu) {
-        <section class="panel-menu" [class.panel-menu--abierto]="menuAbierto()">
-          <button
-            type="button"
-            class="panel-menu__toggle"
-            [attr.aria-expanded]="menuAbierto()"
-            aria-controls="panel-menu-contenido"
-            (click)="alternarMenu()"
-          >
-            <span>{{ menuAbierto() ? 'Ocultar menú' : 'Ver menú' }}</span>
-            <span class="panel-menu__chevron" aria-hidden="true"></span>
-          </button>
+        @if (panel.enlaces.length) {
+          <section class="panel-negocio__relacionados" [attr.aria-label]="panel.tituloEnlaces">
+            <h3>{{ panel.tituloEnlaces }}</h3>
+            <ul>
+              @for (enlace of panel.enlaces; track enlace.id) {
+                <li>
+                  <button
+                    type="button"
+                    class="panel-negocio__chip"
+                    (click)="abrirDesdePanel(enlace.id)"
+                  >
+                    <span class="panel-negocio__chip-nombre">{{ enlace.nombre }}</span>
+                    <span class="panel-negocio__chip-detalle">{{ enlace.detalle }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </section>
+        }
 
-          @if (menuAbierto()) {
-            <div id="panel-menu-contenido" class="panel-menu__contenido">
-              <div class="panel-menu__bloque">
-                <h3>Cafés</h3>
-                <ul class="panel-menu__lista">
-                  @for (cafe of menu.cafes; track cafe.id) {
-                    <li class="panel-menu__item">
-                      <div class="panel-menu__info">
-                        <p class="panel-menu__nombre">{{ cafe.nombre }}</p>
-                        <p class="panel-menu__detalle">
-                          Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
-                        </p>
-                        <button
-                          type="button"
-                          class="panel-menu__origen"
-                          (click)="abrirDesdePanel(cafe.fincaOrigen.id)"
-                        >
-                          Ver origen →
-                        </button>
-                      </div>
-                      <span class="panel-menu__precio">{{ precio(cafe.precio) }}</span>
-                    </li>
-                  }
-                </ul>
-              </div>
+        @if (panel.menu; as menu) {
+          <section class="panel-menu" [class.panel-menu--abierto]="menuAbierto()">
+            <button
+              type="button"
+              class="panel-menu__toggle"
+              [attr.aria-expanded]="menuAbierto()"
+              aria-controls="panel-menu-contenido"
+              (click)="alternarMenu()"
+            >
+              <span>{{ menuAbierto() ? 'Ocultar menú' : 'Ver menú' }}</span>
+              <span class="panel-menu__chevron" aria-hidden="true"></span>
+            </button>
 
-              @if (menu.otrasComidas.length) {
+            @if (menuAbierto()) {
+              <div id="panel-menu-contenido" class="panel-menu__contenido">
                 <div class="panel-menu__bloque">
-                  <h3>Otras comidas</h3>
+                  <h3>Cafés</h3>
                   <ul class="panel-menu__lista">
-                    @for (comida of menu.otrasComidas; track comida.id) {
+                    @for (cafe of menu.cafes; track cafe.id) {
                       <li class="panel-menu__item">
-                        <p class="panel-menu__nombre">{{ comida.nombre }}</p>
-                        <span class="panel-menu__precio">{{ precio(comida.precio) }}</span>
+                        <div class="panel-menu__info">
+                          <p class="panel-menu__nombre">{{ cafe.nombre }}</p>
+                          <p class="panel-menu__detalle">
+                            Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
+                          </p>
+                          <button
+                            type="button"
+                            class="panel-menu__origen"
+                            (click)="abrirDesdePanel(cafe.fincaOrigen.id)"
+                          >
+                            Ver origen →
+                          </button>
+                        </div>
+                        <span class="panel-menu__precio">{{ precio(cafe.precio) }}</span>
                       </li>
                     }
                   </ul>
                 </div>
-              }
-            </div>
-          }
-        </section>
-      }
+
+                @if (menu.otrasComidas.length) {
+                  <div class="panel-menu__bloque">
+                    <h3>Otras comidas</h3>
+                    <ul class="panel-menu__lista">
+                      @for (comida of menu.otrasComidas; track comida.id) {
+                        <li class="panel-menu__item">
+                          <p class="panel-menu__nombre">{{ comida.nombre }}</p>
+                          <span class="panel-menu__precio">{{ precio(comida.precio) }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+        }
       </div>
     </aside>
   }

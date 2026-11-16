@@ -36,12 +36,12 @@ describe('ExplorarCosechasComponent', () => {
     expect(rutas).toContain('/tostador/cosechas/cosecha-caturra-catalina');
   });
 
-  it('arranca en tema oscuro y alterna a claro', () => {
+  it('arranca en tema claro y alterna a oscuro', () => {
     const vista = pagina.querySelector('.dashboard')!;
-    expect(vista.getAttribute('data-theme')).toBe('oscuro');
+    expect(vista.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(vista.getAttribute('data-theme')).toBe('claro');
+    expect(vista.getAttribute('data-theme')).toBe('oscuro');
   });
 });
