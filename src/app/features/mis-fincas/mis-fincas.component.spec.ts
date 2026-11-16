@@ -127,10 +127,10 @@ describe('MisFincasComponent', () => {
   it('permite alternar entre tema oscuro y claro', () => {
     responder([]);
     const root = elemento.querySelector('.mis-fincas')!;
-    expect(root.getAttribute('data-theme')).toBe('oscuro');
+    expect(root.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(root.getAttribute('data-theme')).toBe('claro');
+    expect(root.getAttribute('data-theme')).toBe('oscuro');
   });
 });

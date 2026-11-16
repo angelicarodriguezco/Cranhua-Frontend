@@ -114,26 +114,6 @@
         }
       </section>
 
-      <section class="vidrio seccion" aria-labelledby="titulo-preferencias">
-        <h2 id="titulo-preferencias" class="seccion__titulo">Preferencias</h2>
-        <div class="preferencia">
-          <div>
-            <p class="preferencia__titulo">Apariencia</p>
-            <p class="seccion__texto" id="ayuda-apariencia">Elegí entre modo claro y modo oscuro</p>
-          </div>
-          <button
-            type="button"
-            class="switch"
-            role="switch"
-            [attr.aria-checked]="tema() === 'oscuro'"
-            aria-label="Modo oscuro"
-            aria-describedby="ayuda-apariencia"
-            (click)="alternarTema()"
-          >
-            <span class="switch__perilla" aria-hidden="true"></span>
-          </button>
-        </div>
-      </section>
     } @else {
       <header class="encabezado">
         <div>

@@ -15,16 +15,15 @@
   border-radius: var(--radius-card);
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
-  backdrop-filter: blur(var(--blur-glass));
-  -webkit-backdrop-filter: blur(var(--blur-glass));
   color: var(--text);
 }
 
 .tarjeta__nombre {
   margin: 0 0 0.45rem;
-  font-size: 1.05rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   color: var(--text-heading);
 }
 
@@ -41,7 +40,7 @@
   flex: 0 0 auto;
   width: 0.9rem;
   height: 0.9rem;
-  fill: var(--pin, #c43b3b);
+  fill: var(--pin, var(--brand-accent));
 }
 
 .tarjeta__pills {

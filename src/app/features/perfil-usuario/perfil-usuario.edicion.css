@@ -173,53 +173,6 @@
   margin-top: 0.65rem;
 }
 
-.preferencia {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 0.6rem;
-}
-
-.preferencia__titulo {
-  margin: 0 0 0.15rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.switch {
-  position: relative;
-  flex-shrink: 0;
-  width: 3rem;
-  height: 1.7rem;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: var(--switch-fondo);
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.switch[aria-checked='true'] {
-  background: var(--btn-dorado);
-}
-
-.switch__perilla {
-  position: absolute;
-  top: 0.2rem;
-  left: 0.2rem;
-  width: 1.3rem;
-  height: 1.3rem;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease;
-}
-
-.switch[aria-checked='true'] .switch__perilla {
-  transform: translateX(1.3rem);
-}
-
 @media (max-width: 560px) {
   .formulario {
     grid-template-columns: minmax(0, 1fr);

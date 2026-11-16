@@ -167,7 +167,6 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  backdrop-filter: blur(10px);
 }
 
 .portada__cambiar:hover {

@@ -64,6 +64,11 @@
   gap: 0.6rem;
 }
 
+.kiana-fab[hidden],
+.kiana-panel[hidden] {
+  display: none !important;
+}
+
 .kiana-fab__prompter {
   position: relative;
   max-width: 13.5rem;
@@ -153,7 +158,6 @@
   border-radius: 1.125rem;
   background: var(--kiana-panel);
   box-shadow: var(--kiana-sombra-panel);
-  backdrop-filter: blur(13px);
 }
 
 .kiana-panel__header {

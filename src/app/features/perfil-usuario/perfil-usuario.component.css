@@ -90,7 +90,6 @@
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
-  backdrop-filter: blur(10px);
 }
 
 .portada__cambiar:hover {
@@ -378,8 +377,7 @@ app-zona-peligro {
     .avatar__camara,
     .campo__control,
     .red__quitar,
-    .agregar-red,
-    .switch
+    .agregar-red
   ):focus-visible {
   outline: 2px solid var(--seleccion-borde);
   outline-offset: 2px;

@@ -48,7 +48,6 @@
   font-weight: 600;
   background: var(--pill-disponible-bg);
   color: var(--pill-disponible-text);
-  backdrop-filter: blur(6px);
 }
 
 .pill-proxima {

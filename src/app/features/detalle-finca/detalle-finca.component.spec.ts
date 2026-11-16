@@ -158,7 +158,7 @@ describe('DetalleFincaComponent', () => {
     );
     expect(pagina.querySelector('.modal__aviso')?.textContent).toContain(AVISO_ELIMINAR_FINCA);
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
-      'rgba(8, 28, 38, 0.96)',
+      'rgb(255, 255, 255)',
     );
 
     pagina.querySelector<HTMLButtonElement>('.modal__btn--secundario')!.click();

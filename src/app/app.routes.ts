@@ -110,11 +110,6 @@ export const routes: Routes = [
       { path: 'tostadores/:id', component: DetalleTostadorComponent },
       { path: 'pedidos', component: MisPedidosComponent },
       { path: 'mi-cafeteria', component: MiCafeteriaComponent },
-      {
-        path: 'menu',
-        component: PaginaMockComponent,
-        data: { title: 'Publicar en el menú' },
-      },
       { path: 'menu', component: PublicarMenuComponent },
     ],
   },

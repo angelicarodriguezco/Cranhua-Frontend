@@ -33,7 +33,6 @@
   --avatar-anillo: var(--brand-surface);
   --camara-fondo: var(--brand-nav);
   --separador: color-mix(in srgb, var(--brand-nav) 12%, transparent);
-  --switch-fondo: var(--brand-bg-secondary);
   --btn-dorado: var(--brand-button);
   --btn-dorado-hover: var(--brand-button-hover);
   --btn-dorado-texto: var(--brand-on-button);
@@ -76,7 +75,6 @@
   --avatar-anillo: color-mix(in srgb, var(--brand-nav) 90%, #0a1c14);
   --camara-fondo: color-mix(in srgb, var(--brand-nav) 80%, #000);
   --separador: color-mix(in srgb, var(--brand-on-dark) 12%, transparent);
-  --switch-fondo: color-mix(in srgb, var(--brand-on-dark) 18%, transparent);
   --btn-dorado: var(--brand-button);
   --btn-dorado-hover: var(--brand-button-hover);
   --btn-dorado-texto: var(--brand-on-button);

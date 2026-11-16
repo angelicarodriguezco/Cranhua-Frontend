@@ -137,13 +137,13 @@ describe('DetalleTostadorComponent', () => {
     expect(elemento.querySelector('.boton-secundario')?.textContent?.trim()).toBe('Volver');
   });
 
-  it('arranca en tema oscuro y alterna a claro en el host', () => {
+  it('arranca en tema claro y alterna a oscuro en el host', () => {
     crear('tostador-volcan');
-    expect(elemento.getAttribute('data-theme')).toBe('oscuro');
+    expect(elemento.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(elemento.getAttribute('data-theme')).toBe('claro');
+    expect(elemento.getAttribute('data-theme')).toBe('oscuro');
   });
 
   it('avisa si el tostador no tiene café disponible', () => {

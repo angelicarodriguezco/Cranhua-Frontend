@@ -280,11 +280,11 @@ describe('RegistrarCafeteriaComponent', () => {
   });
 
   it('sigue el tema global claro/oscuro', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(DashboardCafeteriaService).alternarTema();
     fixture.detectChanges();
 
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 });

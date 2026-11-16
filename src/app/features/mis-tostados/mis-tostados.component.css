@@ -406,7 +406,6 @@ tr.abierto td {
 
 .dialogo::backdrop {
   background: rgba(5, 12, 20, 0.55);
-  backdrop-filter: blur(3px);
 }
 
 .ficha {

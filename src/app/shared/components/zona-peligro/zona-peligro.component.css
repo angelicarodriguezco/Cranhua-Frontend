@@ -20,7 +20,6 @@
       var(--peligro-fondo, rgba(145, 35, 22, 0.12))
     ),
     var(--card-bg, transparent);
-  backdrop-filter: blur(13px);
 }
 
 h2 {
