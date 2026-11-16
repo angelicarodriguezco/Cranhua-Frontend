@@ -42,9 +42,9 @@
   position: absolute;
   top: 0.65rem;
   right: 0.65rem;
-  padding: 0.28rem 0.7rem;
+  padding: 0.32rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.6875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   background: var(--pill-disponible-bg);
   color: var(--pill-disponible-text);
@@ -67,7 +67,7 @@
 .zona {
   margin: 0;
   color: var(--brand-nav, var(--text-heading));
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -76,7 +76,7 @@
 h3 {
   margin: 0;
   font-family: var(--font-display, inherit);
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: 0.02em;
   color: var(--text-heading);
@@ -86,7 +86,7 @@ h3 {
 .ubicacion {
   margin: 0;
   color: var(--text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.95rem;
 }
 
 .datos {
@@ -98,7 +98,7 @@ h3 {
 
 dt {
   color: var(--text-muted);
-  font-size: 0.6875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -107,14 +107,14 @@ dt {
 dd {
   margin: 0.15rem 0 0;
   color: var(--text-heading);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .notas {
   margin: 0.1rem 0 0;
   color: var(--text-muted);
-  font-size: 0.8125rem;
+  font-size: 0.95rem;
   line-height: 1.4;
   font-style: italic;
 }
@@ -135,12 +135,12 @@ dd {
   align-items: baseline;
   gap: 0.3rem;
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .precio strong {
   color: var(--brand-accent, var(--text-heading));
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.01em;
 }
@@ -148,7 +148,7 @@ dd {
 .tarjeta-pie a {
   color: var(--link);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -162,7 +162,7 @@ dd {
   padding: 2.25rem 1rem;
   text-align: center;
   color: var(--text-muted);
-  font-size: 0.9rem;
+  font-size: 1.05rem;
   border: 1px dashed var(--divider);
   border-radius: 0.75rem;
 }
