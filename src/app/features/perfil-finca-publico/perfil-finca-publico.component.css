@@ -1,79 +1,60 @@
 :host {
-  --font-ui: 'Inter', system-ui, sans-serif;
-  --gold: #c9a227;
-  --cta: #a57008;
-  --cta-text: #fff;
-  --radius-card: 1.25rem;
-  --blur-glass: 14px;
+  --font-ui: var(--font-family);
+  --gold: var(--brand-button);
+  --cta: var(--brand-button);
+  --cta-text: var(--brand-on-button);
+  --radius-card: 0.75rem;
 
-  --bg-image: url('/images/bg-claro.jpg');
-  --overlay: linear-gradient(
-    180deg,
-    rgba(245, 239, 227, 0.35) 0%,
-    rgba(255, 255, 255, 0.12) 40%,
-    rgba(8, 50, 62, 0.18) 100%
-  );
-  --card-bg: rgba(255, 255, 255, 0.72);
-  --card-outline: rgba(255, 255, 255, 0.78);
-  --card-shadow: 0 28px 64px rgba(8, 50, 62, 0.18);
-  --text: #1c3426;
-  --text-muted: #5c6b5e;
-  --divider: rgba(28, 52, 38, 0.1);
-  --badge-bg: rgba(63, 122, 79, 0.14);
-  --badge-text: #2f5c3c;
-  --portada-placeholder: #3d6f9e;
-  --chip-bg: rgba(255, 255, 255, 0.55);
-  --chip-border: rgba(28, 52, 38, 0.16);
-  --chip-hover: rgba(255, 255, 255, 0.85);
+  --card-bg: var(--brand-surface);
+  --card-outline: rgba(41, 43, 39, 0.1);
+  --card-shadow: 0 18px 40px rgba(28, 52, 38, 0.08);
+  --text: var(--brand-text);
+  --text-muted: var(--brand-text-muted);
+  --divider: rgba(41, 43, 39, 0.12);
+  --badge-bg: rgba(28, 52, 38, 0.1);
+  --badge-text: var(--brand-nav);
+  --portada-placeholder: var(--brand-nav);
+  --chip-bg: var(--brand-bg-secondary);
+  --chip-border: rgba(41, 43, 39, 0.12);
+  --chip-hover: #ddd0bb;
   --cosecha-resalte-bg: rgba(165, 112, 8, 0.14);
   --cosecha-resalte-border: rgba(165, 112, 8, 0.55);
-  --toggle-bg: rgba(20, 35, 32, 0.88);
-  --toggle-text: rgba(245, 239, 227, 0.72);
-  --overlay-border: rgba(20, 40, 34, 0.08);
-  --overlay-shadow: 0 10px 28px rgba(8, 50, 62, 0.16);
+  --toggle-bg: var(--brand-nav);
+  --toggle-text: rgba(246, 240, 231, 0.72);
+  --overlay-border: rgba(41, 43, 39, 0.1);
+  --overlay-shadow: 0 10px 28px rgba(28, 52, 38, 0.14);
 
   display: block;
   min-height: 100dvh;
   font-family: var(--font-ui);
   color: var(--text);
   color-scheme: light;
-  background-color: #6f8fa8;
-  background-image: var(--overlay), var(--bg-image);
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  background: var(--brand-bg);
 }
 
 :host([data-theme='oscuro']) {
-  --bg-image: url('/images/bg-oscuro.jpg');
-  --overlay: linear-gradient(
-    180deg,
-    rgba(5, 8, 20, 0.55) 0%,
-    rgba(5, 8, 20, 0.18) 35%,
-    rgba(10, 14, 32, 0.32) 100%
-  );
-  --card-bg: rgba(8, 28, 38, 0.62);
-  --card-outline: rgba(255, 255, 255, 0.12);
-  --card-shadow: 0 28px 64px rgba(0, 0, 0, 0.45);
-  --text: #f5efe3;
-  --text-muted: #aec0bc;
-  --divider: rgba(255, 255, 255, 0.1);
-  --badge-bg: rgba(201, 162, 39, 0.18);
-  --badge-text: #e3b65b;
-  --portada-placeholder: #1e4a63;
-  --chip-bg: rgba(255, 255, 255, 0.06);
-  --chip-border: rgba(255, 255, 255, 0.16);
-  --chip-hover: rgba(245, 239, 227, 0.1);
-  --cosecha-resalte-bg: rgba(217, 164, 65, 0.18);
-  --cosecha-resalte-border: rgba(217, 164, 65, 0.55);
-  --toggle-bg: rgba(8, 28, 38, 0.92);
-  --toggle-text: rgba(245, 239, 227, 0.55);
-  --overlay-border: rgba(255, 255, 255, 0.12);
-  --overlay-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
-  --cta-text: #1c1407;
+  --card-bg: #244536;
+  --card-outline: rgba(246, 240, 231, 0.12);
+  --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --text: var(--brand-on-dark);
+  --text-muted: rgba(246, 240, 231, 0.7);
+  --divider: rgba(246, 240, 231, 0.12);
+  --badge-bg: rgba(165, 112, 8, 0.2);
+  --badge-text: #f0d9a8;
+  --portada-placeholder: #1a2f24;
+  --chip-bg: rgba(246, 240, 231, 0.1);
+  --chip-border: rgba(246, 240, 231, 0.14);
+  --chip-hover: rgba(246, 240, 231, 0.16);
+  --cosecha-resalte-bg: rgba(165, 112, 8, 0.22);
+  --cosecha-resalte-border: rgba(165, 112, 8, 0.6);
+  --toggle-bg: rgba(18, 36, 26, 0.95);
+  --toggle-text: rgba(246, 240, 231, 0.55);
+  --overlay-border: rgba(246, 240, 231, 0.14);
+  --overlay-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+  --cta-text: var(--brand-on-button);
 
   color-scheme: dark;
-  background-color: #061f27;
+  background: var(--brand-nav);
 }
 
 .perfil {
@@ -108,7 +89,7 @@
   gap: 0.2rem;
   padding: 0.28rem;
   border: 1px solid var(--overlay-border);
-  border-radius: 999px;
+  border-radius: 0.5rem;
   background: var(--toggle-bg);
   box-shadow: var(--overlay-shadow);
 }
@@ -118,7 +99,7 @@
   height: 2.15rem;
   padding: 0 0.85rem;
   border: 0;
-  border-radius: 999px;
+  border-radius: 0.35rem;
   background: transparent;
   color: var(--toggle-text);
   font: inherit;
@@ -128,8 +109,8 @@
 }
 
 .toggle-tema__opcion--activa {
-  background: var(--gold);
-  color: #142320;
+  background: var(--cta);
+  color: var(--cta-text);
   font-weight: 600;
 }
 
@@ -147,8 +128,6 @@
   border-radius: var(--radius-card);
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
-  backdrop-filter: blur(var(--blur-glass));
-  -webkit-backdrop-filter: blur(var(--blur-glass));
 }
 
 .portada {
@@ -175,22 +154,28 @@
 
 .badge {
   justify-self: start;
-  padding: 0.28rem 0.7rem;
-  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.3rem;
   background: var(--badge-bg);
   color: var(--badge-text);
   font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .cuerpo h1 {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(1.55rem, 3vw, 1.95rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   line-height: 1.15;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) .cuerpo h1 {
+  color: var(--brand-on-dark);
 }
 
 .ubicacion {
@@ -312,8 +297,14 @@
 
 .cafeterias h2 {
   margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 400;
+  color: var(--brand-heading);
+}
+
+:host([data-theme='oscuro']) .cafeterias h2 {
+  color: #f0d9a8;
 }
 
 .cafeterias__lista {
@@ -331,7 +322,7 @@
   min-width: 8.5rem;
   padding: 0.55rem 0.85rem;
   border: 1px solid var(--chip-border);
-  border-radius: 0.85rem;
+  border-radius: 0.4rem;
   background: var(--chip-bg);
   color: var(--text);
   text-decoration: none;
@@ -384,16 +375,17 @@
   justify-content: center;
   min-height: 2.55rem;
   padding: 0.55rem 1.15rem;
-  border-radius: 999px;
+  border-radius: 0.4rem;
   background: var(--cta);
   color: var(--cta-text);
   font-size: 0.92rem;
   font-weight: 600;
   text-decoration: none;
+  transition: background-color 0.2s ease;
 }
 
 .cta:hover {
-  filter: brightness(1.05);
+  background: var(--brand-button-hover);
 }
 
 .vacio {
@@ -408,7 +400,6 @@
   border-radius: var(--radius-card);
   background: var(--card-bg);
   box-shadow: var(--card-shadow);
-  backdrop-filter: blur(var(--blur-glass));
 }
 
 .vacio h1 {

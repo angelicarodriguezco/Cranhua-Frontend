@@ -70,17 +70,6 @@
         </div>
       </section>
 
-      <section class="indicadores" aria-label="Indicadores">
-        <article class="vidrio">
-          <strong>{{ indicadores().fincasRegistradas }}</strong>
-          <span>Fincas registradas</span>
-        </article>
-        <article class="vidrio">
-          <strong>{{ indicadores().cosechasActivas }}</strong>
-          <span>Cosechas activas</span>
-        </article>
-      </section>
-
       <section class="vidrio seccion" aria-labelledby="titulo-cuenta">
         <h2 id="titulo-cuenta" class="seccion__titulo">Información de la cuenta</h2>
         <dl class="datos">
@@ -123,27 +112,6 @@
             Todavía no agregaste redes. Podés hacerlo al editar tu perfil.
           </p>
         }
-      </section>
-
-      <section class="vidrio seccion" aria-labelledby="titulo-preferencias">
-        <h2 id="titulo-preferencias" class="seccion__titulo">Preferencias</h2>
-        <div class="preferencia">
-          <div>
-            <p class="preferencia__titulo">Apariencia</p>
-            <p class="seccion__texto" id="ayuda-apariencia">Elegí entre modo claro y modo oscuro</p>
-          </div>
-          <button
-            type="button"
-            class="switch"
-            role="switch"
-            [attr.aria-checked]="tema() === 'oscuro'"
-            aria-label="Modo oscuro"
-            aria-describedby="ayuda-apariencia"
-            (click)="alternarTema()"
-          >
-            <span class="switch__perilla" aria-hidden="true"></span>
-          </button>
-        </div>
       </section>
     } @else {
       <header class="encabezado">

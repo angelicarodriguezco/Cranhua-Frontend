@@ -10,7 +10,6 @@ import {
   SALUDO_KIANA,
 } from '../../../core/models/kiana-chat.model';
 import { KianaChatService } from '../../../core/services/kiana-chat.service';
-import { CLAVE_TEMA, TemaService } from '../../../core/services/tema.service';
 import { KianaWidgetComponent } from './kiana-widget.component';
 
 function respuestaTras(ms: number, texto: string): Observable<RespuestaKiana> {
@@ -23,13 +22,12 @@ describe('KianaWidgetComponent', () => {
   let chat: jasmine.SpyObj<KianaChatService>;
 
   beforeEach(async () => {
-    localStorage.removeItem(CLAVE_TEMA);
     chat = jasmine.createSpyObj('KianaChatService', ['enviarMensaje']);
     chat.enviarMensaje.and.returnValue(of({ texto: 'Respuesta de prueba' }));
 
     await TestBed.configureTestingModule({
       imports: [KianaWidgetComponent],
-      providers: [TemaService, { provide: KianaChatService, useValue: chat }],
+      providers: [{ provide: KianaChatService, useValue: chat }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(KianaWidgetComponent);
@@ -53,16 +51,37 @@ describe('KianaWidgetComponent', () => {
 
   it('muestra el FAB colapsado con el prompter', () => {
     expect(pagina.textContent).toContain('¿Necesitás ayuda? Preguntame lo que sea !');
-    expect(pagina.querySelector('.kiana-panel')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab')?.hasAttribute('hidden')).toBeFalse();
+    expect(pagina.querySelector('.kiana-panel')?.hasAttribute('hidden')).toBeTrue();
     expect(pagina.querySelector('.kiana-fab__avatar img')?.getAttribute('src')).toContain(
       'idle.png',
     );
   });
 
+  it('oculta el prompter al cerrarlo o tras unos segundos', fakeAsync(() => {
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    pagina.querySelector<HTMLButtonElement>('.kiana-fab__cerrar-prompter')!.click();
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+
+    fixture = TestBed.createComponent(KianaWidgetComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    tick(6000);
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+  }));
+
   it('abre el panel con saludo, chips, disclaimer y maxlength 500', () => {
     abrirChat();
 
-    expect(pagina.querySelector('.kiana-panel')).toBeTruthy();
+    expect(pagina.querySelector('.kiana-fab')?.hasAttribute('hidden')).toBeTrue();
+    expect(pagina.querySelector('.kiana-panel')?.hasAttribute('hidden')).toBeFalse();
     expect(pagina.textContent).toContain(SALUDO_KIANA);
     expect(pagina.textContent).toContain('En línea');
     expect(pagina.textContent).toContain('Verificá la información importante');
@@ -74,10 +93,7 @@ describe('KianaWidgetComponent', () => {
     expect(input.getAttribute('maxlength')).toBe(String(MAX_LONGITUD_MENSAJE_KIANA));
   });
 
-  it('aplica data-theme desde TemaService', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    TestBed.inject(TemaService).establecerTema('claro');
-    fixture.detectChanges();
+  it('usa tema claro fijo', () => {
     expect(pagina.getAttribute('data-theme')).toBe('claro');
   });
 

@@ -1,0 +1,40 @@
+/**
+ * Paleta Crán̈hua
+ * ----------------
+ * Colores de marca y uso recomendado en la interfaz.
+ * Los porcentajes indican el peso visual aproximado en la composición.
+ *
+ * Hex        | Variable CSS            | Uso                              | Peso
+ * -----------|-------------------------|----------------------------------|------
+ * #F6F0E7    | --brand-bg              | Fondos principales               | 35%
+ * #FFFFFF    | --brand-surface         | Cards, formularios y paneles     | 15%
+ * #E8DCCB    | --brand-bg-secondary    | Fondos secundarios               |  7%
+ * #292B27    | --brand-text            | Texto de cuerpo e iconos         |  3%
+ * #1C3426    | --brand-nav             | Navegación y secciones oscuras   | 15%
+ * #912316    | --brand-accent          | Destacados, métricas y acentos   |  9%
+ * #6D320A    | --brand-heading         | Títulos y elementos secundarios  |  6%
+ * #A57008    | --brand-button          | Botones importantes              | 10%
+ */
+
+:root {
+  /* Fondos */
+  --brand-bg: #f6f0e7; /* Main backgrounds — 35% */
+  --brand-surface: #ffffff; /* Cards, forms and panels — 15% */
+  --brand-bg-secondary: #e8dccb; /* Secondary backgrounds — 7% */
+
+  /* Texto e iconografía */
+  --brand-text: #292b27; /* Body text and icons — 3% */
+
+  /* Estructura y énfasis */
+  --brand-nav: #1c3426; /* Navigation and dark sections — 15% */
+  --brand-accent: #912316; /* Highlights, metrics, accents — 9% */
+  --brand-heading: #6d320a; /* Headings and secondary elements — 6% */
+  --brand-button: #a57008; /* Important buttons — 10% */
+
+  /* Derivados útiles */
+  --brand-button-hover: #b88410;
+  --brand-text-muted: rgba(41, 43, 39, 0.8);
+  --brand-overlay: rgba(28, 52, 38, 0.72);
+  --brand-on-dark: #f6f0e7;
+  --brand-on-button: #fff8ee;
+}

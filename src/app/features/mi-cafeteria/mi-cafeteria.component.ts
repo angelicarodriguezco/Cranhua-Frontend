@@ -19,11 +19,13 @@ import {
   Cafeteria,
 } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
+import { ItemMenu } from '../../core/models/menu-cafeteria.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
+import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
-import { formatearTelefono } from '../../shared/utils/formato';
+import { formatearColones, formatearTelefono } from '../../shared/utils/formato';
 import {
   crearFormularioDatos,
   FormularioDatos,
@@ -41,6 +43,7 @@ export const AVISO_ELIMINAR_CAFETERIA =
   'Esta cafetería ya vendió bebidas con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu cafetería no borra esos códigos, pero ya no vas a poder editar tu menú ni recibir nuevos pedidos.';
 
 type Campo = keyof FormularioDatos['controls'];
+type Modo = 'vista' | 'edicion';
 
 export function inicialesCafeteria(nombre: string): string {
   const partes = nombre.trim().split(/\s+/).filter(Boolean);
@@ -80,12 +83,14 @@ function clonarCafeteria(cafeteria: Cafeteria): Cafeteria {
 export class MiCafeteriaComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardCafeteriaService);
   private readonly cafeteriaService = inject(CafeteriaService);
+  private readonly menuService = inject(MenuCafeteriaService);
   private readonly router = inject(Router);
 
   protected readonly tema = this.dashboard.tema;
   protected readonly estilosDisponibles = ESTILOS_CAFE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CAFETERIA;
   protected readonly avisoEliminar = AVISO_ELIMINAR_CAFETERIA;
+  protected readonly colones = formatearColones;
 
   protected readonly formulario = crearFormularioDatos();
   protected readonly estilos = new FormControl<EstiloCafe[]>([], {
@@ -104,10 +109,20 @@ export class MiCafeteriaComponent implements OnDestroy {
   });
 
   protected readonly cafeteria = signal<Cafeteria | null>(null);
+  protected readonly modo = signal<Modo>('vista');
   protected readonly noEncontrado = signal(false);
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
   protected readonly portadaUrl = signal<string | null>(null);
+  protected readonly itemsMenu = signal<ItemMenu[]>([]);
+  protected readonly menuAbierto = signal(false);
+
+  protected readonly cafesMenu = computed(() =>
+    this.itemsMenu().filter((item) => item.categoria === 'Café'),
+  );
+  protected readonly comidasMenu = computed(() =>
+    this.itemsMenu().filter((item) => item.categoria === 'Otra comida'),
+  );
 
   private portadaObjectUrl: string | null = null;
   private readonly inputPortada = viewChild<ElementRef<HTMLInputElement>>('inputPortada');
@@ -120,9 +135,12 @@ export class MiCafeteriaComponent implements OnDestroy {
     { initialValue: '' },
   );
 
-  protected readonly iniciales = computed(() =>
-    inicialesCafeteria(this.nombreActual() || this.cafeteria()?.nombre || ''),
-  );
+  protected readonly iniciales = computed(() => {
+    if (this.modo() === 'edicion') {
+      return inicialesCafeteria(this.nombreActual() || this.cafeteria()?.nombre || '');
+    }
+    return inicialesCafeteria(this.cafeteria()?.nombre || '');
+  });
 
   constructor() {
     this.cafeteriaService.obtenerActual().subscribe((cafeteria) => {
@@ -131,7 +149,9 @@ export class MiCafeteriaComponent implements OnDestroy {
         return;
       }
       this.aplicar(cafeteria);
+      this.modo.set('vista');
     });
+    this.menuService.listar().subscribe((items) => this.itemsMenu.set(items));
   }
 
   ngOnDestroy(): void {
@@ -168,6 +188,19 @@ export class MiCafeteriaComponent implements OnDestroy {
     this.estilos.markAsTouched();
   }
 
+  protected editar(): void {
+    const guardado = this.cafeteria();
+    if (!guardado) {
+      return;
+    }
+    this.aplicar(guardado);
+    this.modo.set('edicion');
+  }
+
+  protected alternarMenu(): void {
+    this.menuAbierto.update((abierto) => !abierto);
+  }
+
   protected abrirSelectorPortada(): void {
     this.inputPortada()?.nativeElement.click();
   }
@@ -188,6 +221,7 @@ export class MiCafeteriaComponent implements OnDestroy {
       return;
     }
     this.aplicar(guardado);
+    this.modo.set('vista');
   }
 
   protected guardar(): void {
@@ -221,6 +255,7 @@ export class MiCafeteriaComponent implements OnDestroy {
 
     this.cafeteriaService.actualizar(actualizado).subscribe((cafeteria) => {
       this.aplicar(cafeteria);
+      this.modo.set('vista');
     });
   }
 

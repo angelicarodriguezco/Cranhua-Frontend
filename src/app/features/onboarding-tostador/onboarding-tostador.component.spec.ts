@@ -2,7 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
 
+import { USUARIOS } from '../../core/mocks/finca.mock';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { Coordenada } from '../../core/models/negocio-tueste.model';
 import {
   OnboardingTostadorComponent,
@@ -64,10 +66,15 @@ describe('OnboardingTostadorComponent', () => {
     clic('Medio');
   }
 
-  it('da la bienvenida con el nombre del tostador', () => {
-    expect(pagina.textContent).toContain('Mariana');
-    expect(pagina.querySelector('.avatar')?.textContent).toBe('M');
+  it('da la bienvenida con el nombre de la sesión', () => {
+    expect(pagina.textContent).toContain('Rodrigo');
+    expect(pagina.querySelector('.avatar')?.textContent).toBe('R');
     expect(pasoActual()).toBe('Paso 1 de 3');
+
+    TestBed.inject(SesionService).iniciarSesion(USUARIOS[1]);
+    fixture.detectChanges();
+    expect(pagina.textContent).toContain('María');
+    expect(pagina.querySelector('.avatar')?.textContent).toBe('M');
   });
 
   it('pasa al formulario y vuelve a la bienvenida', () => {

@@ -4,6 +4,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { USUARIOS } from '../../core/mocks/finca.mock';
+import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardTostadorComponent } from './dashboard-tostador.component';
 
@@ -49,8 +51,14 @@ describe('DashboardTostadorComponent', () => {
       .map((el) => el.injector.get(RouterLink).href ?? '');
   }
 
-  it('saluda al tostador', () => {
-    expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Hola, Mariana');
+  it('saluda con el nombre de la sesión', () => {
+    expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Hola, Rodrigo');
+  });
+
+  it('usa el nombre de quien haya iniciado sesión', () => {
+    TestBed.inject(SesionService).iniciarSesion(USUARIOS[1]);
+    fixture.detectChanges();
+    expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Hola, María');
   });
 
   it('muestra los 3 indicadores con datos de ejemplo', () => {
@@ -92,14 +100,14 @@ describe('DashboardTostadorComponent', () => {
     ]);
   });
 
-  it('muestra el rol tostador en el perfil y alterna entre tema oscuro y claro', () => {
+  it('muestra el rol tostador en el perfil y alterna entre tema claro y oscuro', () => {
     expect(pagina.querySelector('.perfil-rol')?.textContent).toContain('Tostador');
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
     const dashboard = pagina.querySelector('.dashboard')!;
-    expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
+    expect(dashboard.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(dashboard.getAttribute('data-theme')).toBe('claro');
+    expect(dashboard.getAttribute('data-theme')).toBe('oscuro');
   });
 });

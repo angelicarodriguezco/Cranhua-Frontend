@@ -1,25 +1,26 @@
 .equipo {
-  padding: 6rem 1.5rem 7rem;
+  padding: 5.5rem 1.5rem 6.5rem;
+  background: var(--brand-bg);
+  color: var(--brand-text);
   text-align: center;
 }
 
 .equipo__titulo {
   margin: 0;
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-headline-large-size);
-  font-weight: var(--md-sys-typescale-headline-large-weight);
-  line-height: var(--md-sys-typescale-headline-large-line-height);
-  letter-spacing: var(--md-sys-typescale-headline-large-tracking);
-  color: var(--color-gold);
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3vw, 2.15rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.03em;
+  color: var(--brand-heading);
 }
 
 .equipo__intro {
-  margin: 1rem auto 0;
-  font-size: var(--md-sys-typescale-body-large-size);
-  font-weight: var(--md-sys-typescale-body-large-weight);
-  line-height: var(--md-sys-typescale-body-large-line-height);
-  letter-spacing: var(--md-sys-typescale-body-large-tracking);
-  color: rgba(255, 255, 255, 0.9);
+  margin: 0.9rem auto 0;
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: rgba(41, 43, 39, 0.78);
 }
 
 .equipo__rejilla {
@@ -27,9 +28,9 @@
   grid-template-columns: repeat(4, 1fr);
   gap: 1.75rem;
   list-style: none;
-  margin: 3.5rem auto 0;
+  margin: 3.25rem auto 0;
   padding: 0;
-  max-width: 64rem;
+  max-width: 68rem;
 }
 
 .equipo__tarjeta {
@@ -44,61 +45,43 @@
   justify-content: center;
   width: 100%;
   aspect-ratio: 1;
-  max-width: 12rem;
-  margin-bottom: 1.25rem;
+  max-width: 11.5rem;
+  margin-bottom: 1.15rem;
   border-radius: 0.35rem;
-  background: linear-gradient(
-    145deg,
-    rgba(201, 162, 39, 0.55) 0%,
-    rgba(90, 60, 20, 0.85) 45%,
-    rgba(30, 20, 8, 0.95) 100%
-  );
-  border: 1px solid rgba(201, 162, 39, 0.35);
-  transition:
-    transform 0.25s ease,
-    border-color 0.25s ease;
+  background:
+    linear-gradient(160deg, rgba(165, 112, 8, 0.35) 0%, transparent 45%),
+    linear-gradient(145deg, #1c3426 0%, #292b27 100%);
+  transition: transform 0.25s ease;
 }
 
 .equipo__tarjeta:hover .equipo__foto {
   transform: translateY(-4px);
-  border-color: var(--color-gold-light);
 }
 
 .equipo__iniciales {
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-headline-large-size);
-  font-weight: var(--md-sys-typescale-headline-large-weight);
-  line-height: var(--md-sys-typescale-headline-large-line-height);
-  color: rgba(255, 255, 255, 0.9);
+  font-family: var(--font-display);
+  font-size: 1.85rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(246, 240, 231, 0.92);
 }
 
 .equipo__nombre {
   margin: 0;
+  max-width: 14rem;
   font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-headline-small-size);
-  font-weight: var(--md-sys-typescale-headline-small-weight);
-  line-height: var(--md-sys-typescale-headline-small-line-height);
-  letter-spacing: var(--md-sys-typescale-headline-small-tracking);
-  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--brand-text);
 }
 
 .equipo__rol {
-  margin: 0.35rem 0 0;
-  font-size: var(--md-sys-typescale-title-medium-size);
-  font-weight: var(--md-sys-typescale-title-medium-weight);
-  line-height: var(--md-sys-typescale-title-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-title-medium-tracking);
-  color: var(--color-gold-light);
-}
-
-.equipo__bio {
-  margin: 0.75rem 0 0;
-  max-width: 14rem;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  font-weight: var(--md-sys-typescale-body-medium-weight);
-  line-height: var(--md-sys-typescale-body-medium-line-height);
-  letter-spacing: var(--md-sys-typescale-body-medium-tracking);
-  color: rgba(255, 255, 255, 0.75);
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--brand-accent);
 }
 
 @media (max-width: 900px) {
@@ -112,5 +95,11 @@
   .equipo__rejilla {
     grid-template-columns: 1fr;
     max-width: 14rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .equipo__foto {
+    transition: none;
   }
 }

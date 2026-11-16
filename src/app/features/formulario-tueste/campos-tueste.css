@@ -114,12 +114,12 @@ select.campo__control option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.45rem;
-  padding: 0.9rem 0.5rem 0.8rem;
+  gap: 0.55rem;
+  padding: 1rem 0.5rem 0.9rem;
   border: 1.5px solid var(--campo-borde);
   border-radius: 0.6rem;
   background: var(--campo-fondo);
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   font-weight: 500;
   transition:
     background-color 0.15s ease,
@@ -127,8 +127,8 @@ select.campo__control option {
 }
 
 .nivel__punto {
-  width: 0.8rem;
-  height: 0.8rem;
+  width: 1.45rem;
+  height: 1.45rem;
   border-radius: 50%;
   background: var(--punto);
 }

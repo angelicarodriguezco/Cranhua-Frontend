@@ -92,7 +92,7 @@ describe('MisTostadosComponent', () => {
       expect(dialogo().open).toBeTrue();
       expect(pagina.querySelector('.tabla-lotes')).not.toBeNull();
       expect(texto(':scope > dialog h2')).toBe('Código generado');
-      expect(texto('.codigo')).toBe('TRZ-0103-MC');
+      expect(texto('.codigo')).toBe('TRZ-0103-RS');
 
       const datos = Object.fromEntries(
         [...pagina.querySelectorAll('.ficha__datos div')].map((d) => [
@@ -105,7 +105,7 @@ describe('MisTostadosComponent', () => {
           'Finca de origen': 'Los Robles',
           Variedad: 'Catuaí, Lavado',
           Kilos: '45 kg',
-          Tostador: 'Mariana Castro Rojas',
+          Tostador: 'Rodrigo Solís Ureña',
         }),
       );
 
@@ -142,7 +142,7 @@ describe('MisTostadosComponent', () => {
       const blob = crearUrl.calls.mostRecent().args[0] as Blob;
       expect(blob.type).toBe('image/svg+xml');
       const enlace = descargar.calls.mostRecent().object as HTMLAnchorElement;
-      expect(enlace.download).toBe('trazabilidad-TRZ-0103-MC.svg');
+      expect(enlace.download).toBe('trazabilidad-TRZ-0103-RS.svg');
     });
   });
 

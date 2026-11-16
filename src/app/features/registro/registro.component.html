@@ -28,6 +28,7 @@
                 [disabled]="enviando()"
                 (click)="alternarRol(rol.valor)"
               >
+                <span class="roles__chip-marca" aria-hidden="true"></span>
                 {{ rol.etiqueta }}
               </button>
             }
@@ -196,12 +197,12 @@
         </svg>
         Continuar con Google
       </button>
-    </div>
 
-    <p class="registro__login">
-      ¿Ya tienes cuenta?
-      <a routerLink="/iniciar-sesion" class="registro__login-enlace">Iniciar sesión</a>
-    </p>
+      <p class="registro__login">
+        ¿Ya tienes cuenta?
+        <a routerLink="/iniciar-sesion" class="registro__login-enlace">Iniciar sesión</a>
+      </p>
+    </div>
   </div>
 
   <div class="registro__visual" aria-hidden="true">

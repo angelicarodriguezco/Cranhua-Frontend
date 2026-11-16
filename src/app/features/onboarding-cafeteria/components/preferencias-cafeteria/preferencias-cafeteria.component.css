@@ -5,29 +5,36 @@
 }
 
 .chip {
-  padding: 0.3rem 0.9rem;
-  border: 1px solid rgba(201, 162, 39, 0.45);
-  border-radius: 999px;
-  background: rgba(201, 162, 39, 0.08);
-  color: var(--color-text);
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-body-medium-size);
+  padding: 0.35rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--brand-on-dark) 18%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--brand-on-dark) 5%, transparent);
+  color: color-mix(in srgb, var(--brand-on-dark) 78%, transparent);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .chip:hover {
-  border-color: var(--color-gold);
+  border-color: color-mix(in srgb, var(--brand-on-dark) 32%, transparent);
+  background: color-mix(in srgb, var(--brand-on-dark) 8%, transparent);
+  color: var(--brand-on-dark);
 }
 
 .chip--activo {
-  border-color: var(--color-gold);
-  background: var(--color-gold);
-  color: #1a1408;
+  border-color: var(--brand-button);
+  background: color-mix(in srgb, var(--brand-button) 28%, transparent);
+  color: var(--brand-on-button);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-button) 35%, transparent);
 }
 
 .chip--activo:hover {
-  background: var(--color-gold-light);
+  background: color-mix(in srgb, var(--brand-button) 36%, transparent);
+  color: var(--brand-on-button);
 }

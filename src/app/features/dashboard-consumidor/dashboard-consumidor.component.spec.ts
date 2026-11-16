@@ -42,16 +42,6 @@ describe('DashboardConsumidorComponent', () => {
     fixture.detectChanges();
   });
 
-  function boton(texto: string): HTMLButtonElement {
-    const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes(texto),
-    );
-    if (!encontrado) {
-      throw new Error(`No hay botón "${texto}"`);
-    }
-    return encontrado;
-  }
-
   function buscarCodigo(codigo: string): void {
     componente['codigo'].setValue(codigo);
     componente['buscar']();
@@ -82,26 +72,72 @@ describe('DashboardConsumidorComponent', () => {
     expect(items).toEqual(['Fincas', 'Tostadores', 'Cafeterías']);
   });
 
-  it('al hacer click en un pin navega a la ruta stub del perfil', () => {
+  it('al hacer click en un pin abre el panel con query seleccionado', () => {
     const router = TestBed.inject(Router);
-    const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
+    const navegar = spyOn(router, 'navigate').and.resolveTo(true);
 
     for (const punto of PUNTOS_MAPA_CONSUMIDOR) {
       navegar.calls.reset();
       componente['abrirPerfil'](punto);
-      expect(navegar).toHaveBeenCalledWith(punto.rutaPerfil);
+      expect(navegar).toHaveBeenCalledWith([], {
+        relativeTo: TestBed.inject(ActivatedRoute),
+        queryParams: {
+          seleccionado: punto.id,
+          menu: null,
+        },
+        queryParamsHandling: 'merge',
+      });
     }
   });
 
-  it('con código válido navega a la finca con query cosecha', () => {
+  it('con query seleccionado muestra el panel lateral sin CTA de perfil completo', () => {
+    const punto = PUNTOS_MAPA_CONSUMIDOR[0];
+    queryParams$.next(convertToParamMap({ seleccionado: punto.id }));
+    fixture.detectChanges();
+
+    const panel = pagina.querySelector('.panel-negocio');
+    expect(panel).toBeTruthy();
+    expect(panel!.textContent).toContain(punto.nombre);
+    expect(pagina.querySelector('#panel-negocio-titulo')!.textContent).toContain(punto.nombre);
+    expect(panel!.textContent).not.toContain('Ver perfil completo');
+    expect(pagina.querySelector('.panel-negocio__portada')).toBeTruthy();
+  });
+
+  it('en cafetería muestra el menú colapsado y se abre con menu=1', () => {
+    const cafeteria = PUNTOS_MAPA_CONSUMIDOR.find((p) => p.tipo === 'cafeteria')!;
+    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id }));
+    fixture.detectChanges();
+
+    const toggle = pagina.querySelector<HTMLButtonElement>('.panel-menu__toggle');
+    expect(toggle).toBeTruthy();
+    expect(toggle!.textContent).toContain('Ver menú');
+    expect(toggle!.getAttribute('aria-expanded')).toBe('false');
+    expect(pagina.querySelector('#panel-menu-contenido')).toBeNull();
+
+    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id, menu: '1' }));
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.panel-menu__toggle')!.textContent).toContain('Ocultar menú');
+    expect(pagina.querySelector('#panel-menu-contenido')).toBeTruthy();
+    expect(pagina.querySelector('.panel-menu__contenido')!.textContent).toContain('Cafés');
+  });
+
+  it('con código válido abre el panel de la finca con query cosecha', () => {
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigate').and.resolveTo(true);
 
     buscarCodigo('CRH-2026-0103');
 
     expect(pagina.querySelector('.barra-busqueda__error')).toBeNull();
-    expect(navegar).toHaveBeenCalledWith(['/explorar/finca', 'finca-el-roble'], {
-      queryParams: { cosecha: 'cosecha-catuai-el-roble' },
+    expect(navegar).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams: {
+        seleccionado: 'finca-el-roble',
+        resaltar: 'finca-el-roble',
+        cosecha: 'cosecha-catuai-el-roble',
+        menu: null,
+      },
+      queryParamsHandling: 'merge',
     });
   });
 
@@ -118,35 +154,10 @@ describe('DashboardConsumidorComponent', () => {
     expect(error!.textContent).toContain('CRH-2026-0103');
   });
 
-  it('el toggle cambia data-theme en el host', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    expect(
-      pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src'),
-    ).toBe('/images/logo-cranhua.png');
-
-    boton('Claro').click();
-    fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
-    expect(
-      pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src'),
-    ).toBe('/images/logo-cranhua-negro.png');
-
-    boton('Oscuro').click();
-    fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-  });
-
-  it('centrar ajusta centro y zoom al pin indicado', () => {
-    const punto = PUNTOS_MAPA_CONSUMIDOR[0];
-    queryParams$.next(convertToParamMap({ centrar: punto.id }));
-    fixture.detectChanges();
-
-    expect(componente['centro']()).toEqual(punto.coordenada);
-    expect(componente['zoom']()).toBe(14);
-  });
-
-  it('resaltar marca pines y centra cuando no hay centrar', () => {
+  it('resaltar marca pines sin cambiar el zoom del mapa', () => {
     const [a, b] = PUNTOS_MAPA_CONSUMIDOR;
+    const centroInicial = componente['centro']();
+    const zoomInicial = componente['zoom']();
     queryParams$.next(convertToParamMap({ resaltar: `${a.id},${b.id}` }));
     fixture.detectChanges();
 
@@ -162,21 +173,27 @@ describe('DashboardConsumidorComponent', () => {
         'pin-consumidor--resaltado',
       ),
     ).toBeFalse();
-
-    expect(componente['centro']()).toEqual({
-      lat: (a.coordenada.lat + b.coordenada.lat) / 2,
-      lng: (a.coordenada.lng + b.coordenada.lng) / 2,
-    });
-    expect(componente['zoom']()).toBe(9);
+    expect(componente['centro']()).toEqual(centroInicial);
+    expect(componente['zoom']()).toBe(zoomInicial);
   });
 
-  it('resaltar un solo pin centra y hace zoom como centrar', () => {
+  it('seleccionar un pin no cambia el zoom del mapa y lo marca como seleccionado', () => {
     const punto = PUNTOS_MAPA_CONSUMIDOR[2];
-    queryParams$.next(convertToParamMap({ resaltar: punto.id }));
+    const centroInicial = componente['centro']();
+    const zoomInicial = componente['zoom']();
+    queryParams$.next(convertToParamMap({ seleccionado: punto.id }));
     fixture.detectChanges();
 
     expect(componente['idsResaltados']()).toEqual(new Set([punto.id]));
-    expect(componente['centro']()).toEqual(punto.coordenada);
-    expect(componente['zoom']()).toBe(14);
+    expect(
+      componente['contenidoPin'](punto).classList.contains('pin-consumidor--seleccionado'),
+    ).toBeTrue();
+    expect(
+      componente['contenidoPin'](PUNTOS_MAPA_CONSUMIDOR[0]).classList.contains(
+        'pin-consumidor--seleccionado',
+      ),
+    ).toBeFalse();
+    expect(componente['centro']()).toEqual(centroInicial);
+    expect(componente['zoom']()).toBe(zoomInicial);
   });
 });

@@ -1,6 +1,6 @@
 export const MAX_LONGITUD_MENSAJE_KIANA = 500;
 
-export const DELAY_RESPUESTA_KIANA_MS = 1200;
+export const DELAY_RESPUESTA_KIANA_MS = 400;
 
 export const INTERVALO_FALLO_KIANA = 4;
 

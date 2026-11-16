@@ -13,14 +13,15 @@
   height: 3.5rem;
   margin-bottom: 1.25rem;
   border-radius: 50%;
-  background: rgba(201, 162, 39, 0.18);
+  background: color-mix(in srgb, var(--brand-button) 22%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-button) 40%, transparent);
 }
 
 .icono svg {
   width: 1.75rem;
   height: 1.75rem;
   fill: none;
-  stroke: var(--color-text);
+  stroke: var(--brand-on-dark);
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -28,6 +29,7 @@
 
 .texto {
   margin-top: 0.75rem;
+  max-width: 26rem;
 }
 
 .instrucciones {
@@ -36,11 +38,15 @@
   gap: 0.75rem;
   width: 100%;
   margin: 1.75rem 0 2.25rem;
-  padding: 0 0.5rem;
+  padding: 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--brand-on-dark) 18%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--brand-on-dark) 5%, transparent);
   list-style: none;
-  font-size: var(--md-sys-typescale-body-small-size);
-  line-height: var(--md-sys-typescale-body-small-line-height);
+  font-size: 0.875rem;
+  line-height: 1.4;
   text-align: left;
+  color: var(--brand-on-dark);
 }
 
 .instrucciones li {
@@ -55,11 +61,11 @@
   display: grid;
   flex: none;
   place-items: center;
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
   border-radius: 50%;
-  background: rgba(201, 162, 39, 0.25);
-  color: var(--color-gold-light);
-  font-size: 0.625rem;
-  font-weight: 500;
+  background: color-mix(in srgb, var(--brand-button) 22%, transparent);
+  color: var(--brand-button-hover);
+  font-size: 0.75rem;
+  font-weight: 600;
 }

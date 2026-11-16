@@ -96,11 +96,6 @@ describe('DashboardCafeteriaComponent', () => {
       'Cafetería',
     );
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
-
-    temas.alternarTema();
-    fixture.detectChanges();
-
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
     temas.alternarTema();

@@ -4,58 +4,60 @@
 }
 
 .detalle {
-  --accent: #a57008;
+  --radius-card: 0.75rem;
+  --accent: var(--brand-button);
+
+  --page-bg: var(--brand-surface);
+  --card-bg: var(--brand-bg);
+  --card-outline: color-mix(in srgb, var(--brand-nav) 10%, transparent);
+  --card-shadow: 0 1px 0 color-mix(in srgb, var(--brand-nav) 6%, transparent);
+  --item-bg: var(--brand-surface);
+  --text: var(--brand-text);
+  --text-muted: color-mix(in srgb, var(--brand-text) 78%, transparent);
+  --text-heading: var(--brand-heading);
+  --table-header: color-mix(in srgb, var(--brand-heading) 72%, transparent);
+  --link: var(--brand-button);
+  --badge-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
+  --badge-text: var(--brand-heading);
+  --pill-disponible-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
+  --pill-disponible-text: var(--brand-on-dark);
+  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 16%, transparent);
+  --pill-beneficiado-text: var(--brand-heading);
+  --divider: color-mix(in srgb, var(--brand-nav) 12%, transparent);
+  --peligro-fondo: color-mix(in srgb, var(--brand-accent) 10%, transparent);
+  --peligro-texto: var(--brand-accent);
+  --cabecera-sub: color-mix(in srgb, var(--brand-text) 78%, transparent);
 
   display: grid;
   grid-template-columns: minmax(14rem, 17.5rem) minmax(0, 1fr);
   height: 100dvh;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--font-family);
   color: var(--text);
+  background: var(--page-bg);
 }
 
-/* Mismos valores que el dashboard del cafetalero, más los de la zona de peligro */
 .detalle[data-theme='oscuro'] {
-  --bg-image: url('/images/bg-oscuro.jpg');
-  --overlay: linear-gradient(180deg, rgba(5, 8, 20, 0.6), rgba(10, 14, 32, 0.3));
-  --card-bg: rgba(8, 28, 38, 0.55);
-  --card-outline: rgba(255, 255, 255, 0.12);
-  --item-bg: rgba(255, 255, 255, 0.04);
-  --text: #f5efe3;
-  --text-muted: #aec0bc;
-  --text-heading: #f5efe3;
-  --table-header: #8fa39d;
-  --link: #d9a441;
-  --badge-bg: rgba(217, 164, 65, 0.16);
-  --badge-text: #d9a441;
-  --pill-disponible-bg: rgba(111, 203, 143, 0.16);
-  --pill-disponible-text: #7fda9f;
-  --pill-beneficiado-bg: rgba(217, 164, 65, 0.18);
-  --pill-beneficiado-text: #e3b65b;
-  --divider: rgba(255, 255, 255, 0.1);
-  --peligro-fondo: rgba(145, 35, 22, 0.18);
-  --peligro-texto: #f2a7b5;
-}
-
-.detalle[data-theme='claro'] {
-  --bg-image: url('/images/bg-claro.jpg');
-  --overlay: linear-gradient(180deg, rgba(5, 8, 20, 0.28), rgba(8, 50, 62, 0.18));
-  --card-bg: rgba(255, 255, 255, 0.6);
-  --card-outline: rgba(255, 255, 255, 0.75);
-  --item-bg: rgba(255, 255, 255, 0.45);
-  --text: #1c3426;
-  --text-muted: #5c6b5e;
-  --text-heading: #1c3426;
-  --table-header: #7c8c82;
-  --link: #a57008;
-  --badge-bg: rgba(165, 112, 8, 0.1);
-  --badge-text: #a57008;
-  --pill-disponible-bg: rgba(63, 122, 84, 0.14);
-  --pill-disponible-text: #2f6b45;
-  --pill-beneficiado-bg: rgba(165, 112, 8, 0.14);
-  --pill-beneficiado-text: #8a5a06;
-  --divider: rgba(28, 52, 38, 0.1);
-  --peligro-fondo: rgba(145, 35, 22, 0.08);
-  --peligro-texto: #912316;
+  --page-bg: var(--brand-nav);
+  --card-bg: color-mix(in srgb, var(--brand-on-dark) 6%, var(--brand-nav));
+  --card-outline: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --card-shadow: none;
+  --item-bg: color-mix(in srgb, var(--brand-on-dark) 8%, transparent);
+  --text: var(--brand-on-dark);
+  --text-muted: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
+  --text-heading: var(--brand-on-dark);
+  --table-header: color-mix(in srgb, var(--brand-on-dark) 62%, transparent);
+  --link: var(--brand-button-hover);
+  --badge-bg: color-mix(in srgb, var(--brand-button) 22%, transparent);
+  --badge-text: var(--brand-button-hover);
+  --pill-disponible-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
+  --pill-disponible-text: var(--brand-on-dark);
+  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
+  --pill-beneficiado-text: var(--brand-button-hover);
+  --divider: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
+  --peligro-fondo: color-mix(in srgb, var(--brand-accent) 22%, transparent);
+  --peligro-texto: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
+  --cabecera-sub: color-mix(in srgb, var(--brand-on-dark) 72%, transparent);
+  --accent: var(--brand-button);
 }
 
 .contenido {
@@ -63,12 +65,9 @@
   flex-direction: column;
   gap: 0.9rem;
   min-width: 0;
-  padding: 1.1rem 1.35rem 1.5rem;
+  padding: 1.35rem 1.5rem 1.5rem;
   overflow-y: auto;
-  background-color: #061f27;
-  background-image: var(--overlay), var(--bg-image);
-  background-position: center;
-  background-size: cover;
+  background: var(--page-bg);
 }
 
 .volver,
@@ -100,23 +99,26 @@
 
 h1 {
   margin: 0 0 0.15rem;
+  font-family: var(--font-display);
   color: var(--text-heading);
-  font-size: clamp(1.45rem, 2vw, 1.85rem);
-  font-weight: 600;
+  font-size: clamp(1.7rem, 2.5vw, 2.15rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .cabecera p,
 .no-encontrada p {
   margin: 0;
-  color: var(--text-muted);
-  font-size: 0.875rem;
+  color: var(--cabecera-sub);
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .cta {
   padding: 0.55rem 1rem;
   border-radius: 0.75rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--brand-on-button);
   font-size: 0.875rem;
   font-weight: 600;
   text-decoration: none;
@@ -128,9 +130,9 @@ h1 {
 
 .glass {
   border: 1px solid var(--card-outline);
-  border-radius: 1.15rem;
+  border-radius: var(--radius-card);
   background: var(--card-bg);
-  backdrop-filter: blur(13px);
+  box-shadow: var(--card-shadow);
 }
 
 .indicadores {
@@ -143,18 +145,20 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  padding: 0.75rem 0.95rem;
+  padding: 0.85rem 1rem;
 }
 
 .indicadores strong {
-  color: var(--text-heading);
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-family: var(--font-display);
+  color: var(--brand-accent);
+  font-size: 1.55rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .indicadores span {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   font-weight: 500;
 }
 
@@ -166,7 +170,7 @@ h1 {
 
 .seccion {
   min-width: 0;
-  padding: 0.8rem 1rem 0.9rem;
+  padding: 0.9rem 1.05rem 1.05rem;
 }
 
 .seccion-cabecera {
@@ -178,9 +182,11 @@ h1 {
 
 h2 {
   margin: 0;
+  font-family: var(--font-display);
   color: var(--text-heading);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 .no-encontrada {

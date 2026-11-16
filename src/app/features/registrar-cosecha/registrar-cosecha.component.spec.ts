@@ -117,29 +117,29 @@ describe('RegistrarCosechaComponent', () => {
     expect(pagina.querySelector('.encabezado__titulo')).toBeNull();
   });
 
-  it('aplica tokens Figma en tema oscuro y claro', async () => {
+  it('aplica tokens de marca en tema claro y oscuro', async () => {
     await crearComponente();
 
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
     let estilos = getComputedStyle(pagina);
-    expect(estilos.getPropertyValue('--vidrio-fondo').trim()).toBe('rgba(8, 28, 38, 0.55)');
-    expect(estilos.getPropertyValue('--vidrio-texto').trim()).toBe('#f5efe3');
-    expect(estilos.getPropertyValue('--vidrio-texto-suave').trim()).toBe('#aec0bc');
+    expect(estilos.getPropertyValue('--vidrio-fondo').trim()).toBe('#f6f0e7');
+    expect(estilos.getPropertyValue('--vidrio-texto').trim()).toBe('#292b27');
     expect(estilos.getPropertyValue('--vidrio-dorado').trim()).toBe('#a57008');
-    expect(estilos.getPropertyValue('--vidrio-dorado-claro').trim()).toBe('#d9a441');
-    expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#7fda9f');
-    expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#e3b65b');
+    expect(estilos.getPropertyValue('--vidrio-dorado-claro').trim()).toBe('#a57008');
+    expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#1c3426');
+    expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#6d320a');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
     estilos = getComputedStyle(pagina);
-    expect(estilos.getPropertyValue('--vidrio-fondo').trim()).toBe('rgba(255, 255, 255, 0.6)');
+    expect(estilos.getPropertyValue('--vidrio-fondo').trim()).toContain('color-mix');
+    expect(estilos.getPropertyValue('--vidrio-texto').trim()).toBe('#f6f0e7');
     expect(estilos.getPropertyValue('--vidrio-dorado').trim()).toBe('#a57008');
-    expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#2f6b45');
-    expect(estilos.getPropertyValue('--vidrio-texto').trim()).toBe('#1c3426');
-    expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#8a5a06');
+    expect(estilos.getPropertyValue('--vidrio-dorado-claro').trim()).toBe('#b88410');
+    expect(estilos.getPropertyValue('--vidrio-exito').trim()).toBe('#b88410');
+    expect(estilos.getPropertyValue('--vidrio-merma-texto').trim()).toBe('#b88410');
   });
 
   it('renderiza el paso 1 con campos de datos y reparto', async () => {
@@ -282,7 +282,7 @@ describe('RegistrarCosechaComponent', () => {
     expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha Caturra?');
     expect(pagina.querySelector('.modal__aviso')?.textContent).toContain('LC-2025-001');
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
-      'rgba(8, 28, 38, 0.96)',
+      'rgb(255, 255, 255)',
     );
 
     pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();

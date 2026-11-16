@@ -6,6 +6,8 @@
   margin: 0 auto;
   padding-top: 1.5rem;
   text-align: center;
+  font-family: var(--font-family);
+  color: var(--brand-on-dark);
 }
 
 .check {
@@ -14,41 +16,45 @@
   width: 4rem;
   height: 4rem;
   border-radius: 50%;
-  background: #2a4c45;
+  background: color-mix(in srgb, var(--brand-button) 28%, transparent);
+  border: 1px solid color-mix(in srgb, var(--brand-button) 45%, transparent);
 }
 
 .check svg {
   width: 2.25rem;
   height: 2.25rem;
   fill: none;
-  stroke: var(--color-text);
+  stroke: var(--brand-on-dark);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .titulo {
-  margin: 1.25rem 0 0;
-  font-size: var(--md-sys-typescale-title-large-size);
-  font-weight: var(--md-sys-typescale-title-large-weight);
-  line-height: var(--md-sys-typescale-title-large-line-height);
+  margin: 1.35rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 2.4vw, 1.85rem);
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--brand-on-dark);
 }
 
 .texto {
-  margin: 0.875rem 0 0;
-  font-size: var(--md-sys-typescale-body-medium-size);
-  line-height: var(--md-sys-typescale-body-medium-line-height);
-  color: var(--color-text-muted);
+  margin: 0.85rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
 }
 
 .resumen {
   width: 100%;
   margin: 1.5rem 0 1rem;
-  padding: 0.25rem 0.875rem;
-  border: 1px solid var(--color-border);
-  border-radius: 10px;
-  background: var(--color-surface);
-  font-size: var(--md-sys-typescale-body-medium-size);
+  padding: 0.25rem 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--brand-on-dark) 18%, transparent);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--brand-on-dark) 5%, transparent);
+  font-size: 0.9rem;
 }
 
 .resumen div {
@@ -56,7 +62,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.75rem 0;
-  border-bottom: 1px solid var(--color-border);
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
 }
 
 .resumen div:last-child {
@@ -64,38 +70,41 @@
 }
 
 .resumen dt {
-  color: var(--color-text-muted);
+  color: color-mix(in srgb, var(--brand-on-dark) 68%, transparent);
 }
 
 .resumen dd {
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
   text-align: right;
+  color: var(--brand-on-dark);
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.7rem 1.6rem;
-  border: 1.5px solid var(--color-gold);
+  min-height: 2.7rem;
+  padding: 0.7rem 1.75rem;
+  border: none;
   border-radius: 999px;
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: var(--md-sys-typescale-label-large-weight);
-  line-height: var(--md-sys-typescale-label-large-line-height);
-  letter-spacing: var(--md-sys-typescale-label-large-tracking);
+  font-family: inherit;
+  font-size: 0.98rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .btn--filled {
-  background: var(--color-gold);
-  color: #1a1408;
+  background: var(--brand-button);
+  color: var(--brand-on-button);
 }
 
 .btn--filled:hover {
-  background: var(--color-gold-light);
+  background: var(--brand-button-hover);
+  transform: translateY(-2px);
 }
 
 .otra {
@@ -104,28 +113,37 @@
   border: 0;
   border-bottom: 1px solid transparent;
   background: none;
-  color: var(--color-gold-light);
-  font-family: var(--font-family);
-  font-size: var(--md-sys-typescale-label-large-size);
-  font-weight: var(--md-sys-typescale-label-large-weight);
+  color: var(--brand-button-hover);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
   transition: border-color 0.2s ease;
 }
 
 .otra:hover {
-  border-bottom-color: var(--color-gold-light);
+  border-bottom-color: var(--brand-button-hover);
 }
 
 .fallidos {
+  width: 100%;
   margin: 0 0 1.5rem;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, #e08a96 45%, transparent);
+  border-radius: 0.55rem;
   text-align: left;
-  color: var(--color-error, #b3261e);
-  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: #e08a96;
+  background: color-mix(in srgb, #e08a96 12%, transparent);
+  font-size: 0.875rem;
 }
 
 .fallidos ul {
   margin: 0.5rem 0 0;
   padding-left: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn--filled:hover {
+    transform: none;
+  }
 }

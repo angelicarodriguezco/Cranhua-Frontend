@@ -14,14 +14,14 @@
   width: 4rem;
   height: 4rem;
   border-radius: 50%;
-  background: #2a4c45;
+  background: var(--brand-nav);
 }
 
 .check svg {
   width: 2.25rem;
   height: 2.25rem;
   fill: none;
-  stroke: #ffffff;
+  stroke: var(--brand-on-dark);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -29,9 +29,16 @@
 
 .titulo {
   margin: 1.25rem 0 0;
-  font-size: var(--md-sys-typescale-title-large-size);
-  font-weight: var(--md-sys-typescale-title-large-weight);
-  line-height: var(--md-sys-typescale-title-large-line-height);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2vw, 1.75rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+  color: var(--brand-heading);
+}
+
+:host-context([data-theme='oscuro']) .titulo {
+  color: var(--brand-on-dark);
 }
 
 .texto {
