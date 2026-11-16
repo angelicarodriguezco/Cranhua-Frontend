@@ -42,16 +42,6 @@ describe('DashboardConsumidorComponent', () => {
     fixture.detectChanges();
   });
 
-  function boton(texto: string): HTMLButtonElement {
-    const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
-      b.textContent?.includes(texto),
-    );
-    if (!encontrado) {
-      throw new Error(`No hay botón "${texto}"`);
-    }
-    return encontrado;
-  }
-
   function buscarCodigo(codigo: string): void {
     componente['codigo'].setValue(codigo);
     componente['buscar']();
@@ -162,24 +152,6 @@ describe('DashboardConsumidorComponent', () => {
     expect(error).toBeTruthy();
     expect(error!.textContent).toContain('No encontramos ese código');
     expect(error!.textContent).toContain('CRH-2026-0103');
-  });
-
-  it('el toggle cambia data-theme en el host', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    expect(
-      pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src'),
-    ).toBe('/images/logo-cranhua.png');
-
-    boton('Claro').click();
-    fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
-    expect(
-      pagina.querySelector<HTMLImageElement>('.barra-busqueda__marca')?.getAttribute('src'),
-    ).toBe('/images/logo-cranhua-negro.png');
-
-    boton('Oscuro').click();
-    fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 
   it('resaltar marca pines sin cambiar el zoom del mapa', () => {

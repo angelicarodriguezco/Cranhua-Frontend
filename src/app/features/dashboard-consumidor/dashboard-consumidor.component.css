@@ -205,39 +205,6 @@
   transform: translateX(-50%);
 }
 
-.toggle-tema {
-  position: absolute;
-  top: 1.15rem;
-  right: 1.15rem;
-  display: inline-flex;
-  gap: 0.2rem;
-  padding: 0.28rem;
-  border: 1px solid var(--overlay-border);
-  border-radius: 0.5rem;
-  background: var(--toggle-bg);
-  box-shadow: var(--overlay-shadow);
-}
-
-.toggle-tema__opcion {
-  min-width: 4.35rem;
-  height: 2.15rem;
-  padding: 0 0.85rem;
-  border: 0;
-  border-radius: 0.35rem;
-  background: transparent;
-  color: var(--toggle-text);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.toggle-tema__opcion--activa {
-  background: var(--cta);
-  color: var(--cta-texto);
-  font-weight: 600;
-}
-
 .leyenda {
   position: absolute;
   left: 1.15rem;
@@ -969,15 +936,9 @@
     transform: none;
   }
 
-  .toggle-tema {
-    top: auto;
-    right: 0.85rem;
-    bottom: 0.85rem;
-  }
-
   .leyenda {
     left: 0.85rem;
-    right: 5.5rem;
+    right: 0.85rem;
     bottom: 0.85rem;
   }
 
@@ -990,8 +951,7 @@
     min-height: 0;
   }
 
-  .dashboard-consumidor--panel .leyenda,
-  .dashboard-consumidor--panel .toggle-tema {
+  .dashboard-consumidor--panel .leyenda {
     display: none;
   }
 

@@ -56,27 +56,6 @@
         <p id="error-codigo" class="barra-busqueda__error" role="alert">{{ mensaje }}</p>
       }
 
-      <div class="toggle-tema" role="group" aria-label="Tema del mapa">
-        <button
-          type="button"
-          class="toggle-tema__opcion"
-          [class.toggle-tema__opcion--activa]="tema() === 'claro'"
-          [attr.aria-pressed]="tema() === 'claro'"
-          (click)="establecerTema('claro')"
-        >
-          Claro
-        </button>
-        <button
-          type="button"
-          class="toggle-tema__opcion"
-          [class.toggle-tema__opcion--activa]="tema() === 'oscuro'"
-          [attr.aria-pressed]="tema() === 'oscuro'"
-          (click)="establecerTema('oscuro')"
-        >
-          Oscuro
-        </button>
-      </div>
-
       <ul class="leyenda" aria-label="Leyenda de tipos">
         @for (item of leyenda; track item.tipo) {
           <li class="leyenda__item">

@@ -5,7 +5,6 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { GoogleMap, MapAdvancedMarker } from '@angular/google-maps';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
-import { TemaDashboard } from '../../core/models/dashboard-cafetalero.model';
 import { MenuPublico } from '../../core/models/menu-publico.model';
 import {
   PuntoMapaConsumidor,
@@ -281,10 +280,6 @@ export class DashboardConsumidorComponent {
 
   protected etiquetaTipo(tipo: TipoPuntoMapaConsumidor): string {
     return ETIQUETAS_TIPO[tipo];
-  }
-
-  protected establecerTema(tema: TemaDashboard): void {
-    this.dashboard.establecerTema(tema);
   }
 
   protected abrirPerfil(punto: PuntoMapaConsumidor): void {
