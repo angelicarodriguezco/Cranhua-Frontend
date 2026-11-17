@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
@@ -11,6 +13,7 @@ import {
   RUTA_DASHBOARD_TOSTADOR,
 } from './onboarding-tostador.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const TIBAS: Coordenada = { lat: 9.959, lng: -84.082 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -25,12 +28,15 @@ describe('OnboardingTostadorComponent', () => {
       imports: [OnboardingTostadorComponent],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
     }).compileComponents();
 
     conSesionDeEjemplo();
     fixture = TestBed.createComponent(OnboardingTostadorComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();

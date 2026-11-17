@@ -59,14 +59,6 @@ describe('CafeteriaService', () => {
 
   afterEach(() => http.verify());
 
-  it('ubica una cafetería en Chepe centro', () => {
-    expect(servicio.cantonDe({ lat: 9.9335, lng: -84.0775 })?.nombre).toBe('San José');
-  });
-
-  it('no asigna cantón a un punto lejos de todos', () => {
-    expect(servicio.cantonDe({ lat: 11.2, lng: -85.6 })).toBeNull();
-  });
-
   describe('obtenerActual', () => {
     it('hace GET /actual con credenciales y mapea la respuesta', () => {
       let actual: Cafeteria | undefined;

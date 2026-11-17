@@ -108,7 +108,10 @@
       @if (canton(); as c) {
         {{ c.nombre }}, {{ c.provincia }}
       } @else if (pin()) {
-        El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu tostaduría.
+        <app-estado-cantones
+          >El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu
+          tostaduría.</app-estado-cantones
+        >
       } @else {
         Hacé clic en el mapa para marcar dónde está tu tostaduría.
       }

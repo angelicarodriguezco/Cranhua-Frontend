@@ -91,13 +91,20 @@
       @if (ubicacionInvalida()) {
         <p id="error-ubicacion-cafeteria" class="campo__error">
           @if (pin()) {
-            El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.
+            <app-estado-cantones
+              >El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu
+              local.</app-estado-cantones
+            >
           } @else {
             Marcá en el mapa dónde está tu local.
           }
         </p>
       } @else if (pin() && !canton()) {
-        <p class="campo__ayuda" aria-live="polite">El pin está fuera de los cantones de ejemplo.</p>
+        <p class="campo__ayuda" aria-live="polite">
+          <app-estado-cantones
+            >El pin está fuera de los cantones de Costa Rica.</app-estado-cantones
+          >
+        </p>
       }
     </div>
   </div>

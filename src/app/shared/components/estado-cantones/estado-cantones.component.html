@@ -1,0 +1,12 @@
+@switch (cantones.estado()) {
+  @case ('listo') {
+    <ng-content />
+  }
+  @case ('error') {
+    No pudimos cargar los cantones.
+    <button type="button" class="reintentar" (click)="cantones.cargar()">Reintentar</button>
+  }
+  @default {
+    Cargando cantones…
+  }
+}

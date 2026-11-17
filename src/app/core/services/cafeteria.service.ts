@@ -3,21 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { CANTONES_URBANOS } from '../mocks/cafeteria.mock';
-import { CANTONES } from '../mocks/finca.mock';
-import {
-  Cafeteria,
-  CafeteriaResponseApi,
-  CantonReferencia,
-  NuevaCafeteria,
-} from '../models/cafeteria.model';
-import { Coordenada } from '../models/finca.model';
+import { Cafeteria, CafeteriaResponseApi, NuevaCafeteria } from '../models/cafeteria.model';
 import { cafeteriaDesdeApi, cuerpoRegistro } from '../utils/cafeteria-desde-api';
-import { distanciaKm } from '../../shared/utils/geo';
-
-const DISTANCIA_MAXIMA_CANTON_KM = 25;
-
-const CANTONES_CAFETERIA: CantonReferencia[] = [...CANTONES_URBANOS, ...CANTONES];
 
 const opcionesCredenciales = { withCredentials: true as const };
 
@@ -94,18 +81,5 @@ export class CafeteriaService {
   eliminar(id: string): Observable<boolean> {
     void id;
     return of(false);
-  }
-
-  cantonDe(punto: Coordenada): CantonReferencia | null {
-    let masCercano: CantonReferencia | null = null;
-    let menorDistancia = DISTANCIA_MAXIMA_CANTON_KM;
-    for (const canton of CANTONES_CAFETERIA) {
-      const distancia = distanciaKm(punto, canton.cabecera);
-      if (distancia < menorDistancia) {
-        masCercano = canton;
-        menorDistancia = distancia;
-      }
-    }
-    return masCercano;
   }
 }

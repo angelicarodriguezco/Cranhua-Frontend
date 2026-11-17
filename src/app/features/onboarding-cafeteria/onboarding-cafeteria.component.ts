@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import { Cafeteria } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { BienvenidaCafeteriaComponent } from './components/bienvenida-cafeteria/bienvenida-cafeteria.component';
@@ -38,6 +39,7 @@ export const RUTA_DASHBOARD = '/cafeteria/dashboard';
 })
 export class OnboardingCafeteriaComponent {
   private cafeteriaService = inject(CafeteriaService);
+  private readonly cantones = injectCantones();
   private router = inject(Router);
 
   protected readonly usuario = inject(SesionService).usuario;
@@ -51,7 +53,7 @@ export class OnboardingCafeteriaComponent {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed(() => {
     const pin = this.pin();
-    return pin ? this.cafeteriaService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly intentoContinuar = signal(false);
   protected readonly guardando = signal(false);

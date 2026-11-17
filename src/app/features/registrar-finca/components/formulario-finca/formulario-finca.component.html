@@ -57,7 +57,7 @@
       @if (canton(); as c) {
         {{ c.nombre }}, {{ c.provincia }}
       } @else if (hayPin()) {
-        El pin está fuera de los cantones de ejemplo.
+        <app-estado-cantones>El pin está fuera de los cantones de Costa Rica.</app-estado-cantones>
       } @else {
         Aparece cuando dibujés el perímetro.
       }

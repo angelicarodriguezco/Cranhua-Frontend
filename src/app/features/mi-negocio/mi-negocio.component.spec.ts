@@ -18,6 +18,7 @@ import {
   MiNegocioComponent,
   RUTA_DASHBOARD_TOSTADOR,
 } from './mi-negocio.component';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const TIBAS: Coordenada = { lat: 9.959, lng: -84.082 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -44,6 +45,7 @@ describe('MiNegocioComponent', () => {
     dashboard = TestBed.inject(DashboardTostadorService);
     TestBed.inject(SesionService).iniciarSesion(TOSTADOR_ACTUAL);
     fixture = TestBed.createComponent(MiNegocioComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
