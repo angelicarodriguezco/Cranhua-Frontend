@@ -5,6 +5,7 @@ import { By } from '@angular/platform-browser';
 import { RouterLink, provideRouter } from '@angular/router';
 
 import { MisTostadosComponent } from './mis-tostados.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('MisTostadosComponent', () => {
   let fixture: ComponentFixture<MisTostadosComponent>;
@@ -16,6 +17,7 @@ describe('MisTostadosComponent', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(MisTostadosComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();

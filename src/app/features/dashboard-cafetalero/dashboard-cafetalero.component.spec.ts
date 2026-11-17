@@ -8,6 +8,7 @@ import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { DashboardCafetaleroComponent } from './dashboard-cafetalero.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardCafetaleroComponent', () => {
   let fixture: ComponentFixture<DashboardCafetaleroComponent>;
@@ -19,6 +20,7 @@ describe('DashboardCafetaleroComponent', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardCafetaleroComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();

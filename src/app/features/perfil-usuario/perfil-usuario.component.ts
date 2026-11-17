@@ -29,9 +29,8 @@ import {
   TIPOS_RED_SOCIAL,
   TipoRedSocial,
 } from '../../core/models/perfil.model';
-import { CuentaService } from '../../core/services/cuenta.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PerfilService } from '../../core/services/perfil.service';
-import { SesionService } from '../../core/services/sesion.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
@@ -148,8 +147,7 @@ export function enlaceRedSocial(red: RedSocial): string {
 })
 export class PerfilUsuarioComponent implements OnDestroy {
   private readonly perfilService = inject(PerfilService);
-  private readonly cuentaService = inject(CuentaService);
-  private readonly sesionService = inject(SesionService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -336,8 +334,7 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected confirmarEliminar(): void {
     this.perfilService.eliminarCuenta().subscribe(() => {
-      this.cuentaService.limpiarCuenta();
-      this.sesionService.cerrarSesion();
+      this.auth.limpiarSesion();
       this.modalEliminarAbierto.set(false);
       void this.router.navigateByUrl('/iniciar-sesion');
     });

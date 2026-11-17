@@ -16,6 +16,7 @@ import {
 } from '../models/auth.model';
 import { Cuenta } from '../models/cuenta.model';
 import { usuarioDesdeNombreCompleto } from '../utils/nombre-usuario';
+import { CafeteriaService } from './cafeteria.service';
 import { CuentaService } from './cuenta.service';
 import { SesionService } from './sesion.service';
 
@@ -25,6 +26,7 @@ const ESPERA_RESTAURAR_MS = 5000;
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly cafeteriaService = inject(CafeteriaService);
   private readonly cuentaService = inject(CuentaService);
   private readonly sesionService = inject(SesionService);
 
@@ -104,6 +106,7 @@ export class AuthService {
       correo: cuentaApi.correo,
       roles: cuentaApi.roles.map((rol) => ROL_DESDE_API[rol]),
     };
+    this.cafeteriaService.limpiarCache();
     this.cuentaService.establecerCuenta(cuenta);
     this.sesionService.iniciarSesion(
       usuarioDesdeNombreCompleto(cuentaApi.id, cuentaApi.nombreCompleto, cuentaApi.correo),
@@ -130,6 +133,7 @@ export class AuthService {
   }
 
   limpiarSesion(): void {
+    this.cafeteriaService.limpiarCache();
     this.cuentaService.limpiarCuenta();
     this.sesionService.cerrarSesion();
   }

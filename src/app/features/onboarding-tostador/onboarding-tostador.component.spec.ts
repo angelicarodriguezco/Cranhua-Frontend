@@ -10,6 +10,7 @@ import {
   OnboardingTostadorComponent,
   RUTA_DASHBOARD_TOSTADOR,
 } from './onboarding-tostador.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const TIBAS: Coordenada = { lat: 9.959, lng: -84.082 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -28,6 +29,7 @@ describe('OnboardingTostadorComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(OnboardingTostadorComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;

@@ -10,6 +10,7 @@ import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { PasoDatosCosechaComponent } from './components/paso-datos-cosecha/paso-datos-cosecha.component';
 import { PasoSeleccionCatacionComponent } from './components/paso-seleccion-catacion/paso-seleccion-catacion.component';
 import { RegistrarCosechaComponent } from './registrar-cosecha.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('RegistrarCosechaComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
@@ -37,6 +38,7 @@ describe('RegistrarCosechaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarCosechaComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();

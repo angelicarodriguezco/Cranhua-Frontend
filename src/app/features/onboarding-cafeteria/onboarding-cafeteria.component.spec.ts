@@ -9,6 +9,7 @@ import { CafeteriaResponseApi, ESTILOS_CAFE } from '../../core/models/cafeteria.
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { OnboardingCafeteriaComponent, RUTA_DASHBOARD } from './onboarding-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU = { lat: 9.919, lng: -84.1395 };
@@ -44,6 +45,7 @@ function crear(apiCargada: Observable<boolean>) {
       { provide: GoogleMapsService, useValue: { apiCargada } },
     ],
   });
+  conSesionDeEjemplo();
   const fixture = TestBed.createComponent(OnboardingCafeteriaComponent);
   fixture.detectChanges();
   return fixture;

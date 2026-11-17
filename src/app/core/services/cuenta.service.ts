@@ -1,11 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 
-import { CUENTA_ACTUAL } from '../mocks/cuenta.mock';
 import { Cuenta } from '../models/cuenta.model';
 
 @Injectable({ providedIn: 'root' })
 export class CuentaService {
-  private readonly cuentaActual = signal<Cuenta | null>(CUENTA_ACTUAL);
+  private readonly cuentaActual = signal<Cuenta | null>(null);
 
   readonly cuenta = this.cuentaActual.asReadonly();
 

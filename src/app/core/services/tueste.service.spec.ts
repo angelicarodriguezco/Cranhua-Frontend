@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { TuesteService, calcularMerma } from './tueste.service';
+import { conSesionDeEjemplo } from '../testing/sesion-de-ejemplo';
 
 describe('calcularMerma', () => {
   it('devuelve el porcentaje de peso perdido', () => {
@@ -20,6 +21,7 @@ describe('TuesteService', () => {
   let servicio: TuesteService;
 
   beforeEach(() => {
+    conSesionDeEjemplo();
     servicio = TestBed.inject(TuesteService);
   });
 
