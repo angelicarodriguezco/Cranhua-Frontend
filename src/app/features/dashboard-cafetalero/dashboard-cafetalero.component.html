@@ -11,25 +11,29 @@
     </header>
 
     <section class="indicadores" aria-label="Indicadores">
-      <article class="glass">
+      <a class="glass tarjeta-enlace" routerLink="/cafetalero/fincas">
         <strong>{{ indicadores().fincasRegistradas }}</strong>
         <span>Fincas registradas</span>
-      </article>
-      <article class="glass">
+      </a>
+      <a class="glass tarjeta-enlace" routerLink="/cafetalero/historial">
         <strong>{{ indicadores().cosechasActivas }}</strong>
         <span>Cosechas activas</span>
-      </article>
-      <article class="glass">
+      </a>
+      <a class="glass tarjeta-enlace" routerLink="/cafetalero/historial">
         <strong>{{ indicadores().kgDisponibles }} kg</strong>
         <span>Disponible para tostadores</span>
-      </article>
-      <article class="glass kpi-pendientes">
+      </a>
+      <button
+        type="button"
+        class="glass tarjeta-enlace kpi-pendientes"
+        (click)="seccionSolicitudes.scrollIntoView({ behavior: 'smooth' })"
+      >
         <strong>{{ indicadores().solicitudesPendientes }}</strong>
         <span>Solicitudes pendientes</span>
-      </article>
+      </button>
     </section>
 
-    <section class="solicitudes glass" aria-labelledby="titulo-solicitudes">
+    <section class="solicitudes glass" aria-labelledby="titulo-solicitudes" #seccionSolicitudes>
       <div class="seccion-cabecera">
         <h2 id="titulo-solicitudes">Solicitudes de tostadores</h2>
         <span class="badge">{{ indicadores().solicitudesPendientes }} pendientes</span>
@@ -101,8 +105,12 @@
           </thead>
           <tbody>
             @for (cosecha of cosechas(); track cosecha.id) {
-              <tr>
-                <td>{{ cosecha.variedad }}</td>
+              <tr class="fila-enlace">
+                <td>
+                  <a [routerLink]="['/cafetalero/cosechas', cosecha.id, 'editar']">
+                    {{ cosecha.variedad }}
+                  </a>
+                </td>
                 <td>{{ cosecha.finca }}</td>
                 <td>{{ cosecha.proceso }}</td>
                 <td>

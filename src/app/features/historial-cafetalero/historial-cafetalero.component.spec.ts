@@ -48,7 +48,7 @@ describe('HistorialCafetaleroComponent', () => {
     const cosechas = filas('.cosechas');
 
     expect(cosechas.length).toBeGreaterThanOrEqual(5);
-    expect(cosechas[0]).toEqual(['1 dic 2025', 'Catuaí', '90 kg', 'En beneficiado']);
+    expect(cosechas[0]).toEqual(['1 dic 2025', 'Catuaí', '90 kg', 'En beneficiado', 'Editar →']);
 
     const estados = new Set(cosechas.map((fila) => fila[3]));
     expect([...estados]).toEqual(
@@ -81,6 +81,15 @@ describe('HistorialCafetaleroComponent', () => {
 
     expect(cta.nativeElement.textContent).toContain('Nueva cosecha');
     expect(cta.injector.get(RouterLink).href).toBe('/cafetalero/registrar-cosecha');
+  });
+
+  it('cada fila de cosecha abre su edición', () => {
+    const rutas = fixture.debugElement
+      .queryAll(By.css('.cosechas tbody tr.fila-enlace a'))
+      .map((el) => el.injector.get(RouterLink).href);
+
+    expect(rutas.length).toBe(filas('.cosechas').length);
+    expect(rutas[0]).toBe('/cafetalero/cosechas/cosecha-catuai-catalina/editar');
   });
 
   it('comparte el tema global con el panel', () => {

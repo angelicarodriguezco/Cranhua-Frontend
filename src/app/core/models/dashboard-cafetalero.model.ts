@@ -1,4 +1,4 @@
-export type EstadoCosecha = 'Disponible' | 'En beneficiado';
+export type EstadoCosecha = 'Disponible' | 'En beneficiado' | 'En catación' | 'Vendida';
 
 export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada';
 

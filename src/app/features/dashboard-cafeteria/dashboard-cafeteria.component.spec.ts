@@ -46,7 +46,7 @@ describe('DashboardCafeteriaComponent', () => {
     const indicadores = pagina.querySelector('.indicadores');
     expect(indicadores).toBeTruthy();
 
-    const articulos = indicadores!.querySelectorAll('article');
+    const articulos = indicadores!.querySelectorAll('.tarjeta-enlace');
     expect(articulos).toHaveSize(3);
 
     expect(indicadores!.textContent).toContain('42 kg');
@@ -77,6 +77,17 @@ describe('DashboardCafeteriaComponent', () => {
 
     expect(seccion!.querySelector('.pill-entregado')).toBeTruthy();
     expect(seccion!.querySelector('.pill-en-camino')).toBeTruthy();
+  });
+
+  it('los indicadores y los pedidos recientes abren su sección', () => {
+    expect(rutasDe('.indicadores a')).toEqual([
+      '/cafeteria/pedidos',
+      '/cafeteria/pedidos',
+      '/cafeteria/tostadores',
+    ]);
+    const pedidos = rutasDe('.pedidos tbody a');
+    expect(pedidos.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(pedidos)).toEqual(new Set(['/cafeteria/pedidos']));
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {

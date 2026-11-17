@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
+import { provideRouter, RouterLink } from '@angular/router';
 
 import { COSECHAS_REGISTRADAS } from '../../../../core/mocks/cosecha.mock';
 import { TablaCosechasComponent } from './tabla-cosechas.component';
@@ -30,7 +31,17 @@ describe('TablaCosechasComponent', () => {
       cosecha.codigoLote,
       `${cosecha.kgDisponibles} kg`,
       cosecha.estado,
+      'Editar →',
     ]);
+  });
+
+  it('cada fila abre la edición de su cosecha', () => {
+    const cosecha = COSECHAS_REGISTRADAS[0];
+    fixture.componentRef.setInput('cosechas', [cosecha]);
+    fixture.detectChanges();
+
+    const enlace = fixture.debugElement.query(By.css('tr.fila-enlace a'));
+    expect(enlace.injector.get(RouterLink).href).toBe(`/cafetalero/cosechas/${cosecha.id}/editar`);
   });
 
   it('avisa cuando la finca no tiene cosechas', () => {

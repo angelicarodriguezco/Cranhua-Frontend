@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
 import { COSECHAS_INICIALES } from '../mocks/cosecha.mock';
+import { COSECHAS_HISTORIAL } from '../mocks/historial-cafetalero.mock';
 import { NuevaCosecha } from '../models/cosecha.model';
 import { CosechaService } from './cosecha.service';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
@@ -47,6 +48,14 @@ describe('CosechaService', () => {
   it('lista las cosechas iniciales alineadas con el dashboard', () => {
     expect(servicio.lista()).toHaveSize(COSECHAS_INICIALES.length);
     expect(servicio.obtener('cosecha-caturra-catalina')?.variedad).toBe('Caturra');
+  });
+
+  it('tiene cada cosecha del historial para poder abrir su edición', () => {
+    for (const { id, variedad, estado } of COSECHAS_HISTORIAL) {
+      expect(servicio.obtener(id))
+        .withContext(id)
+        .toEqual(jasmine.objectContaining({ variedad, estado }));
+    }
   });
 
   it('obtener devuelve una copia y undefined si no existe', () => {

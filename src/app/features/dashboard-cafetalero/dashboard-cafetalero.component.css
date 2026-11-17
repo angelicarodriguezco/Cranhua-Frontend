@@ -151,7 +151,7 @@
   flex-shrink: 0;
 }
 
-.indicadores article {
+.indicadores .tarjeta-enlace {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -173,7 +173,7 @@
   font-weight: 500;
 }
 
-.indicadores article.kpi-pendientes strong {
+.indicadores .kpi-pendientes strong {
   color: var(--kpi-pendientes);
 }
 

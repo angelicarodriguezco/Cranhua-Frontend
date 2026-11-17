@@ -59,7 +59,7 @@ describe('DashboardCafetaleroComponent', () => {
     const indicadores = pagina.querySelector('.indicadores');
     expect(indicadores).toBeTruthy();
 
-    const articulos = indicadores!.querySelectorAll('article');
+    const articulos = indicadores!.querySelectorAll('.tarjeta-enlace');
     expect(articulos).toHaveSize(4);
     expect(indicadores!.textContent).toContain('2');
     expect(indicadores!.textContent).toContain('Fincas registradas');
@@ -142,6 +142,15 @@ describe('DashboardCafetaleroComponent', () => {
     expect(rutasDe('.fincas .seccion-cabecera a')).toEqual(['/cafetalero/fincas']);
     expect(rutasDe('.nueva-finca')).toEqual(['/cafetalero/fincas/registrar']);
     expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/cafetalero/historial']);
+
+    expect(rutasDe('.indicadores a')).toEqual([
+      '/cafetalero/fincas',
+      '/cafetalero/historial',
+      '/cafetalero/historial',
+    ]);
+    expect(rutasDe('.cosechas tbody a')).toContain(
+      '/cafetalero/cosechas/cosecha-caturra-catalina/editar',
+    );
 
     const detalles = rutasDe('.fincas-grid article a');
     expect(detalles).toContain('/cafetalero/fincas/finca-la-catalina');

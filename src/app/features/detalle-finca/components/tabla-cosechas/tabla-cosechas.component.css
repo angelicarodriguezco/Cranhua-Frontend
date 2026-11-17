@@ -73,6 +73,16 @@ tbody tr:hover td {
   color: var(--pill-beneficiado-text);
 }
 
+.pill-catacion {
+  background: color-mix(in srgb, var(--brand-accent) 14%, transparent);
+  color: var(--brand-accent);
+}
+
+.pill-vendida {
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  opacity: 0.8;
+}
+
 .vacio {
   margin: 0;
   color: var(--text-muted);

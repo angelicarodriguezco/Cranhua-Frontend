@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { formatearFecha, formatearKg } from '../../shared/utils/formato';
@@ -6,7 +7,7 @@ import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-
 
 @Component({
   selector: 'app-dashboard-cafeteria',
-  imports: [MenuLateralComponent],
+  imports: [MenuLateralComponent, RouterLink],
   templateUrl: './dashboard-cafeteria.component.html',
   styleUrl: './dashboard-cafeteria.component.css',
 })
