@@ -83,6 +83,10 @@ export class CafeteriaService {
     return this.actual$;
   }
 
+  limpiarCache(): void {
+    this.actual$ = null;
+  }
+
   private guardarCache(cafeteria: Cafeteria): void {
     this.actual$ = of(cafeteria).pipe(shareReplay({ bufferSize: 1, refCount: false }));
   }

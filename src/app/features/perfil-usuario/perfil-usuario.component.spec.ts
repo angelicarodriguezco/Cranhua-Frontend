@@ -40,7 +40,10 @@ describe('PerfilUsuarioComponent', () => {
       providers: [
         provideRouter([]),
         provideHttpClient(),
-        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
+        {
+          provide: CafeteriaService,
+          useValue: { obtenerActual: () => of(undefined), limpiarCache: () => undefined },
+        },
       ],
     }).compileComponents();
 

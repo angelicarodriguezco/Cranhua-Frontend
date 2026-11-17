@@ -8,6 +8,7 @@ import { USUARIOS } from '../../core/mocks/finca.mock';
 import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardTostadorComponent } from './dashboard-tostador.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardTostadorComponent', () => {
   let fixture: ComponentFixture<DashboardTostadorComponent>;
@@ -19,6 +20,7 @@ describe('DashboardTostadorComponent', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardTostadorComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();

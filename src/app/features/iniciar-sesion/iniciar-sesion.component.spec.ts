@@ -106,6 +106,24 @@ describe('IniciarSesionComponent', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/cafetalero/dashboard');
   });
 
+  it('después de iniciar sesión vuelve a la ruta privada que se quería abrir', async () => {
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/?volver=%2Ftostador%2Fnegocio');
+    const otro = TestBed.createComponent(IniciarSesionComponent);
+    otro.detectChanges();
+    spyOn(router, 'navigateByUrl');
+
+    otro.componentInstance['form'].setValue({
+      correo: 'rodrigo@fincalacatalina.cr',
+      contrasena: 'Cafe2026!',
+    });
+    (otro.nativeElement as HTMLElement)
+      .querySelector<HTMLButtonElement>('button[type="submit"]')!
+      .click();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/tostador/negocio');
+  });
+
   for (const [rolApi, ruta] of [
     ['TOSTADOR', '/tostador/dashboard'],
     ['CAFETERIA', '/cafeteria/dashboard'],

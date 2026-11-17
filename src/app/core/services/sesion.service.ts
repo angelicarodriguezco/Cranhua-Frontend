@@ -1,11 +1,10 @@
 import { Injectable, signal } from '@angular/core';
 
-import { USUARIO_ACTUAL } from '../mocks/finca.mock';
 import { Usuario } from '../models/finca.model';
 
 @Injectable({ providedIn: 'root' })
 export class SesionService {
-  private readonly usuarioActual = signal<Usuario | null>(USUARIO_ACTUAL);
+  private readonly usuarioActual = signal<Usuario | null>(null);
 
   readonly usuario = this.usuarioActual.asReadonly();
 

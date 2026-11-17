@@ -114,6 +114,15 @@ describe('CafeteriaService', () => {
         .flush({ mensaje: 'Sin sesión.' }, { status: 401, statusText: 'Unauthorized' });
       expect(errorStatus).toBe(401);
     });
+
+    it('después de limpiarCache vuelve a pedir la cafetería al backend', () => {
+      servicio.obtenerActual().subscribe();
+      http.expectOne(`${BASE}/actual`).flush(cafeteriaApi());
+
+      servicio.limpiarCache();
+      servicio.obtenerActual().subscribe();
+      http.expectOne(`${BASE}/actual`).flush(cafeteriaApi());
+    });
   });
 
   describe('registrar', () => {

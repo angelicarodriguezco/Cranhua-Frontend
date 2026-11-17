@@ -10,6 +10,7 @@ import { SesionService } from '../../core/services/sesion.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
 import { OnboardingFincaComponent, RUTA_DASHBOARD } from './onboarding-finca.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const BASE = `${environment.apiUrl}/api/fincas`;
 
@@ -56,6 +57,7 @@ describe('OnboardingFincaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(OnboardingFincaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;

@@ -2,14 +2,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Location } from '@angular/common';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 import { of } from 'rxjs';
 
 import { routes } from './app.routes';
 import { CAFETERIA_EJEMPLO } from './core/mocks/cafeteria.mock';
+import { CUENTA_CAFETALERO_TOSTADOR, CUENTA_SOLO_CAFETALERO } from './core/mocks/cuenta.mock';
+import { AuthService } from './core/services/auth.service';
 import { CafeteriaService } from './core/services/cafeteria.service';
 import { GoogleMapsService } from './core/services/google-maps.service';
+import { conSesionDeEjemplo } from './core/testing/sesion-de-ejemplo';
 
 describe('Rutas del cafetalero', () => {
   let harness: RouterTestingHarness;
@@ -23,6 +26,7 @@ describe('Rutas del cafetalero', () => {
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
       ],
     });
+    conSesionDeEjemplo();
     harness = await RouterTestingHarness.create();
   });
 
@@ -61,6 +65,7 @@ describe('Rutas de la cafetería', () => {
       ],
     });
     cafeteriaService = TestBed.inject(CafeteriaService);
+    conSesionDeEjemplo();
     harness = await RouterTestingHarness.create();
   });
 
@@ -78,5 +83,80 @@ describe('Rutas de la cafetería', () => {
       await harness.navigateByUrl(ruta);
       expect(TestBed.inject(Location).path()).withContext(ruta).toBe('/cafeteria/registrar');
     }
+  });
+});
+
+describe('Rutas privadas por sesión y rol', () => {
+  let harness: RouterTestingHarness;
+  let ruta: () => string;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
+      ],
+    });
+    spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
+    ruta = () => TestBed.inject(Router).url;
+    harness = await RouterTestingHarness.create();
+  });
+
+  it('sin sesión, los dashboards y sus vistas mandan al login con la ruta pedida', async () => {
+    for (const privada of [
+      '/perfil',
+      '/onboarding-finca',
+      '/cafetalero/dashboard',
+      '/cafetalero/fincas/f-la-esperanza',
+      '/tostador/dashboard',
+      '/tostador/tostados/nuevo',
+      '/cafeteria/registrar',
+      '/cafeteria/dashboard',
+      '/cafeteria/pedidos',
+    ]) {
+      await harness.navigateByUrl(privada);
+      expect(ruta())
+        .withContext(privada)
+        .toBe(`/iniciar-sesion?volver=${encodeURIComponent(privada)}`);
+    }
+  });
+
+  it('sin sesión, las rutas públicas abren', async () => {
+    for (const publica of ['/', '/registro', '/iniciar-sesion', '/recuperar-contrasena']) {
+      await harness.navigateByUrl(publica);
+      expect(ruta()).withContext(publica).toBe(publica);
+    }
+    await harness.navigateByUrl('/explorar/finca/f-la-esperanza');
+    expect(ruta()).toBe('/explorar?seleccionado=f-la-esperanza');
+  });
+
+  it('con rol incorrecto lleva al dashboard del rol que tiene la cuenta', async () => {
+    conSesionDeEjemplo(CUENTA_SOLO_CAFETALERO);
+
+    for (const ajena of ['/tostador/negocio', '/cafeteria/pedidos', '/onboarding-tostador']) {
+      await harness.navigateByUrl(ajena);
+      expect(ruta()).withContext(ajena).toBe('/cafetalero/dashboard');
+    }
+  });
+
+  it('una cuenta con varios roles abre las vistas de todos', async () => {
+    conSesionDeEjemplo(CUENTA_CAFETALERO_TOSTADOR);
+
+    for (const propia of ['/cafetalero/historial', '/tostador/solicitudes']) {
+      await harness.navigateByUrl(propia);
+      expect(ruta()).withContext(propia).toBe(propia);
+    }
+  });
+
+  it('después de cerrar sesión las rutas privadas dejan de abrirse', async () => {
+    conSesionDeEjemplo();
+    await harness.navigateByUrl('/cafeteria/dashboard');
+    expect(ruta()).toBe('/cafeteria/dashboard');
+
+    TestBed.inject(AuthService).limpiarSesion();
+    await harness.navigateByUrl('/cafeteria/pedidos');
+    expect(ruta()).toBe('/iniciar-sesion?volver=%2Fcafeteria%2Fpedidos');
   });
 });

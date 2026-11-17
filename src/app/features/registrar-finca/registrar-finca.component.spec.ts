@@ -10,6 +10,7 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const BASE = `${environment.apiUrl}/api/fincas`;
 
@@ -58,6 +59,7 @@ describe('RegistrarFincaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarFincaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;

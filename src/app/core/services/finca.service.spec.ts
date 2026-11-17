@@ -14,6 +14,7 @@ import {
 } from '../models/finca.model';
 import { fincaDesdeApi } from '../utils/finca-desde-api';
 import { FincaService } from './finca.service';
+import { conSesionDeEjemplo } from '../testing/sesion-de-ejemplo';
 
 const BASE = `${environment.apiUrl}/api/fincas`;
 
@@ -61,6 +62,7 @@ describe('FincaService', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
+    conSesionDeEjemplo();
     servicio = TestBed.inject(FincaService);
     http = TestBed.inject(HttpTestingController);
   });

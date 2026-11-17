@@ -13,6 +13,7 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { CLAVE_TEMA } from '../../core/services/tema.service';
 import { RegistrarCafeteriaComponent } from './registrar-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
@@ -55,6 +56,7 @@ describe('RegistrarCafeteriaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarCafeteriaComponent);
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;

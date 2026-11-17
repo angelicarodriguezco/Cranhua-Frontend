@@ -9,6 +9,7 @@ import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardCafeteriaComponent } from './dashboard-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardCafeteriaComponent', () => {
   let fixture: ComponentFixture<DashboardCafeteriaComponent>;
@@ -22,6 +23,7 @@ describe('DashboardCafeteriaComponent', () => {
 
     spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardCafeteriaComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();

@@ -10,6 +10,7 @@ import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const SIN_CUENTA = 'No encontramos una cuenta de cafetalero con ese correo.';
 
@@ -48,6 +49,7 @@ describe('DetalleFincaComponent', () => {
         { provide: FincaService, useValue: fincaServiceFalso },
       ],
     });
+    conSesionDeEjemplo();
     harness = await RouterTestingHarness.create();
   });
 

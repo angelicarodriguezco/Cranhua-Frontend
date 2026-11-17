@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import { CUENTA_ACTUAL, CUENTA_SOLO_CAFETALERO } from '../mocks/cuenta.mock';
+import { CUENTA_SOLO_CAFETALERO } from '../mocks/cuenta.mock';
 import { CuentaService } from './cuenta.service';
 
 describe('CuentaService', () => {
@@ -10,8 +10,8 @@ describe('CuentaService', () => {
     servicio = TestBed.inject(CuentaService);
   });
 
-  it('arranca con la cuenta de ejemplo', () => {
-    expect(servicio.cuenta()).toEqual(CUENTA_ACTUAL);
+  it('arranca sin cuenta hasta restaurar la sesión', () => {
+    expect(servicio.cuenta()).toBeNull();
   });
 
   it('permite cambiar la cuenta actual', () => {
