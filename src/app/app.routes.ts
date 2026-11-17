@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { conCafeteriaGuard, sinCafeteriaGuard } from './core/guards/cafeteria.guard';
+import { rolGuard, sesionGuard } from './core/guards/sesion.guard';
 import { DashboardCafeteriaComponent } from './features/dashboard-cafeteria/dashboard-cafeteria.component';
 import { DashboardCafetaleroComponent } from './features/dashboard-cafetalero/dashboard-cafetalero.component';
 import { DashboardConsumidorComponent } from './features/dashboard-consumidor/dashboard-consumidor.component';
@@ -63,23 +64,7 @@ export const routes: Routes = [
     component: RecuperarContrasenaComponent,
     data: { title: 'Recuperar contraseña' },
   },
-  { path: 'onboarding-finca', component: OnboardingFincaComponent },
-  { path: 'onboarding-tostador', component: OnboardingTostadorComponent },
-  { path: 'onboarding-cafeteria', component: OnboardingCafeteriaComponent },
   { path: 'mapa-prueba', component: MapaPruebaComponent },
-  { path: 'perfil', component: PerfilUsuarioComponent },
-  { path: 'cafetalero/dashboard', component: DashboardCafetaleroComponent },
-  { path: 'cafetalero/fincas', component: MisFincasComponent },
-  { path: 'cafetalero/fincas/registrar', component: RegistrarFincaComponent },
-  { path: 'cafetalero/fincas/:id', component: DetalleFincaComponent },
-  {
-    path: 'cafetalero/fincas/:id/editar',
-    component: PaginaMockComponent,
-    data: { title: 'Editar finca' },
-  },
-  { path: 'cafetalero/registrar-cosecha', component: RegistrarCosechaComponent },
-  { path: 'cafetalero/cosechas/:id/editar', component: RegistrarCosechaComponent },
-  { path: 'cafetalero/historial', component: HistorialCafetaleroComponent },
   { path: 'dashboard', redirectTo: 'cafetalero/dashboard', pathMatch: 'full' },
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
   { path: 'mis-fincas/registrar', redirectTo: 'cafetalero/fincas/registrar', pathMatch: 'full' },
@@ -87,30 +72,82 @@ export const routes: Routes = [
   { path: 'registrar-cosecha', redirectTo: 'cafetalero/registrar-cosecha', pathMatch: 'full' },
   { path: 'cosechas/:id/editar', redirectTo: 'cafetalero/cosechas/:id/editar' },
   { path: 'historial', redirectTo: 'cafetalero/historial', pathMatch: 'full' },
-  { path: 'tostador/dashboard', component: DashboardTostadorComponent },
-  { path: 'tostador/cosechas', component: ExplorarCosechasComponent },
-  { path: 'tostador/cosechas/:id', component: DetalleCosechaComponent },
-  { path: 'tostador/solicitudes', component: MisSolicitudesComponent },
-  { path: 'tostador/tostados', component: MisTostadosComponent },
-  { path: 'tostador/tostados/nuevo', component: FormularioTuesteComponent },
-  { path: 'tostador/tostados/:id/editar', component: FormularioTuesteComponent },
-  { path: 'tostador/negocio', component: MiNegocioComponent },
 
   {
-    path: 'cafeteria/registrar',
-    component: RegistrarCafeteriaComponent,
-    canActivate: [sinCafeteriaGuard],
-  },
-  {
-    path: 'cafeteria',
-    canActivateChild: [conCafeteriaGuard],
+    path: '',
+    canActivateChild: [sesionGuard],
     children: [
-      { path: 'dashboard', component: DashboardCafeteriaComponent },
-      { path: 'tostadores', component: ExplorarTostadoresComponent },
-      { path: 'tostadores/:id', component: DetalleTostadorComponent },
-      { path: 'pedidos', component: MisPedidosComponent },
-      { path: 'mi-cafeteria', component: MiCafeteriaComponent },
-      { path: 'menu', component: PublicarMenuComponent },
+      { path: 'perfil', component: PerfilUsuarioComponent },
+      {
+        path: 'onboarding-finca',
+        component: OnboardingFincaComponent,
+        canActivate: [rolGuard('cafetalero')],
+      },
+      {
+        path: 'onboarding-tostador',
+        component: OnboardingTostadorComponent,
+        canActivate: [rolGuard('tostador')],
+      },
+      {
+        path: 'onboarding-cafeteria',
+        component: OnboardingCafeteriaComponent,
+        canActivate: [rolGuard('cafeteria')],
+      },
+      {
+        path: 'cafetalero',
+        canActivateChild: [rolGuard('cafetalero')],
+        children: [
+          { path: 'dashboard', component: DashboardCafetaleroComponent },
+          { path: 'fincas', component: MisFincasComponent },
+          { path: 'fincas/registrar', component: RegistrarFincaComponent },
+          { path: 'fincas/:id', component: DetalleFincaComponent },
+          {
+            path: 'fincas/:id/editar',
+            component: PaginaMockComponent,
+            data: { title: 'Editar finca' },
+          },
+          { path: 'registrar-cosecha', component: RegistrarCosechaComponent },
+          { path: 'cosechas/:id/editar', component: RegistrarCosechaComponent },
+          { path: 'historial', component: HistorialCafetaleroComponent },
+        ],
+      },
+      {
+        path: 'tostador',
+        canActivateChild: [rolGuard('tostador')],
+        children: [
+          { path: 'dashboard', component: DashboardTostadorComponent },
+          { path: 'cosechas', component: ExplorarCosechasComponent },
+          { path: 'cosechas/:id', component: DetalleCosechaComponent },
+          { path: 'solicitudes', component: MisSolicitudesComponent },
+          { path: 'tostados', component: MisTostadosComponent },
+          { path: 'tostados/nuevo', component: FormularioTuesteComponent },
+          { path: 'tostados/:id/editar', component: FormularioTuesteComponent },
+          { path: 'negocio', component: MiNegocioComponent },
+        ],
+      },
+      {
+        path: 'cafeteria',
+        canActivateChild: [rolGuard('cafeteria')],
+        children: [
+          {
+            path: 'registrar',
+            component: RegistrarCafeteriaComponent,
+            canActivate: [sinCafeteriaGuard],
+          },
+          {
+            path: '',
+            canActivateChild: [conCafeteriaGuard],
+            children: [
+              { path: 'dashboard', component: DashboardCafeteriaComponent },
+              { path: 'tostadores', component: ExplorarTostadoresComponent },
+              { path: 'tostadores/:id', component: DetalleTostadorComponent },
+              { path: 'pedidos', component: MisPedidosComponent },
+              { path: 'mi-cafeteria', component: MiCafeteriaComponent },
+              { path: 'menu', component: PublicarMenuComponent },
+            ],
+          },
+        ],
+      },
     ],
   },
 ];

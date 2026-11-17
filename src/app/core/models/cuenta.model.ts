@@ -6,3 +6,9 @@ export interface Cuenta {
   correo: string;
   roles: RolCuenta[];
 }
+
+export const RUTA_DASHBOARD_POR_ROL: Record<RolCuenta, string> = {
+  cafetalero: '/cafetalero/dashboard',
+  tostador: '/tostador/dashboard',
+  cafeteria: '/cafeteria/dashboard',
+};
