@@ -144,16 +144,20 @@ describe('MenuLateralComponent', () => {
     expect(aside.getAttribute('data-tema')).toBe('oscuro');
   });
 
-  it('"Cerrar sesión" llama a AuthService.cerrarSesion', async () => {
+  it('"Cerrar sesión" limpia la sesión y navega a /iniciar-sesion', async () => {
     await crear(CUENTA_SOLO_CAFETALERO);
+    await navegar('/cafetalero/dashboard');
     const auth = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+    const router = TestBed.inject(Router);
     const enlaces = [...pagina.querySelectorAll<HTMLAnchorElement>('.nav-cuenta a')];
 
     enlaces.find((a) => a.textContent?.includes('Perfil y ajustes'))!.click();
     expect(auth.cerrarSesion).not.toHaveBeenCalled();
 
     enlaces.find((a) => a.textContent?.includes('Cerrar sesión'))!.click();
+    await fixture.whenStable();
     expect(auth.cerrarSesion).toHaveBeenCalledTimes(1);
+    expect(router.url).toBe('/iniciar-sesion');
   });
 });
 
