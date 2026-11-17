@@ -64,7 +64,7 @@ describe('DashboardTostadorComponent', () => {
   });
 
   it('muestra los 3 indicadores con datos de ejemplo', () => {
-    const articulos = pagina.querySelectorAll('.indicadores article');
+    const articulos = pagina.querySelectorAll('.indicadores .tarjeta-enlace');
     expect(articulos).toHaveSize(3);
 
     const texto = pagina.querySelector('.indicadores')!.textContent!;
@@ -73,6 +73,11 @@ describe('DashboardTostadorComponent', () => {
     expect(texto).toContain('Comprados este mes');
     expect(texto).toContain('Lotes con código');
     expect(texto).not.toContain('favoritas');
+    expect(rutasDe('.indicadores a')).toEqual([
+      '/tostador/solicitudes',
+      '/tostador/tostados',
+      '/tostador/tostados',
+    ]);
   });
 
   it('reutiliza el explorador de cosechas con sus filtros', () => {
