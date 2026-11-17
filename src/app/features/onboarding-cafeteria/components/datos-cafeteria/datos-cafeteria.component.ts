@@ -11,6 +11,7 @@ import {
 import { CantonReferencia } from '../../../../core/models/cafeteria.model';
 import { Coordenada } from '../../../../core/models/finca.model';
 import { MapaCafeteriaComponent } from '../mapa-cafeteria/mapa-cafeteria.component';
+import { EstadoCantonesComponent } from '../../../../shared/components/estado-cantones/estado-cantones.component';
 
 // 8 dígitos de Costa Rica, con o sin +506 y separados por espacio o guion
 const TELEFONO = /^(\+506[\s-]?)?\d{4}[\s-]?\d{4}$/;
@@ -48,7 +49,7 @@ export type FormularioDatos = ReturnType<typeof crearFormularioDatos>;
 
 @Component({
   selector: 'app-datos-cafeteria',
-  imports: [ReactiveFormsModule, MapaCafeteriaComponent],
+  imports: [EstadoCantonesComponent, ReactiveFormsModule, MapaCafeteriaComponent],
   templateUrl: './datos-cafeteria.component.html',
   styleUrls: ['../paso-cafeteria.css', './datos-cafeteria.component.css'],
 })

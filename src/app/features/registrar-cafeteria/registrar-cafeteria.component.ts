@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 
 import { CantonReferencia, ESTILOS_CAFE, EstiloCafe } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { formatearTelefono } from '../../shared/utils/formato';
@@ -15,6 +16,7 @@ import {
 } from '../onboarding-cafeteria/components/datos-cafeteria/datos-cafeteria.component';
 import { MapaCafeteriaComponent } from '../onboarding-cafeteria/components/mapa-cafeteria/mapa-cafeteria.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
+import { EstadoCantonesComponent } from '../../shared/components/estado-cantones/estado-cantones.component';
 
 type Vista = 'vacia' | 'formulario';
 
@@ -24,7 +26,12 @@ const ERROR_REGISTRO = 'No pudimos registrar la cafetería. Intentá de nuevo.';
 
 @Component({
   selector: 'app-registrar-cafeteria',
-  imports: [MenuLateralComponent, ReactiveFormsModule, MapaCafeteriaComponent],
+  imports: [
+    EstadoCantonesComponent,
+    MenuLateralComponent,
+    ReactiveFormsModule,
+    MapaCafeteriaComponent,
+  ],
   templateUrl: './registrar-cafeteria.component.html',
   styleUrls: ['../mi-cafeteria/mi-cafeteria.component.css', './registrar-cafeteria.component.css'],
   host: { '[attr.data-theme]': 'tema()' },
@@ -32,6 +39,7 @@ const ERROR_REGISTRO = 'No pudimos registrar la cafetería. Intentá de nuevo.';
 export class RegistrarCafeteriaComponent {
   private readonly dashboard = inject(DashboardCafeteriaService);
   private readonly cafeteriaService = inject(CafeteriaService);
+  private readonly cantones = injectCantones();
   private readonly router = inject(Router);
 
   // El rol del mock incluye el nombre del local, que ya no existe
@@ -49,7 +57,7 @@ export class RegistrarCafeteriaComponent {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed<CantonReferencia | null>(() => {
     const pin = this.pin();
-    return pin ? this.cafeteriaService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly textoUbicacion = computed(() => {
     const canton = this.canton();

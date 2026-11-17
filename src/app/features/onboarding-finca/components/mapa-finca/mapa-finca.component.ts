@@ -14,7 +14,7 @@ import { GoogleMap, MapAdvancedMarker, MapPolygon, MapPolyline } from '@angular/
 
 import { GoogleMapsService } from '../../../../core/services/google-maps.service';
 import { ConflictoFinca, Coordenada } from '../../../../core/models/finca.model';
-import { FincaService } from '../../../../core/services/finca.service';
+import { injectCantones } from '../../../../core/services/canton.service';
 import { formatearHectareas } from '../../../../shared/utils/formato';
 import { areaHectareas, centroide, distanciaKm } from '../../../../shared/utils/geo';
 
@@ -47,7 +47,7 @@ const VINO = '#b03a52';
 })
 export class MapaFincaComponent {
   private document = inject(DOCUMENT);
-  private fincaService = inject(FincaService);
+  private cantones = injectCantones();
 
   readonly perimetro = model<Coordenada[]>([]);
   readonly pin = model<Coordenada | null>(null);
@@ -237,7 +237,7 @@ export class MapaFincaComponent {
         return;
       }
     }
-    const canton = this.fincaService.buscarCanton(texto);
+    const canton = this.cantones.buscar(texto);
     if (canton) {
       this.irA(canton.cabecera, 14);
       return;

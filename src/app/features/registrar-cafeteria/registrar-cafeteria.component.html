@@ -152,14 +152,20 @@
             @if (ubicacionInvalida()) {
               <p id="error-ubicacion" class="campo__error">
                 @if (pin()) {
-                  El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.
+                  <app-estado-cantones
+                    >El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu
+                    local.</app-estado-cantones
+                  >
                 } @else {
                   Marcá en el mapa dónde está tu local.
                 }
               </p>
             } @else {
               <p id="ayuda-ubicacion" class="campo__ayuda">
-                Tocá el mapa para colocar el pin y arrastralo para ajustarlo.
+                <app-estado-cantones
+                  >Tocá el mapa para colocar el pin y arrastralo para
+                  ajustarlo.</app-estado-cantones
+                >
               </p>
             }
           </div>

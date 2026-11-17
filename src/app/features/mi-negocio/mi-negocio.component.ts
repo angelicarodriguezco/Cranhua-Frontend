@@ -19,6 +19,7 @@ import {
   EstiloTueste,
   NegocioTueste,
 } from '../../core/models/negocio-tueste.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
@@ -29,6 +30,7 @@ import {
   FormularioNegocio,
 } from '../onboarding-tostador/components/formulario-negocio/formulario-negocio.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
+import { EstadoCantonesComponent } from '../../shared/components/estado-cantones/estado-cantones.component';
 
 export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
 
@@ -69,6 +71,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 @Component({
   selector: 'app-mi-negocio',
   imports: [
+    EstadoCantonesComponent,
     MenuLateralComponent,
     ReactiveFormsModule,
     MapaUbicacionComponent,
@@ -82,6 +85,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 export class MiNegocioComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardTostadorService);
   private readonly negocioService = inject(NegocioTuesteService);
+  private readonly cantones = injectCantones();
   private readonly router = inject(Router);
 
   protected readonly tema = this.dashboard.tema;
@@ -93,7 +97,7 @@ export class MiNegocioComponent implements OnDestroy {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed<Canton | null>(() => {
     const pin = this.pin();
-    return pin ? this.negocioService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly textoUbicacion = computed(() => {
     const canton = this.canton();

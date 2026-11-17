@@ -11,6 +11,7 @@ import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const BASE = `${environment.apiUrl}/api/fincas`;
 
@@ -61,6 +62,7 @@ describe('RegistrarFincaComponent', () => {
 
     conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarFincaComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     http = TestBed.inject(HttpTestingController);

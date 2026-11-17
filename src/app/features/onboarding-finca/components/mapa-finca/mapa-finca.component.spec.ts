@@ -1,4 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NEVER } from 'rxjs';
 
@@ -6,6 +7,7 @@ import { GoogleMapsService } from '../../../../core/services/google-maps.service
 import { Coordenada } from '../../../../core/models/finca.model';
 import { centroide } from '../../../../shared/utils/geo';
 import { MapaFincaComponent } from './mapa-finca.component';
+import { responderCantones } from '../../../../core/testing/cantones-de-prueba';
 
 function clic(punto: Coordenada) {
   return { latLng: { toJSON: () => punto } } as google.maps.MapMouseEvent;
@@ -25,11 +27,13 @@ describe('MapaFincaComponent', () => {
       // Sin cargar Google Maps: se prueba la lógica de dibujo
       providers: [
         provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(MapaFincaComponent);
+    responderCantones();
     mapa = fixture.componentInstance;
     fixture.detectChanges();
   });

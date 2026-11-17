@@ -8,11 +8,12 @@
           <th>Lote</th>
           <th>Disponible</th>
           <th>Estado</th>
+          <th aria-label="Acciones"></th>
         </tr>
       </thead>
       <tbody>
         @for (cosecha of cosechas(); track cosecha.id) {
-          <tr>
+          <tr class="fila-enlace">
             <td>{{ cosecha.variedad }}</td>
             <td>{{ cosecha.proceso }}</td>
             <td class="lote">{{ cosecha.codigoLote }}</td>
@@ -22,9 +23,19 @@
                 class="pill"
                 [class.pill-disponible]="cosecha.estado === 'Disponible'"
                 [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
+                [class.pill-catacion]="cosecha.estado === 'En catación'"
+                [class.pill-vendida]="cosecha.estado === 'Vendida'"
               >
                 {{ cosecha.estado }}
               </span>
+            </td>
+            <td class="accion">
+              <a
+                [routerLink]="['/cafetalero/cosechas', cosecha.id, 'editar']"
+                [attr.aria-label]="'Editar cosecha ' + cosecha.variedad"
+              >
+                Editar →
+              </a>
             </td>
           </tr>
         }
