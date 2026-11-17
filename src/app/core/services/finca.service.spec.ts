@@ -3,8 +3,9 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { environment } from '../../../environments/environment';
-import { CANTONES, USUARIO_ACTUAL } from '../mocks/finca.mock';
+import { USUARIO_ACTUAL } from '../mocks/finca.mock';
 import {
+  Canton,
   ErrorRegistroFinca,
   FincaResponseApi,
   NuevaFinca,
@@ -24,7 +25,12 @@ const PERIMETRO = [
   { lat: 9.66, lng: -84.02 },
 ];
 
-const TARRAZU = CANTONES.find((c) => c.nombre === 'Tarrazú')!;
+const TARRAZU: Canton = {
+  nombre: 'Tarrazú',
+  provincia: 'San José',
+  zona: 'Tarrazú',
+  cabecera: { lat: 9.6575, lng: -84.0247 },
+};
 
 function fincaApi(cambios: Partial<FincaResponseApi> = {}): FincaResponseApi {
   return {
@@ -86,19 +92,13 @@ describe('FincaService', () => {
       expect(finca.duenosAdicionales.map((d) => d.id)).toEqual([USUARIO_ACTUAL.id]);
     });
 
-    it('toma el cantón de la lista o lo arma con los datos de la finca', () => {
-      expect(fincaDesdeApi(fincaApi(), USUARIO_ACTUAL.id).canton).toBe(TARRAZU);
-
-      const otra = fincaApi({
-        canton: 'Cantón Nuevo',
-        provincia: 'Puntarenas',
-        zonaCafetalera: null,
-      });
-      expect(fincaDesdeApi(otra, USUARIO_ACTUAL.id).canton).toEqual({
-        nombre: 'Cantón Nuevo',
-        provincia: 'Puntarenas',
-        zona: null,
-        cabecera: otra.ubicacion,
+    it('arma el cantón con los datos que guardó el backend', () => {
+      const api = fincaApi();
+      expect(fincaDesdeApi(api, USUARIO_ACTUAL.id).canton).toEqual({
+        nombre: 'Tarrazú',
+        provincia: 'San José',
+        zona: 'Tarrazú',
+        cabecera: api.ubicacion,
       });
     });
   });
@@ -321,16 +321,5 @@ describe('FincaService', () => {
       );
       expect(resultado?.registrada).toBeFalse();
     });
-  });
-
-  it('ubica el cantón más cercano al pin', () => {
-    expect(servicio.cantonDe({ lat: 9.66, lng: -84.03 })?.nombre).toBe('Tarrazú');
-    expect(servicio.cantonDe({ lat: 11.2, lng: -85.6 })).toBeNull();
-  });
-
-  it('busca cantones sin tildes', () => {
-    expect(servicio.buscarCanton('tarrazu')?.nombre).toBe('Tarrazú');
-    expect(servicio.buscarCanton('san ra')?.nombre).toBe('San Ramón');
-    expect(servicio.buscarCanton('Narnia')).toBeUndefined();
   });
 });

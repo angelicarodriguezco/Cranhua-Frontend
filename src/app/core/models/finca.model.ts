@@ -31,6 +31,14 @@ export interface Canton {
   cabecera: Coordenada;
 }
 
+export interface CantonResponseApi {
+  id: number;
+  nombre: string;
+  provincia: string;
+  zonaCafetalera: ZonaCafetalera | null;
+  cabecera: Coordenada;
+}
+
 export interface Finca {
   id: string;
   nombre: string;

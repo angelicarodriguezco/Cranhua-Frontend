@@ -1,17 +1,5 @@
-import { CANTONES } from '../mocks/finca.mock';
-import { Canton, Finca, FincaResponseApi } from '../models/finca.model';
+import { Finca, FincaResponseApi } from '../models/finca.model';
 import { usuarioDesdeNombreCompleto } from './nombre-usuario';
-
-function cantonDe(api: FincaResponseApi): Canton {
-  return (
-    CANTONES.find((c) => c.nombre === api.canton) ?? {
-      nombre: api.canton,
-      provincia: api.provincia,
-      zona: api.zonaCafetalera,
-      cabecera: api.ubicacion,
-    }
-  );
-}
 
 // El usuario actual queda como propietario si es dueño; los demás van como adicionales
 export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
@@ -23,7 +11,12 @@ export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
     zona: api.zonaCafetalera,
     perimetro: api.perimetro,
     ubicacion: api.ubicacion,
-    canton: cantonDe(api),
+    canton: {
+      nombre: api.canton,
+      provincia: api.provincia,
+      zona: api.zonaCafetalera,
+      cabecera: api.ubicacion,
+    },
     areaHectareas: api.areaHectareas,
     propietarioId: propietario?.id ?? '',
     duenosAdicionales: api.duenos

@@ -20,6 +20,7 @@ import {
 } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
 import { ItemMenu } from '../../core/models/menu-cafeteria.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
@@ -32,6 +33,7 @@ import {
 } from '../onboarding-cafeteria/components/datos-cafeteria/datos-cafeteria.component';
 import { MapaCafeteriaComponent } from '../onboarding-cafeteria/components/mapa-cafeteria/mapa-cafeteria.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
+import { EstadoCantonesComponent } from '../../shared/components/estado-cantones/estado-cantones.component';
 
 export const RUTA_DASHBOARD_CAFETERIA = '/cafeteria/dashboard';
 export const RUTA_PUBLICAR_MENU = '/cafeteria/menu';
@@ -70,6 +72,7 @@ function clonarCafeteria(cafeteria: Cafeteria): Cafeteria {
 @Component({
   selector: 'app-mi-cafeteria',
   imports: [
+    EstadoCantonesComponent,
     MenuLateralComponent,
     ReactiveFormsModule,
     MapaCafeteriaComponent,
@@ -83,6 +86,7 @@ function clonarCafeteria(cafeteria: Cafeteria): Cafeteria {
 export class MiCafeteriaComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardCafeteriaService);
   private readonly cafeteriaService = inject(CafeteriaService);
+  private readonly cantones = injectCantones();
   private readonly menuService = inject(MenuCafeteriaService);
   private readonly router = inject(Router);
 
@@ -101,7 +105,7 @@ export class MiCafeteriaComponent implements OnDestroy {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed<CantonReferencia | null>(() => {
     const pin = this.pin();
-    return pin ? this.cafeteriaService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly textoUbicacion = computed(() => {
     const canton = this.canton();

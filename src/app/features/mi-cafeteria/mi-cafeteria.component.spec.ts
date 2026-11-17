@@ -18,6 +18,7 @@ import {
   RUTA_DASHBOARD_CAFETERIA,
   RUTA_PUBLICAR_MENU,
 } from './mi-cafeteria.component';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -45,6 +46,7 @@ describe('MiCafeteriaComponent', () => {
     spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
     fixture = TestBed.createComponent(MiCafeteriaComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -200,7 +202,7 @@ describe('MiCafeteriaComponent', () => {
 
     expect(actualizar).not.toHaveBeenCalled();
     expect(pagina.textContent).toContain(
-      'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
+      'El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu local.',
     );
   });
 

@@ -249,15 +249,19 @@
                 @if (ubicacionInvalida()) {
                   <p id="error-ubicacion" class="campo__error">
                     @if (pin()) {
-                      El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu
-                      tostaduría.
+                      <app-estado-cantones
+                        >El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu
+                        tostaduría.</app-estado-cantones
+                      >
                     } @else {
                       Marcá en el mapa dónde está tu tostaduría.
                     }
                   </p>
                 } @else {
                   <p id="ayuda-ubicacion" class="campo__ayuda">
-                    Se actualiza al mover el pin en el mapa.
+                    <app-estado-cantones
+                      >Se actualiza al mover el pin en el mapa.</app-estado-cantones
+                    >
                   </p>
                 }
               </div>
