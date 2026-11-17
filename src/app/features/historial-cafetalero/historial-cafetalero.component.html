@@ -37,11 +37,12 @@
                 <th>Variedad</th>
                 <th class="numero">Kilos</th>
                 <th>Estado</th>
+                <th aria-label="Acciones"></th>
               </tr>
             </thead>
             <tbody>
               @for (cosecha of cosechas(); track cosecha.id) {
-                <tr>
+                <tr class="fila-enlace">
                   <td>{{ fecha(cosecha.fecha) }}</td>
                   <td>{{ cosecha.variedad }}</td>
                   <td class="numero">{{ kg(cosecha.kilos) }}</td>
@@ -50,10 +51,18 @@
                       {{ cosecha.estado }}
                     </span>
                   </td>
+                  <td class="accion">
+                    <a
+                      [routerLink]="['/cafetalero/cosechas', cosecha.id, 'editar']"
+                      [attr.aria-label]="'Editar cosecha ' + cosecha.variedad"
+                    >
+                      Editar →
+                    </a>
+                  </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4" class="vacio">Todavía no registraste cosechas.</td>
+                  <td colspan="5" class="vacio">Todavía no registraste cosechas.</td>
                 </tr>
               }
             </tbody>

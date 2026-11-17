@@ -127,7 +127,7 @@ describe('DetalleFincaComponent', () => {
     expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
   });
 
-  it('"Editar finca" y "Editar perímetro" llevan al formulario de edición', async () => {
+  it('"Editar" lleva a la edición de la finca, su perímetro y cada cosecha', async () => {
     await abrir('f-la-esperanza');
 
     const rutas = harness.fixture.debugElement
@@ -137,6 +137,8 @@ describe('DetalleFincaComponent', () => {
     expect(rutas).toEqual([
       '/cafetalero/fincas/f-la-esperanza/editar',
       '/cafetalero/fincas/f-la-esperanza/editar',
+      '/cafetalero/cosechas/c-le-caturra/editar',
+      '/cafetalero/cosechas/c-le-catuai/editar',
     ]);
   });
 
