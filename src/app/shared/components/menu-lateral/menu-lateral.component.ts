@@ -84,6 +84,7 @@ export class MenuLateralComponent implements OnDestroy {
   protected cerrarSesion(): void {
     this.ocultarTooltip();
     this.auth.cerrarSesion();
+    void this.router.navigateByUrl('/iniciar-sesion');
   }
 
   protected mostrarTooltip(evento: Event, texto: string): void {
