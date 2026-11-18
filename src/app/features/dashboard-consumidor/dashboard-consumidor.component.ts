@@ -37,6 +37,7 @@ const ETIQUETAS_TIPO: Record<TipoPuntoMapaConsumidor, string> = {
 
 const CENTRO_COSTA_RICA: google.maps.LatLngLiteral = { lat: 9.92, lng: -84.12 };
 const ZOOM_PAIS = 9;
+const ZOOM_LOCAL = 12;
 
 export interface DatoPanelExplorar {
   etiqueta: string;
@@ -98,7 +99,9 @@ export class DashboardConsumidorComponent {
 
   protected readonly apiCargada = toSignal(inject(GoogleMapsService).apiCargada);
   protected readonly tema = this.dashboard.tema;
-  protected readonly puntos = this.dashboard.puntos();
+  protected readonly puntos = toSignal(this.dashboard.puntos(), {
+    initialValue: [] as PuntoMapaConsumidor[],
+  });
   protected readonly codigo = new FormControl('', { nonNullable: true });
   protected readonly errorBusqueda = signal<string | null>(null);
   protected readonly idsResaltados = signal<ReadonlySet<string>>(new Set());
@@ -130,9 +133,7 @@ export class DashboardConsumidorComponent {
     { tipo: 'cafeteria', etiqueta: 'Cafeterías' },
   ];
 
-  private readonly contenidosPin = new Map<string, HTMLElement>(
-    this.puntos.map((punto) => [punto.id, this.crearContenidoPin(punto)]),
-  );
+  private readonly contenidosPin = new Map<string, HTMLElement>();
 
   protected readonly puntoSeleccionado = computed(() => {
     const id = this.queryParams().get('seleccionado')?.trim();
@@ -246,7 +247,12 @@ export class DashboardConsumidorComponent {
 
   constructor() {
     effect(() => {
+      this.sincronizarContenidosPin(this.puntos());
+    });
+
+    effect(() => {
       const params = this.queryParams();
+      const puntos = this.puntos();
       const ids = parseListaIds(params.get('resaltar'));
       const seleccionado = params.get('seleccionado')?.trim() || null;
       if (seleccionado && !ids.includes(seleccionado)) {
@@ -256,6 +262,15 @@ export class DashboardConsumidorComponent {
       for (const [id, nodo] of this.contenidosPin) {
         nodo.classList.toggle('pin-consumidor--resaltado', ids.includes(id));
         nodo.classList.toggle('pin-consumidor--seleccionado', id === seleccionado);
+      }
+
+      const centrarId = params.get('centrar')?.trim();
+      if (centrarId) {
+        const punto = puntos.find((p) => p.id === centrarId);
+        if (punto) {
+          this.centro.set(punto.coordenada);
+          this.zoom.set(ZOOM_LOCAL);
+        }
       }
 
       this.apiCargada();
@@ -276,7 +291,12 @@ export class DashboardConsumidorComponent {
   }
 
   protected contenidoPin(punto: PuntoMapaConsumidor): HTMLElement {
-    return this.contenidosPin.get(punto.id)!;
+    let nodo = this.contenidosPin.get(punto.id);
+    if (!nodo) {
+      nodo = this.crearContenidoPin(punto);
+      this.contenidosPin.set(punto.id, nodo);
+    }
+    return nodo;
   }
 
   protected colorTipo(tipo: TipoPuntoMapaConsumidor): string {
@@ -363,7 +383,21 @@ export class DashboardConsumidorComponent {
   }
 
   private puntoPorId(id: string): PuntoMapaConsumidor | undefined {
-    return this.puntos.find((punto) => punto.id === id);
+    return this.puntos().find((punto) => punto.id === id);
+  }
+
+  private sincronizarContenidosPin(puntos: PuntoMapaConsumidor[]): void {
+    const vigentes = new Set(puntos.map((punto) => punto.id));
+    for (const id of [...this.contenidosPin.keys()]) {
+      if (!vigentes.has(id)) {
+        this.contenidosPin.delete(id);
+      }
+    }
+    for (const punto of puntos) {
+      if (!this.contenidosPin.has(punto.id)) {
+        this.contenidosPin.set(punto.id, this.crearContenidoPin(punto));
+      }
+    }
   }
 
   private crearContenidoPin(punto: PuntoMapaConsumidor): HTMLElement {

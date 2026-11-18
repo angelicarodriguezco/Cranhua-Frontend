@@ -10,7 +10,7 @@
             [zoom]="zoom()"
             [options]="opciones()"
           >
-            @for (punto of puntos; track punto.id) {
+            @for (punto of puntos(); track punto.id) {
               <map-advanced-marker
                 [position]="punto.coordenada"
                 [content]="contenidoPin(punto)"

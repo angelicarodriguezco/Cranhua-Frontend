@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
@@ -12,6 +13,7 @@ describe('PerfilTostadorComponent', () => {
     TestBed.configureTestingModule({
       imports: [PerfilTostadorComponent],
       providers: [
+        provideHttpClient(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
         {
