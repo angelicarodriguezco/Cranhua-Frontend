@@ -2,7 +2,7 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, inject, OnDestroy } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
-import { filter, map } from 'rxjs';
+import { catchError, filter, map, of } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { CafeteriaService } from '../../../core/services/cafeteria.service';
@@ -38,7 +38,10 @@ export class MenuLateralComponent implements OnDestroy {
   private readonly cafeteria = toSignal(
     inject(CafeteriaService)
       .obtenerActual()
-      .pipe(map((cafeteria) => cafeteria ?? null)),
+      .pipe(
+        map((cafeteria) => cafeteria ?? null),
+        catchError(() => of(null)),
+      ),
   );
   private nodoTooltip: HTMLDivElement | null = null;
 

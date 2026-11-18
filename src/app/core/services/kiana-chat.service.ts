@@ -1,42 +1,85 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, switchMap, throwError, timer } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
 
+import { environment } from '../../../environments/environment';
 import {
-  DELAY_RESPUESTA_KIANA_MS,
-  ErrorKiana,
-  INTERVALO_FALLO_KIANA,
+  KianaChatRequestApi,
+  KianaChatResponseApi,
   MAX_LONGITUD_MENSAJE_KIANA,
   MENSAJE_ERROR_KIANA,
-  RESPUESTAS_EJEMPLO_KIANA,
-  RespuestaKiana,
+  MensajeKiana,
+  RolMensajeKiana,
+  SALUDO_KIANA,
 } from '../models/kiana-chat.model';
+
+export function mensajeErrorKiana(error: unknown): string {
+  if (!(error instanceof HttpErrorResponse) || error.status === 0) {
+    return MENSAJE_ERROR_KIANA;
+  }
+  const cuerpo = error.error as { mensaje?: unknown; errores?: Record<string, unknown> } | null;
+  const errorCampo = cuerpo?.errores ? Object.values(cuerpo.errores)[0] : undefined;
+  if (typeof errorCampo === 'string' && errorCampo.trim()) {
+    return errorCampo;
+  }
+  if (typeof cuerpo?.mensaje === 'string' && cuerpo.mensaje.trim()) {
+    return cuerpo.mensaje;
+  }
+  return MENSAJE_ERROR_KIANA;
+}
 
 @Injectable({ providedIn: 'root' })
 export class KianaChatService {
-  readonly delayMs = DELAY_RESPUESTA_KIANA_MS;
+  private readonly http = inject(HttpClient);
+  private readonly lista = signal<MensajeKiana[]>([]);
+  private readonly esperando = signal(false);
+  private conversationId: string | null = null;
+  private contadorIds = 0;
 
-  private contadorEnvios = 0;
-  private indiceRespuesta = 0;
+  readonly mensajes = this.lista.asReadonly();
+  readonly pensando = this.esperando.asReadonly();
 
-  enviarMensaje(texto: string): Observable<RespuestaKiana> {
+  private get url(): string {
+    return `${environment.apiUrl}/api/ai/chat`;
+  }
+
+  iniciar(): void {
+    if (this.lista().length === 0) {
+      this.agregar('kiana', SALUDO_KIANA);
+    }
+  }
+
+  enviar(texto: string): void {
     const mensaje = texto.trim().slice(0, MAX_LONGITUD_MENSAJE_KIANA);
-    if (!mensaje) {
-      return throwError(() => ({ mensaje: MENSAJE_ERROR_KIANA }) satisfies ErrorKiana);
+    if (this.esperando() || !mensaje) {
+      return;
     }
 
-    return timer(this.delayMs).pipe(
-      switchMap(() => {
-        this.contadorEnvios += 1;
+    this.iniciar();
+    this.agregar('usuario', mensaje);
+    this.esperando.set(true);
 
-        if (this.contadorEnvios % INTERVALO_FALLO_KIANA === 0) {
-          return throwError(() => ({ mensaje: MENSAJE_ERROR_KIANA }) satisfies ErrorKiana);
-        }
+    const cuerpo: KianaChatRequestApi = { message: mensaje, conversationId: this.conversationId };
+    this.http.post<KianaChatResponseApi>(this.url, cuerpo).subscribe({
+      next: (respuesta) => {
+        this.conversationId = respuesta.conversationId;
+        this.esperando.set(false);
+        this.agregar('kiana', respuesta.reply);
+      },
+      error: (error: unknown) => {
+        this.esperando.set(false);
+        this.agregar('error', mensajeErrorKiana(error));
+      },
+    });
+  }
 
-        const textoRespuesta =
-          RESPUESTAS_EJEMPLO_KIANA[this.indiceRespuesta % RESPUESTAS_EJEMPLO_KIANA.length];
-        this.indiceRespuesta += 1;
-        return of({ texto: textoRespuesta });
-      }),
-    );
+  private agregar(rol: RolMensajeKiana, texto: string): void {
+    this.contadorIds += 1;
+    const nuevo: MensajeKiana = {
+      id: `kiana-msg-${this.contadorIds}`,
+      rol,
+      texto,
+      creadoEn: Date.now(),
+    };
+    this.lista.update((actuales) => [...actuales, nuevo]);
   }
 }

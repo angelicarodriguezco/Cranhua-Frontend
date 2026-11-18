@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -11,15 +12,11 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   CHIPS_SUGERIDOS_KIANA,
-  ErrorKiana,
   MAX_LONGITUD_MENSAJE_KIANA,
-  MENSAJE_ERROR_KIANA,
   MensajeKiana,
-  SALUDO_KIANA,
 } from '../../../core/models/kiana-chat.model';
 import { KianaChatService } from '../../../core/services/kiana-chat.service';
 
@@ -27,7 +24,7 @@ const AVATAR_IDLE = '/images/kiana/idle.png';
 const AVATAR_PENSANDO = '/images/kiana/pensando.png';
 const AVATAR_RESPONDIO = '/images/kiana/respondio.png';
 
-const TEXTO_PENSANDO = '... (Pensando)';
+const TEXTO_PENSANDO = 'Pensando…';
 const TEXTO_PROMPTER = '¿Necesitás ayuda? Preguntame lo que sea !';
 const PLACEHOLDER_INPUT = 'Escribí tu mensaje...';
 const DISCLAIMER_KIANA = 'Kiana puede cometer errores. Verificá la información importante.';
@@ -47,15 +44,13 @@ export class KianaWidgetComponent {
   private readonly cdr = inject(ChangeDetectorRef);
 
   private readonly hilo = viewChild<ElementRef<HTMLElement>>('hilo');
-  private contadorIds = 0;
-  private saludoAgregado = false;
   private timerPrompter: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly abierto = signal(false);
   protected readonly prompterVisible = signal(true);
   protected readonly mensaje = signal('');
-  protected readonly mensajes = signal<MensajeKiana[]>([]);
-  protected readonly pensando = signal(false);
+  protected readonly mensajes = this.chat.mensajes;
+  protected readonly pensando = this.chat.pensando;
 
   protected readonly chips = CHIPS_SUGERIDOS_KIANA;
   protected readonly maxLongitud = MAX_LONGITUD_MENSAJE_KIANA;
@@ -84,6 +79,12 @@ export class KianaWidgetComponent {
       { injector: this.injector },
     );
 
+    effect(() => {
+      this.mensajes();
+      this.pensando();
+      this.scrollAlFinal();
+    });
+
     this.destroyRef.onDestroy(() => this.limpiarTimerPrompter());
   }
 
@@ -101,7 +102,7 @@ export class KianaWidgetComponent {
   protected abrir(): void {
     this.ocultarPrompter();
     this.abierto.set(true);
-    this.asegurarSaludo();
+    this.chat.iniciar();
     this.cdr.detectChanges();
     this.scrollAlFinal();
   }
@@ -124,11 +125,15 @@ export class KianaWidgetComponent {
   }
 
   protected onChip(texto: string): void {
-    this.enviarTexto(texto);
+    this.chat.enviar(texto);
   }
 
   protected onEnviar(): void {
-    this.enviarTexto(this.mensaje());
+    if (!this.puedeEnviar()) {
+      return;
+    }
+    this.chat.enviar(this.mensaje());
+    this.mensaje.set('');
   }
 
   protected onInputKeydown(event: KeyboardEvent): void {
@@ -144,70 +149,6 @@ export class KianaWidgetComponent {
       clearTimeout(this.timerPrompter);
       this.timerPrompter = null;
     }
-  }
-
-  private asegurarSaludo(): void {
-    if (this.saludoAgregado) {
-      return;
-    }
-    this.saludoAgregado = true;
-    this.mensajes.set([this.crearMensaje('kiana', SALUDO_KIANA)]);
-  }
-
-  private enviarTexto(texto: string): void {
-    if (this.pensando()) {
-      return;
-    }
-
-    const normalizado = texto.trim().slice(0, this.maxLongitud);
-    if (!normalizado) {
-      return;
-    }
-
-    this.asegurarSaludo();
-    this.mensaje.set('');
-    this.mensajes.update((actuales) => [...actuales, this.crearMensaje('usuario', normalizado)]);
-    this.pensando.set(true);
-    this.cdr.detectChanges();
-    this.scrollAlFinal();
-
-    this.chat
-      .enviarMensaje(normalizado)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (respuesta) => {
-          this.zone.run(() => {
-            this.pensando.set(false);
-            this.mensajes.update((actuales) => [
-              ...actuales,
-              this.crearMensaje('kiana', respuesta.texto),
-            ]);
-            this.cdr.detectChanges();
-            this.scrollAlFinal();
-          });
-        },
-        error: (error: ErrorKiana) => {
-          this.zone.run(() => {
-            this.pensando.set(false);
-            this.mensajes.update((actuales) => [
-              ...actuales,
-              this.crearMensaje('error', error?.mensaje ?? MENSAJE_ERROR_KIANA),
-            ]);
-            this.cdr.detectChanges();
-            this.scrollAlFinal();
-          });
-        },
-      });
-  }
-
-  private crearMensaje(rol: MensajeKiana['rol'], texto: string): MensajeKiana {
-    this.contadorIds += 1;
-    return {
-      id: `kiana-msg-${this.contadorIds}`,
-      rol,
-      texto,
-      creadoEn: Date.now(),
-    };
   }
 
   private scrollAlFinal(): void {
