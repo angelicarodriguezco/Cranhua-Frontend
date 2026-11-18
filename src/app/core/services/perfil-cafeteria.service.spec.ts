@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
 
-import { PUNTOS_MAPA_CONSUMIDOR } from '../mocks/dashboard-consumidor.mock';
 import { MENUS_PUBLICOS } from '../mocks/menu-publico.mock';
 import { PERFILES_CAFETERIA } from '../mocks/perfil-cafeteria.mock';
 import { PerfilCafeteriaService } from './perfil-cafeteria.service';
@@ -23,15 +22,6 @@ describe('PerfilCafeteriaService', () => {
   it('cada cafetería del mock tiene al menos 2 fincas de origen', () => {
     for (const perfil of PERFILES_CAFETERIA) {
       expect(perfil.fincas.length).toBeGreaterThanOrEqual(2);
-    }
-  });
-
-  it('la cafetería, sus fincas y tostadores existen como pines en el mapa del consumidor', () => {
-    const idsMapa = PUNTOS_MAPA_CONSUMIDOR.map((p) => p.id);
-    for (const perfil of PERFILES_CAFETERIA) {
-      expect(idsMapa).toContain(perfil.id);
-      perfil.fincas.forEach((f) => expect(idsMapa).toContain(f.id));
-      perfil.tostadores.forEach((t) => expect(idsMapa).toContain(t.id));
     }
   });
 

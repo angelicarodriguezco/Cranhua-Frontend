@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, ParamMap, convertToParamMap, provideRouter } from '@angular/router';
 import { BehaviorSubject, NEVER } from 'rxjs';
@@ -18,6 +19,7 @@ describe('PerfilFincaPublicoComponent', () => {
     await TestBed.configureTestingModule({
       imports: [PerfilFincaPublicoComponent],
       providers: [
+        provideHttpClient(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
         {
