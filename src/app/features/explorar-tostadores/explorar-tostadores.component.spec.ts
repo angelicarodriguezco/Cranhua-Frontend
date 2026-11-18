@@ -9,6 +9,7 @@ import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarTostadoresComponent } from './explorar-tostadores.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('ExplorarTostadoresComponent', () => {
   let fixture: ComponentFixture<ExplorarTostadoresComponent>;
@@ -22,6 +23,7 @@ describe('ExplorarTostadoresComponent', () => {
 
     spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(ExplorarTostadoresComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -118,11 +120,11 @@ describe('ExplorarTostadoresComponent', () => {
     );
   });
 
-  it('arranca en tema oscuro y alterna a claro en el host', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+  it('arranca en tema claro y alterna a oscuro en el host', () => {
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 });

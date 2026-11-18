@@ -8,10 +8,9 @@ import { PERFIL_EJEMPLO } from '../../core/mocks/perfil.mock';
 import { PerfilUsuario } from '../../core/models/perfil.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CuentaService } from '../../core/services/cuenta.service';
-import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
 import { PerfilService } from '../../core/services/perfil.service';
 import { SesionService } from '../../core/services/sesion.service';
-import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
+import { CLAVE_TEMA } from '../../core/services/tema.service';
 import {
   DESCRIPCION_ELIMINAR_CUENTA,
   enlaceRedSocial,
@@ -24,7 +23,6 @@ describe('PerfilUsuarioComponent', () => {
   let fixture: ComponentFixture<PerfilUsuarioComponent>;
   let pagina: HTMLElement;
   let perfilService: PerfilService;
-  let dashboard: DashboardCafetaleroService;
 
   function perfilActualizado(datos: ActualizarPerfilDatos): PerfilUsuario {
     return {
@@ -42,12 +40,14 @@ describe('PerfilUsuarioComponent', () => {
       providers: [
         provideRouter([]),
         provideHttpClient(),
-        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
+        {
+          provide: CafeteriaService,
+          useValue: { obtenerActual: () => of(undefined), limpiarCache: () => undefined },
+        },
       ],
     }).compileComponents();
 
     perfilService = TestBed.inject(PerfilService);
-    dashboard = TestBed.inject(DashboardCafetaleroService);
     spyOn(perfilService, 'obtener').and.returnValue(of({ ...PERFIL_EJEMPLO }));
     spyOn(perfilService, 'actualizar').and.callFake((datos: ActualizarPerfilDatos) =>
       of(perfilActualizado(datos)),
@@ -134,9 +134,7 @@ describe('PerfilUsuarioComponent', () => {
     );
   });
 
-  it('la vista muestra los datos, redes, apariencia y la cuenta, sin zona de peligro', () => {
-    const indicadores = dashboard.indicadores();
-
+  it('la vista muestra los datos, redes y la cuenta, sin zona de peligro ni apariencia', () => {
     expect(titulo()).toBe('Mi perfil');
     expect(pagina.textContent).toContain('Así te ven los demás dentro de Crán̈hua.');
     expect(pagina.textContent).toContain(PERFIL_EJEMPLO.nombreCompleto);
@@ -147,26 +145,17 @@ describe('PerfilUsuarioComponent', () => {
     expect(chips.map((c) => c.textContent!.trim())).toEqual(['Instagram', 'WhatsApp']);
     expect(chips.every((c) => c.target === '_blank')).toBeTrue();
 
-    const kpis = [...pagina.querySelectorAll('.indicadores article')].map(
-      (a) => `${a.querySelector('strong')!.textContent} ${a.querySelector('span')!.textContent}`,
-    );
-    expect(kpis).toEqual([
-      `${indicadores.fincasRegistradas} Fincas registradas`,
-      `${indicadores.cosechasActivas} Cosechas activas`,
-    ]);
+    expect(pagina.querySelector('.indicadores')).toBeNull();
 
     const datos = campo('.datos').textContent!;
     expect(datos).toContain('rodrigo@fincalacatalina.cr');
     expect(datos).toContain('+506 8888-4321');
     expect(datos).toContain('Cafetalero');
 
-    expect(titulosSecciones()).toEqual([
-      'Información de la cuenta',
-      'Redes sociales',
-      'Preferencias',
-    ]);
-    expect(pagina.textContent).toContain('Apariencia');
-    expect(pagina.querySelector('[role="switch"]')).toBeTruthy();
+    expect(titulosSecciones()).toEqual(['Información de la cuenta', 'Redes sociales']);
+    expect(pagina.textContent).not.toContain('Apariencia');
+    expect(pagina.textContent).not.toContain('modo oscuro');
+    expect(pagina.querySelector('[role="switch"]')).toBeNull();
     expect(pagina.querySelector('app-zona-peligro')).toBeNull();
   });
 
@@ -419,20 +408,6 @@ describe('PerfilUsuarioComponent', () => {
     expect(campo('#error-red-sitio').textContent).toContain('Ingresá un enlace válido');
   });
 
-  it('el switch de apariencia cambia el tema global y el data-theme del host', () => {
-    const temas = TestBed.inject(TemaService);
-    const interruptor = campo<HTMLButtonElement>('[role="switch"]');
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    expect(interruptor.getAttribute('aria-checked')).toBe('true');
-
-    interruptor.click();
-    fixture.detectChanges();
-    expect(temas.tema()).toBe('claro');
-    expect(dashboard.tema()).toBe('claro');
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
-    expect(interruptor.getAttribute('aria-checked')).toBe('false');
-  });
-
   it('eliminar cuenta: cancelar cierra el modal y confirmar limpia sesión y navega a iniciar sesión', () => {
     const router = TestBed.inject(Router);
     const cuentaService = TestBed.inject(CuentaService);
@@ -463,15 +438,9 @@ describe('PerfilUsuarioComponent', () => {
     expect(navegar).toHaveBeenCalledWith('/iniciar-sesion');
   });
 
-  it('el modal de eliminar cuenta sigue el tema global', () => {
+  it('el modal de eliminar cuenta usa el fondo claro de marca', () => {
     clic('Editar perfil');
     clic('Eliminar mi cuenta');
-    const fondo = () => getComputedStyle(campo('.modal__dialogo')).backgroundColor;
-    expect(fondo()).toBe('rgba(8, 28, 38, 0.96)');
-
-    TestBed.inject(TemaService).alternarTema();
-    fixture.detectChanges();
-
-    expect(fondo()).toBe('rgb(255, 255, 255)');
+    expect(getComputedStyle(campo('.modal__dialogo')).backgroundColor).toBe('rgb(255, 255, 255)');
   });
 });

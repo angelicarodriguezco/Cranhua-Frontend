@@ -1,41 +1,35 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Observable, of, throwError, timer } from 'rxjs';
-import { map, switchMap } from 'rxjs';
 
+import { environment } from '../../../../environments/environment';
 import {
   CHIPS_SUGERIDOS_KIANA,
   MAX_LONGITUD_MENSAJE_KIANA,
-  MENSAJE_ERROR_KIANA,
-  RespuestaKiana,
   SALUDO_KIANA,
 } from '../../../core/models/kiana-chat.model';
-import { KianaChatService } from '../../../core/services/kiana-chat.service';
-import { CLAVE_TEMA, TemaService } from '../../../core/services/tema.service';
 import { KianaWidgetComponent } from './kiana-widget.component';
 
-function respuestaTras(ms: number, texto: string): Observable<RespuestaKiana> {
-  return timer(ms).pipe(map(() => ({ texto })));
-}
+const URL_CHAT = `${environment.apiUrl}/api/ai/chat`;
 
 describe('KianaWidgetComponent', () => {
   let fixture: ComponentFixture<KianaWidgetComponent>;
   let pagina: HTMLElement;
-  let chat: jasmine.SpyObj<KianaChatService>;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
-    localStorage.removeItem(CLAVE_TEMA);
-    chat = jasmine.createSpyObj('KianaChatService', ['enviarMensaje']);
-    chat.enviarMensaje.and.returnValue(of({ texto: 'Respuesta de prueba' }));
-
     await TestBed.configureTestingModule({
       imports: [KianaWidgetComponent],
-      providers: [TemaService, { provide: KianaChatService, useValue: chat }],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(KianaWidgetComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
+
+  afterEach(() => http.verify());
 
   function abrirChat(): void {
     pagina.querySelector<HTMLButtonElement>('.kiana-fab__avatar')!.click();
@@ -53,16 +47,37 @@ describe('KianaWidgetComponent', () => {
 
   it('muestra el FAB colapsado con el prompter', () => {
     expect(pagina.textContent).toContain('¿Necesitás ayuda? Preguntame lo que sea !');
-    expect(pagina.querySelector('.kiana-panel')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab')?.hasAttribute('hidden')).toBeFalse();
+    expect(pagina.querySelector('.kiana-panel')?.hasAttribute('hidden')).toBeTrue();
     expect(pagina.querySelector('.kiana-fab__avatar img')?.getAttribute('src')).toContain(
       'idle.png',
     );
   });
 
+  it('oculta el prompter al cerrarlo o tras unos segundos', fakeAsync(() => {
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    pagina.querySelector<HTMLButtonElement>('.kiana-fab__cerrar-prompter')!.click();
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+
+    fixture = TestBed.createComponent(KianaWidgetComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeTruthy();
+
+    tick(6000);
+    fixture.detectChanges();
+    expect(pagina.querySelector('.kiana-fab__burbuja')).toBeNull();
+    expect(pagina.querySelector('.kiana-fab__avatar')).toBeTruthy();
+  }));
+
   it('abre el panel con saludo, chips, disclaimer y maxlength 500', () => {
     abrirChat();
 
-    expect(pagina.querySelector('.kiana-panel')).toBeTruthy();
+    expect(pagina.querySelector('.kiana-fab')?.hasAttribute('hidden')).toBeTrue();
+    expect(pagina.querySelector('.kiana-panel')?.hasAttribute('hidden')).toBeFalse();
     expect(pagina.textContent).toContain(SALUDO_KIANA);
     expect(pagina.textContent).toContain('En línea');
     expect(pagina.textContent).toContain('Verificá la información importante');
@@ -74,51 +89,44 @@ describe('KianaWidgetComponent', () => {
     expect(input.getAttribute('maxlength')).toBe(String(MAX_LONGITUD_MENSAJE_KIANA));
   });
 
-  it('aplica data-theme desde TemaService', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
-    TestBed.inject(TemaService).establecerTema('claro');
-    fixture.detectChanges();
+  it('usa tema claro fijo', () => {
     expect(pagina.getAttribute('data-theme')).toBe('claro');
   });
 
-  it('envía un mensaje, muestra ... (Pensando) y luego la respuesta', fakeAsync(() => {
-    chat.enviarMensaje.and.returnValue(respuestaTras(200, 'Los códigos empiezan con CR-'));
+  it('envía un mensaje, muestra Pensando… y luego la respuesta real', () => {
     abrirChat();
     escribirYEnviar('¿Qué es un código?');
 
     expect(pagina.textContent).toContain('¿Qué es un código?');
-    expect(pagina.textContent).toContain('... (Pensando)');
-    expect(chat.enviarMensaje).toHaveBeenCalledWith('¿Qué es un código?');
+    expect(pagina.textContent).toContain('Pensando…');
     expect(pagina.querySelector('.kiana-msg--pensando img')?.getAttribute('src')).toContain(
       'pensando.png',
     );
 
-    tick(200);
+    const req = http.expectOne(URL_CHAT);
+    expect(req.request.body.message).toBe('¿Qué es un código?');
+    req.flush({ reply: 'Los códigos empiezan con CR-', conversationId: 'c-1' });
     fixture.detectChanges();
 
-    expect(pagina.textContent).not.toContain('... (Pensando)');
+    expect(pagina.textContent).not.toContain('Pensando…');
     expect(pagina.textContent).toContain('Los códigos empiezan con CR-');
     const avatares = pagina.querySelectorAll('.kiana-msg--kiana:not(.kiana-msg--error) img');
     expect(avatares[avatares.length - 1]?.getAttribute('src')).toContain('respondio.png');
-  }));
+  });
 
-  it('muestra burbuja de error cuando el servicio falla', fakeAsync(() => {
-    chat.enviarMensaje.and.returnValue(
-      timer(50).pipe(switchMap(() => throwError(() => ({ mensaje: MENSAJE_ERROR_KIANA })))),
-    );
+  it('muestra el error del servicio como mensaje de Kiana', () => {
+    const mensaje = 'Enviaste muchos mensajes seguidos. Esperá un minuto e intentá de nuevo.';
     abrirChat();
     escribirYEnviar('Hola');
 
-    expect(pagina.textContent).toContain('... (Pensando)');
-    tick(50);
+    http.expectOne(URL_CHAT).flush({ mensaje }, { status: 429, statusText: 'Too Many Requests' });
     fixture.detectChanges();
 
-    expect(pagina.textContent).toContain(MENSAJE_ERROR_KIANA);
-    expect(pagina.querySelector('.kiana-msg--error')).toBeTruthy();
-  }));
+    expect(pagina.querySelector('.kiana-msg--error')?.textContent).toContain(mensaje);
+    expect(pagina.textContent).not.toContain('Pensando…');
+  });
 
-  it('los chips envían su texto como mensaje', fakeAsync(() => {
-    chat.enviarMensaje.and.returnValue(respuestaTras(10, 'Ok'));
+  it('los chips envían su texto como mensaje', () => {
     abrirChat();
 
     const chip = CHIPS_SUGERIDOS_KIANA[0];
@@ -128,12 +136,28 @@ describe('KianaWidgetComponent', () => {
     boton.click();
     fixture.detectChanges();
 
-    expect(chat.enviarMensaje).toHaveBeenCalledWith(chip);
+    const req = http.expectOne(URL_CHAT);
+    expect(req.request.body.message).toBe(chip);
     expect(pagina.textContent).toContain(chip);
-    tick(10);
+    req.flush({ reply: 'Ok', conversationId: 'c-1' });
     fixture.detectChanges();
     expect(pagina.textContent).toContain('Ok');
-  }));
+  });
+
+  it('conserva la conversación si el widget se destruye y se vuelve a crear', () => {
+    abrirChat();
+    escribirYEnviar('Hola');
+    http.expectOne(URL_CHAT).flush({ reply: 'Hola, visitante', conversationId: 'c-1' });
+    fixture.destroy();
+
+    fixture = TestBed.createComponent(KianaWidgetComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    abrirChat();
+
+    expect(pagina.textContent).toContain('Hola, visitante');
+    expect(pagina.querySelectorAll('.kiana-msg').length).toBe(3);
+  });
 
   it(`recorta la entrada a ${MAX_LONGITUD_MENSAJE_KIANA} caracteres`, () => {
     abrirChat();

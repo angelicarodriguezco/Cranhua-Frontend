@@ -13,6 +13,8 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { CLAVE_TEMA } from '../../core/services/tema.service';
 import { RegistrarCafeteriaComponent } from './registrar-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
@@ -55,7 +57,9 @@ describe('RegistrarCafeteriaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarCafeteriaComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     http = TestBed.inject(HttpTestingController);
@@ -207,7 +211,7 @@ describe('RegistrarCafeteriaComponent', () => {
 
     http.expectNone({ method: 'POST', url: BASE });
     expect(errores()).toContain(
-      'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
+      'El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu local.',
     );
   });
 
@@ -280,11 +284,11 @@ describe('RegistrarCafeteriaComponent', () => {
   });
 
   it('sigue el tema global claro/oscuro', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(DashboardCafeteriaService).alternarTema();
     fixture.detectChanges();
 
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 });

@@ -37,9 +37,9 @@ describe('ExploradorCosechasComponent', () => {
     return [...pagina.querySelectorAll('.tarjeta h3')].map((h) => h.textContent!.trim());
   }
 
-  function elegirZona(zona: string): void {
-    const select = pagina.querySelector<HTMLSelectElement>('.chip-zona')!;
-    select.value = zona;
+  function elegirSelect(ariaLabel: string, valor: string): void {
+    const select = pagina.querySelector<HTMLSelectElement>(`select[aria-label="${ariaLabel}"]`)!;
+    select.value = valor;
     select.dispatchEvent(new Event('change'));
     fixture.detectChanges();
   }
@@ -72,12 +72,21 @@ describe('ExploradorCosechasComponent', () => {
     expect(fincasVisibles()).not.toContain('Finca Los Robles');
 
     clic(chip('Todas'));
-    elegirZona('Turrialba');
+    elegirSelect('Zona', 'Turrialba');
     expect(fincasVisibles()).toEqual(['Finca Los Robles']);
   });
 
+  it('filtra por variedad y por precio', () => {
+    elegirSelect('Variedad', 'Geisha');
+    expect(fincasVisibles()).toEqual(['Finca Monte Alto']);
+
+    clic(chip('Todas'));
+    elegirSelect('Precio', 'alto');
+    expect(fincasVisibles()).toEqual(['Finca Monte Alto', 'Finca Cerro Verde']);
+  });
+
   it('avisa si ninguna cosecha cumple los filtros', () => {
-    elegirZona('Orosi');
+    elegirSelect('Zona', 'Orosi');
     clic(chip('Disponible ahora'));
     expect(fincasVisibles()).toEqual([]);
     expect(pagina.textContent).toContain('Ninguna cosecha coincide con los filtros.');

@@ -13,10 +13,7 @@ import {
 } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { CANTONES } from '../mocks/finca.mock';
 import {
-  Canton,
-  Coordenada,
   DuenoFallido,
   ErrorRegistroFinca,
   Finca,
@@ -27,23 +24,12 @@ import {
   ResultadoRegistroConDuenos,
 } from '../models/finca.model';
 import { fincaDesdeApi } from '../utils/finca-desde-api';
-import { distanciaKm } from '../../shared/utils/geo';
 import { SesionService } from './sesion.service';
-
-// Más lejos que esto de la cabecera más cercana se considera fuera de los cantones de ejemplo
-const DISTANCIA_MAXIMA_CANTON_KM = 25;
 
 const ERROR_REGISTRO = 'No pudimos registrar la finca. Intentá de nuevo.';
 const ERROR_DUENO = 'No pudimos agregar a ese dueño. Intentá de nuevo.';
 
 const opcionesCredenciales = { withCredentials: true as const };
-
-const normalizar = (texto: string) =>
-  texto
-    .normalize('NFD')
-    .replace(/\p{Diacritic}/gu, '')
-    .trim()
-    .toLowerCase();
 
 @Injectable({ providedIn: 'root' })
 export class FincaService {
@@ -159,26 +145,5 @@ export class FincaService {
   // Pendiente: el backend todavía no tiene DELETE /api/fincas/{id}
   eliminar(id: string): Observable<boolean> {
     return of(id.length > 0);
-  }
-
-  cantonDe(punto: Coordenada): Canton | null {
-    let masCercano: Canton | null = null;
-    let menorDistancia = DISTANCIA_MAXIMA_CANTON_KM;
-    for (const canton of CANTONES) {
-      const distancia = distanciaKm(punto, canton.cabecera);
-      if (distancia < menorDistancia) {
-        masCercano = canton;
-        menorDistancia = distancia;
-      }
-    }
-    return masCercano;
-  }
-
-  buscarCanton(nombre: string): Canton | undefined {
-    const buscado = normalizar(nombre);
-    return (
-      CANTONES.find((c) => normalizar(c.nombre) === buscado) ??
-      CANTONES.find((c) => normalizar(c.nombre).startsWith(buscado))
-    );
   }
 }

@@ -1,5 +1,12 @@
 import { CosechaDisponible } from '../models/cosecha-disponible.model';
 
+const IMG = {
+  finca: '/images/landing-finca.jpg',
+  cerezas: '/images/landing-cerezas.jpg',
+  cafe: '/images/login-cafe.jpg',
+  tueste: '/images/registro-cafe.jpg',
+} as const;
+
 // Datos de ejemplo mientras no existe el endpoint de cosechas publicadas. Precios en colones.
 export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
   {
@@ -12,6 +19,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Panela', 'Naranja', 'Jazmín'],
     precioDesdeKg: 5800,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.finca,
   },
   {
     id: 'cosecha-geisha-monte-alto',
@@ -23,6 +31,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Jazmín', 'Bergamota', 'Durazno'],
     precioDesdeKg: 14500,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.cerezas,
   },
   {
     id: 'cosecha-villa-sarchi-el-cedral',
@@ -34,6 +43,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Fresa', 'Cacao', 'Vino tinto'],
     precioDesdeKg: 7200,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.cafe,
   },
   {
     id: 'cosecha-sl28-quebrada-honda',
@@ -45,6 +55,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Azahar', 'Miel', 'Mandarina'],
     precioDesdeKg: 8900,
     disponibilidad: 'Próximamente',
+    imagenUrl: IMG.tueste,
   },
   {
     id: 'cosecha-catuai-los-robles',
@@ -56,6 +67,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Chocolate', 'Nuez', 'Caramelo'],
     precioDesdeKg: 4600,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.finca,
   },
   {
     id: 'cosecha-bourbon-cerro-verde',
@@ -67,6 +79,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Rosa', 'Frambuesa', 'Panela'],
     precioDesdeKg: 9300,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.cerezas,
   },
   {
     id: 'cosecha-catuai-la-esperanza',
@@ -78,6 +91,7 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Ciruela', 'Chocolate oscuro'],
     precioDesdeKg: 5200,
     disponibilidad: 'Próximamente',
+    imagenUrl: IMG.cafe,
   },
   {
     id: 'cosecha-caturra-el-mirador',
@@ -89,5 +103,6 @@ export const COSECHAS_DISPONIBLES: CosechaDisponible[] = [
     notas: ['Caramelo', 'Manzana verde', 'Flor de café'],
     precioDesdeKg: 6100,
     disponibilidad: 'Disponible',
+    imagenUrl: IMG.tueste,
   },
 ];

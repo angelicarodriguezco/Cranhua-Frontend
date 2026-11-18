@@ -10,6 +10,8 @@ import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { RUTA_DASHBOARD, RegistrarFincaComponent } from './registrar-finca.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const BASE = `${environment.apiUrl}/api/fincas`;
 
@@ -58,7 +60,9 @@ describe('RegistrarFincaComponent', () => {
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(RegistrarFincaComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     http = TestBed.inject(HttpTestingController);
@@ -117,10 +121,10 @@ describe('RegistrarFincaComponent', () => {
   });
 
   it('sigue el tema global oscuro/claro', () => {
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 
   it('toma el cantón y la provincia del pin', () => {

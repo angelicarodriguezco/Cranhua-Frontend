@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import { CuentaResponseApi, ROL_DESDE_API } from '../../core/models/auth.model';
-import { RolCuenta } from '../../core/models/cuenta.model';
+import { RUTA_DASHBOARD_POR_ROL } from '../../core/models/cuenta.model';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleIdentityService } from '../../core/services/google-identity.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
@@ -15,12 +15,6 @@ const CAMPO_API_A_FORM: Record<string, CampoLogin> = {
   contrasena: 'contrasena',
 };
 
-const RUTA_DASHBOARD_POR_ROL: Record<RolCuenta, string> = {
-  cafetalero: '/cafetalero/dashboard',
-  tostador: '/tostador/dashboard',
-  cafeteria: '/cafeteria/dashboard',
-};
-
 @Component({
   selector: 'app-iniciar-sesion',
   imports: [ReactiveFormsModule, RouterLink],
@@ -29,6 +23,8 @@ const RUTA_DASHBOARD_POR_ROL: Record<RolCuenta, string> = {
 })
 export class IniciarSesionComponent {
   private readonly router = inject(Router);
+  // Ruta privada que pidió el guard de sesión antes de mandar al login
+  private readonly volver = inject(ActivatedRoute).snapshot.queryParamMap.get('volver');
   private readonly auth = inject(AuthService);
   private readonly googleIdentity = inject(GoogleIdentityService);
 
@@ -117,6 +113,10 @@ export class IniciarSesionComponent {
   }
 
   private irAlDashboard(cuenta: CuentaResponseApi): void {
+    if (this.volver?.startsWith('/')) {
+      void this.router.navigateByUrl(this.volver);
+      return;
+    }
     const primerRolApi = cuenta.roles[0];
     const rol = primerRolApi ? ROL_DESDE_API[primerRolApi] : 'cafetalero';
     void this.router.navigateByUrl(RUTA_DASHBOARD_POR_ROL[rol]);

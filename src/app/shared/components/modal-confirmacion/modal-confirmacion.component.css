@@ -43,7 +43,6 @@
   position: absolute;
   inset: 0;
   background: rgba(8, 16, 22, 0.55);
-  backdrop-filter: blur(2px);
 }
 
 .modal__dialogo {

@@ -9,6 +9,7 @@ import {
   ErrorRegistroFinca,
   Finca,
 } from '../../core/models/finca.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { FincaService } from '../../core/services/finca.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { listar } from '../../shared/utils/formato';
@@ -40,6 +41,7 @@ export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 })
 export class OnboardingFincaComponent {
   private fincaService = inject(FincaService);
+  private readonly cantones = injectCantones();
   private router = inject(Router);
   private location = inject(Location);
 
@@ -53,7 +55,7 @@ export class OnboardingFincaComponent {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed(() => {
     const pin = this.pin();
-    return pin ? this.fincaService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly errorPerimetro = computed(() => {
     const perimetro = this.perimetro();

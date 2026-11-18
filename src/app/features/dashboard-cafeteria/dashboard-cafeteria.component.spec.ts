@@ -9,6 +9,7 @@ import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardCafeteriaComponent } from './dashboard-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardCafeteriaComponent', () => {
   let fixture: ComponentFixture<DashboardCafeteriaComponent>;
@@ -22,6 +23,7 @@ describe('DashboardCafeteriaComponent', () => {
 
     spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardCafeteriaComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -44,7 +46,7 @@ describe('DashboardCafeteriaComponent', () => {
     const indicadores = pagina.querySelector('.indicadores');
     expect(indicadores).toBeTruthy();
 
-    const articulos = indicadores!.querySelectorAll('article');
+    const articulos = indicadores!.querySelectorAll('.tarjeta-enlace');
     expect(articulos).toHaveSize(3);
 
     expect(indicadores!.textContent).toContain('42 kg');
@@ -77,6 +79,17 @@ describe('DashboardCafeteriaComponent', () => {
     expect(seccion!.querySelector('.pill-en-camino')).toBeTruthy();
   });
 
+  it('los indicadores y los pedidos recientes abren su sección', () => {
+    expect(rutasDe('.indicadores a')).toEqual([
+      '/cafeteria/pedidos',
+      '/cafeteria/pedidos',
+      '/cafeteria/tostadores',
+    ]);
+    const pedidos = rutasDe('.pedidos tbody a');
+    expect(pedidos.length).toBeGreaterThanOrEqual(4);
+    expect(new Set(pedidos)).toEqual(new Set(['/cafeteria/pedidos']));
+  });
+
   it('enlaza el menú a los destinos de cafetería', () => {
     expect(rutasDe('app-menu-lateral a')).toEqual(
       jasmine.arrayContaining([
@@ -96,11 +109,6 @@ describe('DashboardCafeteriaComponent', () => {
       'Cafetería',
     );
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
-
-    temas.alternarTema();
-    fixture.detectChanges();
-
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
     temas.alternarTema();

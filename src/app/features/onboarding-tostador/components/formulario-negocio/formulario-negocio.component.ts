@@ -8,6 +8,7 @@ import {
   EstiloTueste,
 } from '../../../../core/models/negocio-tueste.model';
 import { MapaUbicacionComponent } from '../mapa-ubicacion/mapa-ubicacion.component';
+import { EstadoCantonesComponent } from '../../../../shared/components/estado-cantones/estado-cantones.component';
 
 // 8 dígitos, con el código de país y los separadores opcionales
 const TELEFONO = /^(\+?506[\s-]?)?\d{4}[\s-]?\d{4}$/;
@@ -44,7 +45,7 @@ type Campo = keyof FormularioNegocio['controls'];
 
 @Component({
   selector: 'app-formulario-negocio',
-  imports: [ReactiveFormsModule, MapaUbicacionComponent],
+  imports: [EstadoCantonesComponent, ReactiveFormsModule, MapaUbicacionComponent],
   templateUrl: './formulario-negocio.component.html',
   styleUrl: './formulario-negocio.component.css',
 })

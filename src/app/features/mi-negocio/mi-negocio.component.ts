@@ -19,6 +19,7 @@ import {
   EstiloTueste,
   NegocioTueste,
 } from '../../core/models/negocio-tueste.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
@@ -29,6 +30,7 @@ import {
   FormularioNegocio,
 } from '../onboarding-tostador/components/formulario-negocio/formulario-negocio.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
+import { EstadoCantonesComponent } from '../../shared/components/estado-cantones/estado-cantones.component';
 
 export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
 
@@ -39,6 +41,7 @@ export const AVISO_ELIMINAR_NEGOCIO =
   'Ya tostaste lotes con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu negocio no borra esos códigos, pero ya no vas a poder editar tu información ni generar nuevos tuestes.';
 
 type Campo = keyof FormularioNegocio['controls'];
+type Modo = 'vista' | 'edicion';
 
 function formatearTelefono(telefono: string): string {
   const digitos = telefono.replace(/\D/g, '').slice(-8);
@@ -68,6 +71,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 @Component({
   selector: 'app-mi-negocio',
   imports: [
+    EstadoCantonesComponent,
     MenuLateralComponent,
     ReactiveFormsModule,
     MapaUbicacionComponent,
@@ -81,6 +85,7 @@ function clonarNegocio(negocio: NegocioTueste): NegocioTueste {
 export class MiNegocioComponent implements OnDestroy {
   private readonly dashboard = inject(DashboardTostadorService);
   private readonly negocioService = inject(NegocioTuesteService);
+  private readonly cantones = injectCantones();
   private readonly router = inject(Router);
 
   protected readonly tema = this.dashboard.tema;
@@ -92,7 +97,7 @@ export class MiNegocioComponent implements OnDestroy {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed<Canton | null>(() => {
     const pin = this.pin();
-    return pin ? this.negocioService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly textoUbicacion = computed(() => {
     const canton = this.canton();
@@ -100,6 +105,7 @@ export class MiNegocioComponent implements OnDestroy {
   });
 
   protected readonly negocio = signal<NegocioTueste | null>(null);
+  protected readonly modo = signal<Modo>('vista');
   protected readonly noEncontrado = signal(false);
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
@@ -116,9 +122,12 @@ export class MiNegocioComponent implements OnDestroy {
     { initialValue: '' },
   );
 
-  protected readonly iniciales = computed(() =>
-    inicialesNegocio(this.nombreActual() || this.negocio()?.nombre || ''),
-  );
+  protected readonly iniciales = computed(() => {
+    if (this.modo() === 'edicion') {
+      return inicialesNegocio(this.nombreActual() || this.negocio()?.nombre || '');
+    }
+    return inicialesNegocio(this.negocio()?.nombre || '');
+  });
 
   constructor() {
     this.negocioService.obtenerActual().subscribe((negocio) => {
@@ -127,6 +136,7 @@ export class MiNegocioComponent implements OnDestroy {
         return;
       }
       this.aplicar(negocio);
+      this.modo.set('vista');
     });
   }
 
@@ -160,6 +170,15 @@ export class MiNegocioComponent implements OnDestroy {
     control.markAsTouched();
   }
 
+  protected editar(): void {
+    const guardado = this.negocio();
+    if (!guardado) {
+      return;
+    }
+    this.aplicar(guardado);
+    this.modo.set('edicion');
+  }
+
   protected abrirSelectorPortada(): void {
     this.inputPortada()?.nativeElement.click();
   }
@@ -180,6 +199,7 @@ export class MiNegocioComponent implements OnDestroy {
       return;
     }
     this.aplicar(guardado);
+    this.modo.set('vista');
   }
 
   protected guardar(): void {
@@ -210,6 +230,7 @@ export class MiNegocioComponent implements OnDestroy {
 
     this.negocioService.actualizar(actualizado).subscribe((negocio) => {
       this.aplicar(negocio);
+      this.modo.set('vista');
     });
   }
 

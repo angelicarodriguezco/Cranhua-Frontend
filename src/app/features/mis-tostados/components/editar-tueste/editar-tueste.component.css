@@ -7,17 +7,16 @@
   background: none;
   color: var(--texto);
   color-scheme: var(--esquema);
-  font-family: var(--font-ui);
+  font-family: var(--font-family);
 }
 
 .dialogo::backdrop {
   background: rgba(5, 12, 20, 0.55);
-  backdrop-filter: blur(3px);
 }
 
 .vidrio {
   border: 1px solid var(--vidrio-borde);
-  border-radius: 1.25rem;
+  border-radius: 0.75rem;
   box-shadow: var(--vidrio-sombra);
 }
 

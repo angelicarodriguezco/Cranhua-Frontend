@@ -18,6 +18,7 @@ import {
   RUTA_DASHBOARD_CAFETERIA,
   RUTA_PUBLICAR_MENU,
 } from './mi-cafeteria.component';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -45,6 +46,7 @@ describe('MiCafeteriaComponent', () => {
     spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
 
     fixture = TestBed.createComponent(MiCafeteriaComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -66,6 +68,11 @@ describe('MiCafeteriaComponent', () => {
     return encontrado;
   }
 
+  function entrarAEdicion(): void {
+    boton('Editar cafetería').click();
+    fixture.detectChanges();
+  }
+
   function errores(): string[] {
     return [...pagina.querySelectorAll('.campo__error')].map((e) => e.textContent!.trim());
   }
@@ -75,10 +82,47 @@ describe('MiCafeteriaComponent', () => {
     expect(inicialesCafeteria('Brumas')).toBe('BR');
   });
 
-  it('carga los datos de la cafetería actual', () => {
+  it('muestra la vista de solo lectura de la cafetería', () => {
     expect(campo('h1').textContent).toContain('Mi cafetería');
     expect(pagina.textContent).toContain('Así ven tu local los tostadores dentro de Cránhua.');
+    const valores = [...pagina.querySelectorAll('.campo__valor')].map((v) => v.textContent!.trim());
+    expect(valores).toContain(CAFETERIA_EJEMPLO.nombre);
+    expect(valores).toContain(CAFETERIA_EJEMPLO.contacto);
+    expect(valores).toContain(CAFETERIA_EJEMPLO.correo);
+    expect(valores.some((v) => v.includes('Escazú'))).toBeTrue();
+    expect(campo('.avatar__iniciales').textContent!.trim()).toBe('CB');
+    expect(pagina.querySelector('.mapa--solo-lectura')).toBeTruthy();
+    expect(pagina.textContent).toContain('Claro');
+    expect(pagina.textContent).toContain('Medio');
+    expect(pagina.querySelector('#nombre-cafeteria')).toBeNull();
+    expect(pagina.querySelector('app-zona-peligro')).toBeNull();
+    expect(boton('Editar cafetería')).toBeTruthy();
     expect(boton('Publicar en el menú')).toBeTruthy();
+  });
+
+  it('muestra el menú publicado colapsado y lo abre al hacer click', () => {
+    const toggle = campo<HTMLButtonElement>('.menu-publicado__toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(pagina.querySelector('#menu-publicado-contenido')).toBeNull();
+    expect(pagina.textContent).toContain('Menú publicado');
+    expect(pagina.textContent).toContain('(5)');
+
+    toggle.click();
+    fixture.detectChanges();
+
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(pagina.querySelector('#menu-publicado-contenido')).toBeTruthy();
+    expect(pagina.textContent).toContain('Cafés');
+    expect(pagina.textContent).toContain('Espresso Tarrazú');
+    expect(pagina.textContent).toContain('Otras comidas');
+    expect(pagina.textContent).toContain('Queque de naranja');
+    expect(pagina.textContent).toContain('Ocultar');
+  });
+
+  it('entra a edición y carga los datos de la cafetería', () => {
+    entrarAEdicion();
+
+    expect(campo('h1').textContent).toContain('Editar cafetería');
     expect(boton('Cambiar portada')).toBeTruthy();
     expect(pagina.textContent).toContain('Mover pin en el mapa');
     expect(campo<HTMLInputElement>('#nombre-cafeteria').value).toBe(CAFETERIA_EJEMPLO.nombre);
@@ -99,6 +143,7 @@ describe('MiCafeteriaComponent', () => {
   });
 
   it('muestra errores al guardar con campos vacíos', () => {
+    entrarAEdicion();
     componente['formulario'].reset({
       nombre: '',
       descripcion: '',
@@ -121,6 +166,7 @@ describe('MiCafeteriaComponent', () => {
   });
 
   it('permite alternar estilos de café', () => {
+    entrarAEdicion();
     expect(componente['seleccionado']('Claro')).toBeTrue();
     expect(componente['seleccionado']('Medio')).toBeTrue();
     expect(componente['seleccionado']('Oscuro')).toBeFalse();
@@ -135,6 +181,7 @@ describe('MiCafeteriaComponent', () => {
   });
 
   it('actualiza el texto de ubicación desde el pin', () => {
+    entrarAEdicion();
     componente['pin'].set(ESCAZU);
     fixture.detectChanges();
     expect(campo<HTMLInputElement>('#ubicacion-cafeteria').value).toBe('Escazú, San José');
@@ -145,6 +192,7 @@ describe('MiCafeteriaComponent', () => {
   });
 
   it('rechaza guardar si el pin queda fuera de los cantones', () => {
+    entrarAEdicion();
     const actualizar = spyOn(cafeteriaService, 'actualizar');
     componente['pin'].set(OCEANO);
     fixture.detectChanges();
@@ -154,7 +202,7 @@ describe('MiCafeteriaComponent', () => {
 
     expect(actualizar).not.toHaveBeenCalled();
     expect(pagina.textContent).toContain(
-      'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
+      'El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu local.',
     );
   });
 
@@ -169,6 +217,7 @@ describe('MiCafeteriaComponent', () => {
   });
 
   it('muestra la zona de peligro y confirma la eliminación', () => {
+    entrarAEdicion();
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
     const eliminar = spyOn(cafeteriaService, 'eliminar').and.returnValue(of(true));
@@ -181,7 +230,7 @@ describe('MiCafeteriaComponent', () => {
     expect(campo('.modal__titulo').textContent).toBe('¿Eliminar Cafetería Café Brumas?');
     expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_CAFETERIA);
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
-      'rgba(8, 28, 38, 0.96)',
+      'rgb(255, 255, 255)',
     );
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
@@ -191,7 +240,8 @@ describe('MiCafeteriaComponent', () => {
     expect(navegar).toHaveBeenCalledWith(RUTA_DASHBOARD_CAFETERIA);
   });
 
-  it('guarda cambios en la cafetería', () => {
+  it('guarda cambios y vuelve a la vista', () => {
+    entrarAEdicion();
     const actualizar = spyOn(cafeteriaService, 'actualizar').and.callFake((cafeteria) =>
       of(cafeteria),
     );
@@ -208,11 +258,12 @@ describe('MiCafeteriaComponent', () => {
     expect(guardado.id).toBe(CAFETERIA_EJEMPLO.id);
     expect(guardado.nombre).toBe('Café Brumas Norte');
     expect(guardado.volumenMensual).toBe(CAFETERIA_EJEMPLO.volumenMensual);
-    expect(campo<HTMLInputElement>('#nombre-cafeteria').value).toBe('Café Brumas Norte');
-    expect(campo('.avatar__iniciales').textContent!.trim()).toBe('CB');
+    expect(pagina.querySelector('.campo__valor')?.textContent).toContain('Café Brumas Norte');
+    expect(pagina.querySelector('#nombre-cafeteria')).toBeNull();
   });
 
-  it('cancela y restaura el último estado guardado', () => {
+  it('cancela y vuelve a la vista con el estado guardado', () => {
+    entrarAEdicion();
     campo<HTMLInputElement>('#nombre-cafeteria').value = 'Otro nombre';
     campo<HTMLInputElement>('#nombre-cafeteria').dispatchEvent(new Event('input'));
     fixture.detectChanges();
@@ -220,16 +271,17 @@ describe('MiCafeteriaComponent', () => {
 
     boton('Cancelar').click();
     fixture.detectChanges();
-    expect(campo<HTMLInputElement>('#nombre-cafeteria').value).toBe(CAFETERIA_EJEMPLO.nombre);
+    expect(pagina.querySelector('.campo__valor')?.textContent).toContain(CAFETERIA_EJEMPLO.nombre);
+    expect(pagina.querySelector('#nombre-cafeteria')).toBeNull();
   });
 
   it('sigue el tema global claro/oscuro', () => {
-    expect(dashboard.tema()).toBe('oscuro');
-    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
+    expect(dashboard.tema()).toBe('claro');
+    expect(pagina.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
-    expect(dashboard.tema()).toBe('claro');
-    expect(pagina.getAttribute('data-theme')).toBe('claro');
+    expect(dashboard.tema()).toBe('oscuro');
+    expect(pagina.getAttribute('data-theme')).toBe('oscuro');
   });
 });

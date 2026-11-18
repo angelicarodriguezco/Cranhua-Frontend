@@ -13,6 +13,7 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Canton, ZONAS_CAFETALERAS, ZonaCafetalera } from '../../../../core/models/finca.model';
+import { EstadoCantonesComponent } from '../../../../shared/components/estado-cantones/estado-cantones.component';
 
 // Mismo formato que valida el backend
 const FORMATO_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,7 +33,7 @@ export type FormularioFinca = ReturnType<typeof crearFormularioFinca>;
 
 @Component({
   selector: 'app-detalles-finca',
-  imports: [ReactiveFormsModule],
+  imports: [EstadoCantonesComponent, ReactiveFormsModule],
   templateUrl: './detalles-finca.component.html',
   styleUrl: './detalles-finca.component.css',
 })

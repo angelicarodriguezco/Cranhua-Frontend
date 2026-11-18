@@ -5,6 +5,7 @@ import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing
 import { environment } from '../../../environments/environment';
 import { CuentaResponseApi } from '../models/auth.model';
 import { AuthService } from './auth.service';
+import { CafeteriaService } from './cafeteria.service';
 import { CuentaService } from './cuenta.service';
 import { SesionService } from './sesion.service';
 
@@ -248,6 +249,15 @@ describe('AuthService', () => {
       expect(req.request.method).toBe('POST');
       expect(req.request.withCredentials).toBeTrue();
       req.flush('', { status: 204, statusText: 'No Content' });
+    });
+
+    it('limpia la caché de la cafetería de la cuenta anterior', () => {
+      const limpiarCache = spyOn(TestBed.inject(CafeteriaService), 'limpiarCache');
+
+      servicio.cerrarSesion();
+
+      expect(limpiarCache).toHaveBeenCalled();
+      http.expectOne(urlCerrar).flush('', { status: 204, statusText: 'No Content' });
     });
 
     it('si el backend falla no lanza excepción', () => {

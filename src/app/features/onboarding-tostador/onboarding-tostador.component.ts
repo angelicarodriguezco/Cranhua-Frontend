@@ -2,9 +2,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
 
-import { TOSTADOR_ACTUAL } from '../../core/mocks/negocio-tueste.mock';
 import { Coordenada, NegocioTueste } from '../../core/models/negocio-tueste.model';
+import { injectCantones } from '../../core/services/canton.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { BienvenidaTostadorComponent } from './components/bienvenida-tostador/bienvenida-tostador.component';
 import { ConfirmacionTostadorComponent } from './components/confirmacion-tostador/confirmacion-tostador.component';
 import {
@@ -31,11 +32,11 @@ function formatearTelefono(telefono: string): string {
 })
 export class OnboardingTostadorComponent {
   private negocioService = inject(NegocioTuesteService);
+  private readonly cantones = injectCantones();
   private router = inject(Router);
   private location = inject(Location);
 
-  // Mientras no exista el login se usa el tostador de ejemplo
-  protected readonly usuario = TOSTADOR_ACTUAL;
+  protected readonly usuario = inject(SesionService).usuario;
   protected readonly pasos = PASOS;
 
   protected readonly paso = signal<Paso>('bienvenida');
@@ -45,7 +46,7 @@ export class OnboardingTostadorComponent {
   protected readonly pin = signal<Coordenada | null>(null);
   protected readonly canton = computed(() => {
     const pin = this.pin();
-    return pin ? this.negocioService.cantonDe(pin) : null;
+    return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly intentoGuardar = signal(false);
 
@@ -98,7 +99,7 @@ export class OnboardingTostadorComponent {
       ubicacion: pin,
       canton,
       estilos,
-      propietarioId: this.usuario.id,
+      propietarioId: this.usuario()!.id,
     };
     const registrado = this.registrado();
     const guardado = registrado

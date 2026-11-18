@@ -8,6 +8,7 @@ import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { DashboardCafetaleroComponent } from './dashboard-cafetalero.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardCafetaleroComponent', () => {
   let fixture: ComponentFixture<DashboardCafetaleroComponent>;
@@ -19,6 +20,7 @@ describe('DashboardCafetaleroComponent', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardCafetaleroComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -57,7 +59,7 @@ describe('DashboardCafetaleroComponent', () => {
     const indicadores = pagina.querySelector('.indicadores');
     expect(indicadores).toBeTruthy();
 
-    const articulos = indicadores!.querySelectorAll('article');
+    const articulos = indicadores!.querySelectorAll('.tarjeta-enlace');
     expect(articulos).toHaveSize(4);
     expect(indicadores!.textContent).toContain('2');
     expect(indicadores!.textContent).toContain('Fincas registradas');
@@ -141,6 +143,15 @@ describe('DashboardCafetaleroComponent', () => {
     expect(rutasDe('.nueva-finca')).toEqual(['/cafetalero/fincas/registrar']);
     expect(rutasDe('.cosechas .seccion-cabecera a')).toEqual(['/cafetalero/historial']);
 
+    expect(rutasDe('.indicadores a')).toEqual([
+      '/cafetalero/fincas',
+      '/cafetalero/historial',
+      '/cafetalero/historial',
+    ]);
+    expect(rutasDe('.cosechas tbody a')).toContain(
+      '/cafetalero/cosechas/cosecha-caturra-catalina/editar',
+    );
+
     const detalles = rutasDe('.fincas-grid article a');
     expect(detalles).toContain('/cafetalero/fincas/finca-la-catalina');
     expect(detalles).toContain('/cafetalero/fincas/finca-monte-alto');
@@ -164,11 +175,11 @@ describe('DashboardCafetaleroComponent', () => {
     );
     expect(pagina.querySelector('app-menu-lateral .avatar')?.textContent?.trim()).toBe('RA');
     expect(pagina.querySelector('app-menu-lateral button')).toBeNull();
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
+    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
 
-    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('claro');
+    expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
   });
 });

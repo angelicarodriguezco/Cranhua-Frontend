@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
 import { TuesteService, calcularMerma } from './tueste.service';
+import { conSesionDeEjemplo } from '../testing/sesion-de-ejemplo';
 
 describe('calcularMerma', () => {
   it('devuelve el porcentaje de peso perdido', () => {
@@ -20,6 +21,7 @@ describe('TuesteService', () => {
   let servicio: TuesteService;
 
   beforeEach(() => {
+    conSesionDeEjemplo();
     servicio = TestBed.inject(TuesteService);
   });
 
@@ -44,11 +46,11 @@ describe('TuesteService', () => {
   it('genera el código de trazabilidad de un lote pendiente', () => {
     servicio
       .generarCodigo('l-los-robles-catuai')
-      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0103-MC'));
+      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0103-RS'));
 
     servicio.lotesComprados().subscribe((lotes) => {
       expect(lotes.find((l) => l.id === 'l-los-robles-catuai')!.codigoTrazabilidad).toBe(
-        'TRZ-0103-MC',
+        'TRZ-0103-RS',
       );
     });
   });

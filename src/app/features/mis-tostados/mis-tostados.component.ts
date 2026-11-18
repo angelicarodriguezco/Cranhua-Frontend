@@ -13,6 +13,7 @@ import { RouterLink } from '@angular/router';
 
 import { LoteComprado, Tueste } from '../../core/models/tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { TuesteService, calcularMerma } from '../../core/services/tueste.service';
 import { EditarTuesteComponent } from './components/editar-tueste/editar-tueste.component';
 import { etiquetaSvg } from './etiqueta-trazabilidad';
@@ -46,13 +47,17 @@ function formatearFecha(iso: string): string {
 })
 export class MisTostadosComponent {
   private readonly dashboard = inject(DashboardTostadorService);
+  private readonly sesion = inject(SesionService);
   private readonly tuesteService = inject(TuesteService);
   private readonly injector = inject(Injector);
   private readonly documento = inject(DOCUMENT);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly tema = this.dashboard.tema;
-  protected readonly nombreTostador = `${this.dashboard.tostador.nombre} ${this.dashboard.tostador.apellidos}`;
+  protected readonly nombreTostador = computed(() => {
+    const usuario = this.sesion.usuario();
+    return usuario ? `${usuario.nombre} ${usuario.apellidos}`.trim() : '';
+  });
 
   protected readonly lotes = signal<LoteComprado[]>([]);
   protected readonly indicadores = computed(() => {
@@ -139,7 +144,7 @@ export class MisTostadosComponent {
   }
 
   protected descargarCodigo(lote: LoteComprado): void {
-    const svg = etiquetaSvg(lote, this.nombreTostador);
+    const svg = etiquetaSvg(lote, this.nombreTostador());
     const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
     const enlace = this.documento.createElement('a');
     enlace.href = url;

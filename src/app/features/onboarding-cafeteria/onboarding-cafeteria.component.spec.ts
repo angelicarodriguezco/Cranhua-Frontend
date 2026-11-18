@@ -9,6 +9,8 @@ import { CafeteriaResponseApi, ESTILOS_CAFE } from '../../core/models/cafeteria.
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { OnboardingCafeteriaComponent, RUTA_DASHBOARD } from './onboarding-cafeteria.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const BASE = `${environment.apiUrl}/api/cafeterias`;
 const ESCAZU = { lat: 9.919, lng: -84.1395 };
@@ -44,7 +46,9 @@ function crear(apiCargada: Observable<boolean>) {
       { provide: GoogleMapsService, useValue: { apiCargada } },
     ],
   });
+  conSesionDeEjemplo();
   const fixture = TestBed.createComponent(OnboardingCafeteriaComponent);
+  responderCantones();
   fixture.detectChanges();
   return fixture;
 }
@@ -211,7 +215,7 @@ describe('OnboardingCafeteriaComponent', () => {
 
     expect(pasoActual()).toBe('Paso 2 de 4');
     expect(pagina.textContent).toContain(
-      'El pin está fuera de los cantones de ejemplo. Movelo más cerca de tu local.',
+      'El pin está fuera de los cantones de Costa Rica. Movelo más cerca de tu local.',
     );
     expect(campo('ubicacion-cafeteria').getAttribute('aria-invalid')).toBe('true');
   });
@@ -261,7 +265,7 @@ describe('OnboardingCafeteriaComponent', () => {
     fixture.detectChanges();
 
     expect(campo('ubicacion-cafeteria').value).toBe('');
-    expect(pagina.textContent).toContain('El pin está fuera de los cantones de ejemplo.');
+    expect(pagina.textContent).toContain('El pin está fuera de los cantones de Costa Rica.');
   });
 
   it('vuelve a la bienvenida con Atrás desde el paso 2', () => {
@@ -406,6 +410,7 @@ describe('OnboardingCafeteriaComponent sin Google Maps', () => {
       ],
     });
     const fixture = TestBed.createComponent(OnboardingCafeteriaComponent);
+    responderCantones();
     const componente = fixture.componentInstance;
     const pagina: HTMLElement = fixture.nativeElement;
     fixture.detectChanges();

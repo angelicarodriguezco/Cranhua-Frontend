@@ -57,7 +57,7 @@ describe('RegistroComponent', () => {
 
   function chip(etiqueta: string): HTMLButtonElement {
     const chips = Array.from(pagina.querySelectorAll<HTMLButtonElement>('.roles__chip'));
-    return chips.find((c) => c.textContent?.trim() === etiqueta)!;
+    return chips.find((c) => c.textContent?.replace(/\s+/g, ' ').trim().endsWith(etiqueta))!;
   }
 
   function llenarDatos(): void {
@@ -70,6 +70,7 @@ describe('RegistroComponent', () => {
   }
 
   it('muestra los tres roles y los campos del formulario', () => {
+    expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Crear cuenta');
     expect(pagina.querySelectorAll('.roles__chip').length).toBe(3);
     for (const id of ['nombre', 'correo', 'telefono', 'contrasena', 'foto']) {
       expect(pagina.querySelector(`#${id}`))

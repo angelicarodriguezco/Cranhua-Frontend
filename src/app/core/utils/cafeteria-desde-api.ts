@@ -1,18 +1,13 @@
-import { CANTONES_URBANOS } from '../mocks/cafeteria.mock';
-import { CANTONES } from '../mocks/finca.mock';
 import {
   Cafeteria,
   CafeteriaRegistroApi,
   CafeteriaResponseApi,
-  CantonReferencia,
   EstiloCafe,
   EstiloCafeApi,
   NuevaCafeteria,
   VolumenMensual,
   VolumenMensualApi,
 } from '../models/cafeteria.model';
-
-const CANTONES_CAFETERIA: CantonReferencia[] = [...CANTONES_URBANOS, ...CANTONES];
 
 const ESTILO_A_API: Record<EstiloCafe, EstiloCafeApi> = {
   Claro: 'CLARO',
@@ -42,16 +37,6 @@ const VOLUMEN_DESDE_API: Record<VolumenMensualApi, VolumenMensual> = {
   MAS_DE_100: 'Más de 100 kg',
 };
 
-function cantonDe(api: CafeteriaResponseApi): CantonReferencia {
-  return (
-    CANTONES_CAFETERIA.find((c) => c.nombre === api.canton) ?? {
-      nombre: api.canton,
-      provincia: api.provincia,
-      cabecera: api.ubicacion,
-    }
-  );
-}
-
 export function cafeteriaDesdeApi(api: CafeteriaResponseApi): Cafeteria {
   return {
     id: api.id,
@@ -62,7 +47,7 @@ export function cafeteriaDesdeApi(api: CafeteriaResponseApi): Cafeteria {
     descripcion: api.descripcion,
     horario: api.horario,
     ubicacion: api.ubicacion,
-    canton: cantonDe(api),
+    canton: { nombre: api.canton, provincia: api.provincia, cabecera: api.ubicacion },
     volumenMensual: api.volumenMensual ? VOLUMEN_DESDE_API[api.volumenMensual] : null,
     estilos: api.estilos.map((estilo) => ESTILO_DESDE_API[estilo]),
     propietarioId: api.cuentaId,

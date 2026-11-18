@@ -21,6 +21,7 @@ export const PERFILES_FINCA_PUBLICO: PerfilFincaPublico[] = [
       kilos: 290,
     },
     coordenada: { lat: 10.1025, lng: -84.3812 },
+    imagenPortada: '/images/landing-finca.jpg',
     cafeterias: [
       {
         id: 'c-cafe-brumas',
@@ -50,6 +51,7 @@ export const PERFILES_FINCA_PUBLICO: PerfilFincaPublico[] = [
       kilos: 180,
     },
     coordenada: { lat: 9.6612, lng: -84.031 },
+    imagenPortada: '/images/landing-cerezas.jpg',
     cafeterias: [],
   },
 ];

@@ -1,13 +1,19 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
 
+import { USUARIOS } from '../../core/mocks/finca.mock';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { SesionService } from '../../core/services/sesion.service';
 import { Coordenada } from '../../core/models/negocio-tueste.model';
 import {
   OnboardingTostadorComponent,
   RUTA_DASHBOARD_TOSTADOR,
 } from './onboarding-tostador.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { responderCantones } from '../../core/testing/cantones-de-prueba';
 
 const TIBAS: Coordenada = { lat: 9.959, lng: -84.082 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -22,11 +28,15 @@ describe('OnboardingTostadorComponent', () => {
       imports: [OnboardingTostadorComponent],
       providers: [
         provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
       ],
     }).compileComponents();
 
+    conSesionDeEjemplo();
     fixture = TestBed.createComponent(OnboardingTostadorComponent);
+    responderCantones();
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
@@ -64,10 +74,15 @@ describe('OnboardingTostadorComponent', () => {
     clic('Medio');
   }
 
-  it('da la bienvenida con el nombre del tostador', () => {
-    expect(pagina.textContent).toContain('Mariana');
-    expect(pagina.querySelector('.avatar')?.textContent).toBe('M');
+  it('da la bienvenida con el nombre de la sesión', () => {
+    expect(pagina.textContent).toContain('Rodrigo');
+    expect(pagina.querySelector('.avatar')?.textContent).toBe('R');
     expect(pasoActual()).toBe('Paso 1 de 3');
+
+    TestBed.inject(SesionService).iniciarSesion(USUARIOS[1]);
+    fixture.detectChanges();
+    expect(pagina.textContent).toContain('María');
+    expect(pagina.querySelector('.avatar')?.textContent).toBe('M');
   });
 
   it('pasa al formulario y vuelve a la bienvenida', () => {

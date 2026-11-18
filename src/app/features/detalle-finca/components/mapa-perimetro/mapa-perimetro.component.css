@@ -4,8 +4,8 @@
   height: 16rem;
   overflow: hidden;
   border: 1px solid var(--divider);
-  border-radius: 0.95rem;
-  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--brand-nav) 12%, transparent);
 }
 
 .aviso {
@@ -29,8 +29,8 @@
   left: 0.75rem;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  background: rgba(6, 31, 39, 0.85);
-  color: #f5efe3;
+  background: var(--brand-nav);
+  color: var(--brand-on-dark);
   font-size: 0.8125rem;
   font-weight: 600;
 }

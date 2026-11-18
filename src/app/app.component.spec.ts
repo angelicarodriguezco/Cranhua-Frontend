@@ -3,6 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 
 import { AppComponent } from './app.component';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 @Component({ template: '', standalone: true })
 class RutaVaciaComponent {}
@@ -11,8 +13,12 @@ describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
-      providers: [provideRouter([{ path: '**', component: RutaVaciaComponent }])],
-    }).compileComponents();
+      providers: [
+        provideRouter([{ path: '**', component: RutaVaciaComponent }]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
   });
 
   it('should create the app', () => {

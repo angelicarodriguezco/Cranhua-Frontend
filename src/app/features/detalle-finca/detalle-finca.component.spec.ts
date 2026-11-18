@@ -10,6 +10,7 @@ import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
+import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const SIN_CUENTA = 'No encontramos una cuenta de cafetalero con ese correo.';
 
@@ -48,6 +49,7 @@ describe('DetalleFincaComponent', () => {
         { provide: FincaService, useValue: fincaServiceFalso },
       ],
     });
+    conSesionDeEjemplo();
     harness = await RouterTestingHarness.create();
   });
 
@@ -125,7 +127,7 @@ describe('DetalleFincaComponent', () => {
     expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
   });
 
-  it('"Editar finca" y "Editar perímetro" llevan al formulario de edición', async () => {
+  it('"Editar" lleva a la edición de la finca, su perímetro y cada cosecha', async () => {
     await abrir('f-la-esperanza');
 
     const rutas = harness.fixture.debugElement
@@ -135,6 +137,8 @@ describe('DetalleFincaComponent', () => {
     expect(rutas).toEqual([
       '/cafetalero/fincas/f-la-esperanza/editar',
       '/cafetalero/fincas/f-la-esperanza/editar',
+      '/cafetalero/cosechas/c-le-caturra/editar',
+      '/cafetalero/cosechas/c-le-catuai/editar',
     ]);
   });
 
@@ -158,7 +162,7 @@ describe('DetalleFincaComponent', () => {
     );
     expect(pagina.querySelector('.modal__aviso')?.textContent).toContain(AVISO_ELIMINAR_FINCA);
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
-      'rgba(8, 28, 38, 0.96)',
+      'rgb(255, 255, 255)',
     );
 
     pagina.querySelector<HTMLButtonElement>('.modal__btn--secundario')!.click();

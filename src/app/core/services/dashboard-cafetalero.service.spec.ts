@@ -60,12 +60,12 @@ describe('DashboardCafetaleroService', () => {
     expect(servicio.solicitudesPendientes()).toHaveSize(1);
   });
 
-  it('alterna el tema entre oscuro y claro', () => {
-    expect(servicio.tema()).toBe('oscuro');
-    servicio.alternarTema();
+  it('alterna el tema entre claro y oscuro', () => {
     expect(servicio.tema()).toBe('claro');
-    servicio.establecerTema('oscuro');
+    servicio.alternarTema();
     expect(servicio.tema()).toBe('oscuro');
+    servicio.establecerTema('claro');
+    expect(servicio.tema()).toBe('claro');
   });
 
   it('sincroniza y elimina cosechas recientes en memoria', () => {

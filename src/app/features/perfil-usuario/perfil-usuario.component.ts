@@ -29,11 +29,8 @@ import {
   TIPOS_RED_SOCIAL,
   TipoRedSocial,
 } from '../../core/models/perfil.model';
-import { CuentaService } from '../../core/services/cuenta.service';
-import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PerfilService } from '../../core/services/perfil.service';
-import { SesionService } from '../../core/services/sesion.service';
-import { TemaService } from '../../core/services/tema.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
@@ -146,20 +143,15 @@ export function enlaceRedSocial(red: RedSocial): string {
     './perfil-usuario.component.css',
     './perfil-usuario.edicion.css',
   ],
-  host: { '[attr.data-theme]': 'tema()' },
+  host: { '[attr.data-theme]': "'claro'" },
 })
 export class PerfilUsuarioComponent implements OnDestroy {
-  private readonly dashboard = inject(DashboardCafetaleroService);
-  private readonly temas = inject(TemaService);
   private readonly perfilService = inject(PerfilService);
-  private readonly cuentaService = inject(CuentaService);
-  private readonly sesionService = inject(SesionService);
+  private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly injector = inject(Injector);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  protected readonly tema = this.temas.tema;
-  protected readonly indicadores = this.dashboard.indicadores;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CUENTA;
   protected readonly nombresRed = NOMBRES_RED_SOCIAL;
   protected readonly placeholdersRed = PLACEHOLDERS_RED_SOCIAL;
@@ -201,10 +193,6 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.descartarVistasPrevias();
-  }
-
-  protected alternarTema(): void {
-    this.temas.alternarTema();
   }
 
   protected errorRed(red: RedSocial): string | null {
@@ -346,8 +334,7 @@ export class PerfilUsuarioComponent implements OnDestroy {
 
   protected confirmarEliminar(): void {
     this.perfilService.eliminarCuenta().subscribe(() => {
-      this.cuentaService.limpiarCuenta();
-      this.sesionService.cerrarSesion();
+      this.auth.limpiarSesion();
       this.modalEliminarAbierto.set(false);
       void this.router.navigateByUrl('/iniciar-sesion');
     });
