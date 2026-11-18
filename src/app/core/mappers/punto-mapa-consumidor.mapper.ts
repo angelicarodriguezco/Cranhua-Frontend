@@ -24,9 +24,7 @@ export function ubicacionLabelDesdeApi(canton: string, provincia: string): strin
   return `${cantonLimpio}, ${provinciaLimpia}`;
 }
 
-export function mapearPuntoMapaResponseAConsumidor(
-  api: PuntoMapaResponseApi,
-): PuntoMapaConsumidor {
+export function mapearPuntoMapaResponseAConsumidor(api: PuntoMapaResponseApi): PuntoMapaConsumidor {
   const tipo = mapearTipoPuntoMapaDesdeApi(api.tipo);
   return {
     id: api.id,

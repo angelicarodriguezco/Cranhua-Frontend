@@ -25,10 +25,7 @@ export class DashboardConsumidorService {
 
   puntos(): Observable<PuntoMapaConsumidor[]> {
     return this.http
-      .get<PuntoMapaResponseApi[]>(
-        `${environment.apiUrl}/api/publico/mapa`,
-        opcionesCredenciales,
-      )
+      .get<PuntoMapaResponseApi[]>(`${environment.apiUrl}/api/publico/mapa`, opcionesCredenciales)
       .pipe(map((puntos) => puntos.map(mapearPuntoMapaResponseAConsumidor)));
   }
 
