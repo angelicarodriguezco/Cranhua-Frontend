@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter, Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
 import {
   CUENTA_CAFETALERO_TOSTADOR,
@@ -24,7 +25,11 @@ describe('MenuLateralComponent', () => {
   let fixture: ComponentFixture<MenuLateralComponent>;
   let pagina: HTMLElement;
 
-  async function crear(cuenta: Cuenta, conCafeteria = true): Promise<void> {
+  async function crear(cuenta: Cuenta, conCafeteria: boolean | 'error' = true): Promise<void> {
+    const obtenerActual = () =>
+      conCafeteria === 'error'
+        ? throwError(() => new HttpErrorResponse({ status: 403 }))
+        : of(conCafeteria ? CAFETERIA_EJEMPLO : undefined);
     localStorage.removeItem(CLAVE_TEMA);
     await TestBed.configureTestingModule({
       imports: [MenuLateralComponent],
@@ -32,7 +37,7 @@ describe('MenuLateralComponent', () => {
         provideRouter([{ path: '**', component: VistaVaciaComponent }]),
         {
           provide: CafeteriaService,
-          useValue: { obtenerActual: () => of(conCafeteria ? CAFETERIA_EJEMPLO : undefined) },
+          useValue: { obtenerActual },
         },
         { provide: AuthService, useValue: jasmine.createSpyObj('AuthService', ['cerrarSesion']) },
       ],
@@ -132,6 +137,13 @@ describe('MenuLateralComponent', () => {
     expect(rutasDe('[data-rol="tostador"] a')).toEqual(
       NAV_POR_ROL.tostador.map((item) => item.ruta),
     );
+  });
+
+  it('si /api/cafeterias/actual falla (403 sin rol cafetería) el menú sigue renderizando', async () => {
+    await crear(CUENTA_SOLO_CAFETALERO, 'error');
+
+    expect(() => fixture.detectChanges()).not.toThrow();
+    expect(rutasDe('.nav-rol a')).toEqual(NAV_POR_ROL.cafetalero.map((item) => item.ruta));
   });
 
   it('sigue el tema global (modo claro por defecto)', async () => {
