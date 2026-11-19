@@ -50,6 +50,9 @@ export interface Finca {
   areaHectareas: number;
   propietarioId: string;
   duenosAdicionales: Usuario[];
+  // Solo vienen en el listado de Mis fincas
+  cosechasActivas?: number;
+  kgDisponibles?: number;
 }
 
 export type NuevaFinca = Pick<
@@ -73,6 +76,8 @@ export interface FincaResponseApi {
   provincia: string;
   areaHectareas: number;
   duenos: DuenoApi[];
+  cosechasActivas?: number;
+  kgDisponibles?: number;
 }
 
 // Misma forma que el 409 del backend

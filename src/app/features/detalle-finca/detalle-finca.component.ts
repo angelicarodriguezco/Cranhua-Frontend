@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
@@ -77,14 +77,21 @@ export class DetalleFincaComponent {
     };
   });
 
+  private readonly ruta = inject(ActivatedRoute);
+
+  protected readonly cosechaResaltada = toSignal(
+    this.ruta.queryParamMap.pipe(map((parametros) => parametros.get('cosecha'))),
+    { initialValue: null },
+  );
+
   constructor() {
-    inject(ActivatedRoute)
-      .paramMap.pipe(
+    this.ruta.paramMap
+      .pipe(
         map((parametros) => parametros.get('id') ?? ''),
         switchMap((id) =>
           forkJoin({
             finca: this.fincaService.obtener(id).pipe(catchError(() => of(undefined))),
-            cosechas: this.cosechaService.deFinca(id),
+            cosechas: this.cosechaService.deFinca(id).pipe(catchError(() => of([]))),
           }),
         ),
         takeUntilDestroyed(),

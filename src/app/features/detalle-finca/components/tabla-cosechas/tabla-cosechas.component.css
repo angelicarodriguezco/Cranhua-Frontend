@@ -51,6 +51,15 @@ tbody tr:hover td {
   background: color-mix(in srgb, var(--brand-button) 5%, transparent);
 }
 
+.fila-resaltada td,
+tbody tr.fila-resaltada:hover td {
+  background: color-mix(in srgb, var(--brand-button) 14%, transparent);
+}
+
+.fila-resaltada td:first-child {
+  box-shadow: inset 3px 0 0 var(--brand-button);
+}
+
 .lote {
   font-family: ui-monospace, 'Cascadia Code', monospace;
 }

@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
-import { COSECHAS_REGISTRADAS } from '../../../../core/mocks/cosecha.mock';
+import { cosechaDePrueba } from '../../../../core/testing/cosechas-de-prueba';
 import { TablaCosechasComponent } from './tabla-cosechas.component';
 
 describe('TablaCosechasComponent', () => {
@@ -17,31 +17,58 @@ describe('TablaCosechasComponent', () => {
     fixture = TestBed.createComponent(TablaCosechasComponent);
   });
 
-  it('muestra variedad, proceso, lote y estado de cada cosecha', () => {
-    const cosecha = COSECHAS_REGISTRADAS[0];
-    fixture.componentRef.setInput('cosechas', [cosecha]);
+  function celdas(): string[] {
+    return [...fixture.nativeElement.querySelectorAll('tbody td')].map((td) =>
+      td.textContent.trim().replace(/\s/g, ' '),
+    );
+  }
+
+  it('muestra variedad, proceso, lote, precio, kg disponibles y estado', () => {
+    fixture.componentRef.setInput('cosechas', [cosechaDePrueba({ codigoLote: 'CRH-2026-0007' })]);
     fixture.detectChanges();
 
-    const celdas = [...fixture.nativeElement.querySelectorAll('tbody td')].map((td) =>
-      td.textContent.trim(),
-    );
-    expect(celdas).toEqual([
-      cosecha.variedad,
-      cosecha.proceso,
-      cosecha.codigoLote,
-      `${cosecha.kgDisponibles} kg`,
-      cosecha.estado,
+    expect(celdas()).toEqual([
+      'Geisha',
+      'Lavado',
+      'CRH-2026-0007',
+      '₡4 500',
+      '720 kg',
+      'Disponible',
       'Editar →',
     ]);
   });
 
+  it('en beneficiado muestra "—" en lote y kg disponibles', () => {
+    fixture.componentRef.setInput('cosechas', [
+      cosechaDePrueba({ estado: 'EN_BENEFICIADO', kgDisponibles: null, precioKg: 3800 }),
+    ]);
+    fixture.detectChanges();
+
+    expect(celdas().slice(2, 6)).toEqual(['—', '₡3 800', '—', 'En beneficiado']);
+  });
+
   it('cada fila abre la edición de su cosecha', () => {
-    const cosecha = COSECHAS_REGISTRADAS[0];
-    fixture.componentRef.setInput('cosechas', [cosecha]);
+    fixture.componentRef.setInput('cosechas', [cosechaDePrueba()]);
     fixture.detectChanges();
 
     const enlace = fixture.debugElement.query(By.css('tr.fila-enlace a'));
-    expect(enlace.injector.get(RouterLink).href).toBe(`/cafetalero/cosechas/${cosecha.id}/editar`);
+    expect(enlace.injector.get(RouterLink).href).toBe('/cafetalero/cosechas/c-1/editar');
+  });
+
+  it('resalta la cosecha indicada y hace scroll hasta ella', () => {
+    const scroll = spyOn(Element.prototype, 'scrollIntoView');
+    fixture.componentRef.setInput('cosechas', [
+      cosechaDePrueba({ id: 'c-1' }),
+      cosechaDePrueba({ id: 'c-2', variedad: 'Caturra' }),
+    ]);
+    fixture.componentRef.setInput('resaltada', 'c-2');
+    fixture.detectChanges();
+
+    const resaltadas = fixture.nativeElement.querySelectorAll('tr.fila-resaltada');
+    expect(resaltadas.length).toBe(1);
+    expect(resaltadas[0].textContent).toContain('Caturra');
+    expect(scroll).toHaveBeenCalled();
+    expect(scroll.calls.mostRecent().object).toBe(resaltadas[0]);
   });
 
   it('avisa cuando la finca no tiene cosechas', () => {

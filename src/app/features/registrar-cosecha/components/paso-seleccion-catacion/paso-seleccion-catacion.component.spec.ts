@@ -26,13 +26,15 @@ describe('PasoSeleccionCatacionComponent', () => {
     componente['formulario'].patchValue({
       pesoAntesKg: antes,
       pesoTrasSeleccionKg: despues,
+      precioKg: 4500,
     });
     fixture.detectChanges();
   }
 
   it('muestra pesos, merma, caracolillo y catación', () => {
-    expect(pagina.querySelectorAll('.tarjeta').length).toBe(2);
+    expect(pagina.querySelectorAll('.tarjeta').length).toBe(3);
     expect(pagina.textContent).toContain('Selección por tamaño y defectos');
+    expect(pagina.querySelector('#cosecha-precio')).toBeTruthy();
     expect(pagina.textContent).toContain('Catación SCA');
     expect(pagina.textContent).toContain('Merma calculada por selección');
     expect(pagina.querySelector('#cosecha-peso-antes')).toBeTruthy();
@@ -73,8 +75,58 @@ describe('PasoSeleccionCatacionComponent', () => {
         pesoCaracolilloKg: null,
         puntajeSca: null,
         notasCatacion: null,
+        precioKg: 4500,
       },
     ]);
+  });
+
+  it('exige un precio por kg mayor a 0 con hasta 2 decimales', () => {
+    const precio = componente['formulario'].controls.precioKg;
+    rellenarPesos();
+
+    for (const invalido of [null, 0, 12.345]) {
+      precio.setValue(invalido);
+      expect(precio.invalid).withContext(String(invalido)).toBeTrue();
+    }
+    precio.setValue(4500.5);
+    expect(precio.valid).toBeTrue();
+
+    precio.setValue(0);
+    pagina.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(pagina.querySelector('#cosecha-precio')?.parentElement?.textContent).toContain(
+      'Indicá un precio mayor a 0',
+    );
+  });
+
+  it('muestra los errores del servidor debajo de su campo', () => {
+    fixture.componentRef.setInput('erroresServidor', {
+      pesoTrasSeleccionKg:
+        'El peso tras la selección no puede ser mayor al peso tras el beneficiado.',
+      precioKg: 'El precio por kg tiene que ser mayor a 0.',
+    });
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('#cosecha-peso-despues')?.parentElement?.textContent).toContain(
+      'no puede ser mayor al peso tras el beneficiado',
+    );
+    expect(pagina.querySelector('#cosecha-precio')?.parentElement?.textContent).toContain(
+      'El precio por kg tiene que ser mayor a 0.',
+    );
+  });
+
+  it('mientras guarda deshabilita los botones y no vuelve a emitir', () => {
+    const emitidos: DatosPasoSeleccion[] = [];
+    componente.guardar.subscribe((datos) => emitidos.push(datos));
+    rellenarPesos();
+    fixture.componentRef.setInput('guardando', true);
+    fixture.detectChanges();
+
+    const guardar = pagina.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+    expect(guardar.disabled).toBeTrue();
+    expect(guardar.textContent?.trim()).toBe('Guardando…');
+    componente['enviar']();
+    expect(emitidos).toEqual([]);
   });
 
   it('exige peso de caracolillo solo cuando la respuesta es Sí', () => {
@@ -105,6 +157,7 @@ describe('PasoSeleccionCatacionComponent', () => {
         pesoCaracolilloKg: 4,
         puntajeSca: null,
         notasCatacion: null,
+        precioKg: 4500,
       },
     ]);
   });

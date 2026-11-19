@@ -58,7 +58,7 @@
           <h2 id="titulo-cosechas">Cosechas</h2>
           <a routerLink="/cafetalero/registrar-cosecha">+ Registrar cosecha</a>
         </div>
-        <app-tabla-cosechas [cosechas]="cosechas()" />
+        <app-tabla-cosechas [cosechas]="cosechas()" [resaltada]="cosechaResaltada()" />
       </section>
 
       <app-zona-peligro

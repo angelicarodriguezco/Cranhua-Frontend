@@ -1,10 +1,7 @@
-import { Component, computed, inject, input } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { map, of, switchMap } from 'rxjs';
 
 import { Finca } from '../../../../core/models/finca.model';
-import { CosechaService } from '../../../../core/services/cosecha.service';
 
 @Component({
   selector: 'app-tarjeta-finca',
@@ -13,8 +10,6 @@ import { CosechaService } from '../../../../core/services/cosecha.service';
   styleUrl: './tarjeta-finca.component.css',
 })
 export class TarjetaFincaComponent {
-  private readonly cosechas = inject(CosechaService);
-
   readonly finca = input.required<Finca>();
 
   protected readonly ubicacion = computed(() => {
@@ -32,28 +27,12 @@ export class TarjetaFincaComponent {
 
   protected readonly duenos = computed(() => 1 + this.finca().duenosAdicionales.length);
 
-  private readonly resumenCosechas = toSignal(
-    toObservable(this.finca).pipe(
-      switchMap((finca) =>
-        finca
-          ? this.cosechas.deFinca(finca.id).pipe(
-              map((lista) => ({
-                cantidad: lista.length,
-                kg: lista.reduce((total, c) => total + (c.kgDisponibles ?? 0), 0),
-              })),
-            )
-          : of({ cantidad: 0, kg: 0 }),
-      ),
-    ),
-    { initialValue: { cantidad: 0, kg: 0 } },
-  );
-
   protected readonly textoCosechas = computed(() => {
-    const n = this.resumenCosechas().cantidad;
-    return `${n} ${n === 1 ? 'cosecha' : 'cosechas'}`;
+    const n = this.finca().cosechasActivas ?? 0;
+    return `${n} ${n === 1 ? 'cosecha activa' : 'cosechas activas'}`;
   });
 
-  protected readonly textoKg = computed(() => `${this.resumenCosechas().kg} kg disponibles`);
+  protected readonly textoKg = computed(() => `${this.finca().kgDisponibles ?? 0} kg disponibles`);
 
   protected readonly textoDuenos = computed(() => {
     const n = this.duenos();

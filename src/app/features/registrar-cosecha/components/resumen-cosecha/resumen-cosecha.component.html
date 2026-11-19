@@ -30,12 +30,20 @@
         }
       </dd>
     </div>
+    @if (cosecha().pesoTrasSeleccionKg !== null) {
+      <div class="resumen__item">
+        <dt>Peso tras selección</dt>
+        <dd>
+          {{ cosecha().pesoTrasSeleccionKg | number: '1.0-1' }} kg
+          @if (cosecha().mermaSeleccionPorcentaje !== null) {
+            (merma {{ cosecha().mermaSeleccionPorcentaje | number: '1.0-1' }}%)
+          }
+        </dd>
+      </div>
+    }
     <div class="resumen__item">
-      <dt>Peso tras selección</dt>
-      <dd>
-        {{ cosecha().pesoTrasSeleccionKg | number: '1.0-1' }} kg (merma
-        {{ mermaPorcentaje() | number: '1.0-1' }}%)
-      </dd>
+      <dt>Precio por kg</dt>
+      <dd>{{ precioKg() }}</dd>
     </div>
     @if (textoCaracolillo(); as caracolillo) {
       <div class="resumen__item">

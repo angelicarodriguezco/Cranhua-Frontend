@@ -22,5 +22,7 @@ export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
     duenosAdicionales: api.duenos
       .filter((d) => d !== propietario)
       .map((d) => usuarioDesdeNombreCompleto(d.id, d.nombreCompleto, '')),
+    cosechasActivas: api.cosechasActivas,
+    kgDisponibles: api.kgDisponibles,
   };
 }

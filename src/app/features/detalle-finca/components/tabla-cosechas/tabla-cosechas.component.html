@@ -6,6 +6,7 @@
           <th>Variedad</th>
           <th>Proceso</th>
           <th>Lote</th>
+          <th>Precio/kg</th>
           <th>Disponible</th>
           <th>Estado</th>
           <th aria-label="Acciones"></th>
@@ -13,10 +14,11 @@
       </thead>
       <tbody>
         @for (cosecha of cosechas(); track cosecha.id) {
-          <tr class="fila-enlace">
+          <tr class="fila-enlace" [class.fila-resaltada]="cosecha.id === resaltada()">
             <td>{{ cosecha.variedad }}</td>
             <td>{{ cosecha.proceso }}</td>
-            <td class="lote">{{ cosecha.codigoLote }}</td>
+            <td class="lote">{{ cosecha.codigoLote ?? '—' }}</td>
+            <td class="precio">{{ colones(cosecha.precioKg) }}</td>
             <td>{{ cosecha.kgDisponibles === null ? '—' : cosecha.kgDisponibles + ' kg' }}</td>
             <td>
               <span

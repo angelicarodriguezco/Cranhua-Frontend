@@ -7,14 +7,18 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 
 import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
+import { Cosecha } from '../../core/models/cosecha.model';
+import { CosechaService } from '../../core/services/cosecha.service';
 import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { cosechaDePrueba } from '../../core/testing/cosechas-de-prueba';
 import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const SIN_CUENTA = 'No encontramos una cuenta de cafetalero con ese correo.';
+const YA_ES_DUENO = 'Esa cuenta ya es dueña de esta finca.';
 
-// Responde como el backend con las fincas de ejemplo
+// Responde como el backend (404 si el correo no existe, 409 si ya es dueño)
 const fincaServiceFalso = {
   obtener: (id: string) => {
     const finca = FINCAS_REGISTRADAS.find((f) => f.id === id);
@@ -23,16 +27,43 @@ const fincaServiceFalso = {
   agregarDueno: (id: string, correo: string) => {
     const finca = FINCAS_REGISTRADAS.find((f) => f.id === id)!;
     const usuario = USUARIOS.find((u) => u.correo === correo);
-    return of(
-      usuario
-        ? {
-            agregado: true,
-            finca: { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] },
-          }
-        : { agregado: false, mensaje: SIN_CUENTA },
-    );
+    if (!usuario) {
+      return of({ agregado: false, mensaje: SIN_CUENTA });
+    }
+    if (finca.duenosAdicionales.some((d) => d.id === usuario.id)) {
+      return of({ agregado: false, mensaje: YA_ES_DUENO });
+    }
+    return of({
+      agregado: true,
+      finca: { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] },
+    });
   },
   eliminar: () => of(true),
+};
+
+const COSECHAS_ESPERANZA: Cosecha[] = [
+  cosechaDePrueba({
+    id: 'c-le-caturra',
+    fincaId: 'f-la-esperanza',
+    variedad: 'Caturra',
+    codigoLote: 'LE-2026-001',
+    precioKg: 4200,
+    kgDisponibles: 96,
+  }),
+  cosechaDePrueba({
+    id: 'c-le-catuai',
+    fincaId: 'f-la-esperanza',
+    variedad: 'Catuaí',
+    codigoLote: 'LE-2026-002',
+    precioKg: 3800,
+    estado: 'EN_BENEFICIADO',
+    pesoTrasSeleccionKg: null,
+    kgDisponibles: null,
+  }),
+];
+
+const cosechaServiceFalso = {
+  deFinca: (id: string) => of(id === 'f-la-esperanza' ? COSECHAS_ESPERANZA : []),
 };
 
 describe('DetalleFincaComponent', () => {
@@ -47,14 +78,15 @@ describe('DetalleFincaComponent', () => {
         // Sin cargar Google Maps
         { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
         { provide: FincaService, useValue: fincaServiceFalso },
+        { provide: CosechaService, useValue: cosechaServiceFalso },
       ],
     });
     conSesionDeEjemplo();
     harness = await RouterTestingHarness.create();
   });
 
-  async function abrir(id: string): Promise<HTMLElement> {
-    await harness.navigateByUrl(`/cafetalero/fincas/${id}`, DetalleFincaComponent);
+  async function abrir(id: string, query = ''): Promise<HTMLElement> {
+    await harness.navigateByUrl(`/cafetalero/fincas/${id}${query}`, DetalleFincaComponent);
     harness.detectChanges();
     return harness.routeNativeElement!;
   }
@@ -87,6 +119,29 @@ describe('DetalleFincaComponent', () => {
       'María Jiménez Solano',
     ]);
     expect(textos(pagina, 'app-tabla-cosechas .lote')).toEqual(['LE-2026-001', 'LE-2026-002']);
+  });
+
+  it('muestra el precio por kg y los kg disponibles de cada cosecha', async () => {
+    const pagina = await abrir('f-la-esperanza');
+
+    expect(textos(pagina, 'app-tabla-cosechas .precio').map((t) => t.replace(/\s/g, ' '))).toEqual([
+      '₡4 200',
+      '₡3 800',
+    ]);
+    const filas = [...pagina.querySelectorAll('app-tabla-cosechas tbody tr')];
+    expect(filas[0].textContent).toContain('96 kg');
+    expect(filas[1].querySelectorAll('td')[4].textContent?.trim()).toBe('—');
+    expect(filas[1].textContent).toContain('En beneficiado');
+  });
+
+  it('resalta la cosecha que viene en ?cosecha=', async () => {
+    spyOn(Element.prototype, 'scrollIntoView');
+    const pagina = await abrir('f-la-esperanza', '?cosecha=c-le-catuai');
+
+    const resaltadas = pagina.querySelectorAll('app-tabla-cosechas tr.fila-resaltada');
+    expect(resaltadas.length).toBe(1);
+    expect(resaltadas[0].textContent).toContain('Catuaí');
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
   });
 
   it('marca con "Vos" al usuario actual y no muestra "Propietario"', async () => {
@@ -124,6 +179,16 @@ describe('DetalleFincaComponent', () => {
     agregarDueno(pagina, 'nadie@ejemplo.cr');
 
     expect(pagina.querySelector('app-lista-duenos .error')?.textContent).toContain(SIN_CUENTA);
+    expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
+  });
+
+  it('muestra el mensaje del backend si la cuenta ya es dueña', async () => {
+    const pagina = await abrir('f-la-esperanza');
+    const maria = USUARIOS.find((u) => u.id === 'u-maria')!;
+
+    agregarDueno(pagina, maria.correo);
+
+    expect(pagina.querySelector('app-lista-duenos .error')?.textContent).toContain(YA_ES_DUENO);
     expect(pagina.querySelectorAll('app-lista-duenos li').length).toBe(2);
   });
 

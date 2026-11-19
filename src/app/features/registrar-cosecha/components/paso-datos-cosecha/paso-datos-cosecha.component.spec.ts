@@ -1,4 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+
+import { FINCAS_REGISTRADAS } from '../../../../core/mocks/finca.mock';
+import { FincaService } from '../../../../core/services/finca.service';
 
 import { DatosPasoCosecha, PasoDatosCosechaComponent } from './paso-datos-cosecha.component';
 
@@ -10,6 +14,7 @@ describe('PasoDatosCosechaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PasoDatosCosechaComponent],
+      providers: [{ provide: FincaService, useValue: { misFincas: () => of(FINCAS_REGISTRADAS) } }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PasoDatosCosechaComponent);
@@ -104,6 +109,26 @@ describe('PasoDatosCosechaComponent', () => {
     pagina.querySelectorAll<HTMLButtonElement>('.reparto__eliminar')[1].click();
     fixture.detectChanges();
     expect(componente['procesos'].length).toBe(1);
+  });
+
+  it('el selector lista las fincas del usuario', () => {
+    const opciones = [...pagina.querySelectorAll('#cosecha-finca option')].map((o) =>
+      o.textContent?.trim(),
+    );
+    expect(opciones.slice(1)).toEqual(FINCAS_REGISTRADAS.map((f) => f.nombre));
+  });
+
+  it('muestra los errores del servidor debajo de su campo', () => {
+    fixture.componentRef.setInput('erroresServidor', {
+      fechaFin: 'La fecha de fin no puede ser antes de la de inicio.',
+      procesos: 'Los porcentajes de los procesos tienen que sumar 100.',
+    });
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('#cosecha-fin')?.parentElement?.textContent).toContain(
+      'La fecha de fin no puede ser antes de la de inicio.',
+    );
+    expect(pagina.textContent).toContain('Los porcentajes de los procesos tienen que sumar 100.');
   });
 
   it('muestra feedback de exceso cuando se supera el 100%', () => {

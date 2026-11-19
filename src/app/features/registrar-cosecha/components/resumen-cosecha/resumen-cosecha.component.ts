@@ -1,9 +1,8 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 import { Cosecha } from '../../../../core/models/cosecha.model';
-import { CosechaService } from '../../../../core/services/cosecha.service';
-import { calcularMermaPorcentaje } from '../paso-seleccion-catacion/paso-seleccion-catacion.component';
+import { formatearColones } from '../../../../shared/utils/formato';
 
 @Component({
   selector: 'app-resumen-cosecha',
@@ -12,28 +11,18 @@ import { calcularMermaPorcentaje } from '../paso-seleccion-catacion/paso-selecci
   styleUrl: './resumen-cosecha.component.css',
 })
 export class ResumenCosechaComponent {
-  private readonly cosechaService = inject(CosechaService);
-
   readonly cosecha = input.required<Cosecha>();
   readonly modoEdicion = input(false);
 
   readonly registrarOtra = output<void>();
   readonly verCosecha = output<string>();
 
-  protected readonly nombreFinca = computed(() => {
-    const id = this.cosecha().fincaId;
-    return this.cosechaService.fincas.find((f) => f.id === id)?.nombre ?? id;
-  });
-
   protected readonly etiquetaFinca = computed(() => {
-    const nombre = this.nombreFinca();
+    const nombre = this.cosecha().fincaNombre ?? '';
     return /^finca\b/i.test(nombre) ? nombre : `Finca ${nombre}`;
   });
 
-  protected readonly mermaPorcentaje = computed(() => {
-    const c = this.cosecha();
-    return calcularMermaPorcentaje(c.pesoAntesKg, c.pesoTrasSeleccionKg);
-  });
+  protected readonly precioKg = computed(() => formatearColones(this.cosecha().precioKg));
 
   protected readonly procesosResumen = computed(() => {
     const c = this.cosecha();

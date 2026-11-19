@@ -1,14 +1,15 @@
 import { Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { catchError, of, startWith } from 'rxjs';
 
 import {
-  FincaCosechaOpcion,
+  CATALOGO_PROCESOS_BENEFICIADO,
   OpcionProcesoBeneficiado,
   ProcesoReparto,
+  VARIEDADES_CAFE,
 } from '../../../../core/models/cosecha.model';
-import { CosechaService } from '../../../../core/services/cosecha.service';
+import { FincaService } from '../../../../core/services/finca.service';
 import { fechasOrdenadasValidator } from '../../../../shared/validators/fechas-ordenadas.validator';
 import { sumaPorcentajesValidator } from '../../../../shared/validators/suma-porcentajes.validator';
 
@@ -100,17 +101,21 @@ export function crearFormularioDatosCosecha(
   styleUrl: './paso-datos-cosecha.component.css',
 })
 export class PasoDatosCosechaComponent {
-  private readonly cosechaService = inject(CosechaService);
-
   readonly valorInicial = input<Partial<DatosPasoCosecha> | null>(null);
+  readonly erroresServidor = input<Record<string, string>>({});
 
   readonly continuar = output<DatosPasoCosecha>();
   readonly cancelar = output<void>();
 
-  protected readonly fincas: readonly FincaCosechaOpcion[] = this.cosechaService.fincas;
-  protected readonly variedades: readonly string[] = this.cosechaService.variedades;
+  protected readonly fincas = toSignal(
+    inject(FincaService)
+      .misFincas()
+      .pipe(catchError(() => of([]))),
+    { initialValue: [] },
+  );
+  protected readonly variedades: readonly string[] = VARIEDADES_CAFE;
   protected readonly catalogoProcesos: readonly OpcionProcesoBeneficiado[] =
-    this.cosechaService.procesosBeneficiado;
+    CATALOGO_PROCESOS_BENEFICIADO;
 
   protected readonly formulario = crearFormularioDatosCosecha();
   protected readonly intentoContinuar = signal(false);

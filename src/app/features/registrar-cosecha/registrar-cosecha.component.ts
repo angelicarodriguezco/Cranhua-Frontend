@@ -2,11 +2,12 @@ import { Component, computed, ElementRef, inject, signal, viewChild } from '@ang
 import { Location } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { catchError, map, of, switchMap } from 'rxjs';
 
-import { Cosecha, NuevaCosecha } from '../../core/models/cosecha.model';
+import { Cosecha, ErrorCosecha, NuevaCosecha } from '../../core/models/cosecha.model';
 import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
+import { erroresEnFormulario } from '../../core/utils/cosecha-desde-api';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import {
@@ -21,6 +22,16 @@ import { ResumenCosechaComponent } from './components/resumen-cosecha/resumen-co
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 type Paso = 'datos' | 'seleccion' | 'exito';
+
+const CAMPOS_PASO_DATOS = [
+  'fincaId',
+  'variedad',
+  'alturaMsnm',
+  'cantidadTotalKg',
+  'fechaInicio',
+  'fechaFin',
+  'procesos',
+];
 
 @Component({
   selector: 'app-registrar-cosecha',
@@ -61,7 +72,7 @@ export class RegistrarCosechaComponent {
 
   protected readonly subtitulo = computed(() => {
     if (this.paso() === 'seleccion') {
-      return 'Paso 2 de 2 — Selección final, catación y caracolillo.';
+      return 'Paso 2 de 2 — Selección final, catación y precio.';
     }
     return 'Paso 1 de 2 — Datos de la cosecha y reparto por proceso.';
   });
@@ -73,18 +84,35 @@ export class RegistrarCosechaComponent {
   protected readonly datosPaso2 = signal<DatosPasoSeleccion | null>(null);
   protected readonly cosechaGuardada = signal<Cosecha | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly erroresServidor = signal<Record<string, string>>({});
+  protected readonly errorGeneral = signal<string | null>(null);
 
-  protected readonly cosechaAEliminar = computed(() => {
-    const id = this.cosechaId();
-    return id ? (this.cosechaService.obtener(id) ?? null) : null;
-  });
+  private readonly cosechaCargada = toSignal(
+    this.route.paramMap.pipe(
+      map((params) => params.get('id')),
+      switchMap((id) =>
+        id
+          ? this.cosechaService.obtener(id).pipe(
+              catchError((error: ErrorCosecha) => {
+                this.errorGeneral.set(error.mensaje);
+                return of(null);
+              }),
+            )
+          : of(null),
+      ),
+    ),
+    { initialValue: null },
+  );
 
   protected readonly avisoEliminar = computed(() => {
-    const codigo = this.cosechaAEliminar()?.codigoLote;
+    const codigo = this.cosechaCargada()?.codigoLote;
     return codigo
       ? `Esta cosecha ya tiene el lote ${codigo}, con código de trazabilidad visible para tostadores y consumidores. Eliminar la cosecha no borra ese código, pero ya no vas a poder editar su información.`
       : null;
   });
+
+  protected readonly nombreAEliminar = computed(() => this.cosechaCargada()?.variedad);
 
   protected readonly valorInicialPaso1 = computed((): Partial<DatosPasoCosecha> | null => {
     const borrador = this.datosPaso1();
@@ -92,12 +120,7 @@ export class RegistrarCosechaComponent {
       return borrador;
     }
 
-    const id = this.cosechaId();
-    if (!id) {
-      return null;
-    }
-
-    const cosecha = this.cosechaService.obtener(id);
+    const cosecha = this.cosechaCargada();
     if (!cosecha) {
       return null;
     }
@@ -119,23 +142,19 @@ export class RegistrarCosechaComponent {
       return borrador;
     }
 
-    const id = this.cosechaId();
-    if (!id) {
-      return null;
-    }
-
-    const cosecha = this.cosechaService.obtener(id);
+    const cosecha = this.cosechaCargada();
     if (!cosecha) {
       return null;
     }
 
     return {
-      pesoAntesKg: cosecha.pesoAntesKg,
-      pesoTrasSeleccionKg: cosecha.pesoTrasSeleccionKg,
+      pesoAntesKg: cosecha.pesoAntesKg ?? undefined,
+      pesoTrasSeleccionKg: cosecha.pesoTrasSeleccionKg ?? undefined,
       separoCaracolillo: cosecha.separoCaracolillo,
       pesoCaracolilloKg: cosecha.pesoCaracolilloKg,
       puntajeSca: cosecha.puntajeSca,
       notasCatacion: cosecha.notasCatacion,
+      precioKg: cosecha.precioKg,
     };
   });
 
@@ -158,6 +177,7 @@ export class RegistrarCosechaComponent {
 
   protected onContinuarPaso1(datos: DatosPasoCosecha): void {
     this.datosPaso1.set(datos);
+    this.erroresServidor.set({});
     this.paso.set('seleccion');
     this.scrollAlInicio();
   }
@@ -195,26 +215,47 @@ export class RegistrarCosechaComponent {
       pesoCaracolilloKg: datos.pesoCaracolilloKg,
       puntajeSca: datos.puntajeSca,
       notasCatacion: datos.notasCatacion,
+      precioKg: datos.precioKg,
     };
 
-    const id = this.cosechaId();
-    const guardada = id
-      ? this.cosechaService.actualizar(id, payload)
-      : this.cosechaService.crear(payload);
+    this.guardando.set(true);
+    this.erroresServidor.set({});
+    this.errorGeneral.set(null);
 
-    if (!guardada) {
-      return;
-    }
+    const guardar = this.modoEdicion()
+      ? this.cosechaService.actualizar()
+      : this.cosechaService.registrar(payload);
 
-    this.cosechaGuardada.set(guardada);
-    this.paso.set('exito');
-    this.scrollAlInicio();
+    guardar.subscribe({
+      next: (guardada) => {
+        this.guardando.set(false);
+        this.cosechaGuardada.set(guardada);
+        this.paso.set('exito');
+        this.scrollAlInicio();
+      },
+      error: (error: ErrorCosecha) => {
+        this.guardando.set(false);
+        const errores = erroresEnFormulario(error.errores);
+        const campos = Object.keys(errores);
+        if (campos.length === 0) {
+          this.errorGeneral.set(error.mensaje);
+          return;
+        }
+        this.erroresServidor.set(errores);
+        if (campos.some((campo) => CAMPOS_PASO_DATOS.includes(campo))) {
+          this.paso.set('datos');
+          this.scrollAlInicio();
+        }
+      },
+    });
   }
 
   protected onRegistrarOtra(): void {
     this.datosPaso1.set(null);
     this.datosPaso2.set(null);
     this.cosechaGuardada.set(null);
+    this.erroresServidor.set({});
+    this.errorGeneral.set(null);
     this.paso.set('datos');
     void this.router.navigateByUrl('/cafetalero/registrar-cosecha');
     this.scrollAlInicio();
@@ -227,7 +268,8 @@ export class RegistrarCosechaComponent {
   }
 
   protected onVerCosecha(id: string): void {
-    void this.router.navigateByUrl('/cafetalero/historial', { state: { cosechaId: id } });
+    const fincaId = this.cosechaGuardada()?.fincaId;
+    void this.router.navigate(['/cafetalero/fincas', fincaId], { queryParams: { cosecha: id } });
   }
 
   protected abrirModalEliminar(): void {
@@ -242,17 +284,10 @@ export class RegistrarCosechaComponent {
   }
 
   protected onConfirmarEliminar(): void {
-    const id = this.cosechaId();
-    if (!id) {
-      this.modalEliminarAbierto.set(false);
-      return;
-    }
-
-    const eliminada = this.cosechaService.eliminar(id);
     this.modalEliminarAbierto.set(false);
-
-    if (eliminada) {
-      void this.router.navigateByUrl('/cafetalero/historial');
-    }
+    this.cosechaService.eliminar().subscribe({
+      next: () => void this.router.navigateByUrl('/cafetalero/historial'),
+      error: (error: ErrorCosecha) => this.errorGeneral.set(error.mensaje),
+    });
   }
 }

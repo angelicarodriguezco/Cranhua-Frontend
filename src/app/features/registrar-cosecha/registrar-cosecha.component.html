@@ -17,9 +17,14 @@
     </header>
 
     <div class="vidrio formulario" aria-label="Formulario de cosecha">
+      @if (errorGeneral(); as error) {
+        <p class="error-general" role="alert">{{ error }}</p>
+      }
+
       @if (paso() === 'datos') {
         <app-paso-datos-cosecha
           [valorInicial]="valorInicialPaso1()"
+          [erroresServidor]="erroresServidor()"
           (continuar)="onContinuarPaso1($event)"
           (cancelar)="onCancelarPaso1()"
         />
@@ -27,6 +32,8 @@
         <app-paso-seleccion-catacion
           [valorInicial]="valorInicialPaso2()"
           [pesoAntesSugerido]="pesoAntesSugerido()"
+          [erroresServidor]="erroresServidor()"
+          [guardando]="guardando()"
           (guardar)="onGuardarPaso2($event)"
           (atras)="onAtrasPaso2()"
         />
@@ -59,7 +66,7 @@
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
     tipo="cosecha"
-    [nombre]="cosechaAEliminar()?.variedad"
+    [nombre]="nombreAEliminar()"
     [aviso]="avisoEliminar()"
     (confirmar)="onConfirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
