@@ -100,9 +100,7 @@
           <h2 id="titulo-tuestes" class="seccion__titulo" tabindex="-1">
             Tuestes del lote <span class="mono">{{ lote.codigoLote }}</span>
           </h2>
-          <p class="seccion__sub">
-            Finca {{ lote.finca }} · {{ lote.variedad }}, {{ lote.proceso }}
-          </p>
+          <p class="seccion__sub">Finca {{ lote.finca }} · {{ origen(lote) }}</p>
         </div>
         <button type="button" class="enlace" (click)="cerrarTuestes()">Cerrar</button>
       </div>
@@ -196,7 +194,7 @@
         </div>
         <div>
           <dt>Variedad</dt>
-          <dd>{{ lote.variedad }}, {{ lote.proceso }}</dd>
+          <dd>{{ origen(lote) }}</dd>
         </div>
         <div>
           <dt>Kilos</dt>

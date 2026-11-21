@@ -7,11 +7,10 @@ function escapar(texto: string): string {
   );
 }
 
-// Etiqueta que se descarga desde la ficha del código. SVG para que se imprima nítida a
-// cualquier tamaño en las bolsas.
 export function etiquetaSvg(lote: LoteComprado, tostador: string): string {
+  const origen = lote.proceso ? `${lote.variedad}, ${lote.proceso}` : lote.variedad;
   const lineas = [
-    `Finca ${lote.finca} · ${lote.variedad}, ${lote.proceso}`,
+    `Finca ${lote.finca} · ${origen}`,
     `Lote ${lote.codigoLote} · ${lote.kg} kg`,
     `Tostado por ${tostador}`,
   ].map(escapar);

@@ -1,7 +1,53 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-import { TuesteService, calcularMerma } from './tueste.service';
-import { conSesionDeEjemplo } from '../testing/sesion-de-ejemplo';
+import { environment } from '../../../environments/environment';
+import {
+  ErrorTueste,
+  FichaCodigoApi,
+  LoteCompradoApi,
+  LotesComprados,
+  LotesCompradosResponseApi,
+  NuevoTueste,
+  TuesteApi,
+} from '../models/tueste.model';
+import { TuesteService, calcularMerma, kgPorTostar } from './tueste.service';
+
+const BASE_LOTES = `${environment.apiUrl}/api/lotes`;
+const BASE_TUESTES = `${environment.apiUrl}/api/tuestes`;
+
+const LOTE_ACTIVO: LoteCompradoApi = {
+  id: 'l-1',
+  codigo: 'CRH-2026-0101',
+  finca: 'La Catalina',
+  variedad: 'Caturra',
+  kg: 60,
+  fechaCompra: '2026-10-06',
+  estado: 'ACTIVO',
+};
+
+const LOTE_PENDIENTE: LoteCompradoApi = {
+  id: 'l-2',
+  codigo: 'CRH-2026-0102',
+  finca: 'Los Robles',
+  variedad: 'Catuai',
+  kg: 40,
+  fechaCompra: '2026-10-10',
+  estado: 'PENDIENTE',
+};
+
+const TUESTE_API: TuesteApi = {
+  id: 't-1',
+  loteId: 'l-1',
+  codigoLote: 'CRH-2026-0101',
+  nivel: 'MEDIO',
+  pesoVerdeKg: 12,
+  pesoTostadoKg: 10.2,
+  merma: 15,
+  fechaTueste: '2026-10-21',
+  notas: 'Primer crack',
+};
 
 describe('calcularMerma', () => {
   it('devuelve el porcentaje de peso perdido', () => {
@@ -17,74 +63,271 @@ describe('calcularMerma', () => {
   });
 });
 
+describe('kgPorTostar', () => {
+  it('resta la suma de peso verde de los tuestes del lote', () => {
+    expect(kgPorTostar({ kg: 60 }, [{ pesoVerdeKg: 12 }, { pesoVerdeKg: 18 }])).toBe(30);
+    expect(kgPorTostar({ kg: 40 }, [])).toBe(40);
+  });
+});
+
 describe('TuesteService', () => {
   let servicio: TuesteService;
+  let http: HttpTestingController;
 
   beforeEach(() => {
-    conSesionDeEjemplo();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
     servicio = TestBed.inject(TuesteService);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  it('numera los códigos de trazabilidad por lote', () => {
-    const datos = {
-      nivel: 'Medio',
-      pesoVerdeKg: 5,
-      pesoTostadoKg: 4.2,
-      fecha: '2026-11-01',
-    } as const;
-    let codigos: string[] = [];
-    servicio
-      .registrar({ ...datos, loteId: 'l-los-robles-catuai', notas: null })
-      .subscribe((t) => (codigos = [...codigos, t.codigoTrazabilidad]));
-    servicio
-      .registrar({ ...datos, loteId: 'l-los-robles-catuai', notas: null })
-      .subscribe((t) => (codigos = [...codigos, t.codigoTrazabilidad]));
+  afterEach(() => http.verify());
 
-    expect(codigos).toEqual(['CRH-2026-0103-T01', 'CRH-2026-0103-T02']);
-  });
+  it('lista lotes e indicadores desde GET /api/lotes', () => {
+    const respuesta: LotesCompradosResponseApi = {
+      indicadores: { lotesComprados: 2, kgComprados: 100, lotesConCodigo: 1 },
+      lotes: [LOTE_ACTIVO, LOTE_PENDIENTE],
+    };
+    let resultado: LotesComprados | undefined;
 
-  it('genera el código de trazabilidad de un lote pendiente', () => {
-    servicio
-      .generarCodigo('l-los-robles-catuai')
-      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0103-RS'));
+    servicio.lotesComprados().subscribe((r) => (resultado = r));
 
-    servicio.lotesComprados().subscribe((lotes) => {
-      expect(lotes.find((l) => l.id === 'l-los-robles-catuai')!.codigoTrazabilidad).toBe(
-        'TRZ-0103-RS',
-      );
+    const req = http.expectOne(BASE_LOTES);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush(respuesta);
+
+    expect(resultado).toEqual({
+      indicadores: { lotes: 2, kg: 100, conCodigo: 1 },
+      lotes: [
+        {
+          id: 'l-1',
+          codigoLote: 'CRH-2026-0101',
+          finca: 'La Catalina',
+          variedad: 'Caturra',
+          proceso: null,
+          kg: 60,
+          fechaCompra: '2026-10-06',
+          codigoTrazabilidad: 'CRH-2026-0101',
+        },
+        {
+          id: 'l-2',
+          codigoLote: 'CRH-2026-0102',
+          finca: 'Los Robles',
+          variedad: 'Catuai',
+          proceso: null,
+          kg: 40,
+          fechaCompra: '2026-10-10',
+          codigoTrazabilidad: null,
+        },
+      ],
     });
   });
 
-  it('no cambia el código de un lote que ya lo tiene', () => {
-    servicio
-      .generarCodigo('l-catalina-caturra')
-      .subscribe((lote) => expect(lote.codigoTrazabilidad).toBe('TRZ-0101-MC'));
-  });
+  it('genera el código con POST /api/lotes/{id}/codigo', () => {
+    const ficha: FichaCodigoApi = {
+      id: 'l-2',
+      codigo: 'CRH-2026-0102',
+      finca: 'Los Robles',
+      variedad: 'Catuai',
+      kg: 40,
+      tostador: 'Mario Brenes',
+      estado: 'ACTIVO',
+      activadoEn: '2026-11-01T12:00:00Z',
+    };
+    let codigo: string | null | undefined;
+    let tostador: string | undefined;
 
-  it('devuelve solo los tuestes del lote', () => {
-    servicio.tuestesDelLote('l-catalina-caturra').subscribe((tuestes) => {
-      expect(tuestes.map((t) => t.id)).toEqual(['tu-catalina-1', 'tu-catalina-2']);
+    servicio.generarCodigo('l-2', { fechaCompra: '2026-10-10', proceso: null }).subscribe((r) => {
+      codigo = r.lote.codigoTrazabilidad;
+      tostador = r.tostador;
+      expect(r.lote.fechaCompra).toBe('2026-10-10');
     });
-    servicio
-      .tuestesDelLote('l-los-robles-catuai')
-      .subscribe((tuestes) => expect(tuestes).toEqual([]));
+
+    const req = http.expectOne(`${BASE_LOTES}/l-2/codigo`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush(ficha);
+
+    expect(codigo).toBe('CRH-2026-0102');
+    expect(tostador).toBe('Mario Brenes');
   });
 
-  it('al actualizar conserva el lote y el código', () => {
-    servicio
-      .actualizar('tu-monte-alto-1', {
+  it('lista tuestes del lote desde GET /api/lotes/{id}/tuestes', () => {
+    let tuestesMapeados: unknown;
+
+    servicio.tuestesDelLote('l-1').subscribe((tuestes) => (tuestesMapeados = tuestes));
+
+    const req = http.expectOne(`${BASE_LOTES}/l-1/tuestes`);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBeTrue();
+    req.flush([TUESTE_API]);
+
+    expect(tuestesMapeados).toEqual([
+      {
+        id: 't-1',
+        loteId: 'l-1',
         nivel: 'Medio',
-        pesoVerdeKg: 6,
-        pesoTostadoKg: 5.1,
-        fecha: '2026-10-29',
-        notas: 'Segunda pasada',
-      })
-      .subscribe();
+        pesoVerdeKg: 12,
+        pesoTostadoKg: 10.2,
+        fecha: '2026-10-21',
+        notas: 'Primer crack',
+        codigoTrazabilidad: 'CRH-2026-0101',
+      },
+    ]);
+  });
 
-    servicio.obtener('tu-monte-alto-1').subscribe((t) => {
-      expect(t!.loteId).toBe('l-monte-alto-geisha');
-      expect(t!.codigoTrazabilidad).toBe('CRH-2026-0102-T01');
-      expect(t!.pesoVerdeKg).toBe(6);
+  it('obtener sin endpoint devuelve null', () => {
+    let tueste: unknown = 'pendiente';
+    servicio.obtener('t-1').subscribe((t) => (tueste = t));
+    expect(tueste).toBeNull();
+  });
+
+  it('registra un tueste con POST /api/tuestes', () => {
+    const nuevo: NuevoTueste = {
+      loteId: 'l-1',
+      nivel: 'Medio',
+      pesoVerdeKg: 12,
+      pesoTostadoKg: 10.2,
+      fecha: '2026-10-21',
+      notas: 'Primer crack',
+    };
+    let guardado: unknown;
+
+    servicio.registrar(nuevo).subscribe((t) => (guardado = t));
+
+    const req = http.expectOne(BASE_TUESTES);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body).toEqual({
+      loteId: 'l-1',
+      nivel: 'MEDIO',
+      pesoVerdeKg: 12,
+      pesoTostadoKg: 10.2,
+      fechaTueste: '2026-10-21',
+      notas: 'Primer crack',
     });
+    req.flush(TUESTE_API);
+
+    expect(guardado).toEqual({
+      id: 't-1',
+      loteId: 'l-1',
+      nivel: 'Medio',
+      pesoVerdeKg: 12,
+      pesoTostadoKg: 10.2,
+      fecha: '2026-10-21',
+      notas: 'Primer crack',
+      codigoTrazabilidad: 'CRH-2026-0101',
+    });
+  });
+
+  it('propaga errores de peso en 400 al registrar', () => {
+    let error: ErrorTueste | undefined;
+
+    servicio
+      .registrar({
+        loteId: 'l-1',
+        nivel: 'Medio',
+        pesoVerdeKg: 100,
+        pesoTostadoKg: 10,
+        fecha: '2026-10-21',
+        notas: null,
+      })
+      .subscribe({ error: (e: ErrorTueste) => (error = e) });
+
+    http.expectOne(BASE_TUESTES).flush(
+      {
+        mensaje: 'Revisá los pesos.',
+        errores: {
+          pesoVerdeKg: 'Supera el kg disponible del lote.',
+        },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(error).toEqual({
+      mensaje: 'Revisá los pesos.',
+      errores: {
+        pesoVerdeKg: 'Supera el kg disponible del lote.',
+      },
+    });
+  });
+
+  it('actualiza un tueste con PATCH /api/tuestes/{id}', () => {
+    let peso: number | undefined;
+
+    servicio
+      .actualizar('t-1', {
+        nivel: 'Oscuro',
+        pesoVerdeKg: 15,
+        pesoTostadoKg: 12,
+        fecha: '2026-10-30',
+        notas: null,
+      })
+      .subscribe((t) => (peso = t.pesoVerdeKg));
+
+    const req = http.expectOne(`${BASE_TUESTES}/t-1`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.body).toEqual({
+      nivel: 'OSCURO',
+      pesoVerdeKg: 15,
+      pesoTostadoKg: 12,
+      fechaTueste: '2026-10-30',
+      notas: null,
+    });
+    req.flush({ ...TUESTE_API, nivel: 'OSCURO', pesoVerdeKg: 15, pesoTostadoKg: 12 });
+
+    expect(peso).toBe(15);
+  });
+
+  it('propaga errores de peso en 400 al actualizar', () => {
+    let error: ErrorTueste | undefined;
+
+    servicio
+      .actualizar('t-1', {
+        nivel: 'Medio',
+        pesoVerdeKg: 100,
+        pesoTostadoKg: 10,
+        fecha: '2026-10-21',
+        notas: null,
+      })
+      .subscribe({ error: (e: ErrorTueste) => (error = e) });
+
+    http.expectOne(`${BASE_TUESTES}/t-1`).flush(
+      {
+        mensaje: 'Revisá los pesos.',
+        errores: {
+          pesoVerdeKg: 'Supera el kg disponible del lote.',
+          pesoTostadoKg: 'Debe ser menor que el peso verde.',
+        },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+
+    expect(error).toEqual({
+      mensaje: 'Revisá los pesos.',
+      errores: {
+        pesoVerdeKg: 'Supera el kg disponible del lote.',
+        pesoTostadoKg: 'Debe ser menor que el peso verde.',
+      },
+    });
+  });
+
+  it('lotesConKgPorTostar filtra lotes sin kg restante', () => {
+    let ids: string[] | undefined;
+
+    servicio.lotesConKgPorTostar().subscribe((lotes) => (ids = lotes.map((l) => l.id)));
+
+    http.expectOne(BASE_LOTES).flush({
+      indicadores: { lotesComprados: 2, kgComprados: 100, lotesConCodigo: 1 },
+      lotes: [LOTE_ACTIVO, LOTE_PENDIENTE],
+    } satisfies LotesCompradosResponseApi);
+
+    http.expectOne(`${BASE_LOTES}/l-1/tuestes`).flush([{ ...TUESTE_API, pesoVerdeKg: 60 }]);
+    http.expectOne(`${BASE_LOTES}/l-2/tuestes`).flush([]);
+
+    expect(ids).toEqual(['l-2']);
   });
 });

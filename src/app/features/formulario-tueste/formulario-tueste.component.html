@@ -42,8 +42,8 @@
             <option [ngValue]="null" disabled>Elegí uno de tus lotes comprados</option>
             @for (l of lotes(); track l.id) {
               <option [ngValue]="l.id">
-                {{ l.codigoLote }} · Finca {{ l.finca }} · {{ l.variedad }}, {{ l.proceso }} ·
-                {{ kilos.format(l.kg) }} kg
+                {{ l.codigoLote }} · Finca {{ l.finca }} · {{ origen(l) }} ·
+                {{ kilos.format(l.kgPorTostar) }} kg
               </option>
             }
           </select>
