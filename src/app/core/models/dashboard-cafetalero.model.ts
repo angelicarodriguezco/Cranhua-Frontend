@@ -1,7 +1,5 @@
 export type EstadoCosecha = 'Disponible' | 'En beneficiado' | 'En catación' | 'Vendida';
 
-export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada';
-
 export type TemaDashboard = 'claro' | 'oscuro';
 
 export interface IndicadoresDashboard {
@@ -16,11 +14,23 @@ export interface SolicitudTostador {
   nombreTostador: string;
   kgSolicitados: number;
   variedad: string;
-  proceso: string;
   finca: string;
   cosechaId: string;
-  estado: EstadoSolicitud;
 }
+
+/** GET /api/solicitudes/recibidas */
+export interface SolicitudRecibidaApi {
+  id: string;
+  cosechaId: string;
+  nombreTostador: string;
+  variedad: string;
+  finca: string;
+  cantidadKg: number;
+  solicitadaEn: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+}
+
+export type RespuestaSolicitud = 'APROBADA' | 'RECHAZADA';
 
 export interface FincaResumen {
   id: string;

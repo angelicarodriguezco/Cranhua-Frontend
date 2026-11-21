@@ -29,6 +29,7 @@
   --reject-bg: transparent;
   --reject-border: var(--brand-accent);
   --reject-text: var(--brand-accent);
+  --error: var(--brand-accent);
   --approve-bg: var(--brand-button);
   --approve-text: var(--brand-on-button);
   --pill-disponible-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
@@ -67,6 +68,7 @@
   --reject-bg: color-mix(in srgb, var(--brand-on-dark) 6%, transparent);
   --reject-border: color-mix(in srgb, var(--brand-on-dark) 18%, transparent);
   --reject-text: color-mix(in srgb, var(--brand-on-dark) 72%, transparent);
+  --error: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
   --approve-bg: var(--brand-button);
   --approve-text: var(--brand-on-button);
   --pill-disponible-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
@@ -303,9 +305,23 @@
   color: var(--approve-text);
 }
 
-.btn-aprobar:hover,
-.btn-rechazar:hover {
+.btn-aprobar:hover:not(:disabled),
+.btn-rechazar:hover:not(:disabled) {
   filter: brightness(1.08);
+}
+
+.acciones button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.error-solicitudes {
+  margin: 0 0 0.65rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--error);
+  color: var(--error);
+  font-size: 0.8125rem;
 }
 
 .fincas-grid {
