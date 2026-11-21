@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DatosPasoCosecha, PasoDatosCosechaComponent } from './paso-datos-cosecha.component';
@@ -10,6 +12,7 @@ describe('PasoDatosCosechaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PasoDatosCosechaComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PasoDatosCosechaComponent);
