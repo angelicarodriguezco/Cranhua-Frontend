@@ -2,6 +2,7 @@ import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { CosechaDisponible } from '../../../core/models/cosecha-disponible.model';
+import { etiquetaFinca } from '../../utils/formato';
 
 const colones = new Intl.NumberFormat('es-CR', {
   style: 'currency',
@@ -9,7 +10,6 @@ const colones = new Intl.NumberFormat('es-CR', {
   maximumFractionDigits: 0,
 });
 
-// Cuadrícula de cosechas del tostador: la usan el dashboard y Explorar cosechas
 @Component({
   selector: 'app-cuadricula-cosechas',
   imports: [RouterLink],
@@ -18,6 +18,8 @@ const colones = new Intl.NumberFormat('es-CR', {
 })
 export class CuadriculaCosechasComponent {
   readonly cosechas = input.required<CosechaDisponible[]>();
+
+  protected readonly etiquetaFinca = etiquetaFinca;
 
   protected precio(cosecha: CosechaDisponible): string {
     return colones.format(cosecha.precioDesdeKg);

@@ -61,3 +61,8 @@ export function formatearMesAnio(fechaIso: string): string {
 export function nombreCompleto(usuario: Usuario): string {
   return `${usuario.nombre} ${usuario.apellidos}`.trim();
 }
+
+export function etiquetaFinca(nombre: string): string {
+  const limpio = nombre.trim();
+  return /^finca\b/i.test(limpio) ? limpio : `Finca ${limpio}`;
+}

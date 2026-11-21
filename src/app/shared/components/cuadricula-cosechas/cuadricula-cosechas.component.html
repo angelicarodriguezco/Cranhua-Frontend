@@ -5,7 +5,7 @@
         <img
           class="tarjeta__imagen"
           [src]="cosecha.imagenUrl"
-          [alt]="'Cosecha de Finca ' + cosecha.finca"
+          [alt]="'Cosecha de ' + etiquetaFinca(cosecha.finca)"
           loading="lazy"
         />
         <span class="pill" [class.pill-proxima]="cosecha.disponibilidad === 'Próximamente'">
@@ -15,7 +15,7 @@
 
       <div class="tarjeta__cuerpo">
         <p class="zona">{{ cosecha.zona }}</p>
-        <h3>Finca {{ cosecha.finca }}</h3>
+        <h3>{{ etiquetaFinca(cosecha.finca) }}</h3>
         <p class="ubicacion">{{ cosecha.ubicacion }}</p>
 
         <dl class="datos">

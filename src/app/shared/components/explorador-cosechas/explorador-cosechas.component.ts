@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
 
 import {
+  CosechaDisponible,
   FiltrosCosechas,
   RANGOS_PRECIO_COSECHA,
   RangoPrecioCosecha,
@@ -11,11 +12,11 @@ import {
   CosechasDisponiblesService,
   filtrarCosechas,
 } from '../../../core/services/cosechas-disponibles.service';
+import { parsearErrorAuth } from '../../../core/utils/auth-error';
 import { CuadriculaCosechasComponent } from '../cuadricula-cosechas/cuadricula-cosechas.component';
 
 type FiltroRapido = 'soloDisponibles' | 'soloFlorales' | 'soloHoney';
 
-// Filtros rápidos + cuadrícula de cosechas: lo usan Explorar cosechas y el dashboard del tostador
 @Component({
   selector: 'app-explorador-cosechas',
   imports: [CuadriculaCosechasComponent],
@@ -23,12 +24,18 @@ type FiltroRapido = 'soloDisponibles' | 'soloFlorales' | 'soloHoney';
   styleUrl: './explorador-cosechas.component.css',
 })
 export class ExploradorCosechasComponent {
-  private readonly cosechas = inject(CosechasDisponiblesService).cosechas;
+  private readonly servicio = inject(CosechasDisponiblesService);
 
   protected readonly filtros = signal<FiltrosCosechas>(SIN_FILTROS);
+  protected readonly cosechas = signal<CosechaDisponible[]>([]);
+  protected readonly cargando = signal(true);
+  protected readonly error = signal<string | null>(null);
+
   protected readonly rangosPrecio = (
     Object.entries(RANGOS_PRECIO_COSECHA) as [RangoPrecioCosecha, { etiqueta: string }][]
   ).map(([id, rango]) => ({ id, etiqueta: rango.etiqueta }));
+
+  protected readonly zonas = ZONAS_CAFETALERAS;
 
   protected readonly sinFiltros = computed(() => {
     const f = this.filtros();
@@ -42,10 +49,10 @@ export class ExploradorCosechasComponent {
     );
   });
 
-  // Solo las zonas que tienen cosechas, en el orden de la lista del ICAFE
-  protected readonly zonas = computed(() =>
-    ZONAS_CAFETALERAS.filter((zona) => this.cosechas().some((c) => c.zona === zona)),
-  );
+  private readonly claveFiltrosServidor = computed(() => {
+    const f = this.filtros();
+    return `${f.zona ?? ''}|${f.soloFlorales}|${f.soloHoney}`;
+  });
 
   protected readonly variedades = computed(() =>
     [...new Set(this.cosechas().map((c) => c.variedad))].sort((a, b) => a.localeCompare(b, 'es')),
@@ -54,6 +61,35 @@ export class ExploradorCosechasComponent {
   protected readonly cosechasFiltradas = computed(() =>
     filtrarCosechas(this.cosechas(), this.filtros()),
   );
+
+  constructor() {
+    effect((onCleanup) => {
+      void this.claveFiltrosServidor();
+      const f = untracked(() => this.filtros());
+      this.cargando.set(true);
+      this.error.set(null);
+
+      const sub = this.servicio
+        .listar({
+          zona: f.zona,
+          florales: f.soloFlorales,
+          honey: f.soloHoney,
+        })
+        .subscribe({
+          next: (lista) => {
+            this.cosechas.set(lista);
+            this.cargando.set(false);
+          },
+          error: (err: unknown) => {
+            this.cosechas.set([]);
+            this.error.set(parsearErrorAuth(err).mensaje);
+            this.cargando.set(false);
+          },
+        });
+
+      onCleanup(() => sub.unsubscribe());
+    });
+  }
 
   protected limpiarFiltros(): void {
     this.filtros.set(SIN_FILTROS);
