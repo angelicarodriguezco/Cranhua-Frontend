@@ -1,15 +1,23 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
+import {
+  COSECHAS_DISPONIBLES_FIXTURE,
+  cosechaDisponibleAApi,
+} from '../../core/testing/cosechas-disponibles.fixture';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { ExplorarCosechasComponent } from './explorar-cosechas.component';
+
+const BASE = `${environment.apiUrl}/api/cosechas/disponibles`;
 
 describe('ExplorarCosechasComponent', () => {
   let fixture: ComponentFixture<ExplorarCosechasComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -17,8 +25,11 @@ describe('ExplorarCosechasComponent', () => {
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
 
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(ExplorarCosechasComponent);
     pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    http.expectOne(BASE).flush(COSECHAS_DISPONIBLES_FIXTURE.map(cosechaDisponibleAApi));
     fixture.detectChanges();
   });
 

@@ -1,18 +1,26 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
-import { DashboardTostadorComponent } from './dashboard-tostador.component';
+import {
+  COSECHAS_DISPONIBLES_FIXTURE,
+  cosechaDisponibleAApi,
+} from '../../core/testing/cosechas-disponibles.fixture';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { DashboardTostadorComponent } from './dashboard-tostador.component';
+
+const BASE = `${environment.apiUrl}/api/cosechas/disponibles`;
 
 describe('DashboardTostadorComponent', () => {
   let fixture: ComponentFixture<DashboardTostadorComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,8 +29,11 @@ describe('DashboardTostadorComponent', () => {
     }).compileComponents();
 
     conSesionDeEjemplo();
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(DashboardTostadorComponent);
     pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    http.expectOne(BASE).flush(COSECHAS_DISPONIBLES_FIXTURE.map(cosechaDisponibleAApi));
     fixture.detectChanges();
   });
 
@@ -85,7 +96,11 @@ describe('DashboardTostadorComponent', () => {
     expect(fincasVisibles().length).toBeGreaterThanOrEqual(6);
     expect(chip('Todas').getAttribute('aria-pressed')).toBe('true');
 
+    const honey = COSECHAS_DISPONIBLES_FIXTURE.filter((c) => /honey/i.test(c.proceso));
     clic(chip('Proceso honey'));
+    const peticion = http.expectOne((r) => r.url === BASE && r.params.get('honey') === 'true');
+    peticion.flush(honey.map(cosechaDisponibleAApi));
+    fixture.detectChanges();
     expect(fincasVisibles()).toHaveSize(3);
   });
 

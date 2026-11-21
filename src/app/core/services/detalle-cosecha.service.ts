@@ -1,16 +1,42 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map, of } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
-import { DETALLES_COSECHA } from '../mocks/detalle-cosecha.mock';
-import { DetalleCosecha, NuevaSolicitud } from '../models/detalle-cosecha.model';
+import { environment } from '../../../environments/environment';
+import { detalleCosechaDesdeApi } from '../mappers/cosecha-disponible.mapper';
+import {
+  DetalleCosecha,
+  DetalleCosechaDisponibleApi,
+  NuevaSolicitud,
+} from '../models/detalle-cosecha.model';
 import { SolicitudesService } from './solicitudes.service';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 @Injectable({ providedIn: 'root' })
 export class DetalleCosechaService {
+  private readonly http = inject(HttpClient);
   private readonly solicitudes = inject(SolicitudesService);
 
+  private get base(): string {
+    return `${environment.apiUrl}/api/cosechas/disponibles`;
+  }
+
   obtener(id: string): Observable<DetalleCosecha | undefined> {
-    return of(DETALLES_COSECHA.find((c) => c.id === id));
+    if (!id) {
+      return of(undefined);
+    }
+    return this.http
+      .get<DetalleCosechaDisponibleApi>(`${this.base}/${id}`, opcionesCredenciales)
+      .pipe(
+        map(detalleCosechaDesdeApi),
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            return of(undefined);
+          }
+          return throwError(() => error);
+        }),
+      );
   }
 
   enviarSolicitud(solicitud: NuevaSolicitud): Observable<NuevaSolicitud> {

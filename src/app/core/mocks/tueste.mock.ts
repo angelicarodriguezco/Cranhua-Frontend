@@ -1,7 +1,5 @@
 import { LoteComprado, Tueste } from '../models/tueste.model';
 
-// Datos de ejemplo mientras no existen los endpoints de compras y tuestes. Son lotes de las
-// cosechas de cosechas-disponibles.mock.ts.
 export const LOTES_COMPRADOS: LoteComprado[] = [
   {
     id: 'l-catalina-caturra',

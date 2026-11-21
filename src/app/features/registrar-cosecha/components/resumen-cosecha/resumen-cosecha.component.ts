@@ -3,6 +3,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 
 import { Cosecha } from '../../../../core/models/cosecha.model';
 import { CosechaService } from '../../../../core/services/cosecha.service';
+import { etiquetaFinca } from '../../../../shared/utils/formato';
 import { calcularMermaPorcentaje } from '../paso-seleccion-catacion/paso-seleccion-catacion.component';
 
 @Component({
@@ -25,10 +26,7 @@ export class ResumenCosechaComponent {
     return this.cosechaService.fincas.find((f) => f.id === id)?.nombre ?? id;
   });
 
-  protected readonly etiquetaFinca = computed(() => {
-    const nombre = this.nombreFinca();
-    return /^finca\b/i.test(nombre) ? nombre : `Finca ${nombre}`;
-  });
+  protected readonly etiquetaFinca = computed(() => etiquetaFinca(this.nombreFinca()));
 
   protected readonly mermaPorcentaje = computed(() => {
     const c = this.cosecha();
