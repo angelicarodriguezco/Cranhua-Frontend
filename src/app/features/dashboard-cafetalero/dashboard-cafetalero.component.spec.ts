@@ -1,18 +1,46 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
+import { SolicitudRecibidaApi } from '../../core/models/dashboard-cafetalero.model';
 import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { DashboardCafetaleroComponent } from './dashboard-cafetalero.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
+const BASE = `${environment.apiUrl}/api/solicitudes`;
+
+const PENDIENTES: SolicitudRecibidaApi[] = [
+  {
+    id: 's-volcan',
+    cosechaId: 'c-caturra',
+    nombreTostador: 'Tostaduría Volcán',
+    variedad: 'Caturra',
+    finca: 'La Catalina',
+    cantidadKg: 40,
+    solicitadaEn: '2026-11-19T15:00:00Z',
+    estado: 'PENDIENTE',
+  },
+  {
+    id: 's-altamira',
+    cosechaId: 'c-geisha',
+    nombreTostador: 'Café Altamira',
+    variedad: 'Geisha',
+    finca: 'Monte Alto',
+    cantidadKg: 25,
+    solicitadaEn: '2026-11-18T15:00:00Z',
+    estado: 'PENDIENTE',
+  },
+];
+
 describe('DashboardCafetaleroComponent', () => {
   let fixture: ComponentFixture<DashboardCafetaleroComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,12 +49,22 @@ describe('DashboardCafetaleroComponent', () => {
     }).compileComponents();
 
     conSesionDeEjemplo();
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(DashboardCafetaleroComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
 
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+
+  function responderPendientes(solicitudes = PENDIENTES): void {
+    http.expectOne((r) => r.url === `${BASE}/recibidas`).flush(solicitudes);
+    fixture.detectChanges();
+  }
+
+  function kpiPendientes(): string {
+    return pagina.querySelector('.kpi-pendientes strong')!.textContent!.trim();
+  }
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -43,6 +81,83 @@ describe('DashboardCafetaleroComponent', () => {
       .queryAll(By.css(enlaceSelector))
       .map((el) => el.injector.get(RouterLink).href ?? '');
   }
+
+  it('carga las solicitudes pendientes reales al entrar', () => {
+    expect(pagina.querySelector('.solicitudes')!.textContent).toContain('Cargando solicitudes');
+
+    responderPendientes();
+
+    const seccion = pagina.querySelector('.solicitudes')!;
+    expect(seccion.textContent).toContain('Tostaduría Volcán solicita 40 kg');
+    expect(seccion.textContent).toContain('Cosecha Geisha · Finca Monte Alto');
+    expect(seccion.textContent).toContain('2 pendientes');
+    expect(kpiPendientes()).toBe('2');
+  });
+
+  it('avisa cuando no hay solicitudes pendientes', () => {
+    responderPendientes([]);
+    expect(pagina.querySelector('.solicitudes')!.textContent).toContain(
+      'No hay solicitudes pendientes.',
+    );
+    expect(kpiPendientes()).toBe('0');
+  });
+
+  it('muestra un error si no se pueden cargar las solicitudes', () => {
+    http
+      .expectOne((r) => r.url === `${BASE}/recibidas`)
+      .flush(null, { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.error-solicitudes')?.textContent).toContain(
+      'No pudimos cargar las solicitudes',
+    );
+  });
+
+  it('aprueba una solicitud, la quita de pendientes y actualiza el indicador', () => {
+    responderPendientes();
+
+    boton('Aprobar').click();
+    fixture.detectChanges();
+    const peticion = http.expectOne(`${BASE}/s-volcan`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.body).toEqual({ estado: 'APROBADA' });
+    expect(boton('Guardando').disabled).toBeTrue();
+
+    peticion.flush({ id: 's-volcan', estado: 'APROBADA' });
+    fixture.detectChanges();
+
+    const seccion = pagina.querySelector('.solicitudes')!;
+    expect(seccion.textContent).not.toContain('Tostaduría Volcán');
+    expect(seccion.textContent).toContain('1 pendientes');
+    expect(kpiPendientes()).toBe('1');
+  });
+
+  it('rechaza una solicitud y la quita de pendientes', () => {
+    responderPendientes();
+
+    boton('Rechazar').click();
+    const peticion = http.expectOne(`${BASE}/s-volcan`);
+    expect(peticion.request.body).toEqual({ estado: 'RECHAZADA' });
+    peticion.flush({ id: 's-volcan', estado: 'RECHAZADA' });
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.solicitudes')!.textContent).not.toContain('Tostaduría Volcán');
+    expect(kpiPendientes()).toBe('1');
+  });
+
+  it('muestra el mensaje del API si ya no hay cantidad suficiente', () => {
+    responderPendientes();
+    const mensaje = 'No hay suficiente café disponible: la solicitud pide 40 kg y quedan 10 kg.';
+
+    boton('Aprobar').click();
+    http.expectOne(`${BASE}/s-volcan`).flush({ mensaje }, { status: 409, statusText: 'Conflict' });
+    responderPendientes();
+
+    expect(pagina.querySelector('.error-solicitudes')?.textContent).toContain(mensaje);
+    expect(pagina.querySelector('.solicitudes')!.textContent).toContain('Tostaduría Volcán');
+    expect(kpiPendientes()).toBe('2');
+    expect(boton('Aprobar').disabled).toBeFalse();
+  });
 
   it('saluda con el nombre de la sesión sin emoji', () => {
     expect(pagina.textContent).toContain('Hola, Rodrigo');
@@ -68,41 +183,6 @@ describe('DashboardCafetaleroComponent', () => {
     expect(indicadores!.textContent).toContain('146 kg');
     expect(indicadores!.textContent).toContain('Disponible para tostadores');
     expect(indicadores!.textContent).toContain('Solicitudes pendientes');
-  });
-
-  it('lista al menos 2 solicitudes con Aprobar y Rechazar', () => {
-    const seccion = pagina.querySelector('.solicitudes');
-    expect(seccion).toBeTruthy();
-    expect(seccion!.textContent).toContain('Tostaduría Volcán');
-    expect(seccion!.textContent).toContain('40 kg');
-    expect(seccion!.textContent).toContain('Café Altamira');
-    expect(seccion!.textContent).toContain('Monte Alto');
-    expect(seccion!.textContent).toContain('2 pendientes');
-
-    const items = seccion!.querySelectorAll('ul > li');
-    expect(items.length).toBeGreaterThanOrEqual(2);
-
-    for (const item of Array.from(items)) {
-      expect(item.textContent).toContain('Aprobar');
-      expect(item.textContent).toContain('Rechazar');
-    }
-  });
-
-  it('aprueba una solicitud desde la vista', () => {
-    boton('Aprobar').click();
-    fixture.detectChanges();
-
-    expect(pagina.textContent).toContain('1 pendientes');
-    expect(pagina.textContent).toContain('106 kg');
-  });
-
-  it('rechaza una solicitud sin cambiar kg disponibles', () => {
-    boton('Rechazar').click();
-    fixture.detectChanges();
-
-    expect(pagina.textContent).toContain('1 pendientes');
-    expect(pagina.textContent).toContain('146 kg');
-    expect(pagina.querySelector('.solicitudes')!.textContent).toContain('Café Altamira');
   });
 
   it('muestra al menos 2 fincas y la opción de registrar una nueva', () => {
