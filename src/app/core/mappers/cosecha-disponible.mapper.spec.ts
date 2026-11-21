@@ -1,4 +1,7 @@
-import { CosechaDisponibleApi, IMAGEN_COSECHA_DISPONIBLE } from '../models/cosecha-disponible.model';
+import {
+  CosechaDisponibleApi,
+  IMAGEN_COSECHA_DISPONIBLE,
+} from '../models/cosecha-disponible.model';
 import { DetalleCosechaDisponibleApi } from '../models/detalle-cosecha.model';
 import {
   cosechaDisponibleDesdeApi,

@@ -98,9 +98,7 @@ describe('DashboardTostadorComponent', () => {
 
     const honey = COSECHAS_DISPONIBLES_FIXTURE.filter((c) => /honey/i.test(c.proceso));
     clic(chip('Proceso honey'));
-    const peticion = http.expectOne(
-      (r) => r.url === BASE && r.params.get('honey') === 'true',
-    );
+    const peticion = http.expectOne((r) => r.url === BASE && r.params.get('honey') === 'true');
     peticion.flush(honey.map(cosechaDisponibleAApi));
     fixture.detectChanges();
     expect(fincasVisibles()).toHaveSize(3);

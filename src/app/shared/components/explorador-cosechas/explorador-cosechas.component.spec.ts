@@ -33,7 +33,10 @@ describe('ExploradorCosechasComponent', () => {
 
   afterEach(() => http.verify());
 
-  function responderLista(cosechas: CosechaDisponible[], predicado?: (url: string) => boolean): void {
+  function responderLista(
+    cosechas: CosechaDisponible[],
+    predicado?: (url: string) => boolean,
+  ): void {
     const peticion = http.expectOne((r) => {
       if (r.url !== BASE || r.method !== 'GET') {
         return false;

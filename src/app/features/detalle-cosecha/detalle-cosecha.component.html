@@ -72,15 +72,15 @@
               min="1"
               [max]="c.kgDisponibles"
               formControlName="cantidad"
-              [attr.aria-invalid]="
-                (cantidad.invalid && cantidad.touched) || !!errorSolicitud()
-              "
+              [attr.aria-invalid]="(cantidad.invalid && cantidad.touched) || !!errorSolicitud()"
               aria-describedby="ayuda-cantidad"
             />
             @if (errorSolicitud()) {
               <p class="error" id="ayuda-cantidad" role="alert">{{ errorSolicitud() }}</p>
             } @else if (cantidad.touched && cantidad.hasError('excedeDisponible')) {
-              <p class="error" id="ayuda-cantidad">Solo hay {{ c.kgDisponibles }} kg disponibles.</p>
+              <p class="error" id="ayuda-cantidad">
+                Solo hay {{ c.kgDisponibles }} kg disponibles.
+              </p>
             } @else if (cantidad.touched && cantidad.invalid) {
               <p class="error" id="ayuda-cantidad">Ingresá una cantidad de al menos 1 kg.</p>
             } @else {

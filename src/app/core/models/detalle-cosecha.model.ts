@@ -1,4 +1,8 @@
-import { CosechaDisponible, CosechaDisponibleApi, ProcesoCosecha } from './cosecha-disponible.model';
+import {
+  CosechaDisponible,
+  CosechaDisponibleApi,
+  ProcesoCosecha,
+} from './cosecha-disponible.model';
 import { Usuario } from './finca.model';
 
 export interface DetalleCosecha extends CosechaDisponible {

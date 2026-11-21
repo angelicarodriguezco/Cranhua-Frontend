@@ -60,10 +60,7 @@ describe('DetalleCosechaComponent', () => {
     fixture.detectChanges();
   }
 
-  function responderDetalle(
-    cuerpo: DetalleCosechaDisponibleApi | object,
-    status = 200,
-  ): void {
+  function responderDetalle(cuerpo: DetalleCosechaDisponibleApi | object, status = 200): void {
     const peticion = http.expectOne(`${BASE_DETALLE}/${DETALLE.id}`);
     if (status === 200) {
       peticion.flush(cuerpo);
@@ -186,10 +183,12 @@ describe('DetalleCosechaComponent', () => {
 
   it('muestra error de carga si el API falla', () => {
     crear(DETALLE.id);
-    http.expectOne(`${BASE_DETALLE}/${DETALLE.id}`).flush(
-      { mensaje: 'No se pudo completar la solicitud. Intentá de nuevo.' },
-      { status: 500, statusText: 'Server Error' },
-    );
+    http
+      .expectOne(`${BASE_DETALLE}/${DETALLE.id}`)
+      .flush(
+        { mensaje: 'No se pudo completar la solicitud. Intentá de nuevo.' },
+        { status: 500, statusText: 'Server Error' },
+      );
     fixture.detectChanges();
 
     expect(elemento.textContent).toContain('No se pudo completar la solicitud');

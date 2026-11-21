@@ -92,10 +92,9 @@ describe('DetalleCosechaService', () => {
     let resultado: unknown = 'sin-emitir';
     servicio.obtener('no-existe').subscribe((detalle) => (resultado = detalle));
 
-    http.expectOne(`${BASE}/no-existe`).flush(
-      { mensaje: 'Cosecha no encontrada' },
-      { status: 404, statusText: 'Not Found' },
-    );
+    http
+      .expectOne(`${BASE}/no-existe`)
+      .flush({ mensaje: 'Cosecha no encontrada' }, { status: 404, statusText: 'Not Found' });
 
     expect(resultado).toBeUndefined();
   });
@@ -104,10 +103,9 @@ describe('DetalleCosechaService', () => {
     let error: unknown;
     servicio.obtener('c-1').subscribe({ error: (e) => (error = e) });
 
-    http.expectOne(`${BASE}/c-1`).flush(
-      { mensaje: 'Falló la red' },
-      { status: 500, statusText: 'Server Error' },
-    );
+    http
+      .expectOne(`${BASE}/c-1`)
+      .flush({ mensaje: 'Falló la red' }, { status: 500, statusText: 'Server Error' });
 
     expect(error).toBeTruthy();
   });

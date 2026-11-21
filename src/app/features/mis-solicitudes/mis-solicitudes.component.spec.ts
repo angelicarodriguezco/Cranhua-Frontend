@@ -98,16 +98,16 @@ describe('MisSolicitudesComponent', () => {
   });
 
   it('muestra vacío cuando no hay solicitudes', () => {
-    responder({ indicadores: { pendientes: 0, esteMes: 0, fincasContactadas: 0 }, solicitudes: [] });
+    responder({
+      indicadores: { pendientes: 0, esteMes: 0, fincasContactadas: 0 },
+      solicitudes: [],
+    });
 
     expect(pagina.textContent).toContain('Todavía no enviaste solicitudes.');
   });
 
   it('muestra error del API y permite reintentar', () => {
-    responder(
-      { mensaje: 'No se pudo completar la solicitud. Intentá de nuevo.' },
-      500,
-    );
+    responder({ mensaje: 'No se pudo completar la solicitud. Intentá de nuevo.' }, 500);
 
     expect(pagina.textContent).toContain('No se pudo completar la solicitud');
 
@@ -115,7 +115,10 @@ describe('MisSolicitudesComponent', () => {
     fixture.detectChanges();
     expect(pagina.textContent).toContain('Cargando solicitudes…');
 
-    responder({ indicadores: { pendientes: 0, esteMes: 0, fincasContactadas: 0 }, solicitudes: [] });
+    responder({
+      indicadores: { pendientes: 0, esteMes: 0, fincasContactadas: 0 },
+      solicitudes: [],
+    });
     expect(pagina.textContent).toContain('Todavía no enviaste solicitudes.');
   });
 
