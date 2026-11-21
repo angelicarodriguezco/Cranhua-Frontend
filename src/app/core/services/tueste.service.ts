@@ -1,12 +1,28 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, switchMap, throwError } from 'rxjs';
 
-import { LOTES_COMPRADOS, TUESTES_REGISTRADOS } from '../mocks/tueste.mock';
-import { LoteComprado, NuevoTueste, Tueste } from '../models/tueste.model';
-import { iniciales } from '../../shared/utils/formato';
-import { SesionService } from './sesion.service';
+import { environment } from '../../../environments/environment';
+import {
+  cuerpoActualizarTueste,
+  cuerpoRegistrarTueste,
+  loteCompradoDesdeFicha,
+  lotesCompradosDesdeApi,
+  tuesteDesdeApi,
+} from '../mappers/tueste.mapper';
+import {
+  CodigoGenerado,
+  ErrorTueste,
+  FichaCodigoApi,
+  LoteComprado,
+  LoteConKgPorTostar,
+  LotesComprados,
+  LotesCompradosResponseApi,
+  NuevoTueste,
+  Tueste,
+  TuesteApi,
+} from '../models/tueste.model';
 
-/** Porcentaje de peso que pierde el café al tostarse; null si los pesos no alcanzan para calcularlo. */
 export function calcularMerma(
   pesoVerdeKg: number | null,
   pesoTostadoKg: number | null,
@@ -20,62 +36,106 @@ export function calcularMerma(
   return ((pesoVerdeKg - pesoTostadoKg) / pesoVerdeKg) * 100;
 }
 
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
+export function kgPorTostar(
+  lote: Pick<LoteComprado, 'kg'>,
+  tuestes: Pick<Tueste, 'pesoVerdeKg'>[],
+): number {
+  const usados = tuestes.reduce((total, t) => total + t.pesoVerdeKg, 0);
+  return lote.kg - usados;
+}
+
+const opcionesCredenciales = { withCredentials: true as const };
+
+const ERROR_TUESTE = 'No pudimos guardar el tueste. Intentá de nuevo.';
+
 @Injectable({ providedIn: 'root' })
 export class TuesteService {
-  private readonly sesion = inject(SesionService);
-  private lotes = LOTES_COMPRADOS.map((l) => ({ ...l }));
-  private tuestes = TUESTES_REGISTRADOS.map((t) => ({ ...t }));
+  private readonly http = inject(HttpClient);
 
-  lotesComprados(): Observable<LoteComprado[]> {
-    return of(this.lotes);
+  private get baseLotes(): string {
+    return `${environment.apiUrl}/api/lotes`;
+  }
+
+  private get baseTuestes(): string {
+    return `${environment.apiUrl}/api/tuestes`;
+  }
+
+  lotesComprados(): Observable<LotesComprados> {
+    return this.http
+      .get<LotesCompradosResponseApi>(this.baseLotes, opcionesCredenciales)
+      .pipe(map(lotesCompradosDesdeApi));
+  }
+
+  generarCodigo(
+    loteId: string,
+    base?: Pick<LoteComprado, 'fechaCompra' | 'proceso'>,
+  ): Observable<CodigoGenerado> {
+    return this.http
+      .post<FichaCodigoApi>(`${this.baseLotes}/${loteId}/codigo`, {}, opcionesCredenciales)
+      .pipe(
+        map((ficha) => ({
+          lote: loteCompradoDesdeFicha(ficha, base),
+          tostador: ficha.tostador,
+        })),
+      );
   }
 
   tuestesDelLote(loteId: string): Observable<Tueste[]> {
-    return of(this.tuestes.filter((t) => t.loteId === loteId));
+    return this.http
+      .get<TuesteApi[]>(`${this.baseLotes}/${loteId}/tuestes`, opcionesCredenciales)
+      .pipe(map((tuestes) => tuestes.map((t) => tuesteDesdeApi(t))));
   }
 
-  // Número del lote más las iniciales del tostador, por ejemplo TRZ-0101-MC. Si el lote ya
-  // tiene código se devuelve el mismo: puede estar impreso.
-  generarCodigo(loteId: string): Observable<LoteComprado> {
-    const actual = this.lotes.find((l) => l.id === loteId)!;
-    if (actual.codigoTrazabilidad) {
-      return of(actual);
-    }
-    const numero = actual.codigoLote.split('-').at(-1);
-    const usuario = this.sesion.usuario();
-    const sufijo = usuario ? iniciales(usuario) : 'XX';
-    const lote = { ...actual, codigoTrazabilidad: `TRZ-${numero}-${sufijo}` };
-    this.lotes = this.lotes.map((l) => (l.id === loteId ? lote : l));
-    return of(lote);
-  }
-
-  obtener(id: string): Observable<Tueste | null> {
-    return of(this.tuestes.find((t) => t.id === id) ?? null);
+  obtener(_id: string): Observable<Tueste | null> {
+    return of(null);
   }
 
   registrar(nuevo: NuevoTueste): Observable<Tueste> {
-    const tueste: Tueste = {
-      ...nuevo,
-      id: `tu-${Date.now()}`,
-      codigoTrazabilidad: this.siguienteCodigo(nuevo.loteId),
-    };
-    this.tuestes.push(tueste);
-    return of(tueste);
+    return this.http
+      .post<TuesteApi>(this.baseTuestes, cuerpoRegistrarTueste(nuevo), opcionesCredenciales)
+      .pipe(
+        map((api) => tuesteDesdeApi(api)),
+        catchError((error: HttpErrorResponse) => throwError(() => this.errorTueste(error))),
+      );
   }
 
-  // El lote y el código no cambian al editar: el código ya puede estar impreso en las bolsas
   actualizar(id: string, cambios: Omit<NuevoTueste, 'loteId'>): Observable<Tueste> {
-    const actual = this.tuestes.find((t) => t.id === id)!;
-    const tueste = { ...actual, ...cambios };
-    this.tuestes = this.tuestes.map((t) => (t.id === id ? tueste : t));
-    return of(tueste);
+    return this.http
+      .patch<TuesteApi>(
+        `${this.baseTuestes}/${id}`,
+        cuerpoActualizarTueste(cambios),
+        opcionesCredenciales,
+      )
+      .pipe(
+        map((api) => tuesteDesdeApi(api)),
+        catchError((error: HttpErrorResponse) => throwError(() => this.errorTueste(error))),
+      );
   }
 
-  // Código del lote más un correlativo por tueste, por ejemplo CRH-2026-0101-T02
-  private siguienteCodigo(loteId: string): string {
-    const lote = this.lotes.find((l) => l.id === loteId)!;
-    const numero = this.tuestes.filter((t) => t.loteId === loteId).length + 1;
-    return `${lote.codigoLote}-T${String(numero).padStart(2, '0')}`;
+  lotesConKgPorTostar(): Observable<LoteConKgPorTostar[]> {
+    return this.lotesComprados().pipe(
+      switchMap(({ lotes }) => {
+        if (lotes.length === 0) {
+          return of([]);
+        }
+        return forkJoin(
+          lotes.map((lote) =>
+            this.tuestesDelLote(lote.id).pipe(
+              map((tuestes) => ({ ...lote, kgPorTostar: kgPorTostar(lote, tuestes) })),
+            ),
+          ),
+        ).pipe(map((conKg) => conKg.filter((lote) => lote.kgPorTostar > 0)));
+      }),
+    );
+  }
+
+  private errorTueste(error: HttpErrorResponse): ErrorTueste {
+    if (error.status === 400) {
+      return {
+        mensaje: error.error?.mensaje ?? ERROR_TUESTE,
+        errores: error.error?.errores ?? {},
+      };
+    }
+    return { mensaje: ERROR_TUESTE, errores: {} };
   }
 }

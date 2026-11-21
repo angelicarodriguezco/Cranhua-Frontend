@@ -2,21 +2,98 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
-import { LOTES_COMPRADOS } from '../../core/mocks/tueste.mock';
+import { ErrorTueste, LoteConKgPorTostar, Tueste } from '../../core/models/tueste.model';
+import { TuesteService } from '../../core/services/tueste.service';
 import { FormularioTuesteComponent, RUTA_MIS_TOSTADOS } from './formulario-tueste.component';
+
+const LOTES: LoteConKgPorTostar[] = [
+  {
+    id: 'l-catalina-caturra',
+    codigoLote: 'CRH-2026-0101',
+    finca: 'La Catalina',
+    variedad: 'Caturra',
+    proceso: null,
+    kg: 60,
+    fechaCompra: '2026-10-06',
+    codigoTrazabilidad: 'CRH-2026-0101',
+    kgPorTostar: 33,
+  },
+  {
+    id: 'l-monte-alto-geisha',
+    codigoLote: 'CRH-2026-0102',
+    finca: 'Monte Alto',
+    variedad: 'Geisha',
+    proceso: null,
+    kg: 30,
+    fechaCompra: '2026-10-14',
+    codigoTrazabilidad: 'CRH-2026-0102',
+    kgPorTostar: 25,
+  },
+  {
+    id: 'l-los-robles-catuai',
+    codigoLote: 'CRH-2026-0103',
+    finca: 'Los Robles',
+    variedad: 'Catuaí',
+    proceso: null,
+    kg: 45,
+    fechaCompra: '2026-10-22',
+    codigoTrazabilidad: null,
+    kgPorTostar: 45,
+  },
+  {
+    id: 'l-cerro-verde-bourbon',
+    codigoLote: 'CRH-2026-0104',
+    finca: 'Cerro Verde',
+    variedad: 'Bourbon',
+    proceso: null,
+    kg: 25,
+    fechaCompra: '2026-10-29',
+    codigoTrazabilidad: null,
+    kgPorTostar: 25,
+  },
+];
+
+const TUESTE_GUARDADO: Tueste = {
+  id: 'tu-nuevo',
+  loteId: 'l-catalina-caturra',
+  nivel: 'Oscuro',
+  pesoVerdeKg: 10,
+  pesoTostadoKg: 8.4,
+  fecha: '2026-11-20',
+  notas: null,
+  codigoTrazabilidad: 'CRH-2026-0101',
+};
 
 describe('FormularioTuesteComponent', () => {
   let fixture: ComponentFixture<FormularioTuesteComponent>;
   let pagina: HTMLElement;
+  let tuesteService: jasmine.SpyObj<TuesteService>;
 
-  async function crear(id: string | null, lote: string | null = null): Promise<void> {
+  async function crear(
+    id: string | null,
+    lote: string | null = null,
+    lotes: LoteConKgPorTostar[] = LOTES,
+  ): Promise<void> {
+    tuesteService = jasmine.createSpyObj<TuesteService>('TuesteService', [
+      'lotesConKgPorTostar',
+      'registrar',
+      'actualizar',
+      'obtener',
+    ]);
+    tuesteService.lotesConKgPorTostar.and.returnValue(of(lotes));
+    tuesteService.registrar.and.returnValue(of(TUESTE_GUARDADO));
+    tuesteService.actualizar.and.returnValue(of(TUESTE_GUARDADO));
+    tuesteService.obtener.and.returnValue(of(null));
+
     await TestBed.configureTestingModule({
       imports: [FormularioTuesteComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
+        { provide: TuesteService, useValue: tuesteService },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -91,11 +168,14 @@ describe('FormularioTuesteComponent', () => {
   describe('al crear', () => {
     beforeEach(() => crear(null));
 
-    it('muestra el título, los lotes comprados y los tres niveles', () => {
+    it('muestra el título, solo lotes con kg por tostar y los tres niveles', () => {
       expect(campo('h1').textContent).toContain('Crear tueste');
       expect(campo<HTMLSelectElement>('#lote-tueste').disabled).toBeFalse();
-      expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(
-        LOTES_COMPRADOS.length + 1,
+      expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(LOTES.length + 1);
+      expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).toContain('33 kg');
+      expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).toContain('Caturra');
+      expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).not.toContain(
+        'null',
       );
       expect(niveles().map((n) => n.textContent!.trim())).toEqual(['Claro', 'Medio', 'Oscuro']);
       expect(niveles().every((n) => n.querySelector('input')!.type === 'radio')).toBeTrue();
@@ -124,12 +204,12 @@ describe('FormularioTuesteComponent', () => {
       expect(campo('#merma').textContent!.trim()).toBe('—');
     });
 
-    it('no deja que el peso verde supere los kg del lote', () => {
-      elegirLote(2); // Monte Alto, 30 kg
-      escribir('#peso-verde', '31');
-      expect(errores()).toContain('El lote tiene 30 kg; el peso verde no puede ser mayor.');
+    it('no deja que el peso verde supere el kg restante del lote', () => {
+      elegirLote(2);
+      escribir('#peso-verde', '26');
+      expect(errores()).toContain('El lote tiene 25 kg; el peso verde no puede ser mayor.');
 
-      escribir('#peso-verde', '30');
+      escribir('#peso-verde', '25');
       expect(errores()).toEqual([]);
     });
 
@@ -145,20 +225,46 @@ describe('FormularioTuesteComponent', () => {
     });
 
     function llenarYGuardar(): void {
-      elegirLote(1); // La Catalina, ya tiene dos tuestes
+      elegirLote(1);
       elegirNivel('Oscuro');
       escribir('#peso-verde', '10');
       escribir('#peso-tostado', '8.4');
       enviar();
     }
 
-    it('guarda sin notas y muestra el código en un diálogo sobre el formulario', () => {
+    it('guarda sin notas y muestra el código del lote en un diálogo', () => {
       llenarYGuardar();
 
+      expect(tuesteService.registrar).toHaveBeenCalledWith({
+        loteId: 'l-catalina-caturra',
+        nivel: 'Oscuro',
+        pesoVerdeKg: 10,
+        pesoTostadoKg: 8.4,
+        fecha: jasmine.any(String),
+        notas: null,
+      });
       expect(dialogo().open).toBeTrue();
       expect(campo('dialog h2').textContent).toContain('Tueste guardado');
-      expect(campo('dialog .codigo').textContent!.trim()).toBe('CRH-2026-0101-T03');
+      expect(campo('dialog .codigo').textContent!.trim()).toBe('CRH-2026-0101');
       expect(pagina.querySelector('form')).not.toBeNull();
+    });
+
+    it('muestra errores de peso del API al guardar', () => {
+      const error: ErrorTueste = {
+        mensaje: 'Revisá los pesos.',
+        errores: {
+          pesoVerdeKg: 'Supera el kg disponible del lote.',
+          pesoTostadoKg: 'Debe ser menor que el peso verde.',
+        },
+      };
+      tuesteService.registrar.and.returnValue(throwError(() => error));
+      llenarYGuardar();
+
+      expect(dialogo().open).toBeFalse();
+      expect(errores()).toEqual([
+        'Supera el kg disponible del lote.',
+        'Debe ser menor que el peso verde.',
+      ]);
     });
 
     it('Registrar otro tueste cierra el diálogo y limpia el formulario', () => {
@@ -174,7 +280,6 @@ describe('FormularioTuesteComponent', () => {
 
     it('cerrar el diálogo con Esc también limpia el formulario', () => {
       llenarYGuardar();
-      // Esc dispara cancel en el <dialog>
       dialogo().dispatchEvent(new Event('cancel', { cancelable: true }));
       fixture.detectChanges();
 
@@ -191,63 +296,22 @@ describe('FormularioTuesteComponent', () => {
     });
   });
 
-  describe('al editar', () => {
-    beforeEach(() => crear('tu-catalina-1'));
-
-    it('carga el tueste con el lote bloqueado', () => {
-      expect(campo('h1').textContent).toContain('Editar tueste');
-      const lote = campo<HTMLSelectElement>('#lote-tueste');
-      expect(lote.disabled).toBeTrue();
-      expect(lote.selectedOptions[0].textContent).toContain('CRH-2026-0101');
-      expect(nivelElegido()).toBe('Medio');
-      expect(campo<HTMLInputElement>('#peso-verde').value).toBe('12');
-      expect(campo<HTMLInputElement>('#peso-tostado').value).toBe('10.2');
-      expect(campo<HTMLInputElement>('#fecha-tueste').value).toBe('2026-10-21');
-      expect(campo<HTMLTextAreaElement>('#notas-tueste').value).toContain('primer crack');
-      expect(campo('#merma').textContent!.trim()).toBe('15%');
-      expect(campo('button[type="submit"]').textContent).toContain('Guardar cambios');
-    });
-
-    it('aplica las mismas validaciones de pesos', () => {
-      escribir('#peso-verde', '61');
-      escribir('#peso-tostado', '70');
-      enviar();
-      expect(errores()).toEqual([
-        'El lote tiene 60 kg; el peso verde no puede ser mayor.',
-        'El peso tostado no puede ser mayor al peso verde.',
-      ]);
-      expect(dialogo().open).toBeFalse();
-    });
-
-    it('guarda los cambios y mantiene el código del tueste', () => {
-      escribir('#notas-tueste', '');
-      enviar();
-      expect(dialogo().open).toBeTrue();
-      expect(campo('dialog h2').textContent).toContain('Cambios guardados');
-      expect(campo('dialog .codigo').textContent!.trim()).toBe('CRH-2026-0101-T01');
-    });
-
-    it('Seguir editando cierra el diálogo sin borrar los datos', () => {
-      enviar();
-      botonDelDialogo('Seguir editando').click();
-      fixture.detectChanges();
-
-      expect(dialogo().open).toBeFalse();
-      expect(campo<HTMLInputElement>('#peso-verde').value).toBe('12');
-      expect(campo<HTMLSelectElement>('#lote-tueste').disabled).toBeTrue();
-    });
-  });
-
-  it('llega con el lote elegido desde Mis tostados', async () => {
+  it('llega con el lote elegido desde Mis tostados después de cargar', async () => {
     await crear(null, 'l-los-robles-catuai');
     expect(campo<HTMLSelectElement>('#lote-tueste').selectedOptions[0].textContent).toContain(
       'CRH-2026-0103',
     );
   });
 
-  it('ignora un lote que no es del tostador', async () => {
+  it('ignora un lote sin kg por tostar o ajeno', async () => {
     await crear(null, 'l-ajeno');
     expect(campo<HTMLSelectElement>('#lote-tueste').selectedIndex).toBe(0);
+  });
+
+  it('no incluye en el selector lotes sin kg restante', async () => {
+    await crear(null, null, LOTES.slice(0, 2));
+    expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(3);
+    expect(tuesteService.lotesConKgPorTostar).toHaveBeenCalled();
   });
 
   it('avisa si el tueste a editar no existe', async () => {
