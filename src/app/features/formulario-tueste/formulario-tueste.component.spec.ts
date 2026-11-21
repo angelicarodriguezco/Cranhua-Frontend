@@ -174,9 +174,7 @@ describe('FormularioTuesteComponent', () => {
       expect(campo<HTMLSelectElement>('#lote-tueste').options.length).toBe(LOTES.length + 1);
       expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).toContain('33 kg');
       expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).toContain('Caturra');
-      expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).not.toContain(
-        'null',
-      );
+      expect(campo<HTMLSelectElement>('#lote-tueste').options[1].textContent).not.toContain('null');
       expect(niveles().map((n) => n.textContent!.trim())).toEqual(['Claro', 'Medio', 'Oscuro']);
       expect(niveles().every((n) => n.querySelector('input')!.type === 'radio')).toBeTrue();
       expect(nivelElegido()).toBeUndefined();

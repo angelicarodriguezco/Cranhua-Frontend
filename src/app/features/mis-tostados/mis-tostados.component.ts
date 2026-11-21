@@ -58,9 +58,7 @@ export class MisTostadosComponent {
     return usuario ? `${usuario.nombre} ${usuario.apellidos}`.trim() : '';
   });
   private readonly tostadorFicha = signal<string | null>(null);
-  protected readonly nombreTostador = computed(
-    () => this.tostadorFicha() ?? this.nombreSesion(),
-  );
+  protected readonly nombreTostador = computed(() => this.tostadorFicha() ?? this.nombreSesion());
 
   protected readonly lotes = signal<LoteComprado[]>([]);
   protected readonly indicadores = signal<IndicadoresLotes>({ lotes: 0, kg: 0, conCodigo: 0 });
@@ -97,9 +95,7 @@ export class MisTostadosComponent {
     this.tuesteService
       .generarCodigo(lote.id, { fechaCompra: lote.fechaCompra, proceso: lote.proceso })
       .subscribe(({ lote: actualizado, tostador }) => {
-        this.lotes.update((lotes) =>
-          lotes.map((l) => (l.id === actualizado.id ? actualizado : l)),
-        );
+        this.lotes.update((lotes) => lotes.map((l) => (l.id === actualizado.id ? actualizado : l)));
         this.indicadores.update((i) => ({ ...i, conCodigo: i.conCodigo + 1 }));
         this.abrirFicha(actualizado, true, tostador);
       });

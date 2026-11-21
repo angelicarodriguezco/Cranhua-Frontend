@@ -139,13 +139,11 @@ describe('TuesteService', () => {
     let codigo: string | null | undefined;
     let tostador: string | undefined;
 
-    servicio
-      .generarCodigo('l-2', { fechaCompra: '2026-10-10', proceso: null })
-      .subscribe((r) => {
-        codigo = r.lote.codigoTrazabilidad;
-        tostador = r.tostador;
-        expect(r.lote.fechaCompra).toBe('2026-10-10');
-      });
+    servicio.generarCodigo('l-2', { fechaCompra: '2026-10-10', proceso: null }).subscribe((r) => {
+      codigo = r.lote.codigoTrazabilidad;
+      tostador = r.tostador;
+      expect(r.lote.fechaCompra).toBe('2026-10-10');
+    });
 
     const req = http.expectOne(`${BASE_LOTES}/l-2/codigo`);
     expect(req.request.method).toBe('POST');
@@ -327,9 +325,7 @@ describe('TuesteService', () => {
       lotes: [LOTE_ACTIVO, LOTE_PENDIENTE],
     } satisfies LotesCompradosResponseApi);
 
-    http.expectOne(`${BASE_LOTES}/l-1/tuestes`).flush([
-      { ...TUESTE_API, pesoVerdeKg: 60 },
-    ]);
+    http.expectOne(`${BASE_LOTES}/l-1/tuestes`).flush([{ ...TUESTE_API, pesoVerdeKg: 60 }]);
     http.expectOne(`${BASE_LOTES}/l-2/tuestes`).flush([]);
 
     expect(ids).toEqual(['l-2']);

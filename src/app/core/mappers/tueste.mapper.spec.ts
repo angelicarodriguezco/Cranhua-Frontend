@@ -124,9 +124,7 @@ describe('tueste.mapper', () => {
       activadoEn: '2026-03-15T12:00:00Z',
     };
 
-    expect(
-      loteCompradoDesdeFicha(ficha, { fechaCompra: '2026-10-06', proceso: 'Honey' }),
-    ).toEqual({
+    expect(loteCompradoDesdeFicha(ficha, { fechaCompra: '2026-10-06', proceso: 'Honey' })).toEqual({
       id: 'l-1',
       codigoLote: 'CRH-2026-0101',
       finca: 'La Catalina',
@@ -186,7 +184,8 @@ describe('tueste.mapper', () => {
       notas: null,
     });
 
-    const { loteId: _loteId, ...cambios } = nuevo;
+    const { loteId, ...cambios } = nuevo;
+    void loteId;
     const actualizacion: ActualizarTuesteRequestApi = cuerpoActualizarTueste(cambios);
     expect(actualizacion).toEqual({
       nivel: 'OSCURO',

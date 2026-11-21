@@ -86,7 +86,9 @@ export class TuesteService {
       .pipe(map((tuestes) => tuestes.map((t) => tuesteDesdeApi(t))));
   }
 
-  obtener(_id: string): Observable<Tueste | null> {
+  // Sin GET /api/tuestes/{id} en el backend todavía
+  obtener(id: string): Observable<Tueste | null> {
+    void id;
     return of(null);
   }
 
