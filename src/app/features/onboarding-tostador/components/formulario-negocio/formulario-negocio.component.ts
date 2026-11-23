@@ -55,6 +55,8 @@ export class FormularioNegocioComponent {
   readonly canton = input<Canton | null>(null);
   readonly intentoGuardar = input(false);
   readonly editando = input(false);
+  readonly guardando = input(false);
+  readonly error = input<string | null>(null);
   readonly guardar = output();
   readonly cancelar = output();
 

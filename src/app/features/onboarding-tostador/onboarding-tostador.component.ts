@@ -6,6 +6,7 @@ import { Coordenada, NegocioTueste } from '../../core/models/negocio-tueste.mode
 import { injectCantones } from '../../core/services/canton.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
 import { SesionService } from '../../core/services/sesion.service';
+import { mensajeDeError } from '../../core/utils/auth-error';
 import { BienvenidaTostadorComponent } from './components/bienvenida-tostador/bienvenida-tostador.component';
 import { ConfirmacionTostadorComponent } from './components/confirmacion-tostador/confirmacion-tostador.component';
 import {
@@ -49,8 +50,11 @@ export class OnboardingTostadorComponent {
     return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly intentoGuardar = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly error = signal<string | null>(null);
 
   protected readonly registrado = signal<NegocioTueste | null>(null);
+  private pinGuardado: Coordenada | null = null;
 
   protected volver(): void {
     switch (this.paso()) {
@@ -85,7 +89,7 @@ export class OnboardingTostadorComponent {
     this.intentoGuardar.set(true);
     const canton = this.canton();
     const pin = this.pin();
-    if (this.formulario.invalid || !canton || !pin) {
+    if (this.formulario.invalid || !canton || this.guardando()) {
       return;
     }
     const { nombre, descripcion, contacto, telefono, correo, estilos } =
@@ -96,19 +100,27 @@ export class OnboardingTostadorComponent {
       contacto: contacto.trim(),
       telefono: formatearTelefono(telefono),
       correo: correo.trim(),
-      ubicacion: pin,
       canton,
       estilos,
-      propietarioId: this.usuario()!.id,
     };
+    this.guardando.set(true);
+    this.error.set(null);
     const registrado = this.registrado();
-    const guardado = registrado
-      ? this.negocioService.actualizar({ ...datos, id: registrado.id })
+    const peticion = registrado
+      ? this.negocioService.actualizar(registrado.id, datos)
       : this.negocioService.registrar(datos);
-    guardado.subscribe((negocio) => {
-      this.registrado.set(negocio);
-      this.cargar(negocio);
-      this.paso.set('confirmacion');
+    peticion.subscribe({
+      next: (negocio) => {
+        this.guardando.set(false);
+        this.registrado.set(negocio);
+        this.pinGuardado = pin;
+        this.cargar(negocio);
+        this.paso.set('confirmacion');
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.error.set(mensajeDeError(error));
+      },
     });
   }
 
@@ -129,7 +141,8 @@ export class OnboardingTostadorComponent {
       correo: negocio.correo,
       estilos: negocio.estilos,
     });
-    this.pin.set(negocio.ubicacion);
+    this.pin.set(this.pinGuardado);
     this.intentoGuardar.set(false);
+    this.error.set(null);
   }
 }
