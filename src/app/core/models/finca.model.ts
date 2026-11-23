@@ -3,7 +3,6 @@ export interface Coordenada {
   lng: number;
 }
 
-// Regiones cafetaleras del ICAFE
 export const ZONAS_CAFETALERAS = [
   'Tarrazú',
   'Valle Central',
@@ -50,6 +49,8 @@ export interface Finca {
   areaHectareas: number;
   propietarioId: string;
   duenosAdicionales: Usuario[];
+  cosechasActivas?: number;
+  kgDisponibles?: number;
 }
 
 export type NuevaFinca = Pick<
@@ -73,9 +74,10 @@ export interface FincaResponseApi {
   provincia: string;
   areaHectareas: number;
   duenos: DuenoApi[];
+  cosechasActivas?: number;
+  kgDisponibles?: number;
 }
 
-// Misma forma que el 409 del backend
 export interface ConflictoFinca {
   fincaId: string;
   nombre: string;
@@ -87,7 +89,6 @@ export type ResultadoRegistro =
   | { registrada: true; finca: Finca }
   | { registrada: false; conflicto: ConflictoFinca; mensaje: string };
 
-// 400 con los mensajes por campo, o un error genérico
 export interface ErrorRegistroFinca {
   mensaje: string;
   errores: Record<string, string>;

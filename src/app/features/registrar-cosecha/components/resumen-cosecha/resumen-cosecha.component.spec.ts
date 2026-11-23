@@ -26,7 +26,7 @@ const COSECHA: Cosecha = {
   proceso: 'Honey',
   codigoLote: 'LC-2026-001',
   kgDisponibles: 96,
-  estado: 'Disponible',
+  estado: 'Publicada',
 };
 
 describe('ResumenCosechaComponent', () => {

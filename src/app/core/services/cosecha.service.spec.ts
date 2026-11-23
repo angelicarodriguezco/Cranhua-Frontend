@@ -85,13 +85,15 @@ describe('CosechaService', () => {
         finca: 'La Catalina',
         proceso: 'Honey',
         kgDisponibles: 64,
-        estado: 'Disponible',
+        estado: 'Publicada',
       }),
     );
   });
 
   it('actualiza una cosecha existente y sincroniza el dashboard', () => {
     const id = 'cosecha-geisha-monte-alto';
+    expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeFalse();
+
     const actualizada = servicio.actualizar(
       id,
       datosNueva({
@@ -116,16 +118,27 @@ describe('CosechaService', () => {
 
   it('elimina una cosecha y la quita del dashboard', () => {
     const id = 'cosecha-catuai-catalina';
+    servicio.actualizar(
+      id,
+      datosNueva({
+        fincaId: 'finca-la-catalina',
+        variedad: 'Catuaí',
+        pesoTrasSeleccionKg: 0,
+        procesos: [{ proceso: 'Natural', porcentaje: 100 }],
+      }),
+    );
+    expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeTrue();
+
     expect(servicio.eliminar(id)).toBeTrue();
     expect(servicio.obtener(id)).toBeUndefined();
     expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeFalse();
     expect(servicio.eliminar(id)).toBeFalse();
   });
 
-  it('marca En beneficiado cuando el peso tras selección es 0', () => {
+  it('marca Borrador cuando el peso tras selección es 0', () => {
     const creada = servicio.crear(datosNueva({ pesoTrasSeleccionKg: 0 }));
     const reciente = dashboard.cosechasRecientes().find((c) => c.id === creada.id);
-    expect(reciente?.estado).toBe('En beneficiado');
+    expect(reciente?.estado).toBe('Borrador');
     expect(reciente?.kgDisponibles).toBeNull();
   });
 

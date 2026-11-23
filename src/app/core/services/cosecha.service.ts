@@ -50,7 +50,7 @@ function derivarEstado(pesoTrasSeleccionKg: number): {
   const enBeneficiado = pesoTrasSeleccionKg <= 0;
   return {
     kgDisponibles: enBeneficiado ? null : pesoTrasSeleccionKg,
-    estado: enBeneficiado ? 'En beneficiado' : 'Disponible',
+    estado: enBeneficiado ? 'Borrador' : 'Publicada',
   };
 }
 
