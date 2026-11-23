@@ -1,8 +1,17 @@
-export type EstadoCosecha = 'Disponible' | 'En beneficiado' | 'En catación' | 'Vendida';
+export type EstadoCosechaApi = 'BORRADOR' | 'PUBLICADA' | 'AGOTADA';
+
+export type EstadoCosecha = 'Borrador' | 'Publicada' | 'Agotada';
 
 export type TemaDashboard = 'claro' | 'oscuro';
 
 export interface IndicadoresDashboard {
+  fincasRegistradas: number;
+  cosechasActivas: number;
+  kgDisponibles: number;
+  solicitudesPendientes: number;
+}
+
+export interface IndicadoresDashboardApi {
   fincasRegistradas: number;
   cosechasActivas: number;
   kgDisponibles: number;
@@ -18,7 +27,6 @@ export interface SolicitudTostador {
   cosechaId: string;
 }
 
-/** GET /api/solicitudes/recibidas */
 export interface SolicitudRecibidaApi {
   id: string;
   cosechaId: string;
@@ -39,6 +47,16 @@ export interface FincaResumen {
   cosechasActivas: number;
 }
 
+export interface CosechaRecienteApi {
+  id: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  proceso: string;
+  kgDisponibles: number | null;
+  estado: EstadoCosechaApi;
+}
+
 export interface CosechaReciente {
   id: string;
   variedad: string;
@@ -46,6 +64,12 @@ export interface CosechaReciente {
   proceso: string;
   kgDisponibles: number | null;
   estado: EstadoCosecha;
+}
+
+export interface DashboardCafetaleroResponseApi {
+  indicadores: IndicadoresDashboardApi;
+  solicitudesRecientes: SolicitudRecibidaApi[];
+  cosechasRecientes: CosechaRecienteApi[];
 }
 
 export interface PerfilCafetaleroSidebar {
@@ -57,6 +81,5 @@ export interface PerfilCafetaleroSidebar {
 export interface ResumenDashboard {
   indicadores: IndicadoresDashboard;
   solicitudes: SolicitudTostador[];
-  fincas: FincaResumen[];
   cosechas: CosechaReciente[];
 }

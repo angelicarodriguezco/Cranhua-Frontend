@@ -4,7 +4,6 @@ import {
   PerfilCafetaleroSidebar,
 } from '../models/dashboard-cafetalero.model';
 
-/** Perfil del footer del menú lateral (prototipo); el saludo usa SesionService. */
 export const PERFIL_CAFETALERO_SIDEBAR: PerfilCafetaleroSidebar = {
   iniciales: 'RC',
   nombreCompleto: 'Rodrigo Alvarado',
@@ -33,7 +32,7 @@ export const COSECHAS_DASHBOARD: CosechaReciente[] = [
     finca: 'La Catalina',
     proceso: 'Honey',
     kgDisponibles: 96,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
   {
     id: 'cosecha-geisha-monte-alto',
@@ -41,7 +40,7 @@ export const COSECHAS_DASHBOARD: CosechaReciente[] = [
     finca: 'Monte Alto',
     proceso: 'Lavado',
     kgDisponibles: 50,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
   {
     id: 'cosecha-catuai-catalina',
@@ -49,6 +48,6 @@ export const COSECHAS_DASHBOARD: CosechaReciente[] = [
     finca: 'La Catalina',
     proceso: 'Natural',
     kgDisponibles: null,
-    estado: 'En beneficiado',
+    estado: 'Borrador',
   },
 ];

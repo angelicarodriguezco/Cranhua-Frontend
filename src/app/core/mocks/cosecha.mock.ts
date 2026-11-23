@@ -48,7 +48,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Honey',
     codigoLote: 'LC-2025-001',
     kgDisponibles: 96,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
   {
     id: 'cosecha-geisha-monte-alto',
@@ -68,7 +68,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Lavado',
     codigoLote: 'MA-2025-001',
     kgDisponibles: 50,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
   {
     id: 'cosecha-catuai-catalina',
@@ -88,7 +88,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Natural',
     codigoLote: 'LC-2025-002',
     kgDisponibles: null,
-    estado: 'En beneficiado',
+    estado: 'Borrador',
   },
   {
     id: 'cosecha-bourbon-monte-alto',
@@ -108,7 +108,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Lavado',
     codigoLote: 'MA-2025-002',
     kgDisponibles: null,
-    estado: 'En catación',
+    estado: 'Publicada',
   },
   // Cosechas vendidas: sus lotes están en LOTES_VENDIDOS del historial
   {
@@ -129,7 +129,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Honey',
     codigoLote: 'LC-2025-003',
     kgDisponibles: 0,
-    estado: 'Vendida',
+    estado: 'Agotada',
   },
   {
     id: 'cosecha-villa-sarchi-catalina',
@@ -149,7 +149,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Natural',
     codigoLote: 'LC-2025-004',
     kgDisponibles: 0,
-    estado: 'Vendida',
+    estado: 'Agotada',
   },
   {
     id: 'cosecha-geisha-monte-alto-marzo',
@@ -169,7 +169,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Lavado',
     codigoLote: 'MA-2025-003',
     kgDisponibles: 0,
-    estado: 'Vendida',
+    estado: 'Agotada',
   },
   {
     id: 'c-le-caturra',
@@ -189,7 +189,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Honey',
     codigoLote: 'LE-2026-001',
     kgDisponibles: 96,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
   {
     id: 'c-le-catuai',
@@ -209,7 +209,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Natural',
     codigoLote: 'LE-2026-002',
     kgDisponibles: null,
-    estado: 'En beneficiado',
+    estado: 'Borrador',
   },
   {
     id: 'c-em-geisha',
@@ -229,7 +229,7 @@ export const COSECHAS_INICIALES: Cosecha[] = [
     proceso: 'Lavado',
     codigoLote: 'EM-2026-001',
     kgDisponibles: 50,
-    estado: 'Disponible',
+    estado: 'Publicada',
   },
 ];
 

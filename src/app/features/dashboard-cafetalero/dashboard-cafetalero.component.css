@@ -32,10 +32,12 @@
   --error: var(--brand-accent);
   --approve-bg: var(--brand-button);
   --approve-text: var(--brand-on-button);
-  --pill-disponible-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
-  --pill-disponible-text: var(--brand-on-dark);
-  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 16%, transparent);
-  --pill-beneficiado-text: var(--brand-heading);
+  --pill-borrador-bg: color-mix(in srgb, var(--brand-button) 16%, transparent);
+  --pill-borrador-text: var(--brand-heading);
+  --pill-publicada-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
+  --pill-publicada-text: var(--brand-on-dark);
+  --pill-agotada-bg: color-mix(in srgb, var(--brand-accent) 14%, transparent);
+  --pill-agotada-text: var(--brand-accent);
   --nueva-finca-border: color-mix(in srgb, var(--brand-nav) 28%, transparent);
 
   display: grid;
@@ -71,10 +73,12 @@
   --error: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
   --approve-bg: var(--brand-button);
   --approve-text: var(--brand-on-button);
-  --pill-disponible-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
-  --pill-disponible-text: var(--brand-on-dark);
-  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
-  --pill-beneficiado-text: var(--brand-button-hover);
+  --pill-borrador-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
+  --pill-borrador-text: var(--brand-button-hover);
+  --pill-publicada-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
+  --pill-publicada-text: var(--brand-on-dark);
+  --pill-agotada-bg: color-mix(in srgb, var(--brand-accent) 22%, transparent);
+  --pill-agotada-text: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
   --nueva-finca-border: color-mix(in srgb, var(--brand-on-dark) 28%, transparent);
 }
 
@@ -315,13 +319,49 @@
   opacity: 0.6;
 }
 
-.error-solicitudes {
+.error-solicitudes,
+.error-pagina {
   margin: 0 0 0.65rem;
   padding: 0.55rem 0.85rem;
   border-radius: 0.75rem;
   border: 1px solid var(--error);
   color: var(--error);
   font-size: 0.8125rem;
+}
+
+.error-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.error-pagina p {
+  margin: 0;
+}
+
+.estado-seccion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.75rem 0.1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.estado-seccion p {
+  margin: 0;
+}
+
+.finca-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  margin-top: 0.35rem;
 }
 
 .fincas-grid {
@@ -452,14 +492,25 @@ tbody tr:hover td {
   white-space: nowrap;
 }
 
-.pill-disponible {
-  background: var(--pill-disponible-bg);
-  color: var(--pill-disponible-text);
+.pill-borrador {
+  background: var(--pill-borrador-bg);
+  color: var(--pill-borrador-text);
 }
 
-.pill-beneficiado {
-  background: var(--pill-beneficiado-bg);
-  color: var(--pill-beneficiado-text);
+.pill-publicada {
+  background: var(--pill-publicada-bg);
+  color: var(--pill-publicada-text);
+}
+
+.pill-agotada {
+  background: var(--pill-agotada-bg);
+  color: var(--pill-agotada-text);
+}
+
+.vacio-tabla {
+  text-align: center;
+  color: var(--text-muted);
+  font-weight: 500;
 }
 
 @media (max-width: 1100px) {
