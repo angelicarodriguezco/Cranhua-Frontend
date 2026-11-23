@@ -13,9 +13,11 @@ import {
   cosechaDisponibleAApi,
 } from '../../core/testing/cosechas-disponibles.fixture';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { formatearKg } from '../../shared/utils/formato';
 import { DashboardTostadorComponent } from './dashboard-tostador.component';
 
 const BASE = `${environment.apiUrl}/api/cosechas/disponibles`;
+const INDICADORES = `${environment.apiUrl}/api/tostador/dashboard`;
 
 describe('DashboardTostadorComponent', () => {
   let fixture: ComponentFixture<DashboardTostadorComponent>;
@@ -58,6 +60,10 @@ describe('DashboardTostadorComponent', () => {
     return [...pagina.querySelectorAll('.tarjeta h3')].map((h) => h.textContent!.trim());
   }
 
+  function valores(): string[] {
+    return [...pagina.querySelectorAll('.indicadores strong')].map((e) => e.textContent!.trim());
+  }
+
   function rutasDe(selector: string): string[] {
     return fixture.debugElement
       .queryAll(By.css(selector))
@@ -74,13 +80,20 @@ describe('DashboardTostadorComponent', () => {
     expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Hola, María');
   });
 
-  it('muestra los 3 indicadores con datos de ejemplo', () => {
+  it('muestra los 3 indicadores del backend', () => {
+    expect(valores()).toEqual(['—', '—', '—']);
+
+    const peticion = http.expectOne(INDICADORES);
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush({ solicitudesActivas: 2, kgCompradosMes: 85.5, lotesConCodigo: 6 });
+    fixture.detectChanges();
+    expect(valores()).toEqual(['2', formatearKg(85.5), '6']);
+
     const articulos = pagina.querySelectorAll('.indicadores .tarjeta-enlace');
     expect(articulos).toHaveSize(3);
 
     const texto = pagina.querySelector('.indicadores')!.textContent!;
     expect(texto).toContain('Solicitudes activas');
-    expect(texto).toContain('120 kg');
     expect(texto).toContain('Comprados este mes');
     expect(texto).toContain('Lotes con código');
     expect(texto).not.toContain('favoritas');
@@ -89,6 +102,15 @@ describe('DashboardTostadorComponent', () => {
       '/tostador/tostados',
       '/tostador/tostados',
     ]);
+  });
+
+  it('avisa si no pudo cargar los indicadores', () => {
+    http
+      .expectOne(INDICADORES)
+      .flush({ mensaje: 'Servicio caído.' }, { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain('Servicio caído.');
+    expect(valores()).toEqual(['—', '—', '—']);
   });
 
   it('reutiliza el explorador de cosechas con sus filtros', () => {

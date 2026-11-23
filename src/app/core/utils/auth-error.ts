@@ -21,3 +21,10 @@ export function parsearErrorAuth(error: unknown): ErrorAuth {
 
   return { mensaje: MENSAJE_GENERICO };
 }
+
+/** Los errores por campo del backend en una sola línea; si no hay, el mensaje general. */
+export function mensajeDeError(error: unknown): string {
+  const { mensaje, errores } = parsearErrorAuth(error);
+  const porCampo = Object.values(errores ?? {});
+  return porCampo.length > 0 ? porCampo.join(' ') : mensaje;
+}

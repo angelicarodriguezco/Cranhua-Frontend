@@ -6,10 +6,10 @@
       <h1>Mi negocio</h1>
     </header>
     <section class="vidrio tarjeta confirmacion">
-      <p class="tarjeta__texto">No encontramos tu negocio. Puede que se haya eliminado.</p>
+      <p class="tarjeta__texto">Todavía no registraste tu negocio de tueste.</p>
       <div class="confirmacion__acciones">
-        <button type="button" class="btn btn--filled" (click)="irAlDashboard()">
-          Ir al dashboard
+        <button type="button" class="btn btn--filled" (click)="irAlRegistro()">
+          Registrar negocio
         </button>
       </div>
     </section>
@@ -76,9 +76,11 @@
               </p>
             </div>
 
-            <div class="campo campo--ancho mapa mapa--solo-lectura">
-              <app-mapa-ubicacion [pin]="negocio.ubicacion" />
-            </div>
+            @if (cabecera(); as ubicacion) {
+              <div class="campo campo--ancho mapa mapa--solo-lectura">
+                <app-mapa-ubicacion [pin]="ubicacion" />
+              </div>
+            }
 
             <div class="campo campo--ancho">
               <span class="campo__etiqueta">Estilos de tueste que ofrecés</span>
@@ -116,7 +118,7 @@
                 #inputPortada
                 class="portada__input"
                 type="file"
-                accept="image/*"
+                [accept]="acceptImagen"
                 aria-label="Cambiar portada"
                 (change)="alSeleccionarPortada($event)"
               />
@@ -141,6 +143,10 @@
             </div>
 
             <div class="formulario">
+              @if (errorPortada(); as mensaje) {
+                <p class="campo--ancho campo__error" role="alert">{{ mensaje }}</p>
+              }
+
               <div class="campo campo--ancho">
                 <label class="campo__etiqueta" for="nombre-negocio">Nombre del negocio</label>
                 <input
@@ -305,12 +311,23 @@
             />
           </div>
 
+          @if (error(); as mensaje) {
+            <p class="campo__error" role="alert">{{ mensaje }}</p>
+          }
+
           <div class="acciones">
             <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn btn--filled">Guardar cambios</button>
+            <button type="submit" class="btn btn--filled" [disabled]="guardando()">
+              Guardar cambios
+            </button>
           </div>
         </form>
       }
+    } @else {
+      <header class="encabezado">
+        <h1>Mi negocio</h1>
+        <p role="status">{{ error() ?? 'Cargando tu negocio…' }}</p>
+      </header>
     }
   }
 </main>

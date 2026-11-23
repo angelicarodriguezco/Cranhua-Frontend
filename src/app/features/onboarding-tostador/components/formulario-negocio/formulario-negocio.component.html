@@ -141,9 +141,13 @@
     }
   </div>
 
+  @if (error(); as mensaje) {
+    <p class="campo__error" role="alert">{{ mensaje }}</p>
+  }
+
   <div class="acciones">
     <button type="button" class="btn btn--texto" (click)="cancelar.emit()">Cancelar</button>
-    <button type="submit" class="btn btn--filled">
+    <button type="submit" class="btn btn--filled" [disabled]="guardando()">
       {{ editando() ? 'Guardar cambios' : 'Crear cuenta de tostador' }}
     </button>
   </div>
