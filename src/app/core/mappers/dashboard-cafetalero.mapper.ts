@@ -21,9 +21,7 @@ export function estadoCosechaDesdeApi(estado: EstadoCosechaApi): EstadoCosecha {
   return ESTADO_DESDE_API[estado];
 }
 
-export function indicadoresDashboardDesdeApi(
-  api: IndicadoresDashboardApi,
-): IndicadoresDashboard {
+export function indicadoresDashboardDesdeApi(api: IndicadoresDashboardApi): IndicadoresDashboard {
   return {
     fincasRegistradas: api.fincasRegistradas,
     cosechasActivas: api.cosechasActivas,

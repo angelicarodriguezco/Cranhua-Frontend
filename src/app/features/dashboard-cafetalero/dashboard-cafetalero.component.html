@@ -128,16 +128,15 @@
               </p>
               <div class="finca-acciones">
                 <a [routerLink]="['/cafetalero/fincas', finca.id]">Ver detalle →</a>
-                <a
-                  routerLink="/explorar"
-                  [queryParams]="{ centrar: finca.id, resaltar: finca.id }"
-                >
+                <a routerLink="/explorar" [queryParams]="{ centrar: finca.id, resaltar: finca.id }">
                   Ver lotes trazables
                 </a>
               </div>
             </article>
           }
-          <a routerLink="/cafetalero/fincas/registrar" class="nueva-finca">+ Registrar nueva finca</a>
+          <a routerLink="/cafetalero/fincas/registrar" class="nueva-finca"
+            >+ Registrar nueva finca</a
+          >
         </div>
       }
     </section>

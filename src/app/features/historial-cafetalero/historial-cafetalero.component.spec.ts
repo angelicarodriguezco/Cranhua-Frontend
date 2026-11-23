@@ -180,7 +180,10 @@ describe('HistorialCafetaleroComponent', () => {
     flushHistorial();
     const clases = new Set(
       [...pagina.querySelectorAll('.cosechas .pill')].map((pill) =>
-        [...pill.classList].filter((c) => c.startsWith('pill-')).sort().join(' '),
+        [...pill.classList]
+          .filter((c) => c.startsWith('pill-'))
+          .sort()
+          .join(' '),
       ),
     );
     expect(clases.size).toBe(3);

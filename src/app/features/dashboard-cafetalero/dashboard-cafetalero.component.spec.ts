@@ -207,9 +207,7 @@ describe('DashboardCafetaleroComponent', () => {
   });
 
   it('muestra un error de página si no se puede cargar el resumen', () => {
-    http
-      .expectOne(BASE_DASHBOARD)
-      .flush(null, { status: 500, statusText: 'Server Error' });
+    http.expectOne(BASE_DASHBOARD).flush(null, { status: 500, statusText: 'Server Error' });
     responderFincas();
     fixture.detectChanges();
 
