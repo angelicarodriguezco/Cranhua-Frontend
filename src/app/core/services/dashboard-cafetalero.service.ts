@@ -1,66 +1,46 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, map, switchMap, tap } from 'rxjs';
 
-import {
-  COSECHAS_DASHBOARD,
-  FINCAS_DASHBOARD,
-  PERFIL_CAFETALERO_SIDEBAR,
-  SOLICITUDES_DASHBOARD,
-} from '../mocks/dashboard-cafetalero.mock';
+import { environment } from '../../../environments/environment';
+import { resumenDashboardDesdeApi } from '../mappers/dashboard-cafetalero.mapper';
+import { PERFIL_CAFETALERO_SIDEBAR } from '../mocks/dashboard-cafetalero.mock';
 import {
   CosechaReciente,
-  FincaResumen,
+  DashboardCafetaleroResponseApi,
   IndicadoresDashboard,
   PerfilCafetaleroSidebar,
+  RespuestaSolicitud,
+  ResumenDashboard,
   SolicitudTostador,
   TemaDashboard,
 } from '../models/dashboard-cafetalero.model';
-
-function clonarCosechas(cosechas: CosechaReciente[]): CosechaReciente[] {
-  return cosechas.map((c) => ({ ...c }));
-}
-
-function clonarSolicitudes(solicitudes: SolicitudTostador[]): SolicitudTostador[] {
-  return solicitudes.map((s) => ({ ...s }));
-}
-
-function calcularIndicadores(
-  fincas: FincaResumen[],
-  cosechas: CosechaReciente[],
-  solicitudes: SolicitudTostador[],
-): IndicadoresDashboard {
-  const kgDisponibles = cosechas.reduce((total, c) => total + (c.kgDisponibles ?? 0), 0);
-  const solicitudesPendientes = solicitudes.filter((s) => s.estado === 'pendiente').length;
-
-  return {
-    fincasRegistradas: fincas.length,
-    cosechasActivas: cosechas.length,
-    kgDisponibles,
-    solicitudesPendientes,
-  };
-}
-
-// Simula el backend en memoria; Aprobar/Rechazar mutan el estado local.
 import { TemaService } from './tema.service';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 @Injectable({ providedIn: 'root' })
 export class DashboardCafetaleroService {
-  private readonly fincas = signal<FincaResumen[]>(FINCAS_DASHBOARD.map((f) => ({ ...f })));
-  private readonly cosechas = signal<CosechaReciente[]>(clonarCosechas(COSECHAS_DASHBOARD));
-  private readonly solicitudes = signal<SolicitudTostador[]>(
-    clonarSolicitudes(SOLICITUDES_DASHBOARD),
-  );
+  private readonly http = inject(HttpClient);
   private readonly temas = inject(TemaService);
+
+  private readonly indicadoresSignal = signal<IndicadoresDashboard | null>(null);
+  private readonly cosechas = signal<CosechaReciente[]>([]);
+  private readonly solicitudes = signal<SolicitudTostador[]>([]);
+
+  private get baseDashboard(): string {
+    return `${environment.apiUrl}/api/cafetalero/dashboard`;
+  }
+
+  private get baseSolicitudes(): string {
+    return `${environment.apiUrl}/api/solicitudes`;
+  }
 
   readonly perfilSidebar: PerfilCafetaleroSidebar = PERFIL_CAFETALERO_SIDEBAR;
 
-  readonly fincasResumen = this.fincas.asReadonly();
+  readonly indicadores = this.indicadoresSignal.asReadonly();
   readonly cosechasRecientes = this.cosechas.asReadonly();
-  readonly solicitudesPendientes = computed(() =>
-    this.solicitudes().filter((s) => s.estado === 'pendiente'),
-  );
-  readonly indicadores = computed(() =>
-    calcularIndicadores(this.fincas(), this.cosechas(), this.solicitudes()),
-  );
+  readonly solicitudesPendientes = this.solicitudes.asReadonly();
   readonly tema = this.temas.tema;
 
   alternarTema(): void {
@@ -71,38 +51,35 @@ export class DashboardCafetaleroService {
     this.temas.establecerTema(tema);
   }
 
-  aprobarSolicitud(id: string): void {
-    const solicitud = this.solicitudes().find((s) => s.id === id);
-    if (!solicitud || solicitud.estado !== 'pendiente') {
-      return;
-    }
+  obtenerResumen(): Observable<ResumenDashboard> {
+    return this.http
+      .get<DashboardCafetaleroResponseApi>(this.baseDashboard, opcionesCredenciales)
+      .pipe(
+        map(resumenDashboardDesdeApi),
+        tap((resumen) => this.aplicarResumen(resumen)),
+      );
+  }
 
-    this.cosechas.update((lista) =>
-      lista.map((cosecha) => {
-        if (cosecha.id !== solicitud.cosechaId || cosecha.kgDisponibles == null) {
-          return cosecha;
-        }
-        return {
-          ...cosecha,
-          kgDisponibles: Math.max(0, cosecha.kgDisponibles - solicitud.kgSolicitados),
-        };
-      }),
-    );
+  aprobarSolicitud(id: string): Observable<void> {
+    return this.responder(id, 'APROBADA');
+  }
 
-    this.solicitudes.update((lista) =>
-      lista.map((s) => (s.id === id ? { ...s, estado: 'aprobada' } : s)),
+  rechazarSolicitud(id: string): Observable<void> {
+    return this.responder(id, 'RECHAZADA');
+  }
+
+  private responder(id: string, estado: RespuestaSolicitud): Observable<void> {
+    return this.http.patch(`${this.baseSolicitudes}/${id}`, { estado }, opcionesCredenciales).pipe(
+      tap(() => this.solicitudes.update((lista) => lista.filter((s) => s.id !== id))),
+      switchMap(() => this.obtenerResumen()),
+      map(() => undefined),
     );
   }
 
-  rechazarSolicitud(id: string): void {
-    const solicitud = this.solicitudes().find((s) => s.id === id);
-    if (!solicitud || solicitud.estado !== 'pendiente') {
-      return;
-    }
-
-    this.solicitudes.update((lista) =>
-      lista.map((s) => (s.id === id ? { ...s, estado: 'rechazada' } : s)),
-    );
+  private aplicarResumen(resumen: ResumenDashboard): void {
+    this.indicadoresSignal.set(resumen.indicadores);
+    this.solicitudes.set(resumen.solicitudes);
+    this.cosechas.set(resumen.cosechas);
   }
 
   sincronizarCosechaReciente(cosecha: CosechaReciente): void {

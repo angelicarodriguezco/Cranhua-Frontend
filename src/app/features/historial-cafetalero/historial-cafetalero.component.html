@@ -10,17 +10,30 @@
       <a routerLink="/cafetalero/registrar-cosecha" class="cta">+ Nueva cosecha</a>
     </header>
 
+    @if (error(); as mensaje) {
+      <div class="error-pagina" role="alert">
+        <p>{{ mensaje }}</p>
+        <button type="button" class="cta" (click)="reintentar()">Reintentar</button>
+      </div>
+    }
+
     <section class="indicadores" aria-label="Indicadores">
       <article class="glass">
-        <strong>{{ indicadores().cosechasRegistradas }}</strong>
+        <strong>{{ cargando() ? '—' : (indicadores()?.cosechasRegistradas ?? '—') }}</strong>
         <span>Cosechas registradas</span>
       </article>
       <article class="glass">
-        <strong>{{ kg(indicadores().produccionTotalKg) }}</strong>
+        <strong>
+          @if (cargando() || !indicadores()) {
+            —
+          } @else {
+            {{ kg(indicadores()!.produccionTotalKg) }}
+          }
+        </strong>
         <span>Producción total</span>
       </article>
       <article class="glass">
-        <strong>{{ indicadores().lotesVendidos }}</strong>
+        <strong>{{ cargando() ? '—' : (indicadores()?.lotesVendidos ?? '—') }}</strong>
         <span>Lotes vendidos</span>
       </article>
     </section>
@@ -34,6 +47,7 @@
             <thead>
               <tr>
                 <th>Fecha</th>
+                <th>Finca</th>
                 <th>Variedad</th>
                 <th class="numero">Kilos</th>
                 <th>Estado</th>
@@ -43,11 +57,17 @@
             <tbody>
               @for (cosecha of cosechas(); track cosecha.id) {
                 <tr class="fila-enlace">
-                  <td>{{ fecha(cosecha.fecha) }}</td>
+                  <td>{{ fecha(cosecha.fechaInicio) }}</td>
+                  <td>{{ cosecha.finca }}</td>
                   <td>{{ cosecha.variedad }}</td>
-                  <td class="numero">{{ kg(cosecha.kilos) }}</td>
+                  <td class="numero">{{ kg(cosecha.cantidadCosechadaKg) }}</td>
                   <td>
-                    <span class="pill" [class]="claseEstado[cosecha.estado]">
+                    <span
+                      class="pill"
+                      [class.pill-borrador]="cosecha.estado === 'Borrador'"
+                      [class.pill-publicada]="cosecha.estado === 'Publicada'"
+                      [class.pill-agotada]="cosecha.estado === 'Agotada'"
+                    >
                       {{ cosecha.estado }}
                     </span>
                   </td>
@@ -62,7 +82,13 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="5" class="vacio">Todavía no registraste cosechas.</td>
+                  <td colspan="6" class="vacio">
+                    @if (cargando()) {
+                      Cargando cosechas…
+                    } @else {
+                      Todavía no registraste cosechas.
+                    }
+                  </td>
                 </tr>
               }
             </tbody>
@@ -84,16 +110,22 @@
               </tr>
             </thead>
             <tbody>
-              @for (lote of lotes(); track lote.codigo) {
+              @for (lote of lotes(); track lote.id) {
                 <tr>
                   <td class="codigo">{{ lote.codigo }}</td>
                   <td>{{ lote.comprador }}</td>
-                  <td class="numero">{{ kg(lote.kilos) }}</td>
-                  <td class="numero">{{ colones(lote.precioColones) }}</td>
+                  <td class="numero">{{ kg(lote.kg) }}</td>
+                  <td class="numero">{{ colones(lote.total) }}</td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="4" class="vacio">Todavía no vendiste lotes.</td>
+                  <td colspan="4" class="vacio">
+                    @if (cargando()) {
+                      Cargando lotes…
+                    } @else {
+                      Todavía no vendiste lotes.
+                    }
+                  </td>
                 </tr>
               }
             </tbody>

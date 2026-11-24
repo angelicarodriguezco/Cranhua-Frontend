@@ -1,5 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormControl,
@@ -9,11 +10,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { catchError, finalize, map, of, switchMap } from 'rxjs';
 
+import { DetalleCosecha } from '../../core/models/detalle-cosecha.model';
+import { ErrorSolicitud } from '../../core/models/solicitud.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { DetalleCosechaService } from '../../core/services/detalle-cosecha.service';
-import { iniciales, nombreCorto } from '../../shared/utils/formato';
+import { parsearErrorAuth } from '../../core/utils/auth-error';
+import { etiquetaFinca, iniciales, nombreCorto } from '../../shared/utils/formato';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
 
 const colones = new Intl.NumberFormat('es-CR', {
@@ -36,11 +40,11 @@ export class DetalleCosechaComponent {
 
   protected readonly tema = this.dashboard.tema;
 
-  protected readonly cosecha = toSignal(
-    inject(ActivatedRoute).paramMap.pipe(
-      switchMap((params) => this.servicio.obtener(params.get('id') ?? '')),
-    ),
-  );
+  protected readonly cargando = signal(true);
+  protected readonly errorCarga = signal<string | null>(null);
+  protected readonly cosecha = signal<DetalleCosecha | undefined>(undefined);
+  protected readonly enviando = signal(false);
+  protected readonly errorSolicitud = signal<string | null>(null);
 
   protected readonly formulario = new FormGroup({
     cantidad: new FormControl<number | null>(null, [
@@ -63,26 +67,67 @@ export class DetalleCosechaComponent {
       : undefined;
   });
 
+  constructor() {
+    inject(ActivatedRoute)
+      .paramMap.pipe(
+        map((params) => params.get('id') ?? ''),
+        switchMap((id) => {
+          this.cargando.set(true);
+          this.errorCarga.set(null);
+          this.cosecha.set(undefined);
+          return this.servicio.obtener(id).pipe(
+            catchError((err: unknown) => {
+              this.errorCarga.set(
+                err instanceof HttpErrorResponse && err.error?.mensaje
+                  ? String(err.error.mensaje)
+                  : parsearErrorAuth(err).mensaje,
+              );
+              return of(undefined);
+            }),
+          );
+        }),
+        takeUntilDestroyed(),
+      )
+      .subscribe((detalle) => {
+        this.cosecha.set(detalle);
+        this.cargando.set(false);
+      });
+
+    this.cantidad.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.errorSolicitud.set(null);
+    });
+  }
+
+  protected readonly etiquetaFinca = etiquetaFinca;
+
   protected colones(monto: number): string {
     return colones.format(monto);
   }
 
   protected enviar(): void {
     const cosecha = this.cosecha();
-    if (!cosecha || this.formulario.invalid) {
+    if (!cosecha || this.formulario.invalid || this.enviando()) {
       this.formulario.markAllAsTouched();
       return;
     }
+
+    this.enviando.set(true);
+    this.errorSolicitud.set(null);
     this.servicio
       .enviarSolicitud({
         cosechaId: cosecha.id,
         kilos: this.cantidad.value ?? 0,
         precioKg: cosecha.precioKg,
       })
-      .subscribe(() => this.router.navigate(['/tostador/solicitudes']));
+      .pipe(finalize(() => this.enviando.set(false)))
+      .subscribe({
+        next: () => void this.router.navigate(['/tostador/solicitudes']),
+        error: (err: ErrorSolicitud) => {
+          this.errorSolicitud.set(err.errores?.['cantidadKg'] ?? err.mensaje);
+        },
+      });
   }
 
-  // No se puede pedir más de lo que el cafetalero tiene disponible
   private validarDisponible(control: AbstractControl): ValidationErrors | null {
     const disponible = this.cosecha()?.kgDisponibles ?? 0;
     const pedido = control.value as number | null;

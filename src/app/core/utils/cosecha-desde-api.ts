@@ -1,3 +1,4 @@
+import { estadoCosechaDesdeApi } from '../mappers/dashboard-cafetalero.mapper';
 import { Cosecha, CosechaResponseApi, ProcesoReparto } from '../models/cosecha.model';
 
 // Campos del backend que se llaman distinto en el formulario
@@ -34,7 +35,7 @@ export function cosechaDesdeApi(api: CosechaResponseApi): Cosecha {
     proceso: procesoPrincipal(api.procesos),
     codigoLote: api.codigoLote,
     kgDisponibles: api.kgDisponibles,
-    estado: api.estado === 'DISPONIBLE' ? 'Disponible' : 'En beneficiado',
+    estado: estadoCosechaDesdeApi(api.estado),
   };
 }
 

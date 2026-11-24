@@ -2,7 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, input, output } from '@angular/core';
 
 import { Cosecha } from '../../../../core/models/cosecha.model';
-import { formatearColones } from '../../../../shared/utils/formato';
+import { etiquetaFinca, formatearColones } from '../../../../shared/utils/formato';
 
 @Component({
   selector: 'app-resumen-cosecha',
@@ -17,10 +17,7 @@ export class ResumenCosechaComponent {
   readonly registrarOtra = output<void>();
   readonly verCosecha = output<string>();
 
-  protected readonly etiquetaFinca = computed(() => {
-    const nombre = this.cosecha().fincaNombre ?? '';
-    return /^finca\b/i.test(nombre) ? nombre : `Finca ${nombre}`;
-  });
+  protected readonly etiquetaFinca = computed(() => etiquetaFinca(this.cosecha().fincaNombre ?? ''));
 
   protected readonly precioKg = computed(() => formatearColones(this.cosecha().precioKg));
 

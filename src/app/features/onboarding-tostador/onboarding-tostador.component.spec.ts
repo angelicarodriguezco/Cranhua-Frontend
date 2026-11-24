@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
@@ -14,6 +14,7 @@ import {
 } from './onboarding-tostador.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 import { responderCantones } from '../../core/testing/cantones-de-prueba';
+import { NEGOCIO_API, URL_TOSTADORES } from '../../core/testing/negocio-tueste.fixture';
 
 const TIBAS: Coordenada = { lat: 9.959, lng: -84.082 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
@@ -22,6 +23,7 @@ describe('OnboardingTostadorComponent', () => {
   let fixture: ComponentFixture<OnboardingTostadorComponent>;
   let componente: OnboardingTostadorComponent;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -35,6 +37,7 @@ describe('OnboardingTostadorComponent', () => {
     }).compileComponents();
 
     conSesionDeEjemplo();
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(OnboardingTostadorComponent);
     responderCantones();
     componente = fixture.componentInstance;
@@ -74,6 +77,16 @@ describe('OnboardingTostadorComponent', () => {
     clic('Medio');
   }
 
+  function crearCuenta() {
+    clic('Empezar a registrar');
+    llenar();
+    clic('Crear cuenta de tostador');
+    const peticion = http.expectOne(URL_TOSTADORES);
+    peticion.flush(NEGOCIO_API);
+    fixture.detectChanges();
+    return peticion.request;
+  }
+
   it('da la bienvenida con el nombre de la sesión', () => {
     expect(pagina.textContent).toContain('Rodrigo');
     expect(pagina.querySelector('.avatar')?.textContent).toBe('R');
@@ -98,6 +111,7 @@ describe('OnboardingTostadorComponent', () => {
     clic('Empezar a registrar');
     clic('Crear cuenta de tostador');
 
+    http.expectNone(URL_TOSTADORES);
     expect(pasoActual()).toBe('Paso 2 de 3');
     expect(pagina.textContent).toContain('Poné el nombre de tu negocio.');
     expect(pagina.textContent).toContain('Poné un teléfono de contacto.');
@@ -148,18 +162,25 @@ describe('OnboardingTostadorComponent', () => {
     expect(boton('Oscuro').getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('muestra el resumen y va al dashboard del tostador', () => {
-    clic('Empezar a registrar');
-    llenar();
-    clic('Crear cuenta de tostador');
+  it('crea el negocio en el backend, muestra el resumen y va al dashboard', () => {
+    const { method, body } = crearCuenta();
 
+    expect(method).toBe('POST');
+    expect(body).toEqual(
+      jasmine.objectContaining({
+        nombre: 'Tostaduría Volcán',
+        telefono: '+506 8888-1234',
+        canton: 'Tibás',
+        provincia: 'San José',
+        estilos: ['CLARO', 'MEDIO'],
+      }),
+    );
     expect(pasoActual()).toBe('Paso 3 de 3');
     const resumen = pagina.querySelector('.resumen')!.textContent!;
     expect(resumen).toContain('Tostaduría Volcán');
     expect(resumen).toContain('Mariana Castro');
     expect(resumen).toContain('Tibás, San José');
     expect(resumen).toContain('Claro y Medio');
-    expect(componente['registrado']()?.telefono).toBe('+506 8888-1234');
 
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
@@ -167,11 +188,27 @@ describe('OnboardingTostadorComponent', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith(RUTA_DASHBOARD_TOSTADOR);
   });
 
-  it('vuelve al formulario con los datos para editarlos', () => {
+  it('muestra el error del backend y deja corregir', () => {
     clic('Empezar a registrar');
     llenar();
     clic('Crear cuenta de tostador');
-    const id = componente['registrado']()!.id;
+    expect(boton('Crear cuenta de tostador').disabled).toBeTrue();
+
+    http
+      .expectOne(URL_TOSTADORES)
+      .flush(
+        { mensaje: 'Tu cuenta ya tiene un negocio registrado.' },
+        { status: 409, statusText: 'Conflict' },
+      );
+    fixture.detectChanges();
+
+    expect(pasoActual()).toBe('Paso 2 de 3');
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain('ya tiene un negocio');
+    expect(boton('Crear cuenta de tostador').disabled).toBeFalse();
+  });
+
+  it('vuelve al formulario con los datos para editarlos', () => {
+    crearCuenta();
 
     clic('Editar información');
     expect(pasoActual()).toBe('Paso 2 de 3');
@@ -181,23 +218,26 @@ describe('OnboardingTostadorComponent', () => {
 
     componente['formulario'].controls.nombre.setValue('Volcán Tostadores');
     clic('Guardar cambios');
+    const peticion = http.expectOne(`${URL_TOSTADORES}/${NEGOCIO_API.id}`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.body.nombre).toBe('Volcán Tostadores');
+    peticion.flush({ ...NEGOCIO_API, nombre: 'Volcán Tostadores' });
+    fixture.detectChanges();
 
     expect(pasoActual()).toBe('Paso 3 de 3');
-    expect(componente['registrado']()).toEqual(
-      jasmine.objectContaining({ id, nombre: 'Volcán Tostadores' }),
-    );
+    expect(pagina.querySelector('.resumen')!.textContent).toContain('Volcán Tostadores');
   });
 
   it('descarta los cambios al cancelar la edición', () => {
-    clic('Empezar a registrar');
-    llenar();
-    clic('Crear cuenta de tostador');
+    crearCuenta();
 
     clic('Editar información');
     componente['formulario'].controls.nombre.setValue('Otro nombre');
+    componente['pin'].set(OCEANO);
     clic('Cancelar');
 
     expect(pasoActual()).toBe('Paso 3 de 3');
     expect(componente['formulario'].controls.nombre.value).toBe('Tostaduría Volcán');
+    expect(componente['pin']()).toEqual(TIBAS);
   });
 });

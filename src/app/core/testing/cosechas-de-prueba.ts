@@ -23,7 +23,7 @@ export function cosechaApi(cambios: Partial<CosechaResponseApi> = {}): CosechaRe
     puntajeSca: 88.25,
     precioKg: 4500,
     kgDisponibles: 720,
-    estado: 'DISPONIBLE',
+    estado: 'BORRADOR',
     codigoLote: null,
     fincaNombre: 'Finca La Catalina',
     ...cambios,

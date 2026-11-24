@@ -4,7 +4,7 @@ import { AbstractControl, ReactiveFormsModule } from '@angular/forms';
 import { map } from 'rxjs';
 
 import { ESTILOS_TUESTE } from '../../../../core/models/negocio-tueste.model';
-import { LoteComprado, Tueste } from '../../../../core/models/tueste.model';
+import { ErrorTueste, LoteComprado, Tueste } from '../../../../core/models/tueste.model';
 import { TuesteService, calcularMerma } from '../../../../core/services/tueste.service';
 import {
   crearFormularioTueste,
@@ -31,6 +31,8 @@ export class EditarTuesteComponent {
   protected readonly tueste = signal<Tueste | null>(null);
   protected readonly lote = signal<LoteComprado | null>(null);
   private readonly dialogo = viewChild.required<ElementRef<HTMLDialogElement>>('dialogo');
+  private readonly errorApiPesoVerde = signal<string | null>(null);
+  private readonly errorApiPesoTostado = signal<string | null>(null);
 
   protected readonly niveles = ESTILOS_TUESTE;
   protected readonly formulario = crearFormularioTueste(() => this.lote()?.kg ?? null);
@@ -51,6 +53,8 @@ export class EditarTuesteComponent {
   abrir(tueste: Tueste, lote: LoteComprado): void {
     this.tueste.set(tueste);
     this.lote.set(lote);
+    this.errorApiPesoVerde.set(null);
+    this.errorApiPesoTostado.set(null);
     this.formulario.reset({
       loteId: tueste.loteId,
       nivel: tueste.nivel,
@@ -68,11 +72,11 @@ export class EditarTuesteComponent {
   }
 
   protected errorPesoVerde(): string | null {
-    return errorPesoVerde(this.formulario);
+    return errorPesoVerde(this.formulario) ?? this.errorApiPesoVerde();
   }
 
   protected errorPesoTostado(): string | null {
-    return errorPesoTostado(this.formulario);
+    return errorPesoTostado(this.formulario) ?? this.errorApiPesoTostado();
   }
 
   protected guardar(): void {
@@ -80,6 +84,8 @@ export class EditarTuesteComponent {
     if (this.formulario.invalid) {
       return;
     }
+    this.errorApiPesoVerde.set(null);
+    this.errorApiPesoTostado.set(null);
     const { nivel, pesoVerdeKg, pesoTostadoKg, fecha, notas } = this.formulario.getRawValue();
     this.tuesteService
       .actualizar(this.tueste()!.id, {
@@ -89,9 +95,15 @@ export class EditarTuesteComponent {
         fecha,
         notas: notas.trim() || null,
       })
-      .subscribe((tueste) => {
-        this.cerrar();
-        this.guardado.emit(tueste);
+      .subscribe({
+        next: (tueste) => {
+          this.cerrar();
+          this.guardado.emit(tueste);
+        },
+        error: (error: ErrorTueste) => {
+          this.errorApiPesoVerde.set(error.errores['pesoVerdeKg'] ?? null);
+          this.errorApiPesoTostado.set(error.errores['pesoTostadoKg'] ?? null);
+        },
       });
   }
 
@@ -99,7 +111,6 @@ export class EditarTuesteComponent {
     this.dialogo().nativeElement.close();
   }
 
-  // Esc: no todos los navegadores disparan después el evento close, así que se cierra a mano
   protected alCancelar(evento: Event): void {
     evento.preventDefault();
     this.cerrar();

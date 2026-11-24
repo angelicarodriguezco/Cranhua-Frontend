@@ -3,18 +3,129 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { RouterLink, provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
 
-import { MisTostadosComponent } from './mis-tostados.component';
+import { ErrorTueste, LoteComprado, LotesComprados, Tueste } from '../../core/models/tueste.model';
+import { TuesteService } from '../../core/services/tueste.service';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { MisTostadosComponent } from './mis-tostados.component';
+
+const LOTES: LoteComprado[] = [
+  {
+    id: 'l-catalina-caturra',
+    codigoLote: 'CRH-2026-0101',
+    finca: 'La Catalina',
+    variedad: 'Caturra',
+    proceso: null,
+    kg: 60,
+    fechaCompra: '2026-10-06',
+    codigoTrazabilidad: 'CRH-2026-0101',
+  },
+  {
+    id: 'l-monte-alto-geisha',
+    codigoLote: 'CRH-2026-0102',
+    finca: 'Monte Alto',
+    variedad: 'Geisha',
+    proceso: null,
+    kg: 30,
+    fechaCompra: '2026-10-14',
+    codigoTrazabilidad: 'CRH-2026-0102',
+  },
+  {
+    id: 'l-los-robles-catuai',
+    codigoLote: 'CRH-2026-0103',
+    finca: 'Los Robles',
+    variedad: 'Catuaí',
+    proceso: null,
+    kg: 45,
+    fechaCompra: '2026-10-22',
+    codigoTrazabilidad: null,
+  },
+  {
+    id: 'l-cerro-verde-bourbon',
+    codigoLote: 'CRH-2026-0104',
+    finca: 'Cerro Verde',
+    variedad: 'Bourbon',
+    proceso: null,
+    kg: 25,
+    fechaCompra: '2026-10-29',
+    codigoTrazabilidad: null,
+  },
+  {
+    id: 'l-el-cedral-villa-sarchi',
+    codigoLote: 'CRH-2026-0098',
+    finca: 'El Cedral',
+    variedad: 'Villa Sarchí',
+    proceso: null,
+    kg: 40,
+    fechaCompra: '2026-09-18',
+    codigoTrazabilidad: 'CRH-2026-0098',
+  },
+];
+
+const INDICADORES = { lotes: 5, kg: 200, conCodigo: 3 };
+
+const TUESTES_CATALINA: Tueste[] = [
+  {
+    id: 'tu-catalina-1',
+    loteId: 'l-catalina-caturra',
+    nivel: 'Medio',
+    pesoVerdeKg: 12,
+    pesoTostadoKg: 10.2,
+    fecha: '2026-10-21',
+    notas: 'Desarrollo de 1:45 después del primer crack.',
+    codigoTrazabilidad: 'CRH-2026-0101',
+  },
+  {
+    id: 'tu-catalina-2',
+    loteId: 'l-catalina-caturra',
+    nivel: 'Oscuro',
+    pesoVerdeKg: 15,
+    pesoTostadoKg: 12.4,
+    fecha: '2026-10-30',
+    notas: 'Para espresso de la casa.',
+    codigoTrazabilidad: 'CRH-2026-0101',
+  },
+];
 
 describe('MisTostadosComponent', () => {
   let fixture: ComponentFixture<MisTostadosComponent>;
   let pagina: HTMLElement;
+  let tuesteService: jasmine.SpyObj<TuesteService>;
 
   beforeEach(async () => {
+    tuesteService = jasmine.createSpyObj<TuesteService>('TuesteService', [
+      'lotesComprados',
+      'generarCodigo',
+      'tuestesDelLote',
+      'actualizar',
+    ]);
+    tuesteService.lotesComprados.and.returnValue(
+      of<LotesComprados>({ indicadores: INDICADORES, lotes: LOTES }),
+    );
+    tuesteService.generarCodigo.and.callFake((id) => {
+      const lote = LOTES.find((l) => l.id === id)!;
+      return of({
+        lote: { ...lote, codigoTrazabilidad: lote.codigoLote },
+        tostador: 'Mario Brenes',
+      });
+    });
+    tuesteService.tuestesDelLote.and.callFake((loteId) =>
+      of(TUESTES_CATALINA.filter((t) => t.loteId === loteId)),
+    );
+    tuesteService.actualizar.and.callFake((id, cambios) => {
+      const actual = TUESTES_CATALINA.find((t) => t.id === id)!;
+      return of({ ...actual, ...cambios });
+    });
+
     await TestBed.configureTestingModule({
       imports: [MisTostadosComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: TuesteService, useValue: tuesteService },
+      ],
     }).compileComponents();
 
     conSesionDeEjemplo();
@@ -49,7 +160,6 @@ describe('MisTostadosComponent', () => {
   }
 
   function dialogo(): HTMLDialogElement {
-    // El de la ficha; el popup de edición vive dentro de app-editar-tueste
     return pagina.querySelector(':scope > dialog')!;
   }
 
@@ -57,7 +167,7 @@ describe('MisTostadosComponent', () => {
     return fixture.debugElement.query(By.css(selector)).injector.get(RouterLink).href ?? '';
   }
 
-  it('muestra los 3 indicadores calculados de los lotes', () => {
+  it('muestra los 3 indicadores del API', () => {
     const indicadores = [...pagina.querySelectorAll('.indicadores article')].map((a) => [
       a.querySelector('strong')!.textContent!.trim(),
       a.querySelector('span')!.textContent!.trim(),
@@ -90,11 +200,11 @@ describe('MisTostadosComponent', () => {
   describe('al generar el código', () => {
     beforeEach(() => clic(boton(fila('CRH-2026-0103'), 'Generar código')));
 
-    it('abre la ficha en un diálogo sobre la tabla', () => {
+    it('abre la ficha en un diálogo con el código del backend', () => {
       expect(dialogo().open).toBeTrue();
       expect(pagina.querySelector('.tabla-lotes')).not.toBeNull();
       expect(texto(':scope > dialog h2')).toBe('Código generado');
-      expect(texto('.codigo')).toBe('TRZ-0103-RS');
+      expect(texto('.codigo')).toBe('CRH-2026-0103');
 
       const datos = Object.fromEntries(
         [...pagina.querySelectorAll('.ficha__datos div')].map((d) => [
@@ -105,9 +215,9 @@ describe('MisTostadosComponent', () => {
       expect(datos).toEqual(
         jasmine.objectContaining({
           'Finca de origen': 'Los Robles',
-          Variedad: 'Catuaí, Lavado',
+          Variedad: 'Catuaí',
           Kilos: '45 kg',
-          Tostador: 'Rodrigo Solís Ureña',
+          Tostador: 'Mario Brenes',
         }),
       );
 
@@ -144,15 +254,16 @@ describe('MisTostadosComponent', () => {
       const blob = crearUrl.calls.mostRecent().args[0] as Blob;
       expect(blob.type).toBe('image/svg+xml');
       const enlace = descargar.calls.mostRecent().object as HTMLAnchorElement;
-      expect(enlace.download).toBe('trazabilidad-TRZ-0103-RS.svg');
+      expect(enlace.download).toBe('trazabilidad-CRH-2026-0103.svg');
     });
   });
 
-  it('Ver código abre la ficha en un diálogo', () => {
+  it('Ver código abre la ficha con el código del lote y el tostador de sesión', () => {
     clic(boton(fila('CRH-2026-0102'), 'Ver código'));
     expect(dialogo().open).toBeTrue();
     expect(texto(':scope > dialog h2')).toBe('Código de trazabilidad');
-    expect(texto('.codigo')).toBe('TRZ-0102-MC');
+    expect(texto('.codigo')).toBe('CRH-2026-0102');
+    expect(texto('.ficha__datos div:nth-child(4) dd')).toBe('Rodrigo Solís Ureña');
   });
 
   describe('Ver tuestes', () => {
@@ -162,6 +273,7 @@ describe('MisTostadosComponent', () => {
 
       expect(verTuestes.getAttribute('aria-expanded')).toBe('true');
       expect(texto('#titulo-tuestes')).toBe('Tuestes del lote CRH-2026-0101');
+      expect(texto('.seccion__sub')).toContain('Finca La Catalina · Caturra');
       const filas = [...pagina.querySelectorAll<HTMLTableRowElement>('.tabla-tuestes tbody tr')];
       expect(filas.length).toBe(2);
       expect([...filas[0].cells].slice(0, 5).map((c) => c.textContent!.trim())).toEqual([
@@ -200,7 +312,7 @@ describe('MisTostadosComponent', () => {
       it('abre un popup con los datos del tueste', () => {
         expect(editor().open).toBeTrue();
         expect(editor().querySelector('h2')!.textContent).toContain('Editar tueste');
-        expect(editor().querySelector('.editor__sub')!.textContent).toContain('CRH-2026-0101-T01');
+        expect(editor().querySelector('.editor__sub')!.textContent).toContain('CRH-2026-0101');
         expect(editor().querySelector('.nivel:has(input:checked)')!.textContent!.trim()).toBe(
           'Medio',
         );
@@ -216,6 +328,27 @@ describe('MisTostadosComponent', () => {
         expect(editor().querySelector('.campo__error')!.textContent!.trim()).toBe(
           'El lote tiene 60 kg; el peso verde no puede ser mayor.',
         );
+      });
+
+      it('muestra errores de peso del API al guardar', () => {
+        const error: ErrorTueste = {
+          mensaje: 'Pesos incoherentes',
+          errores: {
+            pesoVerdeKg: 'El peso verde supera el disponible del lote.',
+            pesoTostadoKg: 'El peso tostado no puede superar el verde.',
+          },
+        };
+        tuesteService.actualizar.and.returnValue(throwError(() => error));
+
+        escribir('#editar-peso-tostado', '9');
+        guardar();
+
+        expect(editor().open).toBeTrue();
+        const mensajes = [...editor().querySelectorAll('.campo__error')].map((e) =>
+          e.textContent!.trim(),
+        );
+        expect(mensajes).toContain('El peso verde supera el disponible del lote.');
+        expect(mensajes).toContain('El peso tostado no puede superar el verde.');
       });
 
       it('guarda, cierra el popup y actualiza la fila', () => {

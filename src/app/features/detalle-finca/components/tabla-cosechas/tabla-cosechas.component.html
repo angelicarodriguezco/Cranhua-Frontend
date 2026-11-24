@@ -23,10 +23,9 @@
             <td>
               <span
                 class="pill"
-                [class.pill-disponible]="cosecha.estado === 'Disponible'"
-                [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
-                [class.pill-catacion]="cosecha.estado === 'En catación'"
-                [class.pill-vendida]="cosecha.estado === 'Vendida'"
+                [class.pill-borrador]="cosecha.estado === 'Borrador'"
+                [class.pill-publicada]="cosecha.estado === 'Publicada'"
+                [class.pill-agotada]="cosecha.estado === 'Agotada'"
               >
                 {{ cosecha.estado }}
               </span>

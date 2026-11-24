@@ -1,4 +1,4 @@
-import { EstadoCosecha } from './dashboard-cafetalero.model';
+import { EstadoCosecha, EstadoCosechaApi } from './dashboard-cafetalero.model';
 
 export interface ProcesoReparto {
   proceso: string;
@@ -91,7 +91,7 @@ export interface CosechaResponseApi {
   puntajeSca: number | null;
   precioKg: number;
   kgDisponibles: number | null;
-  estado: 'EN_BENEFICIADO' | 'DISPONIBLE';
+  estado: EstadoCosechaApi;
   codigoLote: string | null;
   fincaNombre?: string;
 }

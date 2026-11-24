@@ -10,17 +10,30 @@
       <a routerLink="/cafetalero/registrar-cosecha" class="cta">+ Registrar cosecha</a>
     </header>
 
+    @if (error(); as mensaje) {
+      <div class="error-pagina" role="alert">
+        <p>{{ mensaje }}</p>
+        <button type="button" class="cta" (click)="reintentar()">Reintentar</button>
+      </div>
+    }
+
     <section class="indicadores" aria-label="Indicadores">
       <a class="glass tarjeta-enlace" routerLink="/cafetalero/fincas">
-        <strong>{{ indicadores().fincasRegistradas }}</strong>
+        <strong>{{ cargando() ? '—' : (indicadores()?.fincasRegistradas ?? '—') }}</strong>
         <span>Fincas registradas</span>
       </a>
       <a class="glass tarjeta-enlace" routerLink="/cafetalero/historial">
-        <strong>{{ indicadores().cosechasActivas }}</strong>
+        <strong>{{ cargando() ? '—' : (indicadores()?.cosechasActivas ?? '—') }}</strong>
         <span>Cosechas activas</span>
       </a>
       <a class="glass tarjeta-enlace" routerLink="/cafetalero/historial">
-        <strong>{{ indicadores().kgDisponibles }} kg</strong>
+        <strong>
+          @if (cargando() || !indicadores()) {
+            —
+          } @else {
+            {{ indicadores()!.kgDisponibles }} kg
+          }
+        </strong>
         <span>Disponible para tostadores</span>
       </a>
       <button
@@ -28,7 +41,7 @@
         class="glass tarjeta-enlace kpi-pendientes"
         (click)="seccionSolicitudes.scrollIntoView({ behavior: 'smooth' })"
       >
-        <strong>{{ indicadores().solicitudesPendientes }}</strong>
+        <strong>{{ cargando() ? '—' : (indicadores()?.solicitudesPendientes ?? '—') }}</strong>
         <span>Solicitudes pendientes</span>
       </button>
     </section>
@@ -36,30 +49,51 @@
     <section class="solicitudes glass" aria-labelledby="titulo-solicitudes" #seccionSolicitudes>
       <div class="seccion-cabecera">
         <h2 id="titulo-solicitudes">Solicitudes de tostadores</h2>
-        <span class="badge">{{ indicadores().solicitudesPendientes }} pendientes</span>
+        <span class="badge">
+          {{ cargando() ? '—' : (indicadores()?.solicitudesPendientes ?? 0) }} pendientes
+        </span>
       </div>
+
+      @if (errorSolicitudes(); as mensaje) {
+        <p class="error-solicitudes" role="alert">{{ mensaje }}</p>
+      }
 
       <ul>
         @for (solicitud of solicitudes(); track solicitud.id) {
           <li>
             <div>
               <p>{{ solicitud.nombreTostador }} solicita {{ solicitud.kgSolicitados }} kg</p>
-              <p class="detalle">
-                Cosecha {{ solicitud.variedad }} · Proceso {{ solicitud.proceso }} · Finca
-                {{ solicitud.finca }}
-              </p>
+              <p class="detalle">Cosecha {{ solicitud.variedad }} · Finca {{ solicitud.finca }}</p>
             </div>
             <div class="acciones">
-              <button type="button" class="btn-rechazar" (click)="rechazar(solicitud.id)">
+              <button
+                type="button"
+                class="btn-rechazar"
+                [disabled]="respondiendo() !== null"
+                (click)="rechazar(solicitud.id)"
+              >
                 Rechazar
               </button>
-              <button type="button" class="btn-aprobar" (click)="aprobar(solicitud.id)">
-                Aprobar
+              <button
+                type="button"
+                class="btn-aprobar"
+                [disabled]="respondiendo() !== null"
+                (click)="aprobar(solicitud.id)"
+              >
+                {{ respondiendo() === solicitud.id ? 'Guardando…' : 'Aprobar' }}
               </button>
             </div>
           </li>
         } @empty {
-          <li class="vacio">No hay solicitudes pendientes.</li>
+          <li class="vacio">
+            {{
+              cargando()
+                ? 'Cargando solicitudes…'
+                : error()
+                  ? 'No pudimos cargar las solicitudes.'
+                  : 'No hay solicitudes pendientes.'
+            }}
+          </li>
         }
       </ul>
     </section>
@@ -70,20 +104,41 @@
         <a routerLink="/cafetalero/fincas">Ver todas</a>
       </div>
 
-      <div class="fincas-grid">
-        @for (finca of fincas(); track finca.id) {
-          <article>
-            <h3>Finca {{ finca.nombre }}</h3>
-            <p>{{ finca.ubicacion }}</p>
-            <p>
-              {{ finca.cosechasActivas }}
-              {{ finca.cosechasActivas === 1 ? 'cosecha' : 'cosechas' }}
-            </p>
-            <a [routerLink]="['/cafetalero/fincas', finca.id]">Ver detalle →</a>
-          </article>
-        }
-        <a routerLink="/cafetalero/fincas/registrar" class="nueva-finca">+ Registrar nueva finca</a>
-      </div>
+      @if (errorFincas(); as mensaje) {
+        <div class="estado-seccion" role="alert">
+          <p>{{ mensaje }}</p>
+          <button type="button" class="cta" (click)="reintentarFincas()">Reintentar</button>
+        </div>
+      } @else if (cargandoFincas()) {
+        <p class="estado-seccion" role="status">Cargando tus fincas…</p>
+      } @else if (fincas().length === 0) {
+        <div class="estado-seccion">
+          <p>Todavía no registraste fincas.</p>
+          <a routerLink="/cafetalero/fincas/registrar" class="cta">+ Registrar finca</a>
+        </div>
+      } @else {
+        <div class="fincas-grid">
+          @for (finca of fincas(); track finca.id) {
+            <article>
+              <h3>Finca {{ finca.nombre }}</h3>
+              <p>{{ ubicacionFinca(finca) }}</p>
+              <p>
+                {{ cosechasActivas(finca) }}
+                {{ cosechasActivas(finca) === 1 ? 'cosecha' : 'cosechas' }}
+              </p>
+              <div class="finca-acciones">
+                <a [routerLink]="['/cafetalero/fincas', finca.id]">Ver detalle →</a>
+                <a routerLink="/explorar" [queryParams]="{ centrar: finca.id, resaltar: finca.id }">
+                  Ver lotes trazables
+                </a>
+              </div>
+            </article>
+          }
+          <a routerLink="/cafetalero/fincas/registrar" class="nueva-finca"
+            >+ Registrar nueva finca</a
+          >
+        </div>
+      }
     </section>
 
     <section class="cosechas glass" aria-labelledby="titulo-cosechas">
@@ -119,11 +174,24 @@
                 <td>
                   <span
                     class="pill"
-                    [class.pill-disponible]="cosecha.estado === 'Disponible'"
-                    [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
+                    [class.pill-borrador]="cosecha.estado === 'Borrador'"
+                    [class.pill-publicada]="cosecha.estado === 'Publicada'"
+                    [class.pill-agotada]="cosecha.estado === 'Agotada'"
                   >
                     {{ cosecha.estado }}
                   </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="vacio-tabla">
+                  {{
+                    cargando()
+                      ? 'Cargando cosechas…'
+                      : error()
+                        ? 'No pudimos cargar las cosechas.'
+                        : 'Todavía no hay cosechas.'
+                  }}
                 </td>
               </tr>
             }

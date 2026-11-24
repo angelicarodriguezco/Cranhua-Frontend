@@ -1,7 +1,6 @@
 import { Finca, FincaResponseApi } from '../models/finca.model';
 import { usuarioDesdeNombreCompleto } from './nombre-usuario';
 
-// El usuario actual queda como propietario si es dueño; los demás van como adicionales
 export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
   const propietario = api.duenos.find((d) => d.id === usuarioId) ?? api.duenos[0];
   return {
@@ -23,6 +22,6 @@ export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
       .filter((d) => d !== propietario)
       .map((d) => usuarioDesdeNombreCompleto(d.id, d.nombreCompleto, '')),
     cosechasActivas: api.cosechasActivas,
-    kgDisponibles: api.kgDisponibles,
+    kgDisponibles: api.kgDisponibles == null ? undefined : Number(api.kgDisponibles),
   };
 }

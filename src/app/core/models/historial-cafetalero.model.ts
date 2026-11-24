@@ -1,24 +1,86 @@
-export type EstadoCosechaHistorial = 'Disponible' | 'En beneficiado' | 'En catación' | 'Vendida';
+import { EstadoCosecha, EstadoCosechaApi } from './dashboard-cafetalero.model';
 
-export interface CosechaHistorial {
-  id: string;
-  fecha: string;
-  variedad: string;
-  kilos: number;
-  estado: EstadoCosechaHistorial;
-}
+export type EstadoCosechaHistorial = EstadoCosecha;
+export type EstadoCosechaHistorialApi = EstadoCosechaApi;
 
-export interface LoteVendido {
-  codigo: string;
-  cosechaId: string;
-  comprador: string;
-  kilos: number;
-  precioColones: number;
-  fechaVenta: string;
+export interface Pagina<T> {
+  contenido: T[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
 }
 
 export interface IndicadoresHistorial {
   cosechasRegistradas: number;
   produccionTotalKg: number;
   lotesVendidos: number;
+}
+
+export interface IndicadoresHistorialApi {
+  cosechasRegistradas: number;
+  produccionTotalKg: number;
+  lotesVendidos: number;
+}
+
+export interface CosechaHistorialApi {
+  id: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  fechaInicio: string;
+  fechaFin: string;
+  cantidadCosechadaKg: number;
+  estado: EstadoCosechaHistorialApi;
+}
+
+export interface CosechaHistorial {
+  id: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  fechaInicio: string;
+  fechaFin: string;
+  cantidadCosechadaKg: number;
+  estado: EstadoCosechaHistorial;
+}
+
+export interface LoteVendidoApi {
+  id: string;
+  codigo: string;
+  cosechaId: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  comprador: string;
+  kg: number;
+  precioKg: number;
+  total: number;
+  vendidoEn: string;
+}
+
+export interface LoteVendido {
+  id: string;
+  codigo: string;
+  cosechaId: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  comprador: string;
+  kg: number;
+  precioKg: number;
+  total: number;
+  vendidoEn: string;
+}
+
+export interface HistorialCafetaleroResponseApi {
+  indicadores: IndicadoresHistorialApi;
+  cosechas: Pagina<CosechaHistorialApi>;
+  lotesVendidos: Pagina<LoteVendidoApi>;
+}
+
+export interface HistorialCafetalero {
+  indicadores: IndicadoresHistorial;
+  cosechas: CosechaHistorial[];
+  lotesVendidos: LoteVendido[];
 }

@@ -11,7 +11,7 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
-import { LoteComprado, Tueste } from '../../core/models/tueste.model';
+import { IndicadoresLotes, LoteComprado, Tueste } from '../../core/models/tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { TuesteService, calcularMerma } from '../../core/services/tueste.service';
@@ -32,7 +32,6 @@ const fechaCorta = new Intl.DateTimeFormat('es-CR', {
   year: 'numeric',
 });
 
-// yyyy-mm-dd como fecha local; new Date('2026-10-06') la toma en UTC y en Costa Rica sale el día 5
 function formatearFecha(iso: string): string {
   const [anio, mes, dia] = iso.split('-').map(Number);
   return fechaCorta.format(new Date(anio, mes - 1, dia));
@@ -54,22 +53,16 @@ export class MisTostadosComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
 
   protected readonly tema = this.dashboard.tema;
-  protected readonly nombreTostador = computed(() => {
+  private readonly nombreSesion = computed(() => {
     const usuario = this.sesion.usuario();
     return usuario ? `${usuario.nombre} ${usuario.apellidos}`.trim() : '';
   });
+  private readonly tostadorFicha = signal<string | null>(null);
+  protected readonly nombreTostador = computed(() => this.tostadorFicha() ?? this.nombreSesion());
 
   protected readonly lotes = signal<LoteComprado[]>([]);
-  protected readonly indicadores = computed(() => {
-    const lotes = this.lotes();
-    return {
-      lotes: lotes.length,
-      kg: lotes.reduce((total, l) => total + l.kg, 0),
-      conCodigo: lotes.filter((l) => l.codigoTrazabilidad).length,
-    };
-  });
+  protected readonly indicadores = signal<IndicadoresLotes>({ lotes: 0, kg: 0, conCodigo: 0 });
 
-  /** Lote cuya ficha de código está abierta en el diálogo */
   protected readonly ficha = signal<LoteComprado | null>(null);
   protected readonly recienGenerado = signal(false);
   private readonly dialogo = viewChild.required<ElementRef<HTMLDialogElement>>('dialogo');
@@ -83,12 +76,14 @@ export class MisTostadosComponent {
   protected readonly formatearFecha = formatearFecha;
 
   constructor() {
-    // Las compras más recientes primero
-    this.tuesteService
-      .lotesComprados()
-      .subscribe((lotes) =>
-        this.lotes.set([...lotes].sort((a, b) => b.fechaCompra.localeCompare(a.fechaCompra))),
-      );
+    this.tuesteService.lotesComprados().subscribe(({ lotes, indicadores }) => {
+      this.lotes.set([...lotes].sort((a, b) => b.fechaCompra.localeCompare(a.fechaCompra)));
+      this.indicadores.set(indicadores);
+    });
+  }
+
+  protected origen(lote: LoteComprado): string {
+    return lote.proceso ? `${lote.variedad}, ${lote.proceso}` : lote.variedad;
   }
 
   protected merma(tueste: Tueste): string {
@@ -97,26 +92,27 @@ export class MisTostadosComponent {
   }
 
   protected generarCodigo(lote: LoteComprado): void {
-    this.tuesteService.generarCodigo(lote.id).subscribe((actualizado) => {
-      this.lotes.update((lotes) => lotes.map((l) => (l.id === actualizado.id ? actualizado : l)));
-      this.abrirFicha(actualizado, true);
-    });
+    this.tuesteService
+      .generarCodigo(lote.id, { fechaCompra: lote.fechaCompra, proceso: lote.proceso })
+      .subscribe(({ lote: actualizado, tostador }) => {
+        this.lotes.update((lotes) => lotes.map((l) => (l.id === actualizado.id ? actualizado : l)));
+        this.indicadores.update((i) => ({ ...i, conCodigo: i.conCodigo + 1 }));
+        this.abrirFicha(actualizado, true, tostador);
+      });
   }
 
   protected verCodigo(lote: LoteComprado): void {
     this.abrirFicha(lote, false);
   }
 
-  // El foco vuelve a la acción de la fila. Al generar, el botón que lo tenía ya no existe: ahora
-  // es "Ver código", con el mismo id.
   protected cerrarFicha(): void {
     const lote = this.ficha()!;
     this.dialogo().nativeElement.close();
     this.ficha.set(null);
+    this.tostadorFicha.set(null);
     this.enfocar(`#codigo-${lote.id}`);
   }
 
-  // Esc: no todos los navegadores disparan después el evento close, así que se cierra a mano
   protected alCancelarFicha(evento: Event): void {
     evento.preventDefault();
     this.cerrarFicha();
@@ -150,18 +146,16 @@ export class MisTostadosComponent {
     enlace.href = url;
     enlace.download = `trazabilidad-${lote.codigoTrazabilidad}.svg`;
     enlace.click();
-    // Revocarla en el mismo tick puede cortar la descarga en Firefox
     setTimeout(() => URL.revokeObjectURL(url));
   }
 
-  private abrirFicha(lote: LoteComprado, recienGenerado: boolean): void {
+  private abrirFicha(lote: LoteComprado, recienGenerado: boolean, tostador?: string): void {
     this.recienGenerado.set(recienGenerado);
+    this.tostadorFicha.set(tostador ?? null);
     this.ficha.set(lote);
-    // Se abre después de pintar la ficha para que showModal() tenga botones a los que dar el foco
     afterNextRender(() => this.dialogo().nativeElement.showModal(), { injector: this.injector });
   }
 
-  // El panel y el cierre de la ficha cambian el contenido: el foco sigue al lector de pantalla
   private enfocar(selector: string): void {
     afterNextRender(() => this.host.nativeElement.querySelector<HTMLElement>(selector)?.focus(), {
       injector: this.injector,

@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
@@ -14,7 +16,11 @@ describe('PasoDatosCosechaComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PasoDatosCosechaComponent],
-      providers: [{ provide: FincaService, useValue: { misFincas: () => of(FINCAS_REGISTRADAS) } }],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: FincaService, useValue: { misFincas: () => of(FINCAS_REGISTRADAS) } },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PasoDatosCosechaComponent);

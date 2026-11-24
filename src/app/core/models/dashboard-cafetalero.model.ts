@@ -1,10 +1,17 @@
-export type EstadoCosecha = 'Disponible' | 'En beneficiado' | 'En catación' | 'Vendida';
+export type EstadoCosechaApi = 'BORRADOR' | 'PUBLICADA' | 'AGOTADA';
 
-export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada';
+export type EstadoCosecha = 'Borrador' | 'Publicada' | 'Agotada';
 
 export type TemaDashboard = 'claro' | 'oscuro';
 
 export interface IndicadoresDashboard {
+  fincasRegistradas: number;
+  cosechasActivas: number;
+  kgDisponibles: number;
+  solicitudesPendientes: number;
+}
+
+export interface IndicadoresDashboardApi {
   fincasRegistradas: number;
   cosechasActivas: number;
   kgDisponibles: number;
@@ -16,17 +23,38 @@ export interface SolicitudTostador {
   nombreTostador: string;
   kgSolicitados: number;
   variedad: string;
-  proceso: string;
   finca: string;
   cosechaId: string;
-  estado: EstadoSolicitud;
 }
+
+export interface SolicitudRecibidaApi {
+  id: string;
+  cosechaId: string;
+  nombreTostador: string;
+  variedad: string;
+  finca: string;
+  cantidadKg: number;
+  solicitadaEn: string;
+  estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
+}
+
+export type RespuestaSolicitud = 'APROBADA' | 'RECHAZADA';
 
 export interface FincaResumen {
   id: string;
   nombre: string;
   ubicacion: string;
   cosechasActivas: number;
+}
+
+export interface CosechaRecienteApi {
+  id: string;
+  fincaId: string;
+  finca: string;
+  variedad: string;
+  proceso: string;
+  kgDisponibles: number | null;
+  estado: EstadoCosechaApi;
 }
 
 export interface CosechaReciente {
@@ -38,6 +66,12 @@ export interface CosechaReciente {
   estado: EstadoCosecha;
 }
 
+export interface DashboardCafetaleroResponseApi {
+  indicadores: IndicadoresDashboardApi;
+  solicitudesRecientes: SolicitudRecibidaApi[];
+  cosechasRecientes: CosechaRecienteApi[];
+}
+
 export interface PerfilCafetaleroSidebar {
   iniciales: string;
   nombreCompleto: string;
@@ -47,6 +81,5 @@ export interface PerfilCafetaleroSidebar {
 export interface ResumenDashboard {
   indicadores: IndicadoresDashboard;
   solicitudes: SolicitudTostador[];
-  fincas: FincaResumen[];
   cosechas: CosechaReciente[];
 }

@@ -14,7 +14,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 
 import { ESTILOS_TUESTE, EstiloTueste } from '../../core/models/negocio-tueste.model';
-import { Tueste } from '../../core/models/tueste.model';
+import { ErrorTueste, LoteConKgPorTostar, Tueste } from '../../core/models/tueste.model';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { TuesteService, calcularMerma } from '../../core/services/tueste.service';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
@@ -29,7 +29,6 @@ function fechaNoFutura(control: AbstractControl<string>): ValidationErrors | nul
   return control.value && control.value > hoy() ? { fechaFutura: true } : null;
 }
 
-// Cruza los pesos entre sí y con el lote; los errores quedan en el grupo
 function pesosValidator(kgDelLote: (loteId: string | null) => number | null): ValidatorFn {
   return (grupo) => {
     const { loteId, pesoVerdeKg, pesoTostadoKg } = (grupo as FormularioTueste).getRawValue();
@@ -130,10 +129,12 @@ export class FormularioTuesteComponent {
   protected readonly modoEdicion = this.tuesteId !== null;
 
   protected readonly niveles = ESTILOS_TUESTE;
-  protected readonly lotes = toSignal(this.tuesteService.lotesComprados(), { initialValue: [] });
+  protected readonly lotes = signal<LoteConKgPorTostar[]>([]);
+  private readonly errorApiPesoVerde = signal<string | null>(null);
+  private readonly errorApiPesoTostado = signal<string | null>(null);
 
   protected readonly formulario = crearFormularioTueste(
-    (loteId) => this.lotes().find((l) => l.id === loteId)?.kg ?? null,
+    (loteId) => this.lotes().find((l) => l.id === loteId)?.kgPorTostar ?? null,
   );
 
   private readonly valores = toSignal(
@@ -173,11 +174,17 @@ export class FormularioTuesteComponent {
       });
       return;
     }
-    // "Crear tueste" desde un lote de Mis tostados trae ?lote=<id>
-    const loteId = this.ruta.queryParamMap.get('lote');
-    if (this.lotes().some((l) => l.id === loteId)) {
-      this.formulario.controls.loteId.setValue(loteId);
-    }
+    this.tuesteService.lotesConKgPorTostar().subscribe((lotes) => {
+      this.lotes.set(lotes);
+      const loteId = this.ruta.queryParamMap.get('lote');
+      if (loteId && lotes.some((l) => l.id === loteId)) {
+        this.formulario.controls.loteId.setValue(loteId);
+      }
+    });
+  }
+
+  protected origen(lote: LoteConKgPorTostar): string {
+    return lote.proceso ? `${lote.variedad}, ${lote.proceso}` : lote.variedad;
   }
 
   protected invalido(control: AbstractControl): boolean {
@@ -185,11 +192,11 @@ export class FormularioTuesteComponent {
   }
 
   protected errorPesoVerde(): string | null {
-    return errorPesoVerde(this.formulario);
+    return errorPesoVerde(this.formulario) ?? this.errorApiPesoVerde();
   }
 
   protected errorPesoTostado(): string | null {
-    return errorPesoTostado(this.formulario);
+    return errorPesoTostado(this.formulario) ?? this.errorApiPesoTostado();
   }
 
   protected guardar(): void {
@@ -197,6 +204,8 @@ export class FormularioTuesteComponent {
     if (this.formulario.invalid) {
       return;
     }
+    this.errorApiPesoVerde.set(null);
+    this.errorApiPesoTostado.set(null);
     const { loteId, nivel, pesoVerdeKg, pesoTostadoKg, fecha, notas } =
       this.formulario.getRawValue();
     const datos = {
@@ -209,14 +218,18 @@ export class FormularioTuesteComponent {
     const guardar$ = this.tuesteId
       ? this.tuesteService.actualizar(this.tuesteId, datos)
       : this.tuesteService.registrar({ ...datos, loteId: loteId! });
-    guardar$.subscribe((tueste) => {
-      this.guardado.set(tueste);
-      this.dialogo().nativeElement.showModal();
+    guardar$.subscribe({
+      next: (tueste) => {
+        this.guardado.set(tueste);
+        this.dialogo().nativeElement.showModal();
+      },
+      error: (error: ErrorTueste) => {
+        this.errorApiPesoVerde.set(error.errores['pesoVerdeKg'] ?? null);
+        this.errorApiPesoTostado.set(error.errores['pesoTostadoKg'] ?? null);
+      },
     });
   }
 
-  // Al crear se limpia el formulario para no guardar dos veces el mismo tueste; al editar se
-  // deja como está, porque volver a guardar solo lo actualiza.
   protected cerrarDialogo(): void {
     this.dialogo().nativeElement.close();
     if (!this.modoEdicion) {
@@ -225,7 +238,6 @@ export class FormularioTuesteComponent {
     this.guardado.set(null);
   }
 
-  // Esc: no todos los navegadores disparan después el evento close, así que se cierra a mano
   protected alCancelarDialogo(evento: Event): void {
     evento.preventDefault();
     this.cerrarDialogo();

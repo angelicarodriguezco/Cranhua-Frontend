@@ -56,7 +56,7 @@ const COSECHAS_ESPERANZA: Cosecha[] = [
     variedad: 'Catuaí',
     codigoLote: 'LE-2026-002',
     precioKg: 3800,
-    estado: 'EN_BENEFICIADO',
+    estado: 'BORRADOR',
     pesoTrasSeleccionKg: null,
     kgDisponibles: null,
   }),
@@ -131,7 +131,7 @@ describe('DetalleFincaComponent', () => {
     const filas = [...pagina.querySelectorAll('app-tabla-cosechas tbody tr')];
     expect(filas[0].textContent).toContain('96 kg');
     expect(filas[1].querySelectorAll('td')[4].textContent?.trim()).toBe('—');
-    expect(filas[1].textContent).toContain('En beneficiado');
+    expect(filas[1].textContent).toContain('Borrador');
   });
 
   it('resalta la cosecha que viene en ?cosecha=', async () => {

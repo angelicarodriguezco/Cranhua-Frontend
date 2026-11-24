@@ -22,14 +22,13 @@
   --cabecera-sub: color-mix(in srgb, var(--brand-text) 78%, transparent);
   --cta-bg: var(--brand-button);
   --cta-text: var(--brand-on-button);
-  --pill-disponible-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
-  --pill-disponible-text: var(--brand-on-dark);
-  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 16%, transparent);
-  --pill-beneficiado-text: var(--brand-heading);
-  --pill-catacion-bg: color-mix(in srgb, var(--brand-accent) 12%, transparent);
-  --pill-catacion-text: var(--brand-accent);
-  --pill-vendida-bg: color-mix(in srgb, var(--brand-nav) 8%, transparent);
-  --pill-vendida-text: color-mix(in srgb, var(--brand-text) 72%, transparent);
+  --pill-borrador-bg: color-mix(in srgb, var(--brand-button) 16%, transparent);
+  --pill-borrador-text: var(--brand-heading);
+  --pill-publicada-bg: color-mix(in srgb, var(--brand-nav) 88%, transparent);
+  --pill-publicada-text: var(--brand-on-dark);
+  --pill-agotada-bg: color-mix(in srgb, var(--brand-accent) 14%, transparent);
+  --pill-agotada-text: var(--brand-accent);
+  --error: var(--brand-accent);
 
   display: grid;
   grid-template-columns: minmax(14rem, 17.5rem) 1fr;
@@ -52,14 +51,12 @@
   --codigo: var(--brand-button-hover);
   --divider: color-mix(in srgb, var(--brand-on-dark) 14%, transparent);
   --cabecera-sub: color-mix(in srgb, var(--brand-on-dark) 72%, transparent);
-  --pill-disponible-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
-  --pill-disponible-text: var(--brand-on-dark);
-  --pill-beneficiado-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
-  --pill-beneficiado-text: var(--brand-button-hover);
-  --pill-catacion-bg: color-mix(in srgb, var(--brand-accent) 22%, transparent);
-  --pill-catacion-text: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
-  --pill-vendida-bg: color-mix(in srgb, var(--brand-on-dark) 8%, transparent);
-  --pill-vendida-text: color-mix(in srgb, var(--brand-on-dark) 72%, transparent);
+  --pill-borrador-bg: color-mix(in srgb, var(--brand-button) 14%, transparent);
+  --pill-borrador-text: var(--brand-button-hover);
+  --pill-publicada-bg: color-mix(in srgb, var(--brand-button) 18%, transparent);
+  --pill-publicada-text: var(--brand-on-dark);
+  --pill-agotada-bg: color-mix(in srgb, var(--brand-accent) 22%, transparent);
+  --pill-agotada-text: color-mix(in srgb, var(--brand-accent) 70%, var(--brand-on-dark));
 }
 
 .contenido {
@@ -96,6 +93,24 @@
   color: var(--cabecera-sub);
   font-size: 1.05rem;
   font-weight: 500;
+}
+
+.error-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--error);
+  color: var(--error);
+  font-size: 0.8125rem;
+}
+
+.error-pagina p {
+  margin: 0;
 }
 
 .cta {
@@ -260,24 +275,19 @@ tbody tr:hover td {
   font-weight: 600;
 }
 
-.pill-disponible {
-  background: var(--pill-disponible-bg);
-  color: var(--pill-disponible-text);
+.pill-borrador {
+  background: var(--pill-borrador-bg);
+  color: var(--pill-borrador-text);
 }
 
-.pill-beneficiado {
-  background: var(--pill-beneficiado-bg);
-  color: var(--pill-beneficiado-text);
+.pill-publicada {
+  background: var(--pill-publicada-bg);
+  color: var(--pill-publicada-text);
 }
 
-.pill-catacion {
-  background: var(--pill-catacion-bg);
-  color: var(--pill-catacion-text);
-}
-
-.pill-vendida {
-  background: var(--pill-vendida-bg);
-  color: var(--pill-vendida-text);
+.pill-agotada {
+  background: var(--pill-agotada-bg);
+  color: var(--pill-agotada-text);
 }
 
 @media (max-width: 1100px) {

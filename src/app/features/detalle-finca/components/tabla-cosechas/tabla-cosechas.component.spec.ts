@@ -24,7 +24,7 @@ describe('TablaCosechasComponent', () => {
   }
 
   it('muestra variedad, proceso, lote, precio, kg disponibles y estado', () => {
-    fixture.componentRef.setInput('cosechas', [cosechaDePrueba({ codigoLote: 'CRH-2026-0007' })]);
+    fixture.componentRef.setInput('cosechas', [cosechaDePrueba({ codigoLote: 'CRH-2026-0007', estado: 'PUBLICADA' })]);
     fixture.detectChanges();
 
     expect(celdas()).toEqual([
@@ -33,18 +33,18 @@ describe('TablaCosechasComponent', () => {
       'CRH-2026-0007',
       '₡4 500',
       '720 kg',
-      'Disponible',
+      'Publicada',
       'Editar →',
     ]);
   });
 
-  it('en beneficiado muestra "—" en lote y kg disponibles', () => {
+  it('sin pesos muestra "—" en lote y kg disponibles', () => {
     fixture.componentRef.setInput('cosechas', [
-      cosechaDePrueba({ estado: 'EN_BENEFICIADO', kgDisponibles: null, precioKg: 3800 }),
+      cosechaDePrueba({ estado: 'BORRADOR', kgDisponibles: null, precioKg: 3800 }),
     ]);
     fixture.detectChanges();
 
-    expect(celdas().slice(2, 6)).toEqual(['—', '₡3 800', '—', 'En beneficiado']);
+    expect(celdas().slice(2, 6)).toEqual(['—', '₡3 800', '—', 'Borrador']);
   });
 
   it('cada fila abre la edición de su cosecha', () => {

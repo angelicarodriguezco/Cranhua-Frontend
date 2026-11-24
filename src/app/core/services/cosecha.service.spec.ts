@@ -91,7 +91,7 @@ describe('CosechaService', () => {
         finca: 'Finca La Catalina',
         proceso: 'Lavado',
         kgDisponibles: 720,
-        estado: 'Disponible',
+        estado: 'Borrador',
       }),
     );
   });
@@ -105,7 +105,7 @@ describe('CosechaService', () => {
 
     expect(cosecha).toEqual(
       jasmine.objectContaining({
-        estado: 'Disponible',
+        estado: 'Borrador',
         proceso: 'Lavado',
         fincaNombre: 'Finca La Catalina',
         cantidadTotalKg: 1000,
@@ -118,14 +118,14 @@ describe('CosechaService', () => {
     );
   });
 
-  it('EN_BENEFICIADO se muestra como En beneficiado', () => {
+  it('deFinca trae las cosechas aunque falten pesos y nombre de finca', () => {
     let cosechas: Cosecha[] = [];
     servicio.deFinca('f-1').subscribe((lista) => (cosechas = lista));
     const peticion = http.expectOne(`${environment.apiUrl}/api/fincas/f-1/cosechas`);
     expect(peticion.request.withCredentials).toBeTrue();
     peticion.flush([
       cosechaApi({
-        estado: 'EN_BENEFICIADO',
+        estado: 'BORRADOR',
         pesoTrasSeleccionKg: null,
         caracolilloKg: null,
         kgDisponibles: null,
@@ -133,7 +133,7 @@ describe('CosechaService', () => {
       }),
     ]);
 
-    expect(cosechas[0].estado).toBe('En beneficiado');
+    expect(cosechas[0].estado).toBe('Borrador');
     expect(cosechas[0].kgDisponibles).toBeNull();
     expect(cosechas[0].separoCaracolillo).toBeNull();
     expect(cosechas[0].fincaNombre).toBeNull();
