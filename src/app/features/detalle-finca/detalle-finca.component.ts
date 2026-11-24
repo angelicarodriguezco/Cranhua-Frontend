@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 
-import { Cosecha } from '../../core/models/cosecha.model';
+import { Cosecha, ErrorCosecha } from '../../core/models/cosecha.model';
 import { Finca, Usuario } from '../../core/models/finca.model';
 import { CosechaService } from '../../core/services/cosecha.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
@@ -48,6 +48,8 @@ export class DetalleFincaComponent {
   protected readonly finca = signal<Finca | undefined>(undefined);
   protected readonly cosechas = signal<Cosecha[]>([]);
   protected readonly errorDueno = signal<string | null>(null);
+  protected readonly cosechaProcesando = signal<string | null>(null);
+  protected readonly errorCosecha = signal<string | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
   protected readonly avisoEliminar = AVISO_ELIMINAR_FINCA;
 
@@ -77,14 +79,21 @@ export class DetalleFincaComponent {
     };
   });
 
+  private readonly ruta = inject(ActivatedRoute);
+
+  protected readonly cosechaResaltada = toSignal(
+    this.ruta.queryParamMap.pipe(map((parametros) => parametros.get('cosecha'))),
+    { initialValue: null },
+  );
+
   constructor() {
-    inject(ActivatedRoute)
-      .paramMap.pipe(
+    this.ruta.paramMap
+      .pipe(
         map((parametros) => parametros.get('id') ?? ''),
         switchMap((id) =>
           forkJoin({
             finca: this.fincaService.obtener(id).pipe(catchError(() => of(undefined))),
-            cosechas: this.cosechaService.deFinca(id),
+            cosechas: this.cosechaService.deFinca(id).pipe(catchError(() => of([]))),
           }),
         ),
         takeUntilDestroyed(),
@@ -114,6 +123,21 @@ export class DetalleFincaComponent {
     this.fincaService.eliminar(finca.id).subscribe(() => {
       this.modalEliminarAbierto.set(false);
       void this.router.navigateByUrl('/cafetalero/fincas');
+    });
+  }
+
+  protected cambiarEstadoCosecha(id: string, estado: 'PUBLICADA' | 'BORRADOR'): void {
+    this.cosechaProcesando.set(id);
+    this.errorCosecha.set(null);
+    this.cosechaService.cambiarEstado(id, estado).subscribe({
+      next: (actualizada) => {
+        this.cosechas.update((lista) => lista.map((c) => (c.id === id ? actualizada : c)));
+        this.cosechaProcesando.set(null);
+      },
+      error: (error: ErrorCosecha) => {
+        this.errorCosecha.set(error.mensaje);
+        this.cosechaProcesando.set(null);
+      },
     });
   }
 

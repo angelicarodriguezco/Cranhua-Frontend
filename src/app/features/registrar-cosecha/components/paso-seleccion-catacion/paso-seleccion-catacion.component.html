@@ -16,7 +16,9 @@
           [attr.aria-invalid]="campoInvalido('pesoAntesKg')"
         />
         @if (campoInvalido('pesoAntesKg')) {
-          <p class="campo__error">Indicá el peso antes de la selección.</p>
+          <p class="campo__error">Indicá un peso antes de la selección mayor a 0.</p>
+        } @else if (erroresServidor()['pesoAntesKg']) {
+          <p class="campo__error">{{ erroresServidor()['pesoAntesKg'] }}</p>
         }
       </div>
 
@@ -35,7 +37,9 @@
           [attr.aria-invalid]="campoInvalido('pesoTrasSeleccionKg')"
         />
         @if (campoInvalido('pesoTrasSeleccionKg')) {
-          <p class="campo__error">Indicá el peso tras la selección.</p>
+          <p class="campo__error">Indicá un peso tras la selección mayor a 0.</p>
+        } @else if (erroresServidor()['pesoTrasSeleccionKg']) {
+          <p class="campo__error">{{ erroresServidor()['pesoTrasSeleccionKg'] }}</p>
         }
       </div>
     </div>
@@ -74,7 +78,9 @@
             [attr.aria-invalid]="campoInvalido('pesoCaracolilloKg')"
           />
           @if (campoInvalido('pesoCaracolilloKg')) {
-            <p class="campo__error">Indicá el peso del caracolillo.</p>
+            <p class="campo__error">Indicá un peso de caracolillo mayor a 0.</p>
+          } @else if (erroresServidor()['pesoCaracolilloKg']) {
+            <p class="campo__error">{{ erroresServidor()['pesoCaracolilloKg'] }}</p>
           }
         </div>
       }
@@ -102,6 +108,8 @@
         />
         @if (campoInvalido('puntajeSca')) {
           <p class="campo__error">El puntaje debe estar entre 0 y 100.</p>
+        } @else if (erroresServidor()['puntajeSca']) {
+          <p class="campo__error">{{ erroresServidor()['puntajeSca'] }}</p>
         }
       </div>
 
@@ -114,12 +122,49 @@
           rows="3"
           placeholder="Ej. Notas a chocolate y miel."
         ></textarea>
+        @if (erroresServidor()['notasCatacion']; as error) {
+          <p class="campo__error">{{ error }}</p>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="tarjeta" aria-labelledby="precio-titulo">
+    <h2 id="precio-titulo" class="tarjeta__titulo">Precio de venta</h2>
+
+    <div class="rejilla">
+      <div class="campo">
+        <label class="campo__etiqueta" for="cosecha-precio">Precio por kg (₡)</label>
+        <input
+          id="cosecha-precio"
+          class="campo__control"
+          type="number"
+          formControlName="precioKg"
+          min="0.01"
+          step="0.01"
+          placeholder="Ej. 4500"
+          [attr.aria-invalid]="campoInvalido('precioKg')"
+        />
+        @if (campoInvalido('precioKg')) {
+          <p class="campo__error">Indicá un precio mayor a 0, con hasta 2 decimales.</p>
+        } @else if (erroresServidor()['precioKg']) {
+          <p class="campo__error">{{ erroresServidor()['precioKg'] }}</p>
+        }
       </div>
     </div>
   </section>
 
   <div class="acciones">
-    <button type="button" class="btn btn--texto" (click)="onAtras()">← Atrás</button>
-    <button type="submit" class="btn btn--filled">Guardar cosecha</button>
+    <button type="button" class="btn btn--texto" [disabled]="guardando()" (click)="onAtras()">
+      ← Atrás
+    </button>
+    <button
+      type="submit"
+      class="btn btn--filled"
+      [disabled]="guardando()"
+      [attr.aria-busy]="guardando()"
+    >
+      {{ guardando() ? 'Guardando…' : 'Guardar cosecha' }}
+    </button>
   </div>
 </form>

@@ -1,154 +1,254 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
 
-import { COSECHAS_INICIALES } from '../mocks/cosecha.mock';
-import { COSECHAS_HISTORIAL } from '../mocks/historial-cafetalero.mock';
-import { NuevaCosecha } from '../models/cosecha.model';
-import { CosechaService } from './cosecha.service';
+import { environment } from '../../../environments/environment';
+import { Cosecha, ErrorCosecha, NuevaCosecha } from '../models/cosecha.model';
+import { cosechaApi } from '../testing/cosechas-de-prueba';
+import { cosechaDesdeApi, erroresEnFormulario } from '../utils/cosecha-desde-api';
+import { CosechaService, EDICION_NO_DISPONIBLE } from './cosecha.service';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
 
-function datosNueva(parcial: Partial<NuevaCosecha> = {}): NuevaCosecha {
+const BASE = `${environment.apiUrl}/api/cosechas`;
+
+function datosNueva(cambios: Partial<NuevaCosecha> = {}): NuevaCosecha {
   return {
-    fincaId: 'finca-la-catalina',
-    variedad: 'Bourbon',
-    alturaMsnm: 1500,
-    cantidadTotalKg: 80,
+    fincaId: 'f-1',
+    variedad: 'Geisha',
+    alturaMsnm: 1650,
+    cantidadTotalKg: 1000,
     fechaInicio: '2026-01-10',
-    fechaFin: '2026-01-20',
-    procesos: [
-      { proceso: 'Honey', porcentaje: 60 },
-      { proceso: 'Natural', porcentaje: 40 },
-    ],
-    pesoAntesKg: 80,
-    pesoTrasSeleccionKg: 64,
-    separoCaracolillo: false,
-    pesoCaracolilloKg: null,
-    puntajeSca: null,
-    notasCatacion: null,
-    ...parcial,
+    fechaFin: '2026-03-15',
+    procesos: [{ proceso: 'Lavado', porcentaje: 100 }],
+    pesoAntesKg: 800,
+    pesoTrasSeleccionKg: 720,
+    separoCaracolillo: true,
+    pesoCaracolilloKg: 40,
+    puntajeSca: 88.25,
+    notasCatacion: 'Jazmín y durazno',
+    precioKg: 4500,
+    ...cambios,
   };
 }
 
 describe('CosechaService', () => {
   let servicio: CosechaService;
-  let dashboard: DashboardCafetaleroService;
+  let http: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()],
     });
     servicio = TestBed.inject(CosechaService);
-    dashboard = TestBed.inject(DashboardCafetaleroService);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  it('expone catálogos mock de fincas y procesos', () => {
-    expect(servicio.fincas.length).toBeGreaterThanOrEqual(2);
-    expect(servicio.procesosBeneficiado.map((p) => p.nombre)).toContain('Honey');
-    expect(servicio.variedades).toContain('Caturra');
+  afterEach(() => http.verify());
+
+  it('registrar manda el cuerpo con los nombres del backend y credenciales', () => {
+    let creada: Cosecha | undefined;
+    servicio.registrar(datosNueva()).subscribe((c) => (creada = c));
+
+    const peticion = http.expectOne(BASE);
+    expect(peticion.request.method).toBe('POST');
+    expect(peticion.request.withCredentials).toBeTrue();
+    expect(peticion.request.body).toEqual({
+      fincaId: 'f-1',
+      variedad: 'Geisha',
+      alturaMsnm: 1650,
+      fechaInicio: '2026-01-10',
+      fechaFin: '2026-03-15',
+      procesos: [{ proceso: 'Lavado', porcentaje: 100 }],
+      cantidadCosechadaKg: 1000,
+      pesoTrasBeneficiadoKg: 800,
+      pesoTrasSeleccionKg: 720,
+      caracolilloKg: 40,
+      notasSabor: 'Jazmín y durazno',
+      puntajeSca: 88.25,
+      precioKg: 4500,
+    });
+    peticion.flush(cosechaApi(), { status: 201, statusText: 'Created' });
+
+    expect(creada?.id).toBe('c-1');
+    expect(creada?.precioKg).toBe(4500);
   });
 
-  it('lista las cosechas iniciales alineadas con el dashboard', () => {
-    expect(servicio.lista()).toHaveSize(COSECHAS_INICIALES.length);
-    expect(servicio.obtener('cosecha-caturra-catalina')?.variedad).toBe('Caturra');
+  it('manda caracolillo null cuando no se separó', () => {
+    servicio.registrar(datosNueva({ separoCaracolillo: false, pesoCaracolilloKg: 12 })).subscribe();
+    expect(http.expectOne(BASE).request.body.caracolilloKg).toBeNull();
+
+    servicio.registrar(datosNueva({ separoCaracolillo: null, pesoCaracolilloKg: 12 })).subscribe();
+    expect(http.expectOne(BASE).request.body.caracolilloKg).toBeNull();
   });
 
-  it('tiene cada cosecha del historial para poder abrir su edición', () => {
-    for (const { id, variedad, estado } of COSECHAS_HISTORIAL) {
-      expect(servicio.obtener(id))
-        .withContext(id)
-        .toEqual(jasmine.objectContaining({ variedad, estado }));
-    }
-  });
+  it('al registrar actualiza las cosechas recientes del dashboard', () => {
+    const dashboard = TestBed.inject(DashboardCafetaleroService);
+    servicio.registrar(datosNueva()).subscribe();
+    http.expectOne(BASE).flush(cosechaApi({ id: 'c-nueva' }));
 
-  it('obtener devuelve una copia y undefined si no existe', () => {
-    const original = servicio.obtener('cosecha-caturra-catalina')!;
-    original.variedad = 'Mutada';
-    expect(servicio.obtener('cosecha-caturra-catalina')?.variedad).toBe('Caturra');
-    expect(servicio.obtener('no-existe')).toBeUndefined();
-  });
-
-  it('crea una cosecha y la refleja en cosechas recientes del dashboard', () => {
-    const creada = servicio.crear(datosNueva());
-
-    expect(creada.id).toBeTruthy();
-    expect(servicio.lista()).toHaveSize(COSECHAS_INICIALES.length + 1);
-    expect(servicio.obtener(creada.id)?.variedad).toBe('Bourbon');
-    expect(creada.proceso).toBe('Honey');
-    expect(creada.kgDisponibles).toBe(64);
-
-    const reciente = dashboard.cosechasRecientes().find((c) => c.id === creada.id);
-    expect(reciente).toEqual(
+    expect(dashboard.cosechasRecientes().find((c) => c.id === 'c-nueva')).toEqual(
       jasmine.objectContaining({
-        variedad: 'Bourbon',
-        finca: 'La Catalina',
-        proceso: 'Honey',
-        kgDisponibles: 64,
-        estado: 'Publicada',
+        finca: 'Finca La Catalina',
+        proceso: 'Lavado',
+        kgDisponibles: 720,
+        estado: 'Borrador',
       }),
     );
   });
 
-  it('actualiza una cosecha existente y sincroniza el dashboard', () => {
-    const id = 'cosecha-geisha-monte-alto';
-    expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeFalse();
+  it('mapea la respuesta: estado, proceso principal y nombres del formulario', () => {
+    let cosecha: Cosecha | undefined;
+    servicio.obtener('c-1').subscribe((c) => (cosecha = c));
+    const peticion = http.expectOne(`${BASE}/c-1`);
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush(cosechaApi());
 
-    const actualizada = servicio.actualizar(
-      id,
-      datosNueva({
-        fincaId: 'finca-monte-alto',
-        variedad: 'Geisha',
-        pesoTrasSeleccionKg: 45,
-        procesos: [{ proceso: 'Lavado', porcentaje: 100 }],
+    expect(cosecha).toEqual(
+      jasmine.objectContaining({
+        estado: 'Borrador',
+        proceso: 'Lavado',
+        fincaNombre: 'Finca La Catalina',
+        cantidadTotalKg: 1000,
+        pesoAntesKg: 800,
+        separoCaracolillo: true,
+        pesoCaracolilloKg: 40,
+        notasCatacion: 'Jazmín y durazno',
+        mermaSeleccionPorcentaje: 10,
       }),
     );
-
-    expect(actualizada?.pesoTrasSeleccionKg).toBe(45);
-    expect(servicio.obtener(id)?.pesoTrasSeleccionKg).toBe(45);
-
-    const reciente = dashboard.cosechasRecientes().find((c) => c.id === id);
-    expect(reciente?.kgDisponibles).toBe(45);
-    expect(reciente?.proceso).toBe('Lavado');
   });
 
-  it('actualizar retorna undefined si el id no existe', () => {
-    expect(servicio.actualizar('fantasma', datosNueva())).toBeUndefined();
-  });
-
-  it('elimina una cosecha y la quita del dashboard', () => {
-    const id = 'cosecha-catuai-catalina';
-    servicio.actualizar(
-      id,
-      datosNueva({
-        fincaId: 'finca-la-catalina',
-        variedad: 'Catuaí',
-        pesoTrasSeleccionKg: 0,
-        procesos: [{ proceso: 'Natural', porcentaje: 100 }],
+  it('deFinca trae las cosechas aunque falten pesos y nombre de finca', () => {
+    let cosechas: Cosecha[] = [];
+    servicio.deFinca('f-1').subscribe((lista) => (cosechas = lista));
+    const peticion = http.expectOne(`${environment.apiUrl}/api/fincas/f-1/cosechas`);
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush([
+      cosechaApi({
+        estado: 'BORRADOR',
+        pesoTrasSeleccionKg: null,
+        caracolilloKg: null,
+        kgDisponibles: null,
+        fincaNombre: undefined,
       }),
+    ]);
+
+    expect(cosechas[0].estado).toBe('Borrador');
+    expect(cosechas[0].kgDisponibles).toBeNull();
+    expect(cosechas[0].separoCaracolillo).toBeNull();
+    expect(cosechas[0].fincaNombre).toBeNull();
+  });
+
+  it('un 400 devuelve el mensaje y los errores por campo', () => {
+    let error: ErrorCosecha | undefined;
+    servicio.registrar(datosNueva()).subscribe({ error: (e) => (error = e) });
+    http.expectOne(BASE).flush(
+      {
+        mensaje: 'Revisá los datos ingresados.',
+        errores: { precioKg: 'El precio por kg tiene que ser mayor a 0.' },
+      },
+      { status: 400, statusText: 'Bad Request' },
     );
-    expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeTrue();
 
-    expect(servicio.eliminar(id)).toBeTrue();
-    expect(servicio.obtener(id)).toBeUndefined();
-    expect(dashboard.cosechasRecientes().some((c) => c.id === id)).toBeFalse();
-    expect(servicio.eliminar(id)).toBeFalse();
+    expect(error).toEqual({
+      mensaje: 'Revisá los datos ingresados.',
+      errores: { precioKg: 'El precio por kg tiene que ser mayor a 0.' },
+    });
   });
 
-  it('marca Borrador cuando el peso tras selección es 0', () => {
-    const creada = servicio.crear(datosNueva({ pesoTrasSeleccionKg: 0 }));
-    const reciente = dashboard.cosechasRecientes().find((c) => c.id === creada.id);
-    expect(reciente?.estado).toBe('Borrador');
-    expect(reciente?.kgDisponibles).toBeNull();
+  it('un 403 trae solo el mensaje y un error de red usa el genérico', () => {
+    const errores: ErrorCosecha[] = [];
+    servicio.registrar(datosNueva()).subscribe({ error: (e) => errores.push(e) });
+    http
+      .expectOne(BASE)
+      .flush(
+        { mensaje: 'Solo un dueño de la finca puede registrar cosechas en ella.' },
+        { status: 403, statusText: 'Forbidden' },
+      );
+    servicio.registrar(datosNueva()).subscribe({ error: (e) => errores.push(e) });
+    http.expectOne(BASE).error(new ProgressEvent('error'));
+
+    expect(errores).toEqual([
+      { mensaje: 'Solo un dueño de la finca puede registrar cosechas en ella.', errores: {} },
+      { mensaje: 'No pudimos registrar la cosecha. Intentá de nuevo.', errores: {} },
+    ]);
   });
 
-  it('devuelve solo las cosechas de la finca pedida', async () => {
-    const cosechas = await firstValueFrom(servicio.deFinca('f-la-esperanza'));
-    expect(cosechas.length).toBe(2);
-    expect(cosechas.every((c) => c.fincaId === 'f-la-esperanza')).toBeTrue();
+  it('cosechaDesdeApi convierte los tres estados del backend', () => {
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'BORRADOR' })).estado).toBe('Borrador');
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'PUBLICADA' })).estado).toBe('Publicada');
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'AGOTADA' })).estado).toBe('Agotada');
   });
 
-  it('devuelve una lista vacía si la finca no tiene cosechas', async () => {
-    expect(await firstValueFrom(servicio.deFinca('f-el-tucan'))).toEqual([]);
+  it('cambiarEstado hace PATCH con el estado y credenciales', () => {
+    let cosecha: Cosecha | undefined;
+    servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe((c) => (cosecha = c));
+    const peticion = http.expectOne(`${BASE}/c-1/estado`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.withCredentials).toBeTrue();
+    expect(peticion.request.body).toEqual({ estado: 'PUBLICADA' });
+    peticion.flush(cosechaApi({ estado: 'PUBLICADA' }));
+    expect(cosecha?.estado).toBe('Publicada');
+
+    servicio.cambiarEstado('c-1', 'BORRADOR').subscribe((c) => (cosecha = c));
+    const retiro = http.expectOne(`${BASE}/c-1/estado`);
+    expect(retiro.request.body).toEqual({ estado: 'BORRADOR' });
+    retiro.flush(cosechaApi({ estado: 'BORRADOR' }));
+    expect(cosecha?.estado).toBe('Borrador');
+  });
+
+  it('cambiarEstado actualiza la cosecha en el dashboard', () => {
+    const dashboard = TestBed.inject(DashboardCafetaleroService);
+    servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe();
+    http.expectOne(`${BASE}/c-1/estado`).flush(cosechaApi({ estado: 'PUBLICADA' }));
+    expect(dashboard.cosechasRecientes().find((c) => c.id === 'c-1')?.estado).toBe('Publicada');
+  });
+
+  it('cambiarEstado devuelve los errores del backend como ErrorCosecha', () => {
+    const errores: ErrorCosecha[] = [];
+    const fallar = (status: number, statusText: string, mensaje: string) => {
+      servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe({ error: (e) => errores.push(e) });
+      http.expectOne(`${BASE}/c-1/estado`).flush({ mensaje }, { status, statusText });
+    };
+    fallar(400, 'Bad Request', 'Solo se puede publicar una cosecha en borrador.');
+    fallar(403, 'Forbidden', 'Solo un dueño de la finca puede cambiar el estado.');
+    fallar(404, 'Not Found', 'No encontramos la cosecha.');
+    servicio.cambiarEstado('c-1', 'BORRADOR').subscribe({ error: (e) => errores.push(e) });
+    http.expectOne(`${BASE}/c-1/estado`).error(new ProgressEvent('error'));
+
+    expect(errores).toEqual([
+      { mensaje: 'Solo se puede publicar una cosecha en borrador.', errores: {} },
+      { mensaje: 'Solo un dueño de la finca puede cambiar el estado.', errores: {} },
+      { mensaje: 'No encontramos la cosecha.', errores: {} },
+      { mensaje: 'No pudimos cambiar el estado de la cosecha. Intentá de nuevo.', errores: {} },
+    ]);
+  });
+
+  it('editar y eliminar todavía no están disponibles', () => {
+    const errores: ErrorCosecha[] = [];
+    servicio.actualizar().subscribe({ error: (e) => errores.push(e) });
+    servicio.eliminar().subscribe({ error: (e) => errores.push(e) });
+
+    expect(errores.map((e) => e.mensaje)).toEqual([EDICION_NO_DISPONIBLE, EDICION_NO_DISPONIBLE]);
+  });
+
+  it('erroresEnFormulario pasa los campos del backend a los del formulario', () => {
+    expect(
+      erroresEnFormulario({
+        cantidadCosechadaKg: 'a',
+        pesoTrasBeneficiadoKg: 'b',
+        caracolilloKg: 'c',
+        notasSabor: 'd',
+        'procesos[1].porcentaje': 'e',
+        precioKg: 'f',
+      }),
+    ).toEqual({
+      cantidadTotalKg: 'a',
+      pesoAntesKg: 'b',
+      pesoCaracolilloKg: 'c',
+      notasCatacion: 'd',
+      procesos: 'e',
+      precioKg: 'f',
+    });
   });
 });

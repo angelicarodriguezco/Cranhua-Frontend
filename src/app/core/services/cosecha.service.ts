@@ -1,150 +1,104 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
 
-import {
-  CATALOGO_PROCESOS_BENEFICIADO,
-  COSECHAS_INICIALES,
-  FINCAS_COSECHA,
-  VARIEDADES_CAFE,
-} from '../mocks/cosecha.mock';
-import {
-  Cosecha,
-  FincaCosechaOpcion,
-  NuevaCosecha,
-  OpcionProcesoBeneficiado,
-  ProcesoReparto,
-} from '../models/cosecha.model';
-import { CosechaReciente, EstadoCosecha } from '../models/dashboard-cafetalero.model';
+import { environment } from '../../../environments/environment';
+import { Cosecha, CosechaResponseApi, ErrorCosecha, NuevaCosecha } from '../models/cosecha.model';
+import { cosechaDesdeApi } from '../utils/cosecha-desde-api';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
 
-function clonarProcesos(procesos: ProcesoReparto[]): ProcesoReparto[] {
-  return procesos.map((p) => ({ ...p }));
-}
+const ERROR_REGISTRO = 'No pudimos registrar la cosecha. Intentá de nuevo.';
+const ERROR_CARGA = 'No pudimos cargar la cosecha. Intentá de nuevo.';
+const ERROR_ESTADO = 'No pudimos cambiar el estado de la cosecha. Intentá de nuevo.';
+export const EDICION_NO_DISPONIBLE = 'Editar y eliminar cosechas todavía no está disponible.';
 
-function clonarCosecha(cosecha: Cosecha): Cosecha {
+const opcionesCredenciales = { withCredentials: true as const };
+
+function errorCosecha(error: HttpErrorResponse, porDefecto: string): ErrorCosecha {
   return {
-    ...cosecha,
-    procesos: clonarProcesos(cosecha.procesos),
-  };
-}
-
-function clonarCosechas(cosechas: Cosecha[]): Cosecha[] {
-  return cosechas.map(clonarCosecha);
-}
-
-function procesoPrincipal(procesos: ProcesoReparto[]): string {
-  if (procesos.length === 0) {
-    return '';
-  }
-  return [...procesos].sort((a, b) => b.porcentaje - a.porcentaje)[0].proceso;
-}
-
-function nombreFinca(fincaId: string, fincas: readonly FincaCosechaOpcion[]): string {
-  return fincas.find((f) => f.id === fincaId)?.nombre ?? fincaId;
-}
-
-function derivarEstado(pesoTrasSeleccionKg: number): {
-  kgDisponibles: number | null;
-  estado: EstadoCosecha;
-} {
-  const enBeneficiado = pesoTrasSeleccionKg <= 0;
-  return {
-    kgDisponibles: enBeneficiado ? null : pesoTrasSeleccionKg,
-    estado: enBeneficiado ? 'Borrador' : 'Publicada',
-  };
-}
-
-function completarCosecha(id: string, datos: NuevaCosecha): Cosecha {
-  const proceso = datos.proceso?.trim() || procesoPrincipal(datos.procesos);
-  const { kgDisponibles, estado } = derivarEstado(datos.pesoTrasSeleccionKg);
-  const prefijo = datos.fincaId
-    .replace(/^finca-/, '')
-    .replace(/^f-/, '')
-    .slice(0, 2)
-    .toUpperCase();
-
-  return {
-    ...datos,
-    id,
-    proceso,
-    codigoLote:
-      datos.codigoLote ?? `${prefijo || 'CO'}-${new Date().getFullYear()}-${id.slice(-3)}`,
-    kgDisponibles: datos.kgDisponibles !== undefined ? datos.kgDisponibles : kgDisponibles,
-    estado: datos.estado ?? estado,
-    procesos: clonarProcesos(datos.procesos),
-  };
-}
-
-function aCosechaReciente(
-  cosecha: Cosecha,
-  fincas: readonly FincaCosechaOpcion[],
-): CosechaReciente {
-  return {
-    id: cosecha.id,
-    variedad: cosecha.variedad,
-    finca: nombreFinca(cosecha.fincaId, fincas),
-    proceso: cosecha.proceso || procesoPrincipal(cosecha.procesos),
-    kgDisponibles: cosecha.kgDisponibles,
-    estado: cosecha.estado,
+    mensaje: error.error?.mensaje ?? porDefecto,
+    errores: error.error?.errores ?? {},
   };
 }
 
 @Injectable({ providedIn: 'root' })
 export class CosechaService {
+  private readonly http = inject(HttpClient);
   private readonly dashboard = inject(DashboardCafetaleroService);
-  private readonly cosechas = signal<Cosecha[]>(clonarCosechas(COSECHAS_INICIALES));
-  private siguienteId = 1;
 
-  readonly lista = this.cosechas.asReadonly();
+  private get base(): string {
+    return `${environment.apiUrl}/api/cosechas`;
+  }
 
-  readonly fincas: readonly FincaCosechaOpcion[] = FINCAS_COSECHA;
-  readonly procesosBeneficiado: readonly OpcionProcesoBeneficiado[] = CATALOGO_PROCESOS_BENEFICIADO;
-  readonly variedades: readonly string[] = VARIEDADES_CAFE;
-
-  /** Cosechas de una finca (detalle de finca). */
-  deFinca(fincaId: string): Observable<Cosecha[]> {
-    return of(
-      this.cosechas()
-        .filter((c) => c.fincaId === fincaId)
-        .map(clonarCosecha),
+  registrar(datos: NuevaCosecha): Observable<Cosecha> {
+    const cuerpo = {
+      fincaId: datos.fincaId,
+      variedad: datos.variedad,
+      alturaMsnm: datos.alturaMsnm,
+      fechaInicio: datos.fechaInicio,
+      fechaFin: datos.fechaFin,
+      procesos: datos.procesos,
+      cantidadCosechadaKg: datos.cantidadTotalKg,
+      pesoTrasBeneficiadoKg: datos.pesoAntesKg,
+      pesoTrasSeleccionKg: datos.pesoTrasSeleccionKg,
+      caracolilloKg: datos.separoCaracolillo === true ? datos.pesoCaracolilloKg : null,
+      notasSabor: datos.notasCatacion,
+      puntajeSca: datos.puntajeSca,
+      precioKg: datos.precioKg,
+    };
+    return this.http.post<CosechaResponseApi>(this.base, cuerpo, opcionesCredenciales).pipe(
+      map(cosechaDesdeApi),
+      tap((cosecha) => this.sincronizarDashboard(cosecha)),
+      catchError((error: HttpErrorResponse) =>
+        throwError(() => errorCosecha(error, ERROR_REGISTRO)),
+      ),
     );
   }
 
-  obtener(id: string): Cosecha | undefined {
-    const encontrada = this.cosechas().find((c) => c.id === id);
-    return encontrada ? clonarCosecha(encontrada) : undefined;
+  cambiarEstado(id: string, estado: 'PUBLICADA' | 'BORRADOR'): Observable<Cosecha> {
+    return this.http
+      .patch<CosechaResponseApi>(`${this.base}/${id}/estado`, { estado }, opcionesCredenciales)
+      .pipe(
+        map(cosechaDesdeApi),
+        tap((cosecha) => this.sincronizarDashboard(cosecha)),
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => errorCosecha(error, ERROR_ESTADO)),
+        ),
+      );
   }
 
-  crear(datos: NuevaCosecha): Cosecha {
-    const cosecha = completarCosecha(`cosecha-${Date.now()}-${this.siguienteId++}`, datos);
-    this.cosechas.update((lista) => [cosecha, ...lista]);
-    this.dashboard.sincronizarCosechaReciente(aCosechaReciente(cosecha, this.fincas));
-    return clonarCosecha(cosecha);
+  obtener(id: string): Observable<Cosecha> {
+    return this.http.get<CosechaResponseApi>(`${this.base}/${id}`, opcionesCredenciales).pipe(
+      map(cosechaDesdeApi),
+      catchError((error: HttpErrorResponse) => throwError(() => errorCosecha(error, ERROR_CARGA))),
+    );
   }
 
-  actualizar(id: string, datos: NuevaCosecha): Cosecha | undefined {
-    if (!this.cosechas().some((c) => c.id === id)) {
-      return undefined;
-    }
+  deFinca(fincaId: string): Observable<Cosecha[]> {
+    return this.http
+      .get<
+        CosechaResponseApi[]
+      >(`${environment.apiUrl}/api/fincas/${fincaId}/cosechas`, opcionesCredenciales)
+      .pipe(map((cosechas) => cosechas.map(cosechaDesdeApi)));
+  }
 
-    const previa = this.cosechas().find((c) => c.id === id);
-    const cosecha = completarCosecha(id, {
-      ...datos,
-      codigoLote: datos.codigoLote ?? previa?.codigoLote,
+  // Pendiente: el backend todavía no tiene PATCH ni DELETE de cosechas (CP3-114); se conectan en CP3-75
+  actualizar(): Observable<Cosecha> {
+    return throwError((): ErrorCosecha => ({ mensaje: EDICION_NO_DISPONIBLE, errores: {} }));
+  }
+
+  eliminar(): Observable<void> {
+    return throwError((): ErrorCosecha => ({ mensaje: EDICION_NO_DISPONIBLE, errores: {} }));
+  }
+
+  private sincronizarDashboard(cosecha: Cosecha): void {
+    this.dashboard.sincronizarCosechaReciente({
+      id: cosecha.id,
+      variedad: cosecha.variedad,
+      finca: cosecha.fincaNombre ?? '',
+      proceso: cosecha.proceso,
+      kgDisponibles: cosecha.kgDisponibles,
+      estado: cosecha.estado,
     });
-    this.cosechas.update((lista) => lista.map((c) => (c.id === id ? cosecha : c)));
-    this.dashboard.sincronizarCosechaReciente(aCosechaReciente(cosecha, this.fincas));
-    return clonarCosecha(cosecha);
-  }
-
-  eliminar(id: string): boolean {
-    const existia = this.cosechas().some((c) => c.id === id);
-    if (!existia) {
-      return false;
-    }
-
-    this.cosechas.update((lista) => lista.filter((c) => c.id !== id));
-    this.dashboard.eliminarCosechaReciente(id);
-    return true;
   }
 }
