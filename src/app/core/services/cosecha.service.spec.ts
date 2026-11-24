@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
 import { Cosecha, ErrorCosecha, NuevaCosecha } from '../models/cosecha.model';
 import { cosechaApi } from '../testing/cosechas-de-prueba';
-import { erroresEnFormulario } from '../utils/cosecha-desde-api';
+import { cosechaDesdeApi, erroresEnFormulario } from '../utils/cosecha-desde-api';
 import { CosechaService, EDICION_NO_DISPONIBLE } from './cosecha.service';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
 
@@ -171,6 +171,56 @@ describe('CosechaService', () => {
     expect(errores).toEqual([
       { mensaje: 'Solo un dueño de la finca puede registrar cosechas en ella.', errores: {} },
       { mensaje: 'No pudimos registrar la cosecha. Intentá de nuevo.', errores: {} },
+    ]);
+  });
+
+  it('cosechaDesdeApi convierte los tres estados del backend', () => {
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'BORRADOR' })).estado).toBe('Borrador');
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'PUBLICADA' })).estado).toBe('Publicada');
+    expect(cosechaDesdeApi(cosechaApi({ estado: 'AGOTADA' })).estado).toBe('Agotada');
+  });
+
+  it('cambiarEstado hace PATCH con el estado y credenciales', () => {
+    let cosecha: Cosecha | undefined;
+    servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe((c) => (cosecha = c));
+    const peticion = http.expectOne(`${BASE}/c-1/estado`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.withCredentials).toBeTrue();
+    expect(peticion.request.body).toEqual({ estado: 'PUBLICADA' });
+    peticion.flush(cosechaApi({ estado: 'PUBLICADA' }));
+    expect(cosecha?.estado).toBe('Publicada');
+
+    servicio.cambiarEstado('c-1', 'BORRADOR').subscribe((c) => (cosecha = c));
+    const retiro = http.expectOne(`${BASE}/c-1/estado`);
+    expect(retiro.request.body).toEqual({ estado: 'BORRADOR' });
+    retiro.flush(cosechaApi({ estado: 'BORRADOR' }));
+    expect(cosecha?.estado).toBe('Borrador');
+  });
+
+  it('cambiarEstado actualiza la cosecha en el dashboard', () => {
+    const dashboard = TestBed.inject(DashboardCafetaleroService);
+    servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe();
+    http.expectOne(`${BASE}/c-1/estado`).flush(cosechaApi({ estado: 'PUBLICADA' }));
+    expect(dashboard.cosechasRecientes().find((c) => c.id === 'c-1')?.estado).toBe('Publicada');
+  });
+
+  it('cambiarEstado devuelve los errores del backend como ErrorCosecha', () => {
+    const errores: ErrorCosecha[] = [];
+    const fallar = (status: number, statusText: string, mensaje: string) => {
+      servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe({ error: (e) => errores.push(e) });
+      http.expectOne(`${BASE}/c-1/estado`).flush({ mensaje }, { status, statusText });
+    };
+    fallar(400, 'Bad Request', 'Solo se puede publicar una cosecha en borrador.');
+    fallar(403, 'Forbidden', 'Solo un dueño de la finca puede cambiar el estado.');
+    fallar(404, 'Not Found', 'No encontramos la cosecha.');
+    servicio.cambiarEstado('c-1', 'BORRADOR').subscribe({ error: (e) => errores.push(e) });
+    http.expectOne(`${BASE}/c-1/estado`).error(new ProgressEvent('error'));
+
+    expect(errores).toEqual([
+      { mensaje: 'Solo se puede publicar una cosecha en borrador.', errores: {} },
+      { mensaje: 'Solo un dueño de la finca puede cambiar el estado.', errores: {} },
+      { mensaje: 'No encontramos la cosecha.', errores: {} },
+      { mensaje: 'No pudimos cambiar el estado de la cosecha. Intentá de nuevo.', errores: {} },
     ]);
   });
 

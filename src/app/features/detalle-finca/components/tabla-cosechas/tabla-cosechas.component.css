@@ -72,24 +72,47 @@ tbody tr.fila-resaltada:hover td {
   font-weight: 600;
 }
 
-.pill-disponible {
+.pill-publicada {
   background: var(--pill-disponible-bg);
   color: var(--pill-disponible-text);
 }
 
-.pill-beneficiado {
+.pill-borrador {
   background: var(--pill-beneficiado-bg);
   color: var(--pill-beneficiado-text);
 }
 
-.pill-catacion {
-  background: color-mix(in srgb, var(--brand-accent) 14%, transparent);
-  color: var(--brand-accent);
-}
-
-.pill-vendida {
+.pill-agotada {
   background: color-mix(in srgb, currentColor 8%, transparent);
   opacity: 0.8;
+}
+
+.accion {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.accion button {
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--brand-button);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-heading);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.accion button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.falta-peso {
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 .vacio {

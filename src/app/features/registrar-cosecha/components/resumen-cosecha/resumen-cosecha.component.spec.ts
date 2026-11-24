@@ -66,4 +66,43 @@ describe('ResumenCosechaComponent', () => {
     expect(registrarOtra).toEqual(['ok']);
     expect(verIds).toEqual(['cosecha-1']);
   });
+
+  function publicarAhora(): HTMLButtonElement | undefined {
+    return [...pagina.querySelectorAll<HTMLButtonElement>('button')].find((b) =>
+      b.textContent?.includes('Publicar ahora'),
+    );
+  }
+
+  it('en borrador con kg disponibles muestra Publicar ahora y lo emite', () => {
+    const publicadas: string[] = [];
+    componente.publicar.subscribe((id) => publicadas.push(id));
+
+    expect(pagina.textContent).toContain('Borrador');
+    expect(pagina.textContent).toContain('Quedó como borrador');
+    publicarAhora()!.click();
+    expect(publicadas).toEqual(['cosecha-1']);
+  });
+
+  it('sin kg disponibles deshabilita Publicar ahora', () => {
+    fixture.componentRef.setInput('cosecha', { ...COSECHA, kgDisponibles: null });
+    fixture.detectChanges();
+
+    expect(publicarAhora()!.disabled).toBeTrue();
+    expect(pagina.querySelector('.falta-peso')).not.toBeNull();
+  });
+
+  it('mientras publica deshabilita el botón', () => {
+    fixture.componentRef.setInput('publicando', true);
+    fixture.detectChanges();
+    expect(publicarAhora()!.disabled).toBeTrue();
+  });
+
+  it('ya publicada muestra Publicada y no ofrece publicar', () => {
+    fixture.componentRef.setInput('cosecha', { ...COSECHA, estado: 'Publicada' });
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('Publicada');
+    expect(pagina.textContent).toContain('Ya está publicada');
+    expect(publicarAhora()).toBeUndefined();
+  });
 });

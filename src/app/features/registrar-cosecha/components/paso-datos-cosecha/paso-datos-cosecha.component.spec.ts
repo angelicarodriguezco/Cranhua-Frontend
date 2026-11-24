@@ -104,6 +104,26 @@ describe('PasoDatosCosechaComponent', () => {
     ]);
   });
 
+  it('exige altura y porcentaje de cada proceso de al menos 1', () => {
+    rellenarDatosValidos(0);
+    const form = componente['formulario'];
+    form.patchValue({ alturaMsnm: 0 });
+    fixture.detectChanges();
+
+    expect(form.controls.alturaMsnm.hasError('min')).toBeTrue();
+    expect(form.controls.procesos.at(0).controls.porcentaje.hasError('min')).toBeTrue();
+
+    form.markAllAsTouched();
+    fixture.detectChanges();
+    expect(pagina.textContent).toContain('Indicá una altura mayor a 0 msnm.');
+    expect(pagina.textContent).toContain('Entre 1 y 100');
+
+    form.patchValue({ alturaMsnm: 1 });
+    form.controls.procesos.at(0).patchValue({ porcentaje: 1 });
+    expect(form.controls.alturaMsnm.valid).toBeTrue();
+    expect(form.controls.procesos.at(0).controls.porcentaje.valid).toBeTrue();
+  });
+
   it('permite agregar y eliminar filas de proceso', () => {
     expect(componente['procesos'].length).toBe(1);
 

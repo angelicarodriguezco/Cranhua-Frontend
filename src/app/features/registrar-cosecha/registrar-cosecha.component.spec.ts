@@ -151,6 +151,53 @@ describe('RegistrarCosechaComponent', () => {
     expect(pagina.textContent?.replace(/\s/g, ' ')).toContain('₡4 500');
   });
 
+  it('Publicar ahora publica la cosecha y el resumen pasa a Publicada', async () => {
+    await crearComponente();
+    completarPaso1();
+    completarPaso2();
+    responderPost(cosechaApi());
+
+    const publicarAhora = () =>
+      [...pagina.querySelectorAll<HTMLButtonElement>('app-resumen-cosecha button')].find((b) =>
+        b.textContent?.includes('Publicar ahora'),
+      );
+    expect(pagina.textContent).toContain('Borrador');
+    publicarAhora()!.click();
+    fixture.detectChanges();
+    expect(publicarAhora()!.disabled).toBeTrue();
+
+    const peticion = http.expectOne(`${COSECHAS}/c-1/estado`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.body).toEqual({ estado: 'PUBLICADA' });
+    peticion.flush(cosechaApi({ estado: 'PUBLICADA' }));
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('Publicada');
+    expect(publicarAhora()).toBeUndefined();
+  });
+
+  it('si publicar falla muestra el error en la pantalla de éxito', async () => {
+    await crearComponente();
+    completarPaso1();
+    completarPaso2();
+    responderPost(cosechaApi());
+
+    [...pagina.querySelectorAll<HTMLButtonElement>('app-resumen-cosecha button')]
+      .find((b) => b.textContent?.includes('Publicar ahora'))!
+      .click();
+    http
+      .expectOne(`${COSECHAS}/c-1/estado`)
+      .flush(
+        { mensaje: 'Solo se puede publicar una cosecha en borrador.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.panel--exito .error-general')?.textContent).toContain(
+      'Solo se puede publicar una cosecha en borrador.',
+    );
+  });
+
   it('muestra un error del servidor en su campo y se queda en el paso 2', async () => {
     await crearComponente();
     completarPaso1();

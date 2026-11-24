@@ -31,6 +31,26 @@
               </span>
             </td>
             <td class="accion">
+              @if (cosecha.estado === 'Borrador') {
+                <button
+                  type="button"
+                  [disabled]="!cosecha.kgDisponibles || procesando() === cosecha.id"
+                  (click)="publicar.emit(cosecha.id)"
+                >
+                  Publicar
+                </button>
+                @if (!cosecha.kgDisponibles) {
+                  <span class="falta-peso">Falta el peso tras selección</span>
+                }
+              } @else if (cosecha.estado === 'Publicada') {
+                <button
+                  type="button"
+                  [disabled]="procesando() === cosecha.id"
+                  (click)="porRetirar.set(cosecha.id)"
+                >
+                  Retirar
+                </button>
+              }
               <a
                 [routerLink]="['/cafetalero/cosechas', cosecha.id, 'editar']"
                 [attr.aria-label]="'Editar cosecha ' + cosecha.variedad"
@@ -43,6 +63,16 @@
       </tbody>
     </table>
   </div>
+
+  @if (porRetirar()) {
+    <app-modal-confirmacion
+      titulo="Retirar cosecha"
+      mensaje="La cosecha deja de aparecer para los tostadores. Podés volver a publicarla cuando quieras."
+      etiquetaConfirmar="Sí, retirar"
+      (confirmar)="confirmarRetiro()"
+      (cancelar)="porRetirar.set(null)"
+    />
+  }
 } @else {
   <p class="vacio">
     Esta finca todavía no tiene cosechas.

@@ -11,6 +11,10 @@
       <dd>{{ etiquetaFinca() }}</dd>
     </div>
     <div class="resumen__item">
+      <dt>Estado</dt>
+      <dd>{{ cosecha().estado }}</dd>
+    </div>
+    <div class="resumen__item">
       <dt>Variedad</dt>
       <dd>{{ cosecha().variedad }}</dd>
     </div>
@@ -64,5 +68,18 @@
       Registrar otra cosecha
     </button>
     <button type="button" class="btn btn--filled" (click)="onVerCosecha()">Ver cosecha</button>
+    @if (cosecha().estado === 'Borrador') {
+      <button
+        type="button"
+        class="btn btn--filled"
+        [disabled]="!cosecha().kgDisponibles || publicando()"
+        (click)="publicar.emit(cosecha().id)"
+      >
+        Publicar ahora
+      </button>
+    }
   </div>
+  @if (cosecha().estado === 'Borrador' && !cosecha().kgDisponibles) {
+    <p class="falta-peso">Falta el peso tras selección para publicarla.</p>
+  }
 </div>

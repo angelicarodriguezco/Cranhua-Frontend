@@ -85,6 +85,7 @@ export class RegistrarCosechaComponent {
   protected readonly cosechaGuardada = signal<Cosecha | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
   protected readonly guardando = signal(false);
+  protected readonly publicando = signal(false);
   protected readonly erroresServidor = signal<Record<string, string>>({});
   protected readonly errorGeneral = signal<string | null>(null);
 
@@ -270,6 +271,21 @@ export class RegistrarCosechaComponent {
   protected onVerCosecha(id: string): void {
     const fincaId = this.cosechaGuardada()?.fincaId;
     void this.router.navigate(['/cafetalero/fincas', fincaId], { queryParams: { cosecha: id } });
+  }
+
+  protected onPublicar(id: string): void {
+    this.publicando.set(true);
+    this.errorGeneral.set(null);
+    this.cosechaService.cambiarEstado(id, 'PUBLICADA').subscribe({
+      next: (publicada) => {
+        this.publicando.set(false);
+        this.cosechaGuardada.set(publicada);
+      },
+      error: (error: ErrorCosecha) => {
+        this.publicando.set(false);
+        this.errorGeneral.set(error.mensaje);
+      },
+    });
   }
 
   protected abrirModalEliminar(): void {

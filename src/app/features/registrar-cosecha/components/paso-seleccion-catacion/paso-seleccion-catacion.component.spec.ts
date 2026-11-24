@@ -162,6 +162,40 @@ describe('PasoSeleccionCatacionComponent', () => {
     ]);
   });
 
+  it('exige pesos antes y tras la selección de al menos 0.01 kg', () => {
+    const controles = componente['formulario'].controls;
+    rellenarPesos(0, 0);
+    expect(controles.pesoAntesKg.hasError('min')).toBeTrue();
+    expect(controles.pesoTrasSeleccionKg.hasError('min')).toBeTrue();
+
+    pagina.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(pagina.textContent).toContain('Indicá un peso antes de la selección mayor a 0.');
+    expect(pagina.textContent).toContain('Indicá un peso tras la selección mayor a 0.');
+
+    rellenarPesos(0.01, 0.01);
+    expect(controles.pesoAntesKg.valid).toBeTrue();
+    expect(controles.pesoTrasSeleccionKg.valid).toBeTrue();
+  });
+
+  it('con caracolillo Sí exige un peso de al menos 0.01 kg y con No lo ignora', () => {
+    const formulario = componente['formulario'];
+    rellenarPesos(120, 96);
+    formulario.patchValue({ separoCaracolillo: 'si', pesoCaracolilloKg: 0 });
+    fixture.detectChanges();
+    expect(formulario.hasError('pesoCaracolilloInvalido')).toBeTrue();
+
+    pagina.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+    fixture.detectChanges();
+    expect(pagina.textContent).toContain('Indicá un peso de caracolillo mayor a 0.');
+
+    formulario.patchValue({ pesoCaracolilloKg: 0.01 });
+    expect(formulario.valid).toBeTrue();
+
+    formulario.patchValue({ separoCaracolillo: 'no', pesoCaracolilloKg: 0 });
+    expect(formulario.valid).toBeTrue();
+  });
+
   it('precarga el peso antes sugerido desde el paso 1', () => {
     fixture.componentRef.setInput('pesoAntesSugerido', 150);
     fixture.detectChanges();

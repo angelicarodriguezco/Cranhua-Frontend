@@ -52,11 +52,16 @@
   } @else {
     @if (cosechaGuardada(); as cosecha) {
       <section class="vidrio panel panel--exito" aria-label="Cosecha registrada">
+        @if (errorGeneral(); as error) {
+          <p class="error-general" role="alert">{{ error }}</p>
+        }
         <app-resumen-cosecha
           [cosecha]="cosecha"
           [modoEdicion]="modoEdicion()"
+          [publicando]="publicando()"
           (registrarOtra)="onRegistrarOtra()"
           (verCosecha)="onVerCosecha($event)"
+          (publicar)="onPublicar($event)"
         />
       </section>
     }

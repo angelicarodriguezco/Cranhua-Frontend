@@ -16,7 +16,7 @@
           [attr.aria-invalid]="campoInvalido('pesoAntesKg')"
         />
         @if (campoInvalido('pesoAntesKg')) {
-          <p class="campo__error">Indicá el peso antes de la selección.</p>
+          <p class="campo__error">Indicá un peso antes de la selección mayor a 0.</p>
         } @else if (erroresServidor()['pesoAntesKg']) {
           <p class="campo__error">{{ erroresServidor()['pesoAntesKg'] }}</p>
         }
@@ -37,7 +37,7 @@
           [attr.aria-invalid]="campoInvalido('pesoTrasSeleccionKg')"
         />
         @if (campoInvalido('pesoTrasSeleccionKg')) {
-          <p class="campo__error">Indicá el peso tras la selección.</p>
+          <p class="campo__error">Indicá un peso tras la selección mayor a 0.</p>
         } @else if (erroresServidor()['pesoTrasSeleccionKg']) {
           <p class="campo__error">{{ erroresServidor()['pesoTrasSeleccionKg'] }}</p>
         }
@@ -78,7 +78,7 @@
             [attr.aria-invalid]="campoInvalido('pesoCaracolilloKg')"
           />
           @if (campoInvalido('pesoCaracolilloKg')) {
-            <p class="campo__error">Indicá el peso del caracolillo.</p>
+            <p class="campo__error">Indicá un peso de caracolillo mayor a 0.</p>
           } @else if (erroresServidor()['pesoCaracolilloKg']) {
             <p class="campo__error">{{ erroresServidor()['pesoCaracolilloKg'] }}</p>
           }

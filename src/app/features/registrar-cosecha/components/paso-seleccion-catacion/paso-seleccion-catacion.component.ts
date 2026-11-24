@@ -47,7 +47,7 @@ const pesoCaracolilloCondicionalValidator: ValidatorFn = (
   if (valor === null || valor === undefined || Number.isNaN(Number(valor))) {
     return { pesoCaracolilloRequerido: true };
   }
-  if (Number(valor) < 0) {
+  if (Number(valor) < 0.01) {
     return { pesoCaracolilloInvalido: true };
   }
   return null;
@@ -66,10 +66,10 @@ export function crearFormularioSeleccionCatacion(
   return new FormGroup(
     {
       pesoAntesKg: new FormControl<number | null>(inicial?.pesoAntesKg ?? null, {
-        validators: [Validators.required, Validators.min(0)],
+        validators: [Validators.required, Validators.min(0.01)],
       }),
       pesoTrasSeleccionKg: new FormControl<number | null>(inicial?.pesoTrasSeleccionKg ?? null, {
-        validators: [Validators.required, Validators.min(0)],
+        validators: [Validators.required, Validators.min(0.01)],
       }),
       separoCaracolillo: new FormControl<'' | 'si' | 'no'>(separo, {
         nonNullable: true,

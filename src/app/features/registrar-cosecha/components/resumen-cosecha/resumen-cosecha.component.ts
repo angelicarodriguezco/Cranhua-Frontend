@@ -13,11 +13,15 @@ import { etiquetaFinca, formatearColones } from '../../../../shared/utils/format
 export class ResumenCosechaComponent {
   readonly cosecha = input.required<Cosecha>();
   readonly modoEdicion = input(false);
+  readonly publicando = input(false);
 
   readonly registrarOtra = output<void>();
   readonly verCosecha = output<string>();
+  readonly publicar = output<string>();
 
-  protected readonly etiquetaFinca = computed(() => etiquetaFinca(this.cosecha().fincaNombre ?? ''));
+  protected readonly etiquetaFinca = computed(() =>
+    etiquetaFinca(this.cosecha().fincaNombre ?? ''),
+  );
 
   protected readonly precioKg = computed(() => formatearColones(this.cosecha().precioKg));
 
@@ -35,11 +39,14 @@ export class ResumenCosechaComponent {
     this.modoEdicion() ? '¡Cosecha actualizada!' : '¡Cosecha registrada!',
   );
 
-  protected readonly mensaje = computed(() =>
-    this.modoEdicion()
-      ? 'Los cambios se guardaron correctamente.'
-      : `Ya quedó disponible en ${this.etiquetaFinca()}. En cuanto termine el beneficiado, los tostadores van a poder solicitarla.`,
-  );
+  protected readonly mensaje = computed(() => {
+    if (this.modoEdicion()) {
+      return 'Los cambios se guardaron correctamente.';
+    }
+    return this.cosecha().estado === 'Borrador'
+      ? `Quedó como borrador en ${this.etiquetaFinca()}. Publicala para que los tostadores la puedan solicitar.`
+      : `Ya está publicada en ${this.etiquetaFinca()}. Los tostadores ya la pueden solicitar.`;
+  });
 
   protected readonly textoCaracolillo = computed(() => {
     const c = this.cosecha();

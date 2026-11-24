@@ -46,7 +46,7 @@ export function crearGrupoProceso(inicial?: Partial<ProcesoReparto>): Formulario
     }),
     porcentaje: new FormControl(inicial?.porcentaje ?? 0, {
       nonNullable: true,
-      validators: [Validators.required, Validators.min(0), Validators.max(100)],
+      validators: [Validators.required, Validators.min(1), Validators.max(100)],
     }),
   });
 }
@@ -70,7 +70,7 @@ export function crearFormularioDatosCosecha(
         validators: [Validators.required],
       }),
       alturaMsnm: new FormControl<number | null>(inicial?.alturaMsnm ?? null, {
-        validators: [Validators.required, Validators.min(0)],
+        validators: [Validators.required, Validators.min(1)],
       }),
       cantidadTotalKg: new FormControl<number | null>(inicial?.cantidadTotalKg ?? null, {
         validators: [Validators.required, Validators.min(0.01)],

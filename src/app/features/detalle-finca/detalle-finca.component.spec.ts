@@ -64,6 +64,7 @@ const COSECHAS_ESPERANZA: Cosecha[] = [
 
 const cosechaServiceFalso = {
   deFinca: (id: string) => of(id === 'f-la-esperanza' ? COSECHAS_ESPERANZA : []),
+  cambiarEstado: (id: string) => of(COSECHAS_ESPERANZA.find((c) => c.id === id)!),
 };
 
 describe('DetalleFincaComponent', () => {
@@ -248,5 +249,43 @@ describe('DetalleFincaComponent', () => {
     const pagina = await abrir('f-no-existe');
     expect(pagina.querySelector('h1')?.textContent).toContain('No encontramos esta finca');
     expect(pagina.querySelector('app-zona-peligro')).toBeNull();
+  });
+
+  it('al publicar actualiza solo la fila de esa cosecha', async () => {
+    const cambiar = spyOn(TestBed.inject(CosechaService), 'cambiarEstado').and.returnValue(
+      of({ ...COSECHAS_ESPERANZA[0], estado: 'Publicada' }),
+    );
+    const pagina = await abrir('f-la-esperanza');
+
+    pagina.querySelector<HTMLButtonElement>('app-tabla-cosechas tbody tr .accion button')!.click();
+    harness.detectChanges();
+
+    expect(cambiar).toHaveBeenCalledWith('c-le-caturra', 'PUBLICADA');
+    const filas = [...pagina.querySelectorAll('app-tabla-cosechas tbody tr')];
+    expect(filas[0].querySelector('.pill')?.textContent?.trim()).toBe('Publicada');
+    expect(filas[0].querySelector('.accion button')?.textContent?.trim()).toBe('Retirar');
+    expect(filas[1].querySelector('.pill')?.textContent?.trim()).toBe('Borrador');
+  });
+
+  it('muestra el error del backend cerca de la tabla', async () => {
+    spyOn(TestBed.inject(CosechaService), 'cambiarEstado').and.returnValue(
+      throwError(() => ({
+        mensaje: 'Solo se puede publicar una cosecha en borrador.',
+        errores: {},
+      })),
+    );
+    const pagina = await abrir('f-la-esperanza');
+
+    pagina.querySelector<HTMLButtonElement>('app-tabla-cosechas tbody tr .accion button')!.click();
+    harness.detectChanges();
+
+    expect(pagina.querySelector('.error-cosecha')?.textContent).toContain(
+      'Solo se puede publicar una cosecha en borrador.',
+    );
+    const boton = pagina.querySelector<HTMLButtonElement>(
+      'app-tabla-cosechas tbody tr .accion button',
+    )!;
+    expect(boton.disabled).toBeFalse();
+    expect(pagina.querySelector('app-tabla-cosechas .pill')?.textContent?.trim()).toBe('Borrador');
   });
 });
