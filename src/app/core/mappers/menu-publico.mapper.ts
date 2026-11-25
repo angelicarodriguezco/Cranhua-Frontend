@@ -27,9 +27,7 @@ export function notasMenuDesdeApi(notas: string[] | null | undefined): string {
     .join(', ');
 }
 
-export function nivelTuesteMenuDesdeApi(
-  nivel: NivelTuesteApi | null | undefined,
-): string {
+export function nivelTuesteMenuDesdeApi(nivel: NivelTuesteApi | null | undefined): string {
   return nivel ? nivelTuesteDesdeApi(nivel) : '';
 }
 
@@ -37,10 +35,7 @@ export function idItemMenuPublico(nombre: string, precio: number, indice: number
   return `${nombre}-${precio}-${indice}`;
 }
 
-export function cafeMenuPublicoDesdeApi(
-  api: CafeMenuPublicoApi,
-  indice: number,
-): CafeMenuPublico {
+export function cafeMenuPublicoDesdeApi(api: CafeMenuPublicoApi, indice: number): CafeMenuPublico {
   return {
     id: idItemMenuPublico(api.nombre, Number(api.precio), indice),
     nombre: api.nombre,

@@ -13,8 +13,7 @@ const PERFIL_PRUEBA: PerfilCafeteria = {
   id: 'c-cafe-brumas',
   nombre: 'Café Brumas',
   ubicacion: 'Escazú, San José',
-  descripcion:
-    'Cafetería de especialidad que sirve café costarricense con origen conocido.',
+  descripcion: 'Cafetería de especialidad que sirve café costarricense con origen conocido.',
   coordenada: { lat: 9.9205, lng: -84.137 },
   cafesTrazables: 3,
   tostadores: [{ id: 'n-tostaduria-volcan', nombre: 'Tostaduría Volcán', ubicacion: 'San José' }],
@@ -29,7 +28,10 @@ const PERFIL_PRUEBA: PerfilCafeteria = {
 describe('PerfilCafeteriaComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
-  function crear(id: string, perfil: PerfilCafeteria | null = PERFIL_PRUEBA): ComponentFixture<PerfilCafeteriaComponent> {
+  function crear(
+    id: string,
+    perfil: PerfilCafeteria | null = PERFIL_PRUEBA,
+  ): ComponentFixture<PerfilCafeteriaComponent> {
     TestBed.configureTestingModule({
       imports: [PerfilCafeteriaComponent],
       providers: [

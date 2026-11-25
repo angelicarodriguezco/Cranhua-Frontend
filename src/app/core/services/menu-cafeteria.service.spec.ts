@@ -154,10 +154,12 @@ describe('MenuCafeteriaService', () => {
         },
       });
 
-    http.expectOne(BASE_MENU).flush(
-      { mensaje: 'No hay un lote activo con el código CRH-0000.' },
-      { status: 404, statusText: 'Not Found' },
-    );
+    http
+      .expectOne(BASE_MENU)
+      .flush(
+        { mensaje: 'No hay un lote activo con el código CRH-0000.' },
+        { status: 404, statusText: 'Not Found' },
+      );
     expect(status).toBe(404);
     expect(mensaje).toBe('No hay un lote activo con el código CRH-0000.');
   });
@@ -168,9 +170,7 @@ describe('MenuCafeteriaService', () => {
       error: (error: { status: number }) => (status = error.status),
     });
 
-    http
-      .expectOne(`${BASE_MENU}/${ITEM_UI.id}`)
-      .flush(null, { status: 500, statusText: 'Error' });
+    http.expectOne(`${BASE_MENU}/${ITEM_UI.id}`).flush(null, { status: 500, statusText: 'Error' });
     expect(status).toBe(500);
   });
 

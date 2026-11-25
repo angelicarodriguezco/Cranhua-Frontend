@@ -1,9 +1,6 @@
 import { enlacePerfilDesdeApi } from './menu-publico.mapper';
 import { ubicacionLabelDesdeApi } from './punto-mapa-consumidor.mapper';
-import {
-  PerfilCafeteria,
-  PerfilCafeteriaResponseApi,
-} from '../models/perfil-cafeteria.model';
+import { PerfilCafeteria, PerfilCafeteriaResponseApi } from '../models/perfil-cafeteria.model';
 
 export function fechaMiembroDesdeApi(miembroDesde: string): string {
   return miembroDesde.slice(0, 10);

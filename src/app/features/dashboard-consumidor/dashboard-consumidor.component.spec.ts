@@ -101,9 +101,7 @@ describe('DashboardConsumidorComponent', () => {
 
   beforeEach(async () => {
     queryParams$ = new BehaviorSubject(convertToParamMap({}));
-    obtenerPerfil = jasmine
-      .createSpy('obtenerPerfil')
-      .and.returnValue(of(PERFIL_CAFETERIA_PRUEBA));
+    obtenerPerfil = jasmine.createSpy('obtenerPerfil').and.returnValue(of(PERFIL_CAFETERIA_PRUEBA));
     obtenerMenu = jasmine.createSpy('obtenerMenu').and.returnValue(of(MENU_CAFETERIA_PRUEBA));
 
     await TestBed.configureTestingModule({

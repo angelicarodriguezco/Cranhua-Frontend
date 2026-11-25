@@ -418,7 +418,8 @@ export class DashboardConsumidorComponent {
     return {
       punto,
       rol: ETIQUETAS_TIPO.cafeteria,
-      descripcion: perfil.descripcion || 'Todavía no hay más detalles publicados para este negocio.',
+      descripcion:
+        perfil.descripcion || 'Todavía no hay más detalles publicados para este negocio.',
       datos: [
         { etiqueta: 'Cafés trazables', valor: String(perfil.cafesTrazables) },
         ...(perfil.horario ? [{ etiqueta: 'Horario', valor: perfil.horario }] : []),

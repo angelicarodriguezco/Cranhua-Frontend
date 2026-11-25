@@ -4,10 +4,7 @@ import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { perfilCafeteriaDesdeApi } from '../mappers/perfil-cafeteria.mapper';
-import {
-  PerfilCafeteria,
-  PerfilCafeteriaResponseApi,
-} from '../models/perfil-cafeteria.model';
+import { PerfilCafeteria, PerfilCafeteriaResponseApi } from '../models/perfil-cafeteria.model';
 
 const opcionesCredenciales = { withCredentials: true as const };
 

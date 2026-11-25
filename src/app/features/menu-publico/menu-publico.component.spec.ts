@@ -56,7 +56,10 @@ const MENU_PRUEBA: MenuPublico = {
 describe('MenuPublicoComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
-  function crear(id: string, menu: MenuPublico | null = MENU_PRUEBA): ComponentFixture<MenuPublicoComponent> {
+  function crear(
+    id: string,
+    menu: MenuPublico | null = MENU_PRUEBA,
+  ): ComponentFixture<MenuPublicoComponent> {
     TestBed.configureTestingModule({
       imports: [MenuPublicoComponent],
       providers: [

@@ -39,8 +39,7 @@
                 <p class="fila__nombre">{{ cafe.nombre }}</p>
                 @if (cafe.nivelTueste || cafe.notas) {
                   <p class="fila__detalle">
-                    {{
-                      cafe.nivelTueste ? 'Tueste ' + cafe.nivelTueste.toLowerCase() : ''
+                    {{ cafe.nivelTueste ? 'Tueste ' + cafe.nivelTueste.toLowerCase() : ''
                     }}{{ cafe.nivelTueste && cafe.notas ? ' · ' : '' }}{{ cafe.notas }}
                   </p>
                 }
