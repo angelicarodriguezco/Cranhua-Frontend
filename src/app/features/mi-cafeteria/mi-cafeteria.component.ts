@@ -10,7 +10,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { map, startWith } from 'rxjs';
+import { map, of, startWith, switchMap, tap } from 'rxjs';
 
 import {
   CantonReferencia,
@@ -24,9 +24,11 @@ import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
+import { mensajeDeError } from '../../core/utils/auth-error';
 import { ModalConfirmacionComponent } from '../../shared/components/modal-confirmacion/modal-confirmacion.component';
 import { ZonaPeligroComponent } from '../../shared/components/zona-peligro/zona-peligro.component';
 import { formatearColones, formatearTelefono } from '../../shared/utils/formato';
+import { ACCEPT_IMAGEN_PERFIL, validarImagenPerfil } from '../../shared/utils/imagen';
 import {
   crearFormularioDatos,
   FormularioDatos,
@@ -95,6 +97,7 @@ export class MiCafeteriaComponent implements OnDestroy {
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CAFETERIA;
   protected readonly avisoEliminar = AVISO_ELIMINAR_CAFETERIA;
   protected readonly colones = formatearColones;
+  protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
 
   protected readonly formulario = crearFormularioDatos();
   protected readonly estilos = new FormControl<EstiloCafe[]>([], {
@@ -118,8 +121,13 @@ export class MiCafeteriaComponent implements OnDestroy {
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
   protected readonly portadaUrl = signal<string | null>(null);
+  protected readonly errorPortada = signal<string | null>(null);
+  protected readonly guardando = signal(false);
+  protected readonly error = signal<string | null>(null);
   protected readonly itemsMenu = signal<ItemMenu[]>([]);
   protected readonly menuAbierto = signal(false);
+  protected readonly cargandoMenu = signal(true);
+  protected readonly errorMenu = signal<string | null>(null);
 
   protected readonly cafesMenu = computed(() =>
     this.itemsMenu().filter((item) => item.categoria === 'Café'),
@@ -128,6 +136,7 @@ export class MiCafeteriaComponent implements OnDestroy {
     this.itemsMenu().filter((item) => item.categoria === 'Otra comida'),
   );
 
+  private archivoPortada: File | null = null;
   private portadaObjectUrl: string | null = null;
   private readonly inputPortada = viewChild<ElementRef<HTMLInputElement>>('inputPortada');
 
@@ -147,15 +156,34 @@ export class MiCafeteriaComponent implements OnDestroy {
   });
 
   constructor() {
-    this.cafeteriaService.obtenerActual().subscribe((cafeteria) => {
-      if (!cafeteria) {
-        this.noEncontrado.set(true);
-        return;
-      }
-      this.aplicar(cafeteria);
-      this.modo.set('vista');
+    this.cafeteriaService.obtenerActual().subscribe({
+      next: (cafeteria) => {
+        if (!cafeteria) {
+          this.noEncontrado.set(true);
+          return;
+        }
+        this.aplicar(cafeteria);
+        this.modo.set('vista');
+      },
+      error: (error: unknown) => this.error.set(mensajeDeError(error)),
     });
-    this.menuService.listar().subscribe((items) => this.itemsMenu.set(items));
+    this.cargarMenu();
+  }
+
+  protected cargarMenu(): void {
+    this.cargandoMenu.set(true);
+    this.errorMenu.set(null);
+    this.menuService.listar().subscribe({
+      next: (items) => {
+        this.itemsMenu.set(items);
+        this.cargandoMenu.set(false);
+      },
+      error: (error: unknown) => {
+        this.itemsMenu.set([]);
+        this.errorMenu.set(mensajeDeError(error));
+        this.cargandoMenu.set(false);
+      },
+    });
   }
 
   ngOnDestroy(): void {
@@ -210,11 +238,19 @@ export class MiCafeteriaComponent implements OnDestroy {
   }
 
   protected alSeleccionarPortada(evento: Event): void {
-    const archivo = (evento.target as HTMLInputElement).files?.[0] ?? null;
-    this.revocarPortadaObjectUrl();
+    const input = evento.target as HTMLInputElement;
+    const archivo = input.files?.[0];
     if (!archivo) {
       return;
     }
+    const error = validarImagenPerfil(archivo);
+    this.errorPortada.set(error);
+    if (error) {
+      input.value = '';
+      return;
+    }
+    this.revocarPortadaObjectUrl();
+    this.archivoPortada = archivo;
     this.portadaObjectUrl = URL.createObjectURL(archivo);
     this.portadaUrl.set(this.portadaObjectUrl);
   }
@@ -235,7 +271,14 @@ export class MiCafeteriaComponent implements OnDestroy {
     const actual = this.cafeteria();
     const canton = this.canton();
     const pin = this.pin();
-    if (!actual || this.formulario.invalid || this.estilos.invalid || !canton || !pin) {
+    if (
+      !actual ||
+      this.formulario.invalid ||
+      this.estilos.invalid ||
+      !canton ||
+      !pin ||
+      this.guardando()
+    ) {
       return;
     }
 
@@ -254,13 +297,31 @@ export class MiCafeteriaComponent implements OnDestroy {
       volumenMensual: actual.volumenMensual,
       estilos: [...this.estilos.value],
       propietarioId: actual.propietarioId,
-      portadaUrl: this.portadaUrl(),
+      portadaUrl: actual.portadaUrl,
     };
+    const portada = this.archivoPortada;
 
-    this.cafeteriaService.actualizar(actualizado).subscribe((cafeteria) => {
-      this.aplicar(cafeteria);
-      this.modo.set('vista');
-    });
+    this.guardando.set(true);
+    this.error.set(null);
+    this.cafeteriaService
+      .actualizar(actualizado)
+      .pipe(
+        tap((cafeteria) => this.cafeteria.set(cafeteria)),
+        switchMap((cafeteria) =>
+          portada ? this.cafeteriaService.actualizarPortada(cafeteria.id, portada) : of(cafeteria),
+        ),
+      )
+      .subscribe({
+        next: (cafeteria) => {
+          this.guardando.set(false);
+          this.aplicar(cafeteria);
+          this.modo.set('vista');
+        },
+        error: (error: unknown) => {
+          this.guardando.set(false);
+          this.error.set(mensajeDeError(error));
+        },
+      });
   }
 
   protected irAPublicarMenu(): void {
@@ -308,6 +369,9 @@ export class MiCafeteriaComponent implements OnDestroy {
     this.estilos.reset([...copia.estilos]);
     this.pin.set({ ...copia.ubicacion });
     this.intentoGuardar.set(false);
+    this.error.set(null);
+    this.errorPortada.set(null);
+    this.archivoPortada = null;
     this.revocarPortadaObjectUrl();
     this.portadaUrl.set(copia.portadaUrl ?? null);
   }

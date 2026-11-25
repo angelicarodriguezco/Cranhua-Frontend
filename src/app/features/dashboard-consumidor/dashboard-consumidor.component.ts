@@ -1,11 +1,13 @@
 import { DOCUMENT } from '@angular/common';
 import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { GoogleMap, MapAdvancedMarker } from '@angular/google-maps';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Observable, catchError, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 
 import { MenuPublico } from '../../core/models/menu-publico.model';
+import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
 import {
   PuntoMapaConsumidor,
   TipoPuntoMapaConsumidor,
@@ -61,6 +63,12 @@ export interface ResumenPanelExplorar {
   imagenPortada?: string;
   codigoResaltado?: string;
 }
+
+type CargaPanelCafeteria =
+  | { estado: 'idle' }
+  | { estado: 'cargando' }
+  | { estado: 'error'; mensaje: string }
+  | { estado: 'ok'; perfil: PerfilCafeteria | null; menu: MenuPublico | null };
 
 function parseListaIds(valor: string | null): string[] {
   if (!valor) {
@@ -147,6 +155,48 @@ export class DashboardConsumidorComponent {
 
   protected readonly menuAbierto = computed(() => this.queryParams().get('menu') === '1');
 
+  private readonly cafeteriaIdSeleccionada = computed(() => {
+    const punto = this.puntoSeleccionado();
+    return punto?.tipo === 'cafeteria' ? punto.id : null;
+  });
+
+  private readonly cargaCafeteria = toSignal(
+    toObservable(this.cafeteriaIdSeleccionada).pipe(
+      switchMap((id): Observable<CargaPanelCafeteria> => {
+        if (!id) {
+          return of({ estado: 'idle' });
+        }
+        return forkJoin({
+          perfil: this.cafeterias.obtener(id),
+          menu: this.menus.obtener(id),
+        }).pipe(
+          map(
+            ({ perfil, menu }): CargaPanelCafeteria => ({
+              estado: 'ok',
+              perfil,
+              menu,
+            }),
+          ),
+          catchError(() =>
+            of({
+              estado: 'error' as const,
+              mensaje: 'No se pudo cargar el perfil de esta cafetería.',
+            }),
+          ),
+          startWith({ estado: 'cargando' as const }),
+        );
+      }),
+    ),
+    { initialValue: { estado: 'idle' } as CargaPanelCafeteria },
+  );
+
+  protected readonly cargandoPanel = computed(() => this.cargaCafeteria().estado === 'cargando');
+
+  protected readonly errorPanel = computed(() => {
+    const carga = this.cargaCafeteria();
+    return carga.estado === 'error' ? carga.mensaje : null;
+  });
+
   protected readonly resumenPanel = computed((): ResumenPanelExplorar | null => {
     const punto = this.puntoSeleccionado();
     if (!punto) {
@@ -222,27 +272,7 @@ export class DashboardConsumidorComponent {
       };
     }
 
-    const perfil = this.cafeterias.obtener(punto.id);
-    if (!perfil) {
-      return this.resumenBasico(punto);
-    }
-    return {
-      punto,
-      rol: ETIQUETAS_TIPO.cafeteria,
-      descripcion: perfil.descripcion,
-      datos: [
-        { etiqueta: 'Cafés trazables', valor: String(perfil.cafesTrazables) },
-        { etiqueta: 'Horario', valor: perfil.horario },
-        { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.miembroDesde) },
-      ],
-      enlaces: perfil.fincas.map((f) => ({
-        id: f.id,
-        nombre: f.nombre,
-        detalle: f.ubicacion,
-      })),
-      tituloEnlaces: 'Fincas de origen de sus cafés',
-      menu: this.menus.obtener(perfil.id),
-    };
+    return this.resumenCafeteria(punto);
   });
 
   constructor() {
@@ -368,6 +398,45 @@ export class DashboardConsumidorComponent {
       },
       queryParamsHandling: 'merge',
     });
+  }
+
+  private resumenCafeteria(punto: PuntoMapaConsumidor): ResumenPanelExplorar {
+    const carga = this.cargaCafeteria();
+    if (carga.estado === 'cargando' || carga.estado === 'idle') {
+      return {
+        ...this.resumenBasico(punto),
+        descripcion: 'Cargando perfil…',
+        datos: [],
+      };
+    }
+
+    if (carga.estado === 'error' || !carga.perfil) {
+      return this.resumenBasico(punto);
+    }
+
+    const perfil = carga.perfil;
+    return {
+      punto,
+      rol: ETIQUETAS_TIPO.cafeteria,
+      descripcion:
+        perfil.descripcion || 'Todavía no hay más detalles publicados para este negocio.',
+      datos: [
+        { etiqueta: 'Cafés trazables', valor: String(perfil.cafesTrazables) },
+        ...(perfil.horario ? [{ etiqueta: 'Horario', valor: perfil.horario }] : []),
+        {
+          etiqueta: 'En Cránhua desde',
+          valor: formatearMesAnio(perfil.miembroDesde),
+        },
+      ],
+      enlaces: perfil.fincas.map((f) => ({
+        id: f.id,
+        nombre: f.nombre,
+        detalle: f.ubicacion,
+      })),
+      tituloEnlaces: 'Fincas de origen de sus cafés',
+      menu: carga.menu,
+      imagenPortada: perfil.portadaUrl ?? undefined,
+    };
   }
 
   private resumenBasico(punto: PuntoMapaConsumidor): ResumenPanelExplorar {

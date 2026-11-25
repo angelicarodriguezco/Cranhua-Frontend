@@ -1,17 +1,41 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
+
+import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { PerfilCafeteriaService } from '../../core/services/perfil-cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { PerfilCafeteriaComponent } from './perfil-cafeteria.component';
+
+const PERFIL_PRUEBA: PerfilCafeteria = {
+  id: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  descripcion: 'Cafetería de especialidad que sirve café costarricense con origen conocido.',
+  coordenada: { lat: 9.9205, lng: -84.137 },
+  cafesTrazables: 3,
+  tostadores: [{ id: 'n-tostaduria-volcan', nombre: 'Tostaduría Volcán', ubicacion: 'San José' }],
+  horario: 'Lun a sáb, 7:00 a 19:00',
+  miembroDesde: '2025-06-10',
+  fincas: [
+    { id: 'finca-la-catalina', nombre: 'Finca La Catalina', ubicacion: 'Tarrazú' },
+    { id: 'finca-el-roble', nombre: 'Finca El Roble', ubicacion: 'Naranjo' },
+  ],
+};
 
 describe('PerfilCafeteriaComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
-  function crear(id: string): ComponentFixture<PerfilCafeteriaComponent> {
+  function crear(
+    id: string,
+    perfil: PerfilCafeteria | null = PERFIL_PRUEBA,
+  ): ComponentFixture<PerfilCafeteriaComponent> {
     TestBed.configureTestingModule({
       imports: [PerfilCafeteriaComponent],
       providers: [
+        provideHttpClient(),
         provideRouter([]),
         { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
         {
@@ -19,6 +43,16 @@ describe('PerfilCafeteriaComponent', () => {
           useValue: {
             snapshot: { paramMap: convertToParamMap({ id }) },
             paramMap: of(convertToParamMap({ id })),
+          },
+        },
+        {
+          provide: PerfilCafeteriaService,
+          useValue: {
+            obtener: jasmine
+              .createSpy('obtener')
+              .and.callFake((pedidoId: string) =>
+                of(pedidoId === PERFIL_PRUEBA.id ? perfil : null),
+              ),
           },
         },
       ],
@@ -106,7 +140,7 @@ describe('PerfilCafeteriaComponent', () => {
   });
 
   it('muestra un aviso si la cafetería no existe', () => {
-    const pagina: HTMLElement = crear('no-existe').nativeElement;
+    const pagina: HTMLElement = crear('no-existe', null).nativeElement;
     expect(pagina.textContent).toContain('No encontramos esta cafetería');
     expect(enlace(pagina, 'Volver al directorio').getAttribute('href')).toBe('/explorar');
   });

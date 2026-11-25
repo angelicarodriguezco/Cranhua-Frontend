@@ -1,14 +1,17 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
-import { NEVER, of } from 'rxjs';
+import { NEVER, Subject, of, throwError } from 'rxjs';
 
 import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { Coordenada } from '../../core/models/finca.model';
+import { ItemMenu } from '../../core/models/menu-cafeteria.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
   AVISO_ELIMINAR_CAFETERIA,
@@ -23,12 +26,31 @@ import { responderCantones } from '../../core/testing/cantones-de-prueba';
 const ESCAZU: Coordenada = { lat: 9.9189, lng: -84.1397 };
 const OCEANO: Coordenada = { lat: 8.5, lng: -86.5 };
 
+const ITEMS_MENU: ItemMenu[] = [
+  {
+    id: 'menu-1',
+    nombre: 'Espresso Tarrazú',
+    categoria: 'Café',
+    codigoTrazabilidad: 'CRH-2026-0101-T01',
+    precio: 1800,
+  },
+  {
+    id: 'menu-2',
+    nombre: 'Queque de naranja',
+    categoria: 'Otra comida',
+    codigoTrazabilidad: null,
+    precio: 1500,
+  },
+];
+
 describe('MiCafeteriaComponent', () => {
   let fixture: ComponentFixture<MiCafeteriaComponent>;
   let componente: MiCafeteriaComponent;
   let pagina: HTMLElement;
   let cafeteriaService: CafeteriaService;
+  let menuService: MenuCafeteriaService;
   let dashboard: DashboardCafeteriaService;
+  let listarMenu: jasmine.Spy;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -42,8 +64,10 @@ describe('MiCafeteriaComponent', () => {
     }).compileComponents();
 
     cafeteriaService = TestBed.inject(CafeteriaService);
+    menuService = TestBed.inject(MenuCafeteriaService);
     dashboard = TestBed.inject(DashboardCafeteriaService);
     spyOn(cafeteriaService, 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
+    listarMenu = spyOn(menuService, 'listar').and.returnValue(of(ITEMS_MENU));
 
     fixture = TestBed.createComponent(MiCafeteriaComponent);
     responderCantones();
@@ -105,7 +129,7 @@ describe('MiCafeteriaComponent', () => {
     expect(toggle.getAttribute('aria-expanded')).toBe('false');
     expect(pagina.querySelector('#menu-publicado-contenido')).toBeNull();
     expect(pagina.textContent).toContain('Menú publicado');
-    expect(pagina.textContent).toContain('(5)');
+    expect(pagina.textContent).toContain('(2)');
 
     toggle.click();
     fixture.detectChanges();
@@ -117,6 +141,67 @@ describe('MiCafeteriaComponent', () => {
     expect(pagina.textContent).toContain('Otras comidas');
     expect(pagina.textContent).toContain('Queque de naranja');
     expect(pagina.textContent).toContain('Ocultar');
+  });
+
+  it('muestra loading del menú mientras lista', () => {
+    const listar$ = new Subject<ItemMenu[]>();
+    listarMenu.and.returnValue(listar$.asObservable());
+    componente['cargarMenu']();
+    boton('Ver menú').click();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="status"]')?.textContent).toContain('Cargando menú…');
+    expect(pagina.querySelector('.menu-publicado__conteo')).toBeNull();
+
+    listar$.next(ITEMS_MENU);
+    listar$.complete();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="status"]')).toBeNull();
+    expect(pagina.textContent).toContain('(2)');
+    expect(pagina.textContent).toContain('Espresso Tarrazú');
+  });
+
+  it('muestra vacío cuando el menú no tiene ítems', () => {
+    listarMenu.and.returnValue(of([]));
+    componente['cargarMenu']();
+    boton('Ver menú').click();
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('(0)');
+    expect(pagina.querySelector('.menu-publicado__vacio')?.textContent).toContain(
+      'Todavía no tenés ítems en el menú.',
+    );
+  });
+
+  it('muestra error del menú y permite reintentar', () => {
+    listarMenu.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            statusText: 'Error',
+            error: { mensaje: 'No se pudo cargar el menú.' },
+          }),
+      ),
+    );
+    componente['cargarMenu']();
+    fixture.detectChanges();
+
+    boton('Ver menú').click();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(
+      'No se pudo cargar el menú.',
+    );
+    expect(pagina.querySelector('.menu-publicado__conteo')).toBeNull();
+
+    listarMenu.and.returnValue(of(ITEMS_MENU));
+    boton('Reintentar').click();
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('Espresso Tarrazú');
+    expect(pagina.textContent).toContain('(2)');
   });
 
   it('entra a edición y carga los datos de la cafetería', () => {
@@ -242,9 +327,11 @@ describe('MiCafeteriaComponent', () => {
 
   it('guarda cambios y vuelve a la vista', () => {
     entrarAEdicion();
-    const actualizar = spyOn(cafeteriaService, 'actualizar').and.callFake((cafeteria) =>
-      of(cafeteria),
+    const guardado$ = new Subject<typeof CAFETERIA_EJEMPLO>();
+    const actualizar = spyOn(cafeteriaService, 'actualizar').and.returnValue(
+      guardado$.asObservable(),
     );
+    const actualizarPortada = spyOn(cafeteriaService, 'actualizarPortada');
 
     campo<HTMLInputElement>('#nombre-cafeteria').value = 'Café Brumas Norte';
     campo<HTMLInputElement>('#nombre-cafeteria').dispatchEvent(new Event('input'));
@@ -254,12 +341,72 @@ describe('MiCafeteriaComponent', () => {
     fixture.detectChanges();
 
     expect(actualizar).toHaveBeenCalled();
+    expect(boton('Guardar cambios').disabled).toBeTrue();
+    expect(actualizarPortada).not.toHaveBeenCalled();
     const guardado = actualizar.calls.mostRecent().args[0];
     expect(guardado.id).toBe(CAFETERIA_EJEMPLO.id);
     expect(guardado.nombre).toBe('Café Brumas Norte');
     expect(guardado.volumenMensual).toBe(CAFETERIA_EJEMPLO.volumenMensual);
+    expect(guardado.portadaUrl).toBe(CAFETERIA_EJEMPLO.portadaUrl);
+
+    guardado$.next({ ...CAFETERIA_EJEMPLO, nombre: 'Café Brumas Norte' });
+    guardado$.complete();
+    fixture.detectChanges();
+
     expect(pagina.querySelector('.campo__valor')?.textContent).toContain('Café Brumas Norte');
     expect(pagina.querySelector('#nombre-cafeteria')).toBeNull();
+  });
+
+  it('sube la portada después de guardar los datos', () => {
+    entrarAEdicion();
+    const archivo = new File(['x'], 'portada.png', { type: 'image/png' });
+    const conPortada = {
+      ...CAFETERIA_EJEMPLO,
+      nombre: 'Café Brumas Norte',
+      portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg',
+    };
+    spyOn(cafeteriaService, 'actualizar').and.callFake((cafeteria) => of(cafeteria));
+    const actualizarPortada = spyOn(cafeteriaService, 'actualizarPortada').and.returnValue(
+      of(conPortada),
+    );
+
+    campo<HTMLInputElement>('#nombre-cafeteria').value = 'Café Brumas Norte';
+    campo<HTMLInputElement>('#nombre-cafeteria').dispatchEvent(new Event('input'));
+    componente['alSeleccionarPortada']({
+      target: { files: [archivo], value: '' },
+    } as unknown as Event);
+    fixture.detectChanges();
+
+    boton('Guardar cambios').click();
+    fixture.detectChanges();
+
+    expect(actualizarPortada).toHaveBeenCalledWith(CAFETERIA_EJEMPLO.id, archivo);
+    expect(pagina.querySelector('.campo__valor')?.textContent).toContain('Café Brumas Norte');
+  });
+
+  it('muestra el error del backend al fallar el guardado', () => {
+    entrarAEdicion();
+    spyOn(cafeteriaService, 'actualizar').and.returnValue(
+      throwError(() => ({ status: 500, error: { mensaje: 'No se pudo guardar.' } })),
+    );
+
+    boton('Guardar cambios').click();
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('No se pudo completar la solicitud. Intentá de nuevo.');
+    expect(pagina.querySelector('#nombre-cafeteria')).toBeTruthy();
+  });
+
+  it('rechaza una portada con tipo inválido', () => {
+    entrarAEdicion();
+    const archivo = new File(['x'], 'portada.gif', { type: 'image/gif' });
+    componente['alSeleccionarPortada']({
+      target: { files: [archivo], value: 'portada.gif' },
+    } as unknown as Event);
+    fixture.detectChanges();
+
+    expect(pagina.textContent).toContain('Solo se permiten imágenes JPG, PNG o WebP.');
+    expect(componente['archivoPortada']).toBeNull();
   });
 
   it('cancela y vuelve a la vista con el estado guardado', () => {

@@ -127,7 +127,9 @@
           >
             <span class="menu-publicado__titulo">
               Menú publicado
-              <span class="menu-publicado__conteo">({{ itemsMenu().length }})</span>
+              @if (!cargandoMenu() && !errorMenu()) {
+                <span class="menu-publicado__conteo">({{ itemsMenu().length }})</span>
+              }
             </span>
             <span class="menu-publicado__accion">
               {{ menuAbierto() ? 'Ocultar' : 'Ver menú' }}
@@ -137,7 +139,16 @@
 
           @if (menuAbierto()) {
             <div id="menu-publicado-contenido" class="menu-publicado__contenido">
-              @if (itemsMenu().length === 0) {
+              @if (cargandoMenu()) {
+                <p class="menu-publicado__estado" role="status">Cargando menú…</p>
+              } @else if (errorMenu()) {
+                <div class="menu-publicado__estado" role="alert">
+                  <p>{{ errorMenu() }}</p>
+                  <button type="button" class="btn btn--filled" (click)="cargarMenu()">
+                    Reintentar
+                  </button>
+                </div>
+              } @else if (itemsMenu().length === 0) {
                 <p class="menu-publicado__vacio">
                   Todavía no tenés ítems en el menú.
                   <button type="button" class="menu-publicado__enlace" (click)="irAPublicarMenu()">
@@ -205,7 +216,7 @@
                 #inputPortada
                 class="portada__input"
                 type="file"
-                accept="image/*"
+                [accept]="acceptImagen"
                 aria-label="Cambiar portada"
                 (change)="alSeleccionarPortada($event)"
               />
@@ -230,6 +241,10 @@
             </div>
 
             <div class="formulario">
+              @if (errorPortada(); as mensaje) {
+                <p class="campo--ancho campo__error" role="alert">{{ mensaje }}</p>
+              }
+
               <div class="campo campo--ancho">
                 <label class="campo__etiqueta" for="nombre-cafeteria">Nombre de la cafetería</label>
                 <input
@@ -404,12 +419,23 @@
             />
           </div>
 
+          @if (error(); as mensaje) {
+            <p class="campo__error" role="alert">{{ mensaje }}</p>
+          }
+
           <div class="acciones">
             <button type="button" class="btn btn--texto" (click)="cancelar()">Cancelar</button>
-            <button type="submit" class="btn btn--filled">Guardar cambios</button>
+            <button type="submit" class="btn btn--filled" [disabled]="guardando()">
+              Guardar cambios
+            </button>
           </div>
         </form>
       }
+    } @else {
+      <header class="encabezado">
+        <h1>Mi cafetería</h1>
+        <p role="status">{{ error() ?? 'Cargando tu cafetería…' }}</p>
+      </header>
     }
   }
 </main>

@@ -308,6 +308,20 @@ tbody tr:last-child td {
   white-space: normal;
 }
 
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+.estado p {
+  margin: 0;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -335,8 +349,13 @@ tbody tr:last-child td {
   font-weight: 600;
 }
 
-.btn--filled:hover {
+.btn--filled:hover:not(:disabled) {
   background: var(--brand-button-hover);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .btn--borde {
