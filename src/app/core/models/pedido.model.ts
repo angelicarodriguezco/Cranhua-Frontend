@@ -4,11 +4,8 @@ export interface Pedido {
   id: string;
   tostador: string;
   kilos: number;
-  /** yyyy-mm-dd en que se hizo el pedido */
   fecha: string;
   estado: EstadoPedido;
-  /** yyyy-mm-dd en que la cafetería lo marcó como recibido; solo en los entregados */
-  fechaRecibido: string | null;
 }
 
 export interface IndicadoresPedidos {
@@ -17,8 +14,45 @@ export interface IndicadoresPedidos {
   tostadoresActivos: number;
 }
 
-export interface PerfilCafeteriaSidebar {
-  iniciales: string;
-  nombreCompleto: string;
-  rol: string;
+export interface HistorialPedidos {
+  indicadores: IndicadoresPedidos;
+  pedidos: Pedido[];
+}
+
+export interface NuevoPedido {
+  tuesteId: string;
+  kilos: number;
+}
+
+export interface ErrorPedido {
+  mensaje: string;
+  errores: Record<string, string>;
+}
+
+export type EstadoPedidoApi = 'EN_CAMINO' | 'ENTREGADO' | 'CANCELADO';
+
+export interface PedidoApi {
+  id: string;
+  tostador: string;
+  cantidadKg: number;
+  pedidoEn: string;
+  estado: EstadoPedidoApi;
+}
+
+export interface HistorialPedidosApi {
+  indicadores: {
+    pedidosActivos: number;
+    kgRecibidosEsteMes: number;
+    tostadoresActivos: number;
+  };
+  pedidos: PedidoApi[];
+}
+
+export interface CrearPedidoRequestApi {
+  tuesteId: string;
+  cantidadKg: number;
+}
+
+export interface CambiarEstadoPedidoRequestApi {
+  estado: Exclude<EstadoPedidoApi, 'EN_CAMINO'>;
 }

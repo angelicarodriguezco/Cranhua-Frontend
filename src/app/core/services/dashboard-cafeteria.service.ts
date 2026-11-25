@@ -1,20 +1,38 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 
-import { RESUMEN_DASHBOARD_CAFETERIA } from '../mocks/dashboard-cafeteria.mock';
-import { IndicadoresCafeteria, PedidoRecienteCafeteria } from '../models/dashboard-cafeteria.model';
-import { PerfilCafeteriaSidebar } from '../models/pedido.model';
+import { environment } from '../../../environments/environment';
+import { resumenDashboardCafeteriaDesdeApi } from '../mappers/pedido.mapper';
+import {
+  DashboardCafeteriaApi,
+  ResumenDashboardCafeteria,
+} from '../models/dashboard-cafeteria.model';
 
+import { CafeteriaService } from './cafeteria.service';
 import { TemaService } from './tema.service';
 
 @Injectable({ providedIn: 'root' })
 export class DashboardCafeteriaService {
+  private readonly http = inject(HttpClient);
+  private readonly cafeterias = inject(CafeteriaService);
   private readonly temas = inject(TemaService);
 
-  readonly indicadores: IndicadoresCafeteria = RESUMEN_DASHBOARD_CAFETERIA.indicadores;
-  readonly pedidosRecientes: PedidoRecienteCafeteria[] =
-    RESUMEN_DASHBOARD_CAFETERIA.pedidosRecientes;
-  readonly perfilSidebar: PerfilCafeteriaSidebar = RESUMEN_DASHBOARD_CAFETERIA.perfilSidebar;
   readonly tema = this.temas.tema;
+
+  obtenerResumen(): Observable<ResumenDashboardCafeteria> {
+    return this.cafeterias.obtenerActual().pipe(
+      switchMap((cafeteria) =>
+        cafeteria
+          ? this.http.get<DashboardCafeteriaApi>(
+              `${environment.apiUrl}/api/cafeterias/${cafeteria.id}/dashboard`,
+              { withCredentials: true },
+            )
+          : throwError(() => new Error('La cuenta no tiene una cafetería registrada.')),
+      ),
+      map(resumenDashboardCafeteriaDesdeApi),
+    );
+  }
 
   alternarTema(): void {
     this.temas.alternarTema();

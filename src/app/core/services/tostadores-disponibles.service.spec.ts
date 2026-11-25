@@ -1,52 +1,54 @@
-import { TOSTADORES_DISPONIBLES } from '../mocks/tostadores-disponibles.mock';
-import { SIN_FILTROS } from '../models/tostador-disponible.model';
-import { filtrarTostadores } from './tostadores-disponibles.service';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 
-describe('filtrarTostadores', () => {
-  const ids = (filtros: Partial<typeof SIN_FILTROS>) =>
-    filtrarTostadores(TOSTADORES_DISPONIBLES, { ...SIN_FILTROS, ...filtros }).map((t) => t.id);
+import { environment } from '../../../environments/environment';
+import { SIN_FILTROS, TostadorDisponible } from '../models/tostador-disponible.model';
+import { TOSTADORES_API } from '../testing/pedidos-cafeteria.fixture';
+import { TostadoresDisponiblesService } from './tostadores-disponibles.service';
 
-  it('sin filtros devuelve todos', () => {
-    expect(ids({})).toHaveSize(TOSTADORES_DISPONIBLES.length);
+const BASE = `${environment.apiUrl}/api/tostadores`;
+
+describe('TostadoresDisponiblesService', () => {
+  let servicio: TostadoresDisponiblesService;
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    servicio = TestBed.inject(TostadoresDisponiblesService);
+    http = TestBed.inject(HttpTestingController);
   });
 
-  it('filtra por estilo Claro', () => {
-    expect(ids({ estilo: 'Claro' })).toEqual([
-      'tostador-volcan',
-      'tostador-nube-alta',
-      'tostador-grano-vivo',
-      'tostador-origen-puro',
-    ]);
+  afterEach(() => http.verify());
+
+  it('sin filtros pide la lista completa con credenciales y la mapea', () => {
+    let lista: TostadorDisponible[] = [];
+    servicio.listar().subscribe((r) => (lista = r));
+
+    const req = http.expectOne(BASE);
+    expect(req.request.method).toBe('GET');
+    expect(req.request.withCredentials).toBeTrue();
+    expect(req.request.params.keys()).toEqual([]);
+    req.flush(TOSTADORES_API);
+
+    expect(lista[0]).toEqual({
+      id: 't-volcan',
+      nombre: 'Tostaduría Volcán',
+      ubicacion: 'San José, San José',
+      estilos: ['Claro', 'Medio'],
+      kgDisponibles: 85,
+    });
+    expect(lista[1].estilos).toEqual(['Oscuro']);
   });
 
-  it('filtra por estilo Medio', () => {
-    expect(ids({ estilo: 'Medio' })).toEqual([
-      'tostador-volcan',
-      'tostador-cerro-azul',
-      'tostador-grano-vivo',
-      'tostador-brisas-del-sur',
-    ]);
-  });
+  it('manda el estilo en el formato del backend y "disponible" cuando se pide café', () => {
+    servicio.listar({ ...SIN_FILTROS, estilo: 'Oscuro', soloConCafe: true }).subscribe();
 
-  it('filtra por estilo Oscuro', () => {
-    expect(ids({ estilo: 'Oscuro' })).toEqual([
-      'tostador-cerro-azul',
-      'tostador-fuego-lento',
-      'tostador-grano-vivo',
-      'tostador-origen-puro',
-    ]);
-  });
-
-  it('"Con café disponible" deja fuera los sin kg', () => {
-    expect(ids({ soloConCafe: true })).not.toContain('tostador-brisas-del-sur');
-    expect(ids({ soloConCafe: true })).toHaveSize(6);
-  });
-
-  it('combina estilo y café disponible', () => {
-    expect(ids({ estilo: 'Medio', soloConCafe: true })).toEqual([
-      'tostador-volcan',
-      'tostador-cerro-azul',
-      'tostador-grano-vivo',
-    ]);
+    const req = http.expectOne((r) => r.url === BASE);
+    expect(req.request.params.get('estilo')).toBe('OSCURO');
+    expect(req.request.params.get('disponible')).toBe('true');
+    req.flush([]);
   });
 });

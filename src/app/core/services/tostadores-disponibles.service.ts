@@ -1,22 +1,42 @@
-import { Injectable, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map } from 'rxjs';
 
-import { TOSTADORES_DISPONIBLES } from '../mocks/tostadores-disponibles.mock';
-import { FiltrosTostadores, TostadorDisponible } from '../models/tostador-disponible.model';
+import { environment } from '../../../environments/environment';
+import { tostadorDisponibleDesdeApi } from '../mappers/tostador-exploracion.mapper';
+import { nivelTuesteHaciaApi } from '../mappers/tueste.mapper';
+import {
+  FiltrosTostadores,
+  SIN_FILTROS,
+  TostadorDisponible,
+  TostadorExploracionApi,
+} from '../models/tostador-disponible.model';
 
-export function filtrarTostadores(
-  tostadores: TostadorDisponible[],
-  filtros: FiltrosTostadores,
-): TostadorDisponible[] {
-  return tostadores.filter(
-    (t) =>
-      (!filtros.estilo || t.estilos.includes(filtros.estilo)) &&
-      (!filtros.soloConCafe || t.kgDisponibles > 0),
-  );
+function paramsDesdeFiltros(filtros: FiltrosTostadores): HttpParams {
+  let params = new HttpParams();
+  if (filtros.estilo) {
+    params = params.set('estilo', nivelTuesteHaciaApi(filtros.estilo));
+  }
+  if (filtros.soloConCafe) {
+    params = params.set('disponible', 'true');
+  }
+  return params;
 }
 
 @Injectable({ providedIn: 'root' })
 export class TostadoresDisponiblesService {
-  private readonly lista = signal<TostadorDisponible[]>(TOSTADORES_DISPONIBLES);
+  private readonly http = inject(HttpClient);
 
-  readonly tostadores = this.lista.asReadonly();
+  private get base(): string {
+    return `${environment.apiUrl}/api/tostadores`;
+  }
+
+  listar(filtros: FiltrosTostadores = SIN_FILTROS): Observable<TostadorDisponible[]> {
+    return this.http
+      .get<TostadorExploracionApi[]>(this.base, {
+        withCredentials: true,
+        params: paramsDesdeFiltros(filtros),
+      })
+      .pipe(map((lista) => lista.map(tostadorDisponibleDesdeApi)));
+  }
 }

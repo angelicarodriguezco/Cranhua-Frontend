@@ -1,62 +1,78 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, throwError } from 'rxjs';
 
-import { PEDIDOS, fechaIso } from '../mocks/pedidos.mock';
-import { EstadoPedido, IndicadoresPedidos, Pedido } from '../models/pedido.model';
+import { environment } from '../../../environments/environment';
+import {
+  cuerpoCrearPedido,
+  historialPedidosDesdeApi,
+  pedidoDesdeApi,
+} from '../mappers/pedido.mapper';
+import {
+  CambiarEstadoPedidoRequestApi,
+  ErrorPedido,
+  HistorialPedidos,
+  HistorialPedidosApi,
+  NuevoPedido,
+  Pedido,
+  PedidoApi,
+} from '../models/pedido.model';
 
-export function calcularIndicadores(pedidos: Pedido[], hoy = new Date()): IndicadoresPedidos {
-  const mesActual = fechaIso(hoy).slice(0, 7);
-  return {
-    activos: pedidos.filter((p) => p.estado === 'En camino').length,
-    kgRecibidosMes: pedidos
-      .filter((p) => p.fechaRecibido?.startsWith(mesActual))
-      .reduce((total, p) => total + p.kilos, 0),
-    tostadoresActivos: new Set(
-      pedidos.filter((p) => p.estado !== 'Cancelado').map((p) => p.tostador),
-    ).size,
-  };
-}
+const opcionesCredenciales = { withCredentials: true as const };
+const ERROR_PEDIDO = 'No pudimos enviar el pedido. Intentá de nuevo.';
+const ERROR_ESTADO = 'No pudimos actualizar el pedido. Intentá de nuevo.';
 
 @Injectable({ providedIn: 'root' })
 export class PedidosService {
-  private pedidos: Pedido[] = PEDIDOS.map((p) => ({ ...p }));
+  private readonly http = inject(HttpClient);
 
-  listar(): Observable<Pedido[]> {
-    return of([...this.pedidos].sort((a, b) => b.fecha.localeCompare(a.fecha)));
+  private get base(): string {
+    return `${environment.apiUrl}/api/pedidos`;
   }
 
-  crear(tostador: string, kilos: number): Observable<Pedido> {
-    const pedido: Pedido = {
-      id: `ped-${this.pedidos.length + 1}-${Date.now()}`,
-      tostador,
-      kilos,
-      fecha: fechaIso(new Date()),
-      estado: 'En camino',
-      fechaRecibido: null,
-    };
-    this.pedidos = [pedido, ...this.pedidos];
-    return of(pedido);
+  listar(): Observable<HistorialPedidos> {
+    return this.http
+      .get<HistorialPedidosApi>(this.base, opcionesCredenciales)
+      .pipe(map(historialPedidosDesdeApi));
+  }
+
+  crear(nuevo: NuevoPedido): Observable<Pedido> {
+    return this.http
+      .post<PedidoApi>(this.base, cuerpoCrearPedido(nuevo), opcionesCredenciales)
+      .pipe(
+        map(pedidoDesdeApi),
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => this.errorDe(error, ERROR_PEDIDO)),
+        ),
+      );
   }
 
   marcarRecibido(id: string): Observable<Pedido> {
-    return this.cerrar(id, 'Entregado');
+    return this.cambiarEstado(id, { estado: 'ENTREGADO' });
   }
 
   cancelar(id: string): Observable<Pedido> {
-    return this.cerrar(id, 'Cancelado');
+    return this.cambiarEstado(id, { estado: 'CANCELADO' });
   }
 
-  private cerrar(id: string, estado: Exclude<EstadoPedido, 'En camino'>): Observable<Pedido> {
-    const pedido = this.pedidos.find((p) => p.id === id);
-    if (!pedido || pedido.estado !== 'En camino') {
-      throw new Error(`El pedido ${id} no está en camino`);
+  private cambiarEstado(id: string, cuerpo: CambiarEstadoPedidoRequestApi): Observable<Pedido> {
+    return this.http
+      .patch<PedidoApi>(`${this.base}/${encodeURIComponent(id)}`, cuerpo, opcionesCredenciales)
+      .pipe(
+        map(pedidoDesdeApi),
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => this.errorDe(error, ERROR_ESTADO)),
+        ),
+      );
+  }
+
+  private errorDe(error: HttpErrorResponse, generico: string): ErrorPedido {
+    if ([400, 403, 404].includes(error.status)) {
+      return {
+        mensaje: error.error?.mensaje ?? generico,
+        errores: error.error?.errores ?? {},
+      };
     }
-    const actualizado: Pedido = {
-      ...pedido,
-      estado,
-      fechaRecibido: estado === 'Entregado' ? fechaIso(new Date()) : null,
-    };
-    this.pedidos = this.pedidos.map((p) => (p.id === id ? actualizado : p));
-    return of(actualizado);
+    return { mensaje: generico, errores: {} };
   }
 }
