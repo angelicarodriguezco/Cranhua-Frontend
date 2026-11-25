@@ -37,18 +37,21 @@
             <li class="fila fila--cafe">
               <div class="fila__info">
                 <p class="fila__nombre">{{ cafe.nombre }}</p>
-                <p class="fila__detalle">
-                  Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
-                </p>
-                <a
-                  class="ver-origen"
-                  [routerLink]="['/explorar/finca', cafe.fincaOrigen.id]"
-                  [attr.aria-label]="
-                    'Ver origen de ' + cafe.nombre + ': ' + cafe.fincaOrigen.nombre
-                  "
-                >
-                  Ver origen →
-                </a>
+                @if (cafe.nivelTueste || cafe.notas) {
+                  <p class="fila__detalle">
+                    {{ cafe.nivelTueste ? 'Tueste ' + cafe.nivelTueste.toLowerCase() : ''
+                    }}{{ cafe.nivelTueste && cafe.notas ? ' · ' : '' }}{{ cafe.notas }}
+                  </p>
+                }
+                @if (cafe.fincaOrigen; as origen) {
+                  <a
+                    class="ver-origen"
+                    [routerLink]="['/explorar/finca', origen.id]"
+                    [attr.aria-label]="'Ver origen de ' + cafe.nombre + ': ' + origen.nombre"
+                  >
+                    Ver origen →
+                  </a>
+                }
               </div>
               <span class="fila__precio">{{ precio(cafe.precio) }}</span>
             </li>
@@ -72,7 +75,7 @@
         <a class="volver" [routerLink]="['/explorar/cafeteria', id()]">← Volver a la cafetería</a>
       </div>
     </article>
-  } @else {
+  } @else if (menu() === null) {
     <article class="tarjeta" role="alert">
       <h1>No encontramos este menú</h1>
       <p class="ubicacion">
@@ -81,6 +84,10 @@
       <div class="acciones">
         <a class="volver" routerLink="/explorar">← Volver al directorio</a>
       </div>
+    </article>
+  } @else {
+    <article class="tarjeta" role="status">
+      <h1>Cargando menú…</h1>
     </article>
   }
 </div>

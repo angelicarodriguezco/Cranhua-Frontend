@@ -1,7 +1,7 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { map, of, switchMap } from 'rxjs';
 
 import { TemaDashboard } from '../../core/models/dashboard-cafetalero.model';
 import { MenuPublicoService } from '../../core/services/menu-publico.service';
@@ -25,7 +25,14 @@ export class MenuPublicoComponent {
     initialValue: this.route.snapshot.paramMap.get('id') ?? '',
   });
 
-  protected readonly menu = computed(() => this.menus.obtener(this.id()));
+  protected readonly menu = toSignal(
+    this.route.paramMap.pipe(
+      switchMap((params) => {
+        const id = params.get('id')?.trim();
+        return id ? this.menus.obtener(id) : of(null);
+      }),
+    ),
+  );
 
   protected readonly logo = computed(() =>
     this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',

@@ -161,12 +161,12 @@ describe('CafeteriaService', () => {
   });
 
   describe('actualizar', () => {
-    it('hace PATCH /{id} con el cuerpo de registro y mapea la respuesta', () => {
+    it('hace PATCH /{id} sin portadaUrl y mapea la respuesta', () => {
       const actualizada: Cafeteria = {
         ...CAFETERIA_EJEMPLO,
         nombre: 'Café Brumas Escazú',
         estilos: ['Oscuro'],
-        portadaUrl: 'https://cdn.ejemplo.cr/portada.jpg',
+        portadaUrl: 'blob:http://localhost/portada',
       };
       let guardada: Cafeteria | undefined;
       servicio.actualizar(actualizada).subscribe((cafeteria) => (guardada = cafeteria));
@@ -174,10 +174,17 @@ describe('CafeteriaService', () => {
       const req = http.expectOne(`${BASE}/${actualizada.id}`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.withCredentials).toBeTrue();
-      const { id, propietarioId, ...datos } = actualizada;
+      const { id, propietarioId, portadaUrl, ...datos } = actualizada;
       void id;
       void propietarioId;
-      expect(req.request.body).toEqual(cuerpoRegistro(datos));
+      void portadaUrl;
+      const { portadaUrl: _omitida, ...cuerpoEsperado } = cuerpoRegistro({
+        ...datos,
+        portadaUrl: null,
+      });
+      void _omitida;
+      expect(req.request.body).toEqual(cuerpoEsperado);
+      expect(req.request.body.portadaUrl).toBeUndefined();
       req.flush(
         cafeteriaApi({
           nombre: 'Café Brumas Escazú',
@@ -193,6 +200,40 @@ describe('CafeteriaService', () => {
             portadaUrl: 'https://cdn.ejemplo.cr/portada.jpg',
           }),
         ),
+      );
+    });
+  });
+
+  describe('actualizarPortada', () => {
+    it('sube la portada como multipart con campo archivo', () => {
+      const archivo = new File(['x'], 'portada.png', { type: 'image/png' });
+      let guardada: Cafeteria | undefined;
+      servicio
+        .actualizarPortada(CAFETERIA_EJEMPLO.id, archivo)
+        .subscribe((cafeteria) => (guardada = cafeteria));
+
+      const req = http.expectOne(`${BASE}/${CAFETERIA_EJEMPLO.id}/portada`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.withCredentials).toBeTrue();
+      expect((req.request.body as FormData).get('archivo')).toEqual(archivo);
+      req.flush(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' }));
+      expect(guardada).toEqual(
+        cafeteriaDesdeApi(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' })),
+      );
+    });
+
+    it('deja la cafetería con portada en caché para obtenerActual', () => {
+      const archivo = new File(['x'], 'portada.png', { type: 'image/png' });
+      servicio.actualizarPortada(CAFETERIA_EJEMPLO.id, archivo).subscribe();
+      http
+        .expectOne(`${BASE}/${CAFETERIA_EJEMPLO.id}/portada`)
+        .flush(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' }));
+
+      let actual: Cafeteria | undefined;
+      servicio.obtenerActual().subscribe((cafeteria) => (actual = cafeteria));
+      http.expectNone(`${BASE}/actual`);
+      expect(actual).toEqual(
+        cafeteriaDesdeApi(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' })),
       );
     });
   });
