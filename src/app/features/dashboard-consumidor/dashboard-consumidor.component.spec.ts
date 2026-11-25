@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import {
   ActivatedRoute,
   ParamMap,
@@ -8,12 +8,53 @@ import {
   convertToParamMap,
   provideRouter,
 } from '@angular/router';
-import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject, of, throwError } from 'rxjs';
 
+import { MenuPublico } from '../../core/models/menu-publico.model';
+import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
 import { PuntoMapaConsumidor } from '../../core/models/punto-mapa-consumidor.model';
 import { DashboardConsumidorService } from '../../core/services/dashboard-consumidor.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { MenuPublicoService } from '../../core/services/menu-publico.service';
+import { PerfilCafeteriaService } from '../../core/services/perfil-cafeteria.service';
 import { DashboardConsumidorComponent } from './dashboard-consumidor.component';
+
+const PERFIL_CAFETERIA_PRUEBA: PerfilCafeteria = {
+  id: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  descripcion: 'Cafetería de especialidad.',
+  coordenada: { lat: 9.9205, lng: -84.137 },
+  cafesTrazables: 2,
+  tostadores: [{ id: 'n-tostaduria-volcan', nombre: 'Tostaduría Volcán', ubicacion: 'San José' }],
+  horario: 'Lun a sáb, 7:00 a 19:00',
+  miembroDesde: '2025-06-10',
+  fincas: [
+    { id: 'finca-la-catalina', nombre: 'Finca La Catalina', ubicacion: 'Tarrazú' },
+    { id: 'finca-el-roble', nombre: 'Finca El Roble', ubicacion: 'Naranjo' },
+  ],
+};
+
+const MENU_CAFETERIA_PRUEBA: MenuPublico = {
+  cafeteriaId: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  cafes: [
+    {
+      id: 'Espresso-1500-0',
+      nombre: 'Espresso Finca La Catalina',
+      nivelTueste: 'Claro',
+      notas: 'Notas a caramelo y cítricos',
+      precio: 1500,
+      fincaOrigen: {
+        id: 'finca-la-catalina',
+        nombre: 'Finca La Catalina',
+        ubicacion: 'Tarrazú',
+      },
+    },
+  ],
+  otrasComidas: [{ id: 'Croissant-1200-0', nombre: 'Croissant de almendra', precio: 1200 }],
+};
 
 const PUNTOS_PRUEBA: PuntoMapaConsumidor[] = [
   {
@@ -55,9 +96,15 @@ describe('DashboardConsumidorComponent', () => {
   let componente: DashboardConsumidorComponent;
   let pagina: HTMLElement;
   let queryParams$: BehaviorSubject<ParamMap>;
+  let obtenerPerfil: jasmine.Spy;
+  let obtenerMenu: jasmine.Spy;
 
   beforeEach(async () => {
     queryParams$ = new BehaviorSubject(convertToParamMap({}));
+    obtenerPerfil = jasmine
+      .createSpy('obtenerPerfil')
+      .and.returnValue(of(PERFIL_CAFETERIA_PRUEBA));
+    obtenerMenu = jasmine.createSpy('obtenerMenu').and.returnValue(of(MENU_CAFETERIA_PRUEBA));
 
     await TestBed.configureTestingModule({
       imports: [DashboardConsumidorComponent],
@@ -72,6 +119,14 @@ describe('DashboardConsumidorComponent', () => {
             snapshot: { queryParamMap: convertToParamMap({}) },
             queryParamMap: queryParams$.asObservable(),
           },
+        },
+        {
+          provide: PerfilCafeteriaService,
+          useValue: { obtener: obtenerPerfil },
+        },
+        {
+          provide: MenuPublicoService,
+          useValue: { obtener: obtenerMenu },
         },
       ],
     }).compileComponents();
@@ -88,6 +143,13 @@ describe('DashboardConsumidorComponent', () => {
     componente['codigo'].setValue(codigo);
     componente['buscar']();
     fixture.detectChanges();
+  }
+
+  function abrirCafeteria(params: Record<string, string> = {}): string {
+    const cafeteria = PUNTOS_PRUEBA.find((p) => p.tipo === 'cafeteria')!;
+    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id, ...params }));
+    fixture.detectChanges();
+    return cafeteria.id;
   }
 
   it('muestra un enlace para volver al inicio', () => {
@@ -145,10 +207,13 @@ describe('DashboardConsumidorComponent', () => {
     expect(pagina.querySelector('.panel-negocio__portada')).toBeTruthy();
   });
 
-  it('en cafetería muestra el menú colapsado y se abre con menu=1', () => {
-    const cafeteria = PUNTOS_PRUEBA.find((p) => p.tipo === 'cafeteria')!;
-    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id }));
+  it('en cafetería muestra el menú colapsado y se abre con menu=1', fakeAsync(() => {
+    const cafeteriaId = abrirCafeteria();
+    tick();
     fixture.detectChanges();
+
+    expect(obtenerPerfil).toHaveBeenCalledWith(cafeteriaId);
+    expect(obtenerMenu).toHaveBeenCalledWith(cafeteriaId);
 
     const toggle = pagina.querySelector<HTMLButtonElement>('.panel-menu__toggle');
     expect(toggle).toBeTruthy();
@@ -156,13 +221,76 @@ describe('DashboardConsumidorComponent', () => {
     expect(toggle!.getAttribute('aria-expanded')).toBe('false');
     expect(pagina.querySelector('#panel-menu-contenido')).toBeNull();
 
-    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id, menu: '1' }));
+    abrirCafeteria({ menu: '1' });
+    tick();
     fixture.detectChanges();
 
     expect(pagina.querySelector('.panel-menu__toggle')!.textContent).toContain('Ocultar menú');
     expect(pagina.querySelector('#panel-menu-contenido')).toBeTruthy();
     expect(pagina.querySelector('.panel-menu__contenido')!.textContent).toContain('Cafés');
-  });
+    expect(pagina.querySelector('.panel-menu__contenido')!.textContent).toContain(
+      'Espresso Finca La Catalina',
+    );
+  }));
+
+  it('muestra loading del panel de cafetería mientras carga perfil y menú', fakeAsync(() => {
+    const perfil$ = new Subject<PerfilCafeteria | null>();
+    const menu$ = new Subject<MenuPublico | null>();
+    obtenerPerfil.and.returnValue(perfil$.asObservable());
+    obtenerMenu.and.returnValue(menu$.asObservable());
+
+    abrirCafeteria();
+    tick();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="status"]')?.textContent).toContain('Cargando perfil…');
+    expect(pagina.querySelector('.panel-menu__toggle')).toBeNull();
+
+    perfil$.next(PERFIL_CAFETERIA_PRUEBA);
+    perfil$.complete();
+    menu$.next(MENU_CAFETERIA_PRUEBA);
+    menu$.complete();
+    tick();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="status"]')).toBeNull();
+    expect(pagina.querySelector('.panel-negocio__desc')?.textContent).toContain(
+      'Cafetería de especialidad.',
+    );
+    expect(pagina.querySelector('.panel-menu__toggle')).toBeTruthy();
+  }));
+
+  it('muestra error del panel si falla la carga de la cafetería', fakeAsync(() => {
+    obtenerPerfil.and.returnValue(throwError(() => new Error('falló')));
+    obtenerMenu.and.returnValue(of(MENU_CAFETERIA_PRUEBA));
+
+    abrirCafeteria();
+    tick();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(
+      'No se pudo cargar el perfil de esta cafetería.',
+    );
+    expect(pagina.querySelector('.panel-menu__toggle')).toBeNull();
+  }));
+
+  it('muestra vacío cuando la cafetería no tiene ítems en el menú', fakeAsync(() => {
+    obtenerMenu.and.returnValue(
+      of({
+        ...MENU_CAFETERIA_PRUEBA,
+        cafes: [],
+        otrasComidas: [],
+      }),
+    );
+
+    abrirCafeteria({ menu: '1' });
+    tick();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.panel-menu__vacio')?.textContent).toContain(
+      'Esta cafetería aún no tiene ítems en el menú.',
+    );
+  }));
 
   it('con código válido abre el panel de la finca con query cosecha', () => {
     const router = TestBed.inject(Router);

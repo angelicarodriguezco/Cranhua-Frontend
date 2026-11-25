@@ -3,7 +3,7 @@ import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { GoogleMap, MapAdvancedMarker } from '@angular/google-maps';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
+import { of, switchMap } from 'rxjs';
 import { TemaDashboard } from '../../core/models/dashboard-cafetalero.model';
 import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
@@ -31,11 +31,15 @@ export class PerfilCafeteriaComponent {
   protected readonly logo = computed(() =>
     this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',
   );
-  private readonly id = toSignal(this.route.paramMap.pipe(map((p) => p.get('id') ?? '')), {
-    initialValue: this.route.snapshot.paramMap.get('id') ?? '',
-  });
 
-  protected readonly perfil = computed(() => this.perfiles.obtener(this.id()));
+  protected readonly perfil = toSignal(
+    this.route.paramMap.pipe(
+      switchMap((params) => {
+        const id = params.get('id')?.trim();
+        return id ? this.perfiles.obtener(id) : of(null);
+      }),
+    ),
+  );
 
   protected readonly iniciales = computed(() =>
     (this.perfil()?.nombre ?? '')
@@ -57,7 +61,7 @@ export class PerfilCafeteriaComponent {
         etiqueta: 'Tostadores con los que trabaja',
         valor: listar(perfil.tostadores.map((t) => t.nombre)),
       },
-      { etiqueta: 'Horario', valor: perfil.horario },
+      ...(perfil.horario ? [{ etiqueta: 'Horario', valor: perfil.horario }] : []),
       { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.miembroDesde) },
     ];
   });
@@ -72,7 +76,7 @@ export class PerfilCafeteriaComponent {
   }));
 
   protected readonly zoom = ZOOM_PERFIL;
-  protected readonly pin = computed(() => this.crearPin(this.perfil()));
+  protected readonly pin = computed(() => this.crearPin(this.perfil() ?? null));
 
   protected establecerTema(tema: TemaDashboard): void {
     this.temas.establecerTema(tema);

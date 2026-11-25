@@ -1,24 +1,82 @@
+import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 
+import { MenuPublico } from '../../core/models/menu-publico.model';
+import { MenuPublicoService } from '../../core/services/menu-publico.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { formatearColones } from '../../shared/utils/formato';
 import { MenuPublicoComponent } from './menu-publico.component';
 
+const MENU_PRUEBA: MenuPublico = {
+  cafeteriaId: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  cafes: [
+    {
+      id: 'cafe-espresso-catalina',
+      nombre: 'Espresso Finca La Catalina',
+      nivelTueste: 'Claro',
+      notas: 'Notas a caramelo y cítricos',
+      precio: 1500,
+      fincaOrigen: {
+        id: 'finca-la-catalina',
+        nombre: 'Finca La Catalina',
+        ubicacion: 'Tarrazú',
+      },
+    },
+    {
+      id: 'cafe-cappuccino-catalina',
+      nombre: 'Cappuccino Finca La Catalina',
+      nivelTueste: 'Medio',
+      notas: 'Con leche vaporizada',
+      precio: 1800,
+      fincaOrigen: {
+        id: 'finca-la-catalina',
+        nombre: 'Finca La Catalina',
+        ubicacion: 'Tarrazú',
+      },
+    },
+    {
+      id: 'cafe-cold-brew',
+      nombre: 'Cold Brew de la casa',
+      nivelTueste: 'Medio',
+      notas: 'Extracción en frío, 18 horas',
+      precio: 2000,
+      fincaOrigen: { id: 'finca-el-roble', nombre: 'Finca El Roble', ubicacion: 'Naranjo' },
+    },
+  ],
+  otrasComidas: [
+    { id: 'comida-croissant-almendra', nombre: 'Croissant de almendra', precio: 1200 },
+    { id: 'comida-tostada-aguacate', nombre: 'Tostada de aguacate', precio: 2400 },
+  ],
+};
+
 describe('MenuPublicoComponent', () => {
   afterEach(() => localStorage.removeItem(CLAVE_TEMA));
 
-  function crear(id: string): ComponentFixture<MenuPublicoComponent> {
+  function crear(id: string, menu: MenuPublico | null = MENU_PRUEBA): ComponentFixture<MenuPublicoComponent> {
     TestBed.configureTestingModule({
       imports: [MenuPublicoComponent],
       providers: [
+        provideHttpClient(),
         provideRouter([]),
         {
           provide: ActivatedRoute,
           useValue: {
             snapshot: { paramMap: convertToParamMap({ id }) },
             paramMap: of(convertToParamMap({ id })),
+          },
+        },
+        {
+          provide: MenuPublicoService,
+          useValue: {
+            obtener: jasmine
+              .createSpy('obtener')
+              .and.callFake((pedidoId: string) =>
+                of(pedidoId === MENU_PRUEBA.cafeteriaId ? menu : null),
+              ),
           },
         },
       ],
@@ -103,7 +161,7 @@ describe('MenuPublicoComponent', () => {
   });
 
   it('muestra un aviso si la cafetería no existe', () => {
-    const pagina: HTMLElement = crear('no-existe').nativeElement;
+    const pagina: HTMLElement = crear('no-existe', null).nativeElement;
     expect(pagina.textContent).toContain('No encontramos este menú');
     expect(enlace(pagina, 'Volver al directorio').getAttribute('href')).toBe('/explorar');
   });

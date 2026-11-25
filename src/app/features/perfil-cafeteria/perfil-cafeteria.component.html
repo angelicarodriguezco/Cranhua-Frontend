@@ -93,7 +93,7 @@
         </div>
       </div>
     </article>
-  } @else {
+  } @else if (perfil() === null) {
     <article class="tarjeta tarjeta--vacia" role="alert">
       <h1>No encontramos esta cafetería</h1>
       <p class="descripcion">
@@ -102,6 +102,10 @@
       <p class="descripcion">
         <a class="volver" routerLink="/explorar">← Volver al directorio</a>
       </p>
+    </article>
+  } @else {
+    <article class="tarjeta tarjeta--vacia" role="status">
+      <h1>Cargando cafetería…</h1>
     </article>
   }
 </div>

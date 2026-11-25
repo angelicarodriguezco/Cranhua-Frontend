@@ -37,14 +37,24 @@ export class CafeteriaService {
   }
 
   actualizar(cafeteria: Cafeteria): Observable<Cafeteria> {
-    const { id, propietarioId, ...datos } = cafeteria;
+    const { id, propietarioId, portadaUrl, ...datos } = cafeteria;
     void propietarioId;
+    void portadaUrl;
+    const { portadaUrl: _omitida, ...cuerpo } = cuerpoRegistro({ ...datos, portadaUrl: null });
+    void _omitida;
     return this.http
-      .patch<CafeteriaResponseApi>(
-        `${this.base}/${id}`,
-        cuerpoRegistro(datos),
-        opcionesCredenciales,
-      )
+      .patch<CafeteriaResponseApi>(`${this.base}/${id}`, cuerpo, opcionesCredenciales)
+      .pipe(
+        map(cafeteriaDesdeApi),
+        tap((guardada) => this.guardarCache(guardada)),
+      );
+  }
+
+  actualizarPortada(id: string, archivo: File): Observable<Cafeteria> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http
+      .post<CafeteriaResponseApi>(`${this.base}/${id}/portada`, formData, opcionesCredenciales)
       .pipe(
         map(cafeteriaDesdeApi),
         tap((guardada) => this.guardarCache(guardada)),
