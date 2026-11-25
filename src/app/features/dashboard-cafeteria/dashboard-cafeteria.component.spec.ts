@@ -1,19 +1,23 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { DashboardCafeteriaComponent } from './dashboard-cafeteria.component';
+import { dashboardApi, pedidoApi } from '../../core/testing/pedidos-cafeteria.fixture';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 describe('DashboardCafeteriaComponent', () => {
   let fixture: ComponentFixture<DashboardCafeteriaComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
+  const URL_DASHBOARD = `${environment.apiUrl}/api/cafeterias/${CAFETERIA_EJEMPLO.id}/dashboard`;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -26,10 +30,28 @@ describe('DashboardCafeteriaComponent', () => {
     conSesionDeEjemplo();
     fixture = TestBed.createComponent(DashboardCafeteriaComponent);
     pagina = fixture.nativeElement;
+    http = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
   });
 
-  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+  afterEach(() => {
+    localStorage.removeItem(CLAVE_TEMA);
+    http.verify();
+  });
+
+  function responder(cuerpo = DASHBOARD): void {
+    http.expectOne(URL_DASHBOARD).flush(cuerpo);
+    fixture.detectChanges();
+  }
+
+  const DASHBOARD = dashboardApi({
+    pedidosRecientes: [
+      pedidoApi({ id: 'r-1', cantidadKg: 20, estado: 'ENTREGADO' }),
+      pedidoApi({ id: 'r-2', tostador: 'Café del Cerro', cantidadKg: 15, estado: 'ENTREGADO' }),
+      pedidoApi({ id: 'r-3', cantidadKg: 10, estado: 'ENTREGADO' }),
+      pedidoApi({ id: 'r-4', tostador: 'Grano y Fuego', cantidadKg: 8 }),
+    ],
+  });
 
   function rutasDe(enlaceSelector: string): string[] {
     return fixture.debugElement
@@ -37,12 +59,20 @@ describe('DashboardCafeteriaComponent', () => {
       .map((el) => el.injector.get(RouterLink).href ?? '');
   }
 
+  it('muestra un estado de carga mientras consulta', () => {
+    expect(pagina.querySelector('[role="status"]')?.textContent).toContain('Cargando');
+    responder();
+    expect(pagina.querySelector('[role="status"]')).toBeNull();
+  });
+
   it('muestra el título del dashboard', () => {
+    responder();
     expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Dashboard');
     expect(pagina.textContent).toContain('Así va tu cafetería esta semana.');
   });
 
-  it('muestra los 3 indicadores con labels del ticket y valores mock', () => {
+  it('muestra los 3 indicadores con labels del ticket y valores del backend', () => {
+    responder();
     const indicadores = pagina.querySelector('.indicadores');
     expect(indicadores).toBeTruthy();
 
@@ -58,6 +88,7 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('muestra la tabla de pedidos con al menos 4 filas y ambos estados', () => {
+    responder();
     const seccion = pagina.querySelector('.pedidos');
     expect(seccion).toBeTruthy();
     expect(seccion!.textContent).toContain('Pedidos recientes a tostadores');
@@ -80,6 +111,7 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('los indicadores y los pedidos recientes abren su sección', () => {
+    responder();
     expect(rutasDe('.indicadores a')).toEqual([
       '/cafeteria/pedidos',
       '/cafeteria/pedidos',
@@ -91,6 +123,7 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('enlaza el menú a los destinos de cafetería', () => {
+    responder();
     expect(rutasDe('app-menu-lateral a')).toEqual(
       jasmine.arrayContaining([
         '/cafeteria/dashboard',
@@ -104,6 +137,7 @@ describe('DashboardCafeteriaComponent', () => {
   });
 
   it('muestra el perfil del sidebar y sigue el tema global', () => {
+    responder();
     const temas = TestBed.inject(TemaService);
     expect(pagina.querySelector('app-menu-lateral .perfil-rol')?.textContent).toContain(
       'Cafetería',
@@ -115,5 +149,24 @@ describe('DashboardCafeteriaComponent', () => {
     fixture.detectChanges();
 
     expect(pagina.querySelector('.dashboard')?.getAttribute('data-theme')).toBe('oscuro');
+  });
+
+  it('muestra el estado vacío si todavía no hay pedidos', () => {
+    responder(dashboardApi({ pedidosRecientes: [] }));
+    expect(pagina.querySelector('.pedidos .vacio')?.textContent).toContain(
+      'Todavía no hiciste pedidos',
+    );
+  });
+
+  it('muestra el error y permite reintentar', () => {
+    http
+      .expectOne(URL_DASHBOARD)
+      .flush({ mensaje: 'No tienes permiso.' }, { status: 403, statusText: 'Forbidden' });
+    fixture.detectChanges();
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain('No tienes permiso.');
+
+    pagina.querySelector<HTMLButtonElement>('[role="alert"] button')!.click();
+    responder();
+    expect(pagina.querySelectorAll('.pedidos tbody tr')).toHaveSize(4);
   });
 });

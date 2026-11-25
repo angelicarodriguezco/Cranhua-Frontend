@@ -398,3 +398,8 @@ dd {
     justify-self: start;
   }
 }
+
+.boton-principal:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}

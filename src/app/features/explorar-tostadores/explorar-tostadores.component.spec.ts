@@ -1,128 +1,118 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 import { of } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
+import { TostadorExploracionApi } from '../../core/models/tostador-disponible.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
+import { TOSTADORES_API } from '../../core/testing/pedidos-cafeteria.fixture';
 import { ExplorarTostadoresComponent } from './explorar-tostadores.component';
-import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+
+const BASE = `${environment.apiUrl}/api/tostadores`;
 
 describe('ExplorarTostadoresComponent', () => {
   let fixture: ComponentFixture<ExplorarTostadoresComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(() => {
+    TestBed.configureTestingModule({
       imports: [ExplorarTostadoresComponent],
       providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
-    }).compileComponents();
-
+    });
+    http = TestBed.inject(HttpTestingController);
+    // El menú lateral consulta la cafetería de la cuenta
     spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
-
-    conSesionDeEjemplo();
     fixture = TestBed.createComponent(ExplorarTostadoresComponent);
     pagina = fixture.nativeElement;
     fixture.detectChanges();
   });
 
-  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+  afterEach(() => {
+    localStorage.removeItem(CLAVE_TEMA);
+    http.verify();
+  });
 
-  function chip(texto: string): HTMLButtonElement {
-    const encontrado = [...pagina.querySelectorAll<HTMLButtonElement>('.filtros button')].find(
-      (b) => b.textContent?.trim() === texto,
-    );
-    if (!encontrado) {
-      throw new Error(`No hay filtro "${texto}"`);
-    }
-    return encontrado;
-  }
-
-  function clic(elemento: HTMLElement): void {
-    elemento.click();
+  function responder(cuerpo: TostadorExploracionApi[] = TOSTADORES_API): void {
+    http.expectOne((r) => r.url === BASE).flush(cuerpo);
     fixture.detectChanges();
   }
 
-  function nombresVisibles(): string[] {
-    return [...pagina.querySelectorAll('.tarjeta h3')].map((h) => h.textContent!.trim());
+  function chip(texto: string): HTMLButtonElement {
+    return [...pagina.querySelectorAll<HTMLButtonElement>('.chip')].find(
+      (b) => b.textContent!.trim() === texto,
+    )!;
   }
 
-  function rutasDe(selector: string): string[] {
-    return fixture.debugElement
-      .queryAll(By.css(selector))
-      .map((el) => el.injector.get(RouterLink).href ?? '');
-  }
-
-  it('muestra al menos 6 tostadores sin filtros', () => {
-    expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Explorar tostadores');
-    expect(nombresVisibles().length).toBeGreaterThanOrEqual(6);
-    expect(chip('Todos').getAttribute('aria-pressed')).toBe('true');
+  it('muestra un estado de carga mientras consulta', () => {
+    expect(pagina.querySelector('[role="status"]')?.textContent).toContain('Cargando tostadores');
+    responder();
+    expect(pagina.querySelector('[role="status"]')).toBeNull();
   });
 
-  it('los filtros cambian los tostadores mostrados', () => {
-    const todos = nombresVisibles().length;
+  it('muestra las tarjetas con los datos del backend y enlaza al detalle', () => {
+    responder();
+    const tarjetas = pagina.querySelectorAll('.tarjeta');
+    expect(tarjetas).toHaveSize(2);
+    expect(tarjetas[0].textContent).toContain('Tostaduría Volcán');
+    expect(tarjetas[0].textContent).toContain('San José, San José');
+    expect(tarjetas[0].textContent).toContain('Claro · Medio');
+    expect(tarjetas[0].textContent).toContain('85 kg');
 
-    clic(chip('Oscuro'));
-    expect(nombresVisibles()).toEqual([
-      'Cerro Azul Roast',
-      'Fuego Lento',
-      'Grano Vivo',
-      'Origen Puro',
-    ]);
-    expect(chip('Todos').getAttribute('aria-pressed')).toBe('false');
-    expect(chip('Oscuro').getAttribute('aria-pressed')).toBe('true');
-
-    clic(chip('Con café disponible'));
-    expect(nombresVisibles()).toEqual([
-      'Cerro Azul Roast',
-      'Fuego Lento',
-      'Grano Vivo',
-      'Origen Puro',
-    ]);
-
-    clic(chip('Medio'));
-    expect(nombresVisibles()).toEqual(['Tostaduría Volcán', 'Cerro Azul Roast', 'Grano Vivo']);
-    expect(nombresVisibles()).not.toContain('Brisas del Sur');
-
-    clic(chip('Todos'));
-    expect(nombresVisibles()).toHaveSize(todos);
-    expect(nombresVisibles()).toContain('Brisas del Sur');
+    const enlace = fixture.debugElement.query(By.css('.tarjeta a')).injector.get(RouterLink);
+    expect(enlace.href).toBe('/cafeteria/tostadores/t-volcan');
   });
 
-  it('"Con café disponible" deja fuera a los sin kg', () => {
-    expect(nombresVisibles()).toContain('Brisas del Sur');
-    clic(chip('Con café disponible'));
-    expect(nombresVisibles()).not.toContain('Brisas del Sur');
-    expect(nombresVisibles().length).toBe(6);
+  it('cada filtro vuelve a consultar al backend', () => {
+    responder();
+
+    chip('Oscuro').click();
+    fixture.detectChanges();
+    const porEstilo = http.expectOne((r) => r.url === BASE);
+    expect(porEstilo.request.params.get('estilo')).toBe('OSCURO');
+    porEstilo.flush([TOSTADORES_API[1]]);
+
+    chip('Con café disponible').click();
+    fixture.detectChanges();
+    const conCafe = http.expectOne((r) => r.url === BASE);
+    expect(conCafe.request.params.get('estilo')).toBe('OSCURO');
+    expect(conCafe.request.params.get('disponible')).toBe('true');
+    conCafe.flush([]);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.vacio')?.textContent).toContain('Ningún tostador coincide');
+
+    chip('Todos').click();
+    fixture.detectChanges();
+    const todos = http.expectOne((r) => r.url === BASE);
+    expect(todos.request.params.keys()).toEqual([]);
+    todos.flush([]);
+    fixture.detectChanges();
+    expect(pagina.querySelector('.vacio')?.textContent).toContain('Todavía no hay tostadores');
   });
 
-  it('"Ver tostador" lleva al detalle del tostador', () => {
-    const rutas = rutasDe('.tarjeta a');
-    expect(rutas).toContain('/cafeteria/tostadores/tostador-volcan');
-    expect([...pagina.querySelectorAll('.tarjeta a')].map((a) => a.textContent!.trim())).toContain(
-      'Ver tostador',
-    );
+  it('muestra el error y permite reintentar', () => {
+    http
+      .expectOne((r) => r.url === BASE)
+      .flush({ mensaje: 'Algo salió mal.' }, { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain('Algo salió mal.');
+
+    chip('Reintentar').click();
+    fixture.detectChanges();
+    responder();
+    expect(pagina.querySelectorAll('.tarjeta')).toHaveSize(2);
   });
 
-  it('enlaza el menú a los destinos de cafetería', () => {
-    expect(rutasDe('app-menu-lateral a')).toEqual(
-      jasmine.arrayContaining([
-        '/cafeteria/dashboard',
-        '/cafeteria/tostadores',
-        '/cafeteria/pedidos',
-        '/cafeteria/mi-cafeteria',
-        '/perfil',
-        '/iniciar-sesion',
-      ]),
-    );
-  });
-
-  it('arranca en tema claro y alterna a oscuro en el host', () => {
+  it('sigue el tema del panel de cafetería', () => {
+    responder();
     expect(pagina.getAttribute('data-theme')).toBe('claro');
-
     TestBed.inject(TemaService).alternarTema();
     fixture.detectChanges();
     expect(pagina.getAttribute('data-theme')).toBe('oscuro');

@@ -38,23 +38,38 @@
       </button>
     </div>
 
-    <ul class="cuadricula">
-      @for (tostador of tostadores(); track tostador.id) {
-        <li class="tarjeta">
-          <h3>{{ tostador.nombre }}</h3>
-          <p class="ubicacion">{{ tostador.ubicacion }}</p>
-          <p class="estilos">{{ tostador.estilos.join(' · ') }}</p>
-          <div class="tarjeta-pie">
-            <p class="kg">
-              <strong>{{ kg(tostador.kgDisponibles) }}</strong>
-              <span>disponibles</span>
-            </p>
-            <a [routerLink]="['/cafeteria/tostadores', tostador.id]">Ver tostador</a>
-          </div>
-        </li>
-      } @empty {
-        <li class="vacio">Ningún tostador coincide con los filtros.</li>
-      }
-    </ul>
+    @if (cargando()) {
+      <p class="estado" role="status">Cargando tostadores…</p>
+    } @else if (error()) {
+      <div class="estado" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" class="chip" (click)="reintentar()">Reintentar</button>
+      </div>
+    } @else {
+      <ul class="cuadricula">
+        @for (tostador of tostadores(); track tostador.id) {
+          <li class="tarjeta">
+            <h3>{{ tostador.nombre }}</h3>
+            <p class="ubicacion">{{ tostador.ubicacion }}</p>
+            <p class="estilos">{{ tostador.estilos.join(' · ') }}</p>
+            <div class="tarjeta-pie">
+              <p class="kg">
+                <strong>{{ kg(tostador.kgDisponibles) }}</strong>
+                <span>disponibles</span>
+              </p>
+              <a [routerLink]="['/cafeteria/tostadores', tostador.id]">Ver tostador</a>
+            </div>
+          </li>
+        } @empty {
+          <li class="vacio">
+            @if (sinFiltros()) {
+              Todavía no hay tostadores registrados.
+            } @else {
+              Ningún tostador coincide con los filtros.
+            }
+          </li>
+        }
+      </ul>
+    }
   </section>
 </main>

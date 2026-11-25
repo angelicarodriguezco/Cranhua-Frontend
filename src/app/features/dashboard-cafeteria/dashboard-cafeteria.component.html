@@ -7,58 +7,75 @@
       <p>Así va tu cafetería esta semana.</p>
     </header>
 
-    <section class="indicadores" aria-label="Indicadores">
-      <a class="glass tarjeta-enlace" routerLink="/cafeteria/pedidos">
-        <strong>{{ kg(indicadores.cafeRecibidoKg) }}</strong>
-        <span>Café recibido</span>
-      </a>
-      <a class="glass tarjeta-enlace" routerLink="/cafeteria/pedidos">
-        <strong>{{ indicadores.pedidosActivos }}</strong>
-        <span>Pedidos activos</span>
-      </a>
-      <a class="glass tarjeta-enlace" routerLink="/cafeteria/tostadores">
-        <strong>{{ indicadores.tostadoresActivos }}</strong>
-        <span>Tostadores activos</span>
-      </a>
-    </section>
-
-    <section class="pedidos glass" aria-labelledby="titulo-pedidos">
-      <div class="seccion-cabecera">
-        <h2 id="titulo-pedidos">Pedidos recientes a tostadores</h2>
+    @if (cargando()) {
+      <p class="glass estado" role="status">Cargando tu resumen…</p>
+    } @else if (error()) {
+      <div class="glass estado" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" class="reintentar" (click)="cargar()">Reintentar</button>
       </div>
+    } @else {
+      <section class="indicadores" aria-label="Indicadores">
+        <a class="glass tarjeta-enlace" routerLink="/cafeteria/pedidos">
+          <strong>{{ kg(indicadores().cafeRecibidoKg) }}</strong>
+          <span>Café recibido</span>
+        </a>
+        <a class="glass tarjeta-enlace" routerLink="/cafeteria/pedidos">
+          <strong>{{ indicadores().pedidosActivos }}</strong>
+          <span>Pedidos activos</span>
+        </a>
+        <a class="glass tarjeta-enlace" routerLink="/cafeteria/tostadores">
+          <strong>{{ indicadores().tostadoresActivos }}</strong>
+          <span>Tostadores activos</span>
+        </a>
+      </section>
 
-      <div class="tabla-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Tostador</th>
-              <th>Kilos</th>
-              <th>Fecha</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (pedido of pedidos; track pedido.id) {
-              <tr class="fila-enlace">
-                <td>
-                  <a routerLink="/cafeteria/pedidos">{{ pedido.tostador }}</a>
-                </td>
-                <td>{{ kg(pedido.kilos) }}</td>
-                <td>{{ fecha(pedido.fecha) }}</td>
-                <td>
-                  <span
-                    class="pill"
-                    [class.pill-entregado]="pedido.estado === 'Entregado'"
-                    [class.pill-en-camino]="pedido.estado === 'En camino'"
-                  >
-                    {{ pedido.estado }}
-                  </span>
-                </td>
+      <section class="pedidos glass" aria-labelledby="titulo-pedidos">
+        <div class="seccion-cabecera">
+          <h2 id="titulo-pedidos">Pedidos recientes a tostadores</h2>
+        </div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Tostador</th>
+                <th>Kilos</th>
+                <th>Fecha</th>
+                <th>Estado</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
+            </thead>
+            <tbody>
+              @for (pedido of pedidos(); track pedido.id) {
+                <tr class="fila-enlace">
+                  <td>
+                    <a routerLink="/cafeteria/pedidos">{{ pedido.tostador }}</a>
+                  </td>
+                  <td>{{ kg(pedido.kilos) }}</td>
+                  <td>{{ fecha(pedido.fecha) }}</td>
+                  <td>
+                    <span
+                      class="pill"
+                      [class.pill-entregado]="pedido.estado === 'Entregado'"
+                      [class.pill-en-camino]="pedido.estado === 'En camino'"
+                      [class.pill-cancelado]="pedido.estado === 'Cancelado'"
+                    >
+                      {{ pedido.estado }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="vacio">
+                    Todavía no hiciste pedidos.
+                    <a routerLink="/cafeteria/tostadores">Explorá los tostadores</a>.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
   </main>
 </div>

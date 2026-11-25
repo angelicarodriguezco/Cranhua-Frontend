@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import {
@@ -9,30 +9,54 @@ import {
   Router,
   RouterLink,
 } from '@angular/router';
-import { firstValueFrom, of } from 'rxjs';
+import { of } from 'rxjs';
 
-import { PedidosService } from '../../core/services/pedidos.service';
+import { environment } from '../../../environments/environment';
+import { CAFETERIA_EJEMPLO } from '../../core/mocks/cafeteria.mock';
+import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
+import { detalleTostadorApi, pedidoApi } from '../../core/testing/pedidos-cafeteria.fixture';
 import { DetalleTostadorComponent } from './detalle-tostador.component';
 
-describe('DetalleTostadorComponent', () => {
-  afterEach(() => localStorage.removeItem(CLAVE_TEMA));
+const URL_DETALLE = `${environment.apiUrl}/api/tostadores/t-volcan`;
+const URL_PEDIDOS = `${environment.apiUrl}/api/pedidos`;
 
+describe('DetalleTostadorComponent', () => {
   let fixture: ComponentFixture<DetalleTostadorComponent>;
   let elemento: HTMLElement;
+  let http: HttpTestingController;
 
-  function crear(id: string): void {
+  afterEach(() => {
+    localStorage.removeItem(CLAVE_TEMA);
+    http.verify();
+  });
+
+  function crear(id = 't-volcan'): void {
     TestBed.configureTestingModule({
       imports: [DetalleTostadorComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
-        { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id })) } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            paramMap: of(convertToParamMap({ id })),
+            snapshot: { paramMap: convertToParamMap({ id }) },
+          },
+        },
       ],
     });
+    http = TestBed.inject(HttpTestingController);
+    spyOn(TestBed.inject(CafeteriaService), 'obtenerActual').and.returnValue(of(CAFETERIA_EJEMPLO));
     fixture = TestBed.createComponent(DetalleTostadorComponent);
     elemento = fixture.nativeElement;
+    fixture.detectChanges();
+  }
+
+  function crearConDetalle(cuerpo = detalleTostadorApi()): void {
+    crear();
+    http.expectOne(URL_DETALLE).flush(cuerpo);
     fixture.detectChanges();
   }
 
@@ -60,8 +84,13 @@ describe('DetalleTostadorComponent', () => {
       .map((el) => el.injector.get(RouterLink).href ?? '');
   }
 
-  it('muestra los datos del tostador y al menos 3 tuestes', () => {
-    crear('tostador-volcan');
+  it('muestra un estado de carga y luego los datos del tostador con sus tuestes', () => {
+    crear();
+    expect(elemento.querySelector('[role="status"]')?.textContent).toContain('Cargando tostador');
+
+    http.expectOne(URL_DETALLE).flush(detalleTostadorApi());
+    fixture.detectChanges();
+
     const texto = elemento.textContent ?? '';
     expect(elemento.querySelector('h1')?.textContent?.trim()).toBe('Tostaduría Volcán');
     expect(texto).toContain('San José, San José');
@@ -73,24 +102,23 @@ describe('DetalleTostadorComponent', () => {
     ]);
 
     const tuestes = elemento.querySelectorAll('.tueste');
-    expect(tuestes.length).toBeGreaterThanOrEqual(3);
+    expect(tuestes).toHaveSize(3);
     expect(tuestes[0].textContent).toContain('La Catalina · Caturra');
     expect(tuestes[0].textContent).toContain('Tueste claro');
     expect(tuestes[0].textContent).toContain('60 kg');
   });
 
   it('exige elegir un tueste antes de enviar', () => {
-    crear('tostador-volcan');
-    const navegar = spyOn(TestBed.inject(Router), 'navigate');
+    crearConDetalle();
     escribirCantidad('5');
     enviar();
 
     expect(elemento.querySelector('#ayuda-tueste')?.textContent).toContain('Elegí el tueste');
-    expect(navegar).not.toHaveBeenCalled();
+    http.expectNone(URL_PEDIDOS);
   });
 
   it('elegir un tueste de la lista lo selecciona en el panel', () => {
-    crear('tostador-volcan');
+    crearConDetalle();
     elegirTueste(1);
 
     expect(
@@ -100,36 +128,61 @@ describe('DetalleTostadorComponent', () => {
   });
 
   it('no deja pedir más de lo disponible del tueste elegido', () => {
-    crear('tostador-volcan');
-    const navegar = spyOn(TestBed.inject(Router), 'navigate');
+    crearConDetalle();
     elegirTueste(1);
     escribirCantidad('30');
 
     expect(elemento.querySelector('.error')?.textContent).toContain('Solo hay 25 kg');
     enviar();
-    expect(navegar).not.toHaveBeenCalled();
+    http.expectNone(URL_PEDIDOS);
 
-    // Con un tueste con más kg la misma cantidad sí es válida
     elegirTueste(0);
     expect(elemento.querySelector('#ayuda-cantidad.error')).toBeNull();
   });
 
-  it('al enviar un pedido válido lo agrega y navega a Mis pedidos', async () => {
-    crear('tostador-volcan');
-    const navegar = spyOn(TestBed.inject(Router), 'navigate');
+  it('al enviar un pedido válido lo crea en el backend y navega a Mis pedidos', () => {
+    crearConDetalle();
+    const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
     elegirTueste(0);
     escribirCantidad('12');
     enviar();
 
+    const req = http.expectOne(URL_PEDIDOS);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ tuesteId: 'tu-1', cantidadKg: 12 });
+    expect(elemento.querySelector('.boton-principal')?.textContent).toContain('Enviando');
+    req.flush(pedidoApi());
+
     expect(navegar).toHaveBeenCalledWith(['/cafeteria/pedidos']);
-    const pedidos = await firstValueFrom(TestBed.inject(PedidosService).listar());
-    expect(pedidos[0]).toEqual(
-      jasmine.objectContaining({ tostador: 'Tostaduría Volcán', kilos: 12, estado: 'En camino' }),
+  });
+
+  it('muestra en el formulario el error del backend y lo limpia al cambiar la cantidad', () => {
+    crearConDetalle();
+    const navegar = spyOn(TestBed.inject(Router), 'navigate');
+    elegirTueste(0);
+    escribirCantidad('50');
+    enviar();
+
+    // Otra cafetería pidió de este tueste después de que se cargó la vista
+    http
+      .expectOne(URL_PEDIDOS)
+      .flush(
+        { mensaje: 'No hay suficiente café disponible: pedís 50 kg y quedan 40 kg.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    fixture.detectChanges();
+
+    expect(elemento.querySelector('.pedido [role="alert"]')?.textContent).toContain(
+      'No hay suficiente café disponible: pedís 50 kg y quedan 40 kg.',
     );
+    expect(navegar).not.toHaveBeenCalled();
+
+    escribirCantidad('40');
+    expect(elemento.querySelector('.pedido [role="alert"]')).toBeNull();
   });
 
   it('"Volver" regresa a Explorar tostadores', () => {
-    crear('tostador-volcan');
+    crearConDetalle();
     expect(rutasDe('.volver, .boton-secundario')).toEqual([
       '/cafeteria/tostadores',
       '/cafeteria/tostadores',
@@ -138,7 +191,7 @@ describe('DetalleTostadorComponent', () => {
   });
 
   it('arranca en tema claro y alterna a oscuro en el host', () => {
-    crear('tostador-volcan');
+    crearConDetalle();
     expect(elemento.getAttribute('data-theme')).toBe('claro');
 
     TestBed.inject(TemaService).alternarTema();
@@ -147,12 +200,28 @@ describe('DetalleTostadorComponent', () => {
   });
 
   it('avisa si el tostador no tiene café disponible', () => {
-    crear('tostador-brisas-del-sur');
+    crearConDetalle(detalleTostadorApi({ tuestes: [] }));
     expect(elemento.textContent).toContain('no tiene café disponible');
   });
 
   it('avisa si el tostador no existe', () => {
-    crear('no-existe');
+    crear();
+    http
+      .expectOne(URL_DETALLE)
+      .flush({ mensaje: 'No encontramos ese negocio.' }, { status: 404, statusText: 'Not Found' });
+    fixture.detectChanges();
     expect(elemento.textContent).toContain('No encontramos este tostador.');
+  });
+
+  it('muestra el error de carga y permite reintentar', () => {
+    crear();
+    http.expectOne(URL_DETALLE).flush(null, { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+    expect(elemento.querySelector('[role="alert"]')).toBeTruthy();
+
+    elemento.querySelector<HTMLButtonElement>('[role="alert"] button')!.click();
+    http.expectOne(URL_DETALLE).flush(detalleTostadorApi());
+    fixture.detectChanges();
+    expect(elemento.querySelector('h1')?.textContent?.trim()).toBe('Tostaduría Volcán');
   });
 });
