@@ -112,7 +112,6 @@ Abrir http://localhost:4200.
 | `/tostador/tostados`            | Mis tostados (tostador)                            |
 | `/tostador/tostados/nuevo`      | Crear tueste (tostador)                            |
 | `/tostador/tostados/:id/editar` | Editar tueste (tostador)                           |
-| `/mapa-prueba`                  | Mapa de prueba de Google Maps                      |
 | `/explorar`, `/perfil`          | Pantallas pendientes (placeholder)                 |
 
 El dashboard y `/mis-fincas/registrar` comparten el tema: se cambia con el botón _Tema claro / Tema oscuro_ del menú lateral.

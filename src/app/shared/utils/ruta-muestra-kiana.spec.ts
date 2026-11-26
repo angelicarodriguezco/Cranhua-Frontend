@@ -30,14 +30,10 @@ describe('rutaMuestraKiana', () => {
   it('muestra el widget en el resto de rutas', () => {
     const visibles = [
       '/explorar',
-      '/explorar/finca/1',
-      '/explorar/tostador/1',
-      '/explorar/cafeteria/1',
-      '/explorar/cafeteria/1/menu',
+      '/explorar?seleccionado=1&tipo=cafeteria&menu=1',
       '/cafetalero/dashboard',
       '/tostador/cosechas',
       '/cafeteria/dashboard',
-      '/mapa-prueba',
     ];
 
     for (const url of visibles) {
