@@ -18,6 +18,8 @@
     />
     @if (nombreInvalido()) {
       <p id="error-nombre" class="campo__error">Poné un nombre para tu finca.</p>
+    } @else if (erroresCampo()['nombre']) {
+      <p class="campo__error">{{ erroresCampo()['nombre'] }}</p>
     }
   </div>
 
@@ -37,6 +39,9 @@
     <p id="contador-descripcion" class="campo__ayuda campo__ayuda--derecha">
       {{ formulario().controls.descripcion.value.length }}/300
     </p>
+    @if (erroresCampo()['descripcion']; as error) {
+      <p class="campo__error">{{ error }}</p>
+    }
   </div>
 
   <div class="campo">
@@ -49,6 +54,9 @@
         <option [ngValue]="zona">{{ zona }}</option>
       }
     </select>
+    @if (erroresCampo()['zonaCafetalera']; as error) {
+      <p class="campo__error">{{ error }}</p>
+    }
   </div>
 
   <div class="campo">
@@ -65,58 +73,60 @@
     <p class="campo__ayuda">Se toma del pin del mapa. Arrastralo si hace falta.</p>
   </div>
 
-  <div class="campo">
-    <span class="campo__etiqueta">
-      Dueños adicionales <span class="campo__opcional">(opcional)</span>
-    </span>
-    @if (duenos().length) {
-      <ul class="duenos">
-        @for (correo of duenos(); track $index) {
-          <li class="dueno">
-            <span class="dueno__iniciales" aria-hidden="true">{{ correo[0].toUpperCase() }}</span>
-            <span class="dueno__nombre">{{ correo }}</span>
-            <button
-              type="button"
-              class="dueno__quitar"
-              [attr.aria-label]="'Quitar a ' + correo"
-              (click)="quitarDueno($index)"
-            >
-              ×
-            </button>
-          </li>
-        }
-      </ul>
-    }
-
-    @if (agregandoDueno()) {
-      <div class="nuevo-dueno">
-        <input
-          #campoCorreo
-          class="campo__control"
-          type="email"
-          [formControl]="correoDueno"
-          placeholder="correo@ejemplo.cr"
-          aria-label="Correo del dueño"
-          autocomplete="off"
-          (keydown.enter)="$event.preventDefault(); agregarDueno()"
-          (keydown.escape)="cancelarDueno()"
-        />
-        <button type="button" class="btn btn--filled btn--pequeno" (click)="agregarDueno()">
-          Agregar
-        </button>
-        <button type="button" class="btn btn--texto btn--pequeno" (click)="cancelarDueno()">
-          Cancelar
-        </button>
-      </div>
-      @if (errorDueno(); as error) {
-        <p class="campo__error" role="alert">{{ error }}</p>
+  @if (conDuenos()) {
+    <div class="campo">
+      <span class="campo__etiqueta">
+        Dueños adicionales <span class="campo__opcional">(opcional)</span>
+      </span>
+      @if (duenos().length) {
+        <ul class="duenos">
+          @for (correo of duenos(); track $index) {
+            <li class="dueno">
+              <span class="dueno__iniciales" aria-hidden="true">{{ correo[0].toUpperCase() }}</span>
+              <span class="dueno__nombre">{{ correo }}</span>
+              <button
+                type="button"
+                class="dueno__quitar"
+                [attr.aria-label]="'Quitar a ' + correo"
+                (click)="quitarDueno($index)"
+              >
+                ×
+              </button>
+            </li>
+          }
+        </ul>
       }
-    } @else {
-      <button type="button" class="detalles__agregar" (click)="mostrarCampoDueno()">
-        + Agregar dueño por correo
-      </button>
-    }
-  </div>
+
+      @if (agregandoDueno()) {
+        <div class="nuevo-dueno">
+          <input
+            #campoCorreo
+            class="campo__control"
+            type="email"
+            [formControl]="correoDueno"
+            placeholder="correo@ejemplo.cr"
+            aria-label="Correo del dueño"
+            autocomplete="off"
+            (keydown.enter)="$event.preventDefault(); agregarDueno()"
+            (keydown.escape)="cancelarDueno()"
+          />
+          <button type="button" class="btn btn--filled btn--pequeno" (click)="agregarDueno()">
+            Agregar
+          </button>
+          <button type="button" class="btn btn--texto btn--pequeno" (click)="cancelarDueno()">
+            Cancelar
+          </button>
+        </div>
+        @if (errorDueno(); as error) {
+          <p class="campo__error" role="alert">{{ error }}</p>
+        }
+      } @else {
+        <button type="button" class="detalles__agregar" (click)="mostrarCampoDueno()">
+          + Agregar dueño por correo
+        </button>
+      }
+    </div>
+  }
 
   <p class="detalles__nota">
     El área se calcula automáticamente según el polígono. Si tu finca se sobrepone con una ya
@@ -136,6 +146,6 @@
   }
 
   <button type="submit" class="btn btn--filled detalles__guardar" [disabled]="guardando()">
-    {{ guardando() ? 'Guardando…' : 'Guardar finca' }}
+    {{ guardando() ? 'Guardando…' : etiquetaGuardar() }}
   </button>
 </form>

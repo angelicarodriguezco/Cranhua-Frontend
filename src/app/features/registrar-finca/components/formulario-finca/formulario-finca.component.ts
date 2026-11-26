@@ -48,6 +48,11 @@ export class FormularioFincaComponent {
   readonly intentoGuardar = input(false);
   readonly guardando = input(false);
   readonly erroresServidor = input<string[]>([]);
+  /** Errores del backend que van debajo de nombre, descripción o zona. */
+  readonly erroresCampo = input<Record<string, string>>({});
+  /** Al editar los dueños se manejan desde el detalle de la finca. */
+  readonly conDuenos = input(true);
+  readonly etiquetaGuardar = input('Guardar finca');
   /** Correos de los dueños adicionales; se agregan después de crear la finca. */
   readonly duenos = model<string[]>([]);
   readonly guardar = output();

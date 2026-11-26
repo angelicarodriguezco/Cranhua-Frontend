@@ -53,6 +53,8 @@ export class MapaFincaComponent {
   readonly pin = model<Coordenada | null>(null);
   /** Finca con la que se superpone el dibujo. Mientras haya conflicto el mapa es de solo lectura. */
   readonly conflicto = input<ConflictoFinca | null>(null);
+  /** Perímetro ya guardado al editar: el mapa se centra en él y el pin guardado no se mueve solo. */
+  readonly encuadre = input<Coordenada[] | null>(null);
 
   protected readonly apiCargada = toSignal(inject(GoogleMapsService).apiCargada);
   private readonly mapa = viewChild(GoogleMap);
@@ -151,6 +153,21 @@ export class MapaFincaComponent {
       if (finca && mapa) {
         const limites = new google.maps.LatLngBounds();
         [...finca.perimetro, ...this.perimetro()].forEach((p) => limites.extend(p));
+        mapa.fitBounds(limites, 48);
+      }
+    });
+
+    effect(() => {
+      const puntos = this.encuadre();
+      if (!puntos?.length) {
+        return;
+      }
+      this.pinMovido = true;
+      this.dibujando.set(false);
+      const mapa = this.mapa();
+      if (mapa) {
+        const limites = new google.maps.LatLngBounds();
+        puntos.forEach((p) => limites.extend(p));
         mapa.fitBounds(limites, 48);
       }
     });

@@ -92,7 +92,16 @@ export type ResultadoRegistro =
 export interface ErrorRegistroFinca {
   mensaje: string;
   errores: Record<string, string>;
+  estado?: number;
 }
+
+// El backend solo cambia los campos que vienen en el cuerpo
+export type CambiosFinca = Partial<
+  Pick<
+    FincaResponseApi,
+    'nombre' | 'descripcion' | 'zonaCafetalera' | 'perimetro' | 'ubicacion' | 'canton' | 'provincia'
+  >
+>;
 
 export interface DuenoFallido {
   correo: string;

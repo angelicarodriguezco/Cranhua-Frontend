@@ -35,7 +35,11 @@
         <section class="glass seccion" aria-labelledby="titulo-perimetro">
           <div class="seccion-cabecera">
             <h2 id="titulo-perimetro">Perímetro</h2>
-            <a [routerLink]="['/cafetalero/fincas', finca.id, 'editar']">Editar perímetro</a>
+            <a
+              [routerLink]="['/cafetalero/fincas', finca.id, 'editar']"
+              [queryParams]="{ seccion: 'perimetro' }"
+              >Editar perímetro</a
+            >
           </div>
           <app-mapa-perimetro [perimetro]="finca.perimetro" [hectareas]="finca.areaHectareas" />
         </section>
@@ -70,8 +74,11 @@
         />
       </section>
 
+      @if (errorEliminar()) {
+        <p class="error-cosecha" role="alert">{{ errorEliminar() }}</p>
+      }
       <app-zona-peligro
-        descripcion="Eliminar esta finca borra su perfil y sus cosechas registradas de tu cuenta."
+        [descripcion]="descripcionEliminar()"
         accion="Eliminar finca"
         (confirmar)="abrirModalEliminar()"
       />
@@ -79,7 +86,7 @@
       @if (modalEliminarAbierto()) {
         <app-modal-confirmacion
           [nombre]="finca.nombre"
-          [aviso]="avisoEliminar"
+          [procesando]="eliminando()"
           (confirmar)="confirmarEliminar()"
           (cancelar)="cerrarModalEliminar()"
         />

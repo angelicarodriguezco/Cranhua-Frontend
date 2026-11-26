@@ -1,13 +1,26 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Injector,
+  afterNextRender,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { Location } from '@angular/common';
-import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 import {
+  CambiosFinca,
   ConflictoFinca,
   Coordenada,
   DuenoFallido,
   ErrorRegistroFinca,
   Finca,
+  ResultadoRegistro,
 } from '../../core/models/finca.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { DashboardCafetaleroService } from '../../core/services/dashboard-cafetalero.service';
@@ -27,8 +40,15 @@ export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
 type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
 
-// Registro de una finca adicional desde el panel del cafetalero. Es una pantalla aparte del
-// onboarding: solo usa su mapa de dibujo, sin modificarlo.
+const CAMPOS_FORMULARIO = ['nombre', 'descripcion', 'zonaCafetalera'];
+const ERROR_CARGA = 'No pudimos cargar la finca. Intentá de nuevo.';
+
+function mismasCoordenadas(a: Coordenada[], b: Coordenada[]): boolean {
+  return a.length === b.length && a.every((p, i) => p.lat === b[i].lat && p.lng === b[i].lng);
+}
+
+// Registro de una finca adicional desde el panel del cafetalero, y edición de una existente
+// en cafetalero/fincas/:id/editar. Es una pantalla aparte del onboarding.
 @Component({
   selector: 'app-registrar-finca',
   imports: [
@@ -36,6 +56,7 @@ type Paso = 'dibujo' | 'conflicto' | 'confirmacion';
     FormularioFincaComponent,
     MapaFincaComponent,
     MenuLateralComponent,
+    RouterLink,
   ],
   templateUrl: './registrar-finca.component.html',
   styleUrl: './registrar-finca.component.css',
@@ -47,6 +68,16 @@ export class RegistrarFincaComponent {
   private dashboard = inject(DashboardCafetaleroService);
   private router = inject(Router);
   private location = inject(Location);
+  private injector = inject(Injector);
+  private ruta = inject(ActivatedRoute);
+
+  protected readonly fincaId = this.ruta.snapshot.paramMap.get('id');
+  protected readonly modoEdicion = this.fincaId !== null;
+  protected readonly original = signal<Finca | null>(null);
+  protected readonly cargando = signal(this.modoEdicion);
+  // 403, 404 o error al cargar: no hay formulario que mostrar
+  protected readonly errorAcceso = signal<string | null>(null);
+  private readonly mapaRef = viewChild('mapa', { read: ElementRef });
 
   protected readonly usuario = inject(SesionService).usuario;
   // El menú y el tema son los del dashboard, así el tema elegido se mantiene al navegar
@@ -76,6 +107,7 @@ export class RegistrarFincaComponent {
   protected readonly intentoGuardar = signal(false);
   protected readonly guardando = signal(false);
   protected readonly erroresServidor = signal<string[]>([]);
+  protected readonly erroresCampo = signal<Record<string, string>>({});
   protected readonly duenosFallidos = signal<DuenoFallido[]>([]);
 
   protected readonly conflicto = signal<ConflictoFinca | null>(null);
@@ -97,6 +129,36 @@ export class RegistrarFincaComponent {
         zona.setValue(canton.zona);
       }
     });
+
+    if (this.fincaId) {
+      this.cargar(this.fincaId);
+    }
+  }
+
+  private cargar(id: string): void {
+    this.fincaService.obtener(id).subscribe({
+      next: (finca) => {
+        this.original.set(finca);
+        this.formulario.setValue({
+          nombre: finca.nombre,
+          descripcion: finca.descripcion ?? '',
+          zona: finca.zona,
+        });
+        this.formulario.controls.zona.markAsDirty();
+        this.perimetro.set(finca.perimetro);
+        this.pin.set(finca.ubicacion);
+        this.cargando.set(false);
+        if (this.ruta.snapshot.queryParamMap.get('seccion') === 'perimetro') {
+          afterNextRender(() => this.mapaRef()?.nativeElement.scrollIntoView({ block: 'start' }), {
+            injector: this.injector,
+          });
+        }
+      },
+      error: (error: HttpErrorResponse) => {
+        this.cargando.set(false);
+        this.errorAcceso.set(error.error?.mensaje ?? ERROR_CARGA);
+      },
+    });
   }
 
   protected volver(): void {
@@ -112,8 +174,13 @@ export class RegistrarFincaComponent {
     if (this.formulario.invalid || this.errorPerimetro() || this.guardando()) {
       return;
     }
+    const original = this.original();
+    if (original) {
+      this.guardarCambios(original);
+      return;
+    }
     this.guardando.set(true);
-    this.erroresServidor.set([]);
+    this.limpiarErrores();
     const { nombre, descripcion, zona } = this.formulario.getRawValue();
     const perimetro = this.perimetro();
     this.fincaService
@@ -130,28 +197,110 @@ export class RegistrarFincaComponent {
       )
       .subscribe({
         next: (resultado) => {
-          this.guardando.set(false);
           if (resultado.registrada) {
+            this.guardando.set(false);
             this.registrada.set(resultado.finca);
             this.duenosFallidos.set(resultado.duenosFallidos);
             this.paso.set('confirmacion');
           } else {
-            this.conflicto.set(resultado.conflicto);
-            this.avisoVisible.set(true);
-            this.paso.set('conflicto');
+            this.mostrarConflicto(resultado);
           }
         },
-        error: (error: ErrorRegistroFinca) => {
-          this.guardando.set(false);
-          const porCampo = Object.values(error.errores);
-          this.erroresServidor.set(porCampo.length ? porCampo : [error.mensaje]);
-        },
+        error: (error: ErrorRegistroFinca) => this.mostrarErrores(error),
       });
   }
 
-  // Solo se borra el polígono; el formulario, el pin y los dueños viven aquí y se conservan
+  private guardarCambios(original: Finca): void {
+    const cambios = this.cambiosRespectoA(original);
+    if (Object.keys(cambios).length === 0) {
+      void this.router.navigate(['/cafetalero/fincas', original.id]);
+      return;
+    }
+    this.guardando.set(true);
+    this.limpiarErrores();
+    this.fincaService.actualizar(original.id, cambios).subscribe({
+      next: (resultado) => {
+        if (resultado.registrada) {
+          void this.router.navigate(['/cafetalero/fincas', original.id]);
+        } else {
+          this.mostrarConflicto(resultado);
+        }
+      },
+      error: (error: ErrorRegistroFinca) => {
+        if (error.estado === 403 || error.estado === 404) {
+          this.guardando.set(false);
+          this.errorAcceso.set(error.mensaje);
+          return;
+        }
+        this.mostrarErrores(error);
+      },
+    });
+  }
+
+  // El backend no borra campos que vienen en null, así que la descripción vacía va como ''
+  private cambiosRespectoA(original: Finca): CambiosFinca {
+    const { nombre, descripcion, zona } = this.formulario.getRawValue();
+    const perimetro = this.perimetro();
+    const ubicacion = this.pin() ?? centroide(perimetro);
+    const canton = this.canton();
+    const cambios: CambiosFinca = {};
+    if (nombre.trim() !== original.nombre) {
+      cambios.nombre = nombre.trim();
+    }
+    if (descripcion.trim() !== (original.descripcion ?? '')) {
+      cambios.descripcion = descripcion.trim();
+    }
+    if (zona !== original.zona && zona !== null) {
+      cambios.zonaCafetalera = zona;
+    }
+    if (!mismasCoordenadas(perimetro, original.perimetro)) {
+      cambios.perimetro = perimetro;
+    }
+    if (!mismasCoordenadas([ubicacion], [original.ubicacion])) {
+      cambios.ubicacion = ubicacion;
+      if (canton) {
+        cambios.canton = canton.nombre;
+        cambios.provincia = canton.provincia;
+      }
+    }
+    return cambios;
+  }
+
+  private mostrarConflicto(resultado: Extract<ResultadoRegistro, { registrada: false }>): void {
+    this.guardando.set(false);
+    this.conflicto.set(resultado.conflicto);
+    this.avisoVisible.set(true);
+    this.paso.set('conflicto');
+  }
+
+  private mostrarErrores(error: ErrorRegistroFinca): void {
+    this.guardando.set(false);
+    const enCampo: Record<string, string> = {};
+    const generales: string[] = [];
+    for (const [campo, mensaje] of Object.entries(error.errores)) {
+      if (CAMPOS_FORMULARIO.includes(campo)) {
+        enCampo[campo] = mensaje;
+      } else {
+        generales.push(mensaje);
+      }
+    }
+    this.erroresCampo.set(enCampo);
+    this.erroresServidor.set(
+      generales.length || Object.keys(enCampo).length ? generales : [error.mensaje],
+    );
+  }
+
+  private limpiarErrores(): void {
+    this.erroresServidor.set([]);
+    this.erroresCampo.set({});
+  }
+
+  // Al registrar se borra solo el polígono; al editar se deja el dibujo para ajustarlo.
+  // El formulario, el pin y los dueños viven aquí y se conservan.
   protected corregirDibujo(): void {
-    this.perimetro.set([]);
+    if (!this.modoEdicion) {
+      this.perimetro.set([]);
+    }
     this.conflicto.set(null);
     this.avisoVisible.set(false);
     this.paso.set('dibujo');
@@ -167,7 +316,7 @@ export class RegistrarFincaComponent {
     this.formulario.reset();
     this.duenos.set([]);
     this.duenosFallidos.set([]);
-    this.erroresServidor.set([]);
+    this.limpiarErrores();
     this.intentoGuardar.set(false);
     this.registrada.set(null);
     this.paso.set('dibujo');
