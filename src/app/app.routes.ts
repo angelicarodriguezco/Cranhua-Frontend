@@ -39,22 +39,6 @@ export const routes: Routes = [
   { path: 'registro', component: RegistroComponent },
   { path: 'explorar', component: DashboardConsumidorComponent },
   {
-    path: 'explorar/finca/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
-    path: 'explorar/tostador/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
-    path: 'explorar/cafeteria/:id/menu',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}&menu=1`,
-  },
-  {
-    path: 'explorar/cafeteria/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,
     data: { title: 'Iniciar Sesión' },
