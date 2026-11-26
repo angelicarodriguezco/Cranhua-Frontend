@@ -11,6 +11,7 @@ const lista = new Intl.ListFormat('es', { type: 'conjunction' });
 })
 export class ConfirmacionTostadorComponent {
   readonly negocio = input.required<NegocioTueste>();
+  readonly etiquetaContinuar = input('Ir a mi dashboard');
   readonly irAlDashboard = output();
   readonly editar = output();
 

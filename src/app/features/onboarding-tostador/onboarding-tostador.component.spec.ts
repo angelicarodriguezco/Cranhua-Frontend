@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -6,6 +7,10 @@ import { NEVER } from 'rxjs';
 
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import {
+  CLAVE_ONBOARDING_ROLES,
+  OnboardingRolesService,
+} from '../../core/services/onboarding-roles.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { Coordenada } from '../../core/models/negocio-tueste.model';
 import {
@@ -43,6 +48,11 @@ describe('OnboardingTostadorComponent', () => {
     componente = fixture.componentInstance;
     pagina = fixture.nativeElement;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(CLAVE_ONBOARDING_ROLES);
+    TestBed.inject(OnboardingRolesService).limpiar();
   });
 
   function boton(texto: string): HTMLButtonElement {
@@ -105,6 +115,36 @@ describe('OnboardingTostadorComponent', () => {
 
     clic('Volver');
     expect(pasoActual()).toBe('Paso 1 de 3');
+  });
+
+  it('al salir desde la bienvenida limpia la cola de roles', () => {
+    const roles = TestBed.inject(OnboardingRolesService);
+    roles.iniciar(['tostador', 'cafeteria']);
+    fixture.detectChanges();
+    expect(roles.hayCadena()).toBeTrue();
+    expect(pagina.querySelector('.onboarding__progreso-roles')).not.toBeNull();
+
+    const location = TestBed.inject(Location);
+    spyOn(location, 'back');
+    clic('Volver');
+
+    expect(location.back).toHaveBeenCalled();
+    expect(roles.hayCadena()).toBeFalse();
+    expect(roles.siguienteRuta()).toBeNull();
+    expect(sessionStorage.getItem(CLAVE_ONBOARDING_ROLES)).toBeNull();
+  });
+
+  it('volver al paso anterior no limpia la cola de roles', () => {
+    const roles = TestBed.inject(OnboardingRolesService);
+    roles.iniciar(['tostador', 'cafeteria']);
+    fixture.detectChanges();
+
+    clic('Empezar a registrar');
+    clic('Volver');
+
+    expect(pasoActual()).toBe('Paso 1 de 3');
+    expect(roles.hayCadena()).toBeTrue();
+    expect(roles.siguienteRuta()).toBe('/onboarding-cafeteria');
   });
 
   it('no crea la cuenta con los campos obligatorios vacíos', () => {
@@ -182,10 +222,40 @@ describe('OnboardingTostadorComponent', () => {
     expect(resumen).toContain('Tibás, San José');
     expect(resumen).toContain('Claro y Medio');
 
+    expect(boton('Ir a mi dashboard')).toBeTruthy();
+
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
     clic('Ir a mi dashboard');
     expect(router.navigateByUrl).toHaveBeenCalledWith(RUTA_DASHBOARD_TOSTADOR);
+  });
+
+  it('con un solo rol no muestra progreso de cadena', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['tostador']);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')).toBeNull();
+    expect(pagina.textContent).not.toContain('Rol 1 de');
+  });
+
+  it('con roles pendientes continúa al siguiente onboarding', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['tostador', 'cafeteria']);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')!.textContent).toContain(
+      'Rol 1 de 2',
+    );
+
+    crearCuenta();
+
+    expect(boton('Continuar con el siguiente rol')).toBeTruthy();
+
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigateByUrl');
+    clic('Continuar con el siguiente rol');
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-cafeteria');
+    expect(TestBed.inject(OnboardingRolesService).siguienteRuta()).toBeNull();
   });
 
   it('muestra el error del backend y deja corregir', () => {

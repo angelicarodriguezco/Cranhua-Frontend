@@ -11,6 +11,7 @@ import {
 } from '../../core/models/finca.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { FincaService } from '../../core/services/finca.service';
+import { OnboardingRolesService } from '../../core/services/onboarding-roles.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { listar } from '../../shared/utils/formato';
 import { centroide, seCruzaConsigoMismo } from '../../shared/utils/geo';
@@ -28,6 +29,9 @@ const PASOS: Paso[] = ['bienvenida', 'dibujo', 'conflicto', 'confirmacion'];
 
 export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 
+const ETIQUETA_SIGUIENTE_ROL = 'Continuar con el siguiente rol';
+const ETIQUETA_DASHBOARD = 'Ir a mi dashboard';
+
 @Component({
   selector: 'app-onboarding-finca',
   imports: [
@@ -42,6 +46,7 @@ export const RUTA_DASHBOARD = '/cafetalero/dashboard';
 export class OnboardingFincaComponent {
   private fincaService = inject(FincaService);
   private readonly cantones = injectCantones();
+  private readonly onboardingRoles = inject(OnboardingRolesService);
   private router = inject(Router);
   private location = inject(Location);
 
@@ -99,6 +104,7 @@ export class OnboardingFincaComponent {
   protected volver(): void {
     switch (this.paso()) {
       case 'bienvenida':
+        this.onboardingRoles.limpiar();
         this.location.back();
         break;
       case 'dibujo':
@@ -167,8 +173,22 @@ export class OnboardingFincaComponent {
     this.paso.set('dibujo');
   }
 
+  protected hayCadena(): boolean {
+    return this.onboardingRoles.hayCadena();
+  }
+
+  protected progreso(): { actual: number; total: number } {
+    return this.onboardingRoles.progreso();
+  }
+
+  protected etiquetaContinuar(): string {
+    return this.onboardingRoles.siguienteRuta() ? ETIQUETA_SIGUIENTE_ROL : ETIQUETA_DASHBOARD;
+  }
+
   protected irAlDashboard(): void {
-    this.router.navigateByUrl(RUTA_DASHBOARD);
+    const destino = this.onboardingRoles.destinoTrasCompletar('cafetalero');
+    this.onboardingRoles.completarRolActual();
+    void this.router.navigateByUrl(destino);
   }
 
   protected registrarOtra(): void {
