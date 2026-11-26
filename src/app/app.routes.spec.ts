@@ -160,3 +160,34 @@ describe('Rutas privadas por sesión y rol', () => {
     expect(ruta()).toBe('/iniciar-sesion?volver=%2Fcafeteria%2Fpedidos');
   });
 });
+
+describe('Rutas inexistentes', () => {
+  let harness: RouterTestingHarness;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter(routes),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: GoogleMapsService, useValue: { apiCargada: of(false) } },
+      ],
+    });
+    harness = await RouterTestingHarness.create();
+  });
+
+  it('una dirección inexistente muestra la página 404 sin redirigir', async () => {
+    for (const inexistente of ['/no-existe', '/mapa-prueba', '/cafeteria/no-existe']) {
+      await harness.navigateByUrl(inexistente);
+      expect(TestBed.inject(Router).url).withContext(inexistente).toBe(inexistente);
+      expect(harness.routeNativeElement?.querySelector('.no-encontrada'))
+        .withContext(inexistente)
+        .not.toBeNull();
+    }
+  });
+
+  it('un negocio inexistente en Explorar abre Explorar, no la página 404', async () => {
+    await harness.navigateByUrl('/explorar?seleccionado=no-existe');
+    expect(harness.routeNativeElement?.querySelector('.no-encontrada')).toBeNull();
+  });
+});

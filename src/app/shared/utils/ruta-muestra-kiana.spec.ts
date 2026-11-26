@@ -37,7 +37,6 @@ describe('rutaMuestraKiana', () => {
       '/cafetalero/dashboard',
       '/tostador/cosechas',
       '/cafeteria/dashboard',
-      '/mapa-prueba',
     ];
 
     for (const url of visibles) {
