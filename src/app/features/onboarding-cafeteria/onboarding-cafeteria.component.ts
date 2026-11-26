@@ -6,6 +6,7 @@ import { Cafeteria } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
+import { OnboardingRolesService } from '../../core/services/onboarding-roles.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { BienvenidaCafeteriaComponent } from './components/bienvenida-cafeteria/bienvenida-cafeteria.component';
 import { ConfirmacionCafeteriaComponent } from './components/confirmacion-cafeteria/confirmacion-cafeteria.component';
@@ -26,6 +27,9 @@ const ERROR_REGISTRO = 'No pudimos registrar la cafetería. Intentá de nuevo.';
 
 export const RUTA_DASHBOARD = '/cafeteria/dashboard';
 
+const ETIQUETA_SIGUIENTE_ROL = 'Continuar con el siguiente rol';
+const ETIQUETA_DASHBOARD = 'Ir a mi dashboard';
+
 @Component({
   selector: 'app-onboarding-cafeteria',
   imports: [
@@ -40,6 +44,7 @@ export const RUTA_DASHBOARD = '/cafeteria/dashboard';
 export class OnboardingCafeteriaComponent {
   private cafeteriaService = inject(CafeteriaService);
   private readonly cantones = injectCantones();
+  private readonly onboardingRoles = inject(OnboardingRolesService);
   private router = inject(Router);
 
   protected readonly usuario = inject(SesionService).usuario;
@@ -125,7 +130,21 @@ export class OnboardingCafeteriaComponent {
     });
   }
 
+  protected hayCadena(): boolean {
+    return this.onboardingRoles.hayCadena();
+  }
+
+  protected progreso(): { actual: number; total: number } {
+    return this.onboardingRoles.progreso();
+  }
+
+  protected etiquetaContinuar(): string {
+    return this.onboardingRoles.siguienteRuta() ? ETIQUETA_SIGUIENTE_ROL : ETIQUETA_DASHBOARD;
+  }
+
   protected irAlDashboard(): void {
-    this.router.navigateByUrl(RUTA_DASHBOARD);
+    const destino = this.onboardingRoles.destinoTrasCompletar('cafeteria');
+    this.onboardingRoles.completarRolActual();
+    void this.router.navigateByUrl(destino);
   }
 }

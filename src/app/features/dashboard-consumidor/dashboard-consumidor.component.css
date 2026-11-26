@@ -488,25 +488,69 @@
   line-height: 1.65;
 }
 
-.panel-negocio__codigo {
-  margin: 0.9rem 0 0;
-  padding: 0.65rem 0.75rem;
-  border-left: 3px solid var(--brand-button);
-  border-radius: 0.35rem;
-  background: color-mix(in srgb, var(--brand-button) 12%, transparent);
-  font-size: 0.88rem;
+.panel-negocio__estado {
+  margin: 0.95rem 0 0;
+  color: var(--brand-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
-.panel-negocio__codigo strong {
-  display: inline-block;
-  margin-left: 0.25rem;
+:host([data-theme='oscuro']) .panel-negocio__estado {
+  color: rgba(246, 240, 231, 0.7);
+}
+
+.panel-negocio__accion {
+  display: block;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px solid var(--cta);
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--cta);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:host([data-theme='oscuro']) .panel-negocio__accion {
+  border-color: #f0d9a8;
+  color: #f0d9a8;
+}
+
+.panel-negocio__accion:hover {
+  background: color-mix(in srgb, var(--cta) 10%, transparent);
+}
+
+.panel-negocio__relacionados .panel-negocio__lotes {
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+.panel-negocio__lote {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 3px solid color-mix(in srgb, var(--brand-nav) 35%, transparent);
+  border-radius: 0.35rem;
+  background: color-mix(in srgb, var(--brand-nav) 6%, transparent);
+  font-size: 0.85rem;
+}
+
+.panel-negocio__lote strong {
   font-family: ui-monospace, 'Cascadia Code', monospace;
   letter-spacing: 0.03em;
   color: var(--brand-heading);
 }
 
-:host([data-theme='oscuro']) .panel-negocio__codigo strong {
+:host([data-theme='oscuro']) .panel-negocio__lote strong {
   color: #f0d9a8;
+}
+
+.panel-negocio__lote--resaltado {
+  border-left-color: var(--brand-button);
+  background: color-mix(in srgb, var(--brand-button) 14%, transparent);
 }
 
 .panel-negocio__datos {
@@ -724,6 +768,13 @@
   font-size: 0.95rem;
   font-weight: 600;
   line-height: 1.35;
+}
+
+.panel-menu__vacio {
+  margin: 0;
+  color: var(--brand-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
 }
 
 .panel-menu__detalle {

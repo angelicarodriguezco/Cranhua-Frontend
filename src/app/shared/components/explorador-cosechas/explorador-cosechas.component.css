@@ -57,3 +57,15 @@
   background: var(--select-fondo);
   color: var(--text);
 }
+
+.estado {
+  padding: 2.25rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+.estado.vacio {
+  border: 1px dashed var(--divider);
+  border-radius: 0.75rem;
+}

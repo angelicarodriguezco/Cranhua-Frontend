@@ -8,6 +8,10 @@ import { environment } from '../../../environments/environment';
 import { CafeteriaResponseApi, ESTILOS_CAFE } from '../../core/models/cafeteria.model';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import {
+  CLAVE_ONBOARDING_ROLES,
+  OnboardingRolesService,
+} from '../../core/services/onboarding-roles.service';
 import { OnboardingCafeteriaComponent, RUTA_DASHBOARD } from './onboarding-cafeteria.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 import { responderCantones } from '../../core/testing/cantones-de-prueba';
@@ -66,7 +70,11 @@ describe('OnboardingCafeteriaComponent', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    sessionStorage.removeItem(CLAVE_ONBOARDING_ROLES);
+    TestBed.inject(OnboardingRolesService).limpiar();
+  });
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -391,10 +399,44 @@ describe('OnboardingCafeteriaComponent', () => {
   it('va al dashboard desde la confirmación', () => {
     registrar();
 
+    expect(boton('Ir a mi dashboard')).toBeTruthy();
+
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
     clic('Ir a mi dashboard');
     expect(router.navigateByUrl).toHaveBeenCalledWith('/cafeteria/dashboard');
+  });
+
+  it('con un solo rol en la cadena va al dashboard', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['cafeteria']);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')).toBeNull();
+    expect(pagina.textContent).not.toContain('Rol 1 de');
+
+    registrar();
+
+    expect(boton('Ir a mi dashboard')).toBeTruthy();
+
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigateByUrl');
+    clic('Ir a mi dashboard');
+    expect(router.navigateByUrl).toHaveBeenCalledWith(RUTA_DASHBOARD);
+    expect(TestBed.inject(OnboardingRolesService).hayCadena()).toBeFalse();
+  });
+
+  it('con cadena de roles muestra progreso Rol X de Y', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['tostador', 'cafeteria']);
+    TestBed.inject(OnboardingRolesService).completarRolActual();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')!.textContent).toContain(
+      'Rol 2 de 2',
+    );
+
+    registrar();
+
+    expect(boton('Ir a mi dashboard')).toBeTruthy();
   });
 });
 

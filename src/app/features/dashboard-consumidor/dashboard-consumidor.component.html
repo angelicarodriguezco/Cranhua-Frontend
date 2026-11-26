@@ -77,19 +77,20 @@
     </div>
   </div>
 
-  @if (resumenPanel(); as panel) {
+  @if (seleccion(); as seleccionado) {
+    @let r = resumen();
     <aside
       class="panel-negocio"
-      [attr.data-tipo]="panel.punto.tipo"
-      aria-labelledby="panel-negocio-titulo"
+      [attr.data-tipo]="seleccionado.tipo"
+      aria-label="Detalles del negocio"
     >
       <div
         class="panel-negocio__portada"
-        [class.panel-negocio__portada--placeholder]="!panel.imagenPortada"
-        [style.background-image]="panel.imagenPortada ? 'url(' + panel.imagenPortada + ')' : null"
-        [style.--portada-color]="colorTipo(panel.punto.tipo)"
-        role="img"
-        [attr.aria-label]="'Portada de ' + panel.punto.nombre"
+        [class.panel-negocio__portada--placeholder]="!r?.portadaUrl"
+        [style.background-image]="r?.portadaUrl ? 'url(' + r?.portadaUrl + ')' : null"
+        [style.--portada-color]="colorTipo(seleccionado.tipo)"
+        [attr.role]="r ? 'img' : null"
+        [attr.aria-label]="r ? 'Portada de ' + r.nombre : null"
       >
         <button
           type="button"
@@ -103,106 +104,169 @@
 
       <div class="panel-negocio__cuerpo">
         <div class="panel-negocio__cabecera">
-          <span class="panel-negocio__rol" [style.--rol-color]="colorTipo(panel.punto.tipo)">
-            {{ panel.rol }}
+          <span class="panel-negocio__rol" [style.--rol-color]="colorTipo(seleccionado.tipo)">
+            {{ etiquetaTipo(seleccionado.tipo) }}
           </span>
         </div>
 
-        <h2 id="panel-negocio-titulo" class="panel-negocio__titulo">{{ panel.punto.nombre }}</h2>
-        <p class="panel-negocio__ubicacion">{{ panel.punto.ubicacionLabel }}</p>
-        <p class="panel-negocio__desc">{{ panel.descripcion }}</p>
-
-        @if (panel.codigoResaltado) {
-          <p class="panel-negocio__codigo">
-            Código encontrado:
-            <strong>{{ panel.codigoResaltado }}</strong>
-          </p>
-        }
-
-        <dl class="panel-negocio__datos">
-          @for (dato of panel.datos; track dato.etiqueta) {
-            <div class="panel-negocio__dato">
-              <dt>{{ dato.etiqueta }}</dt>
-              <dd>{{ dato.valor }}</dd>
-            </div>
+        @switch (panel()?.estado) {
+          @case ('cargando') {
+            <p class="panel-negocio__estado" role="status">Cargando…</p>
           }
-        </dl>
-
-        @if (panel.enlaces.length) {
-          <section class="panel-negocio__relacionados" [attr.aria-label]="panel.tituloEnlaces">
-            <h3>{{ panel.tituloEnlaces }}</h3>
-            <ul>
-              @for (enlace of panel.enlaces; track enlace.id) {
-                <li>
-                  <button
-                    type="button"
-                    class="panel-negocio__chip"
-                    (click)="abrirDesdePanel(enlace.id)"
-                  >
-                    <span class="panel-negocio__chip-nombre">{{ enlace.nombre }}</span>
-                    <span class="panel-negocio__chip-detalle">{{ enlace.detalle }}</span>
-                  </button>
-                </li>
-              }
-            </ul>
-          </section>
+          @case ('error') {
+            <p class="panel-negocio__estado" role="alert">
+              No pudimos cargar este negocio. Revisá tu conexión e intentá de nuevo.
+            </p>
+            <button type="button" class="panel-negocio__accion" (click)="reintentar()">
+              Reintentar
+            </button>
+          }
+          @case ('no-encontrado') {
+            <h2 class="panel-negocio__titulo">No encontramos este negocio</h2>
+            <p class="panel-negocio__estado" role="alert">
+              Puede que el enlace esté desactualizado o que el negocio ya no esté en Cránhua.
+            </p>
+          }
         }
 
-        @if (panel.menu; as menu) {
-          <section class="panel-menu" [class.panel-menu--abierto]="menuAbierto()">
-            <button
-              type="button"
-              class="panel-menu__toggle"
-              [attr.aria-expanded]="menuAbierto()"
-              aria-controls="panel-menu-contenido"
-              (click)="alternarMenu()"
-            >
-              <span>{{ menuAbierto() ? 'Ocultar menú' : 'Ver menú' }}</span>
-              <span class="panel-menu__chevron" aria-hidden="true"></span>
-            </button>
+        @if (r) {
+          <h2 id="panel-negocio-titulo" class="panel-negocio__titulo">{{ r.nombre }}</h2>
+          <p class="panel-negocio__ubicacion">{{ r.ubicacion }}</p>
+          <p class="panel-negocio__desc">
+            {{ r.descripcion || 'Todavía no hay más detalles publicados para este negocio.' }}
+          </p>
 
-            @if (menuAbierto()) {
-              <div id="panel-menu-contenido" class="panel-menu__contenido">
-                <div class="panel-menu__bloque">
-                  <h3>Cafés</h3>
-                  <ul class="panel-menu__lista">
-                    @for (cafe of menu.cafes; track cafe.id) {
-                      <li class="panel-menu__item">
-                        <div class="panel-menu__info">
-                          <p class="panel-menu__nombre">{{ cafe.nombre }}</p>
-                          <p class="panel-menu__detalle">
-                            Tueste {{ cafe.nivelTueste.toLowerCase() }} · {{ cafe.notas }}
-                          </p>
-                          <button
-                            type="button"
-                            class="panel-menu__origen"
-                            (click)="abrirDesdePanel(cafe.fincaOrigen.id)"
-                          >
-                            Ver origen →
-                          </button>
-                        </div>
-                        <span class="panel-menu__precio">{{ precio(cafe.precio) }}</span>
-                      </li>
-                    }
-                  </ul>
-                </div>
-
-                @if (menu.otrasComidas.length) {
-                  <div class="panel-menu__bloque">
-                    <h3>Otras comidas</h3>
-                    <ul class="panel-menu__lista">
-                      @for (comida of menu.otrasComidas; track comida.id) {
-                        <li class="panel-menu__item">
-                          <p class="panel-menu__nombre">{{ comida.nombre }}</p>
-                          <span class="panel-menu__precio">{{ precio(comida.precio) }}</span>
-                        </li>
-                      }
-                    </ul>
-                  </div>
-                }
+          <dl class="panel-negocio__datos">
+            @for (dato of r.datos; track dato.etiqueta) {
+              <div class="panel-negocio__dato">
+                <dt>{{ dato.etiqueta }}</dt>
+                <dd>{{ dato.valor }}</dd>
               </div>
             }
-          </section>
+          </dl>
+
+          @if (r.lotes.length) {
+            <section class="panel-negocio__relacionados" aria-label="Lotes disponibles">
+              <h3>Lotes disponibles</h3>
+              <ul class="panel-negocio__lotes">
+                @for (lote of r.lotes; track lote.id) {
+                  <li
+                    class="panel-negocio__lote"
+                    [class.panel-negocio__lote--resaltado]="lote.id === cosechaBuscada()"
+                  >
+                    <strong>{{ lote.codigo }}</strong>
+                    <span>
+                      {{ lote.variedad }} · {{ lote.proceso }}
+                      @if (lote.alturaMsnm) {
+                        · {{ lote.alturaMsnm }} msnm
+                      }
+                      · {{ kg(lote.kgDisponibles) }}
+                    </span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          @for (seccion of r.secciones; track seccion.titulo) {
+            @if (seccion.enlaces.length) {
+              <section class="panel-negocio__relacionados" [attr.aria-label]="seccion.titulo">
+                <h3>{{ seccion.titulo }}</h3>
+                <ul>
+                  @for (enlace of seccion.enlaces; track enlace.id) {
+                    <li>
+                      <button
+                        type="button"
+                        class="panel-negocio__chip"
+                        (click)="abrirNegocio(seccion.tipo, enlace.id)"
+                      >
+                        <span class="panel-negocio__chip-nombre">{{ enlace.nombre }}</span>
+                        <span class="panel-negocio__chip-detalle">{{ enlace.ubicacion }}</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              </section>
+            }
+          }
+
+          @if (r.accionMapa; as accion) {
+            <button type="button" class="panel-negocio__accion" (click)="verEnMapa(accion)">
+              {{ accion.etiqueta }}
+            </button>
+          }
+
+          @if (r.menu; as menu) {
+            <section class="panel-menu" [class.panel-menu--abierto]="menuAbierto()">
+              <button
+                type="button"
+                class="panel-menu__toggle"
+                [attr.aria-expanded]="menuAbierto()"
+                aria-controls="panel-menu-contenido"
+                (click)="alternarMenu()"
+              >
+                <span>{{ menuAbierto() ? 'Ocultar menú' : 'Ver menú' }}</span>
+                <span class="panel-menu__chevron" aria-hidden="true"></span>
+              </button>
+
+              @if (menuAbierto()) {
+                <div id="panel-menu-contenido" class="panel-menu__contenido">
+                  @if (menu.cafes.length === 0 && menu.otrasComidas.length === 0) {
+                    <p class="panel-menu__vacio">Esta cafetería aún no tiene ítems en el menú.</p>
+                  }
+
+                  @if (menu.cafes.length) {
+                    <div class="panel-menu__bloque">
+                      <h3>Cafés</h3>
+                      <ul class="panel-menu__lista">
+                        @for (cafe of menu.cafes; track cafe.id) {
+                          <li class="panel-menu__item">
+                            <div class="panel-menu__info">
+                              <p class="panel-menu__nombre">{{ cafe.nombre }}</p>
+                              @if (cafe.nivelTueste || cafe.notas) {
+                                <p class="panel-menu__detalle">
+                                  {{
+                                    cafe.nivelTueste
+                                      ? 'Tueste ' + cafe.nivelTueste.toLowerCase()
+                                      : ''
+                                  }}{{ cafe.nivelTueste && cafe.notas ? ' · ' : ''
+                                  }}{{ cafe.notas }}
+                                </p>
+                              }
+                              @if (cafe.fincaOrigen; as origen) {
+                                <button
+                                  type="button"
+                                  class="panel-menu__origen"
+                                  (click)="abrirNegocio('finca', origen.id)"
+                                >
+                                  Ver origen →
+                                </button>
+                              }
+                            </div>
+                            <span class="panel-menu__precio">{{ precio(cafe.precio) }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+
+                  @if (menu.otrasComidas.length) {
+                    <div class="panel-menu__bloque">
+                      <h3>Otras comidas</h3>
+                      <ul class="panel-menu__lista">
+                        @for (comida of menu.otrasComidas; track comida.id) {
+                          <li class="panel-menu__item">
+                            <p class="panel-menu__nombre">{{ comida.nombre }}</p>
+                            <span class="panel-menu__precio">{{ precio(comida.precio) }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                </div>
+              }
+            </section>
+          }
         }
       </div>
     </aside>

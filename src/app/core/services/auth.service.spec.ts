@@ -7,6 +7,7 @@ import { CuentaResponseApi } from '../models/auth.model';
 import { AuthService } from './auth.service';
 import { CafeteriaService } from './cafeteria.service';
 import { CuentaService } from './cuenta.service';
+import { OnboardingRolesService } from './onboarding-roles.service';
 import { SesionService } from './sesion.service';
 
 describe('AuthService', () => {
@@ -257,6 +258,15 @@ describe('AuthService', () => {
       servicio.cerrarSesion();
 
       expect(limpiarCache).toHaveBeenCalled();
+      http.expectOne(urlCerrar).flush('', { status: 204, statusText: 'No Content' });
+    });
+
+    it('limpia la cola de onboardings multi-rol', () => {
+      const limpiarOnboarding = spyOn(TestBed.inject(OnboardingRolesService), 'limpiar');
+
+      servicio.cerrarSesion();
+
+      expect(limpiarOnboarding).toHaveBeenCalled();
       http.expectOne(urlCerrar).flush('', { status: 204, statusText: 'No Content' });
     });
 

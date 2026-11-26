@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
-import { COSECHAS_DISPONIBLES } from '../../../core/mocks/cosechas-disponibles.mock';
+import { COSECHAS_DISPONIBLES_FIXTURE } from '../../../core/testing/cosechas-disponibles.fixture';
 import { CuadriculaCosechasComponent } from './cuadricula-cosechas.component';
 
 describe('CuadriculaCosechasComponent', () => {
@@ -20,7 +20,7 @@ describe('CuadriculaCosechasComponent', () => {
   });
 
   it('muestra finca, foto, ubicación, variedad, proceso y precio desde por kg', () => {
-    fixture.componentRef.setInput('cosechas', [COSECHAS_DISPONIBLES[1]]);
+    fixture.componentRef.setInput('cosechas', [COSECHAS_DISPONIBLES_FIXTURE[1]]);
     fixture.detectChanges();
 
     const tarjeta = pagina.querySelector('.tarjeta')!;
@@ -39,8 +39,17 @@ describe('CuadriculaCosechasComponent', () => {
     expect(precio.textContent).toContain('/ kg');
   });
 
+  it('no duplica "Finca" si el nombre ya la trae', () => {
+    fixture.componentRef.setInput('cosechas', [
+      { ...COSECHAS_DISPONIBLES_FIXTURE[1], finca: 'Finca La Catalina Test' },
+    ]);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('h3')?.textContent).toBe('Finca La Catalina Test');
+  });
+
   it('"Ver detalle" lleva al detalle de la cosecha', () => {
-    fixture.componentRef.setInput('cosechas', COSECHAS_DISPONIBLES.slice(0, 2));
+    fixture.componentRef.setInput('cosechas', COSECHAS_DISPONIBLES_FIXTURE.slice(0, 2));
     fixture.detectChanges();
 
     const rutas = fixture.debugElement

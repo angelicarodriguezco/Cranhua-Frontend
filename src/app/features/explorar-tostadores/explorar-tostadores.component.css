@@ -247,3 +247,19 @@
     padding: 1.1rem 1rem 1.25rem;
   }
 }
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.estado p {
+  margin: 0;
+}

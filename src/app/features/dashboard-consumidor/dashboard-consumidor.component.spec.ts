@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import {
   ActivatedRoute,
   ParamMap,
@@ -8,21 +8,103 @@ import {
   convertToParamMap,
   provideRouter,
 } from '@angular/router';
-import { BehaviorSubject, NEVER, of } from 'rxjs';
+import { BehaviorSubject, NEVER, Subject, of, throwError } from 'rxjs';
 
+import { MenuPublico } from '../../core/models/menu-publico.model';
+import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
+import { PerfilFincaPublico } from '../../core/models/perfil-finca-publico.model';
+import { PerfilTostador } from '../../core/models/perfil-tostador.model';
 import { PuntoMapaConsumidor } from '../../core/models/punto-mapa-consumidor.model';
 import { DashboardConsumidorService } from '../../core/services/dashboard-consumidor.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import { MenuPublicoService } from '../../core/services/menu-publico.service';
+import { PerfilCafeteriaService } from '../../core/services/perfil-cafeteria.service';
+import { PerfilFincaPublicoService } from '../../core/services/perfil-finca-publico.service';
+import { PerfilTostadorService } from '../../core/services/perfil-tostador.service';
 import { DashboardConsumidorComponent } from './dashboard-consumidor.component';
+
+const PERFIL_FINCA_PRUEBA: PerfilFincaPublico = {
+  id: 'finca-la-catalina',
+  nombre: 'Finca La Catalina',
+  ubicacion: 'Tarrazú, San José',
+  descripcion: 'Café de altura.',
+  zona: 'Tarrazú',
+  propietarios: ['Ana Mora'],
+  variedades: ['Caturra', 'Geisha'],
+  procesos: ['Honey'],
+  enCranhuaDesde: '2025-03-01',
+  cosechasActivas: [
+    {
+      id: 'cosecha-1',
+      codigo: 'CRH-2026-0001',
+      variedad: 'Caturra',
+      proceso: 'Honey',
+      alturaMsnm: 1650,
+      kgDisponibles: 120,
+    },
+  ],
+  cafeterias: [{ id: 'c-cafe-brumas', nombre: 'Café Brumas', ubicacion: 'Escazú, San José' }],
+};
+
+const PERFIL_TOSTADOR_PRUEBA: PerfilTostador = {
+  id: 'n-tostaduria-volcan',
+  nombre: 'Tostaduría Volcán',
+  ubicacion: 'San José',
+  descripcion: 'Tueste en lotes pequeños.',
+  estilos: ['Claro', 'Medio'],
+  portadaUrl: null,
+  miembroDesde: '2025-08-20',
+  fincas: [
+    { id: 'finca-la-catalina', nombre: 'Finca La Catalina', ubicacion: 'Tarrazú' },
+    { id: 'finca-el-roble', nombre: 'Finca El Roble', ubicacion: 'Naranjo' },
+  ],
+  puntosVenta: [{ id: 'c-cafe-brumas', nombre: 'Café Brumas', ubicacion: 'Escazú' }],
+};
+
+const PERFIL_CAFETERIA_PRUEBA: PerfilCafeteria = {
+  id: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  descripcion: 'Cafetería de especialidad.',
+  coordenada: { lat: 9.9205, lng: -84.137 },
+  cafesTrazables: 2,
+  tostadores: [{ id: 'n-tostaduria-volcan', nombre: 'Tostaduría Volcán', ubicacion: 'San José' }],
+  horario: 'Lun a sáb, 7:00 a 19:00',
+  miembroDesde: '2025-06-10',
+  fincas: [
+    { id: 'finca-la-catalina', nombre: 'Finca La Catalina', ubicacion: 'Tarrazú' },
+    { id: 'finca-el-roble', nombre: 'Finca El Roble', ubicacion: 'Naranjo' },
+  ],
+};
+
+const MENU_CAFETERIA_PRUEBA: MenuPublico = {
+  cafeteriaId: 'c-cafe-brumas',
+  nombre: 'Café Brumas',
+  ubicacion: 'Escazú, San José',
+  cafes: [
+    {
+      id: 'Espresso-1500-0',
+      nombre: 'Espresso Finca La Catalina',
+      nivelTueste: 'Claro',
+      notas: 'Notas a caramelo y cítricos',
+      precio: 1500,
+      fincaOrigen: {
+        id: 'finca-la-catalina',
+        nombre: 'Finca La Catalina',
+        ubicacion: 'Tarrazú',
+      },
+    },
+  ],
+  otrasComidas: [{ id: 'Croissant-1200-0', nombre: 'Croissant de almendra', precio: 1200 }],
+};
 
 const PUNTOS_PRUEBA: PuntoMapaConsumidor[] = [
   {
-    id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    id: 'finca-la-catalina',
     tipo: 'finca',
     nombre: 'Finca La Catalina',
     ubicacionLabel: 'Tarrazú',
     coordenada: { lat: 9.6612, lng: -84.031 },
-    rutaPerfil: '/explorar/finca/a1b2c3d4-e5f6-7890-abcd-ef1234567890',
   },
   {
     id: 'finca-el-roble',
@@ -30,15 +112,13 @@ const PUNTOS_PRUEBA: PuntoMapaConsumidor[] = [
     nombre: 'Finca El Roble',
     ubicacionLabel: 'Naranjo',
     coordenada: { lat: 10.1025, lng: -84.3812 },
-    rutaPerfil: '/explorar/finca/finca-el-roble',
   },
   {
-    id: '11111111-2222-3333-4444-555555555555',
+    id: 'n-tostaduria-volcan',
     tipo: 'tostador',
     nombre: 'Tostaduría Volcán',
     ubicacionLabel: 'San José',
     coordenada: { lat: 9.9335, lng: -84.0775 },
-    rutaPerfil: '/explorar/tostador/11111111-2222-3333-4444-555555555555',
   },
   {
     id: 'c-cafe-brumas',
@@ -46,7 +126,6 @@ const PUNTOS_PRUEBA: PuntoMapaConsumidor[] = [
     nombre: 'Café Brumas',
     ubicacionLabel: 'Escazú',
     coordenada: { lat: 9.9205, lng: -84.137 },
-    rutaPerfil: '/explorar/cafeteria/c-cafe-brumas',
   },
 ];
 
@@ -55,9 +134,21 @@ describe('DashboardConsumidorComponent', () => {
   let componente: DashboardConsumidorComponent;
   let pagina: HTMLElement;
   let queryParams$: BehaviorSubject<ParamMap>;
+  let obtenerFinca: jasmine.Spy;
+  let obtenerTostador: jasmine.Spy;
+  let obtenerCafeteria: jasmine.Spy;
+  let obtenerMenu: jasmine.Spy;
 
   beforeEach(async () => {
     queryParams$ = new BehaviorSubject(convertToParamMap({}));
+    obtenerFinca = jasmine.createSpy('obtenerFinca').and.returnValue(of(PERFIL_FINCA_PRUEBA));
+    obtenerTostador = jasmine
+      .createSpy('obtenerTostador')
+      .and.returnValue(of(PERFIL_TOSTADOR_PRUEBA));
+    obtenerCafeteria = jasmine
+      .createSpy('obtenerCafeteria')
+      .and.returnValue(of(PERFIL_CAFETERIA_PRUEBA));
+    obtenerMenu = jasmine.createSpy('obtenerMenu').and.returnValue(of(MENU_CAFETERIA_PRUEBA));
 
     await TestBed.configureTestingModule({
       imports: [DashboardConsumidorComponent],
@@ -73,6 +164,10 @@ describe('DashboardConsumidorComponent', () => {
             queryParamMap: queryParams$.asObservable(),
           },
         },
+        { provide: PerfilFincaPublicoService, useValue: { obtener: obtenerFinca } },
+        { provide: PerfilTostadorService, useValue: { obtener: obtenerTostador } },
+        { provide: PerfilCafeteriaService, useValue: { obtener: obtenerCafeteria } },
+        { provide: MenuPublicoService, useValue: { obtener: obtenerMenu } },
       ],
     }).compileComponents();
 
@@ -90,6 +185,33 @@ describe('DashboardConsumidorComponent', () => {
     fixture.detectChanges();
   }
 
+  function abrir(tipo: string, id: string, params: Record<string, string> = {}): void {
+    queryParams$.next(convertToParamMap({ seleccionado: id, tipo, ...params }));
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+  }
+
+  function espiarNavegacion(): jasmine.Spy {
+    return spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+  }
+
+  function navegoCon(navegar: jasmine.Spy, queryParams: Record<string, string | null>): void {
+    expect(navegar).toHaveBeenCalledWith([], {
+      relativeTo: TestBed.inject(ActivatedRoute),
+      queryParams,
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  function botonConTexto(texto: string): HTMLButtonElement {
+    const boton = [...pagina.querySelectorAll<HTMLButtonElement>('.panel-negocio button')].find(
+      (b) => b.textContent?.includes(texto),
+    );
+    expect(boton).withContext(texto).toBeTruthy();
+    return boton!;
+  }
+
   it('muestra un enlace para volver al inicio', () => {
     const enlace = pagina.querySelector<HTMLAnchorElement>('a.volver-inicio');
     expect(enlace).toBeTruthy();
@@ -99,7 +221,6 @@ describe('DashboardConsumidorComponent', () => {
 
   it('usa los pines del servicio y muestra la leyenda con 3 tipos', () => {
     expect(componente['puntos']()).toEqual(PUNTOS_PRUEBA);
-    expect(componente['puntos']().length).toBe(PUNTOS_PRUEBA.length);
 
     for (const punto of PUNTOS_PRUEBA) {
       const pin = componente['contenidoPin'](punto);
@@ -114,78 +235,214 @@ describe('DashboardConsumidorComponent', () => {
     expect(items).toEqual(['Fincas', 'Tostadores', 'Cafeterías']);
   });
 
-  it('al hacer click en un pin abre el panel con query seleccionado', () => {
-    const router = TestBed.inject(Router);
-    const navegar = spyOn(router, 'navigate').and.resolveTo(true);
+  it('al hacer click en un pin abre el panel con seleccionado y tipo', () => {
+    const navegar = espiarNavegacion();
 
     for (const punto of PUNTOS_PRUEBA) {
       navegar.calls.reset();
       componente['abrirPerfil'](punto);
-      expect(navegar).toHaveBeenCalledWith([], {
-        relativeTo: TestBed.inject(ActivatedRoute),
-        queryParams: {
-          seleccionado: punto.id,
-          menu: null,
-        },
-        queryParamsHandling: 'merge',
-      });
+      navegoCon(navegar, { seleccionado: punto.id, tipo: punto.tipo, menu: null });
     }
   });
 
-  it('con query seleccionado muestra el panel lateral sin CTA de perfil completo', () => {
-    const punto = PUNTOS_PRUEBA[0];
-    queryParams$.next(convertToParamMap({ seleccionado: punto.id }));
-    fixture.detectChanges();
+  it('sin tipo válido no abre el panel', fakeAsync(() => {
+    abrir('otro', 'finca-la-catalina');
 
-    const panel = pagina.querySelector('.panel-negocio');
-    expect(panel).toBeTruthy();
-    expect(panel!.textContent).toContain(punto.nombre);
-    expect(pagina.querySelector('#panel-negocio-titulo')!.textContent).toContain(punto.nombre);
-    expect(panel!.textContent).not.toContain('Ver perfil completo');
-    expect(pagina.querySelector('.panel-negocio__portada')).toBeTruthy();
-  });
+    expect(pagina.querySelector('.panel-negocio')).toBeNull();
+    expect(obtenerFinca).not.toHaveBeenCalled();
+  }));
 
-  it('en cafetería muestra el menú colapsado y se abre con menu=1', () => {
-    const cafeteria = PUNTOS_PRUEBA.find((p) => p.tipo === 'cafeteria')!;
-    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id }));
-    fixture.detectChanges();
+  it('muestra los datos reales de la finca con sus lotes y cafeterías', fakeAsync(() => {
+    abrir('finca', 'finca-la-catalina');
+
+    expect(obtenerFinca).toHaveBeenCalledWith('finca-la-catalina');
+    const panel = pagina.querySelector('.panel-negocio')!;
+    expect(pagina.querySelector('#panel-negocio-titulo')!.textContent).toContain(
+      'Finca La Catalina',
+    );
+    expect(panel.textContent).toContain('Tarrazú, San José');
+    expect(panel.textContent).toContain('Café de altura.');
+    expect(panel.textContent).toContain('Ana Mora');
+    expect(panel.textContent).toContain('Caturra y Geisha');
+    expect(panel.querySelector('.panel-negocio__lote')!.textContent).toContain('CRH-2026-0001');
+    expect(panel.querySelector('.panel-negocio__lote')!.textContent).toContain('1650 msnm');
+    expect(panel.querySelector('.panel-negocio__chip')!.textContent).toContain('Café Brumas');
+    expect(panel.querySelector('.panel-menu__toggle')).toBeNull();
+  }));
+
+  it('resalta el lote buscado por código', fakeAsync(() => {
+    abrir('finca', 'finca-la-catalina', { cosecha: 'cosecha-1' });
+
+    expect(
+      pagina
+        .querySelector('.panel-negocio__lote')!
+        .classList.contains('panel-negocio__lote--resaltado'),
+    ).toBeTrue();
+  }));
+
+  it('desde la finca navega a la cafetería y resalta sus lotes en el mapa', fakeAsync(() => {
+    abrir('finca', 'finca-la-catalina');
+    const navegar = espiarNavegacion();
+
+    botonConTexto('Café Brumas').click();
+    navegoCon(navegar, { seleccionado: 'c-cafe-brumas', tipo: 'cafeteria', menu: null });
+
+    botonConTexto('Ver lotes trazables').click();
+    navegoCon(navegar, { resaltar: 'finca-la-catalina', centrar: 'finca-la-catalina' });
+  }));
+
+  it('el tostador navega a fincas y puntos de venta y resalta sus fincas', fakeAsync(() => {
+    abrir('tostador', 'n-tostaduria-volcan');
+
+    expect(obtenerTostador).toHaveBeenCalledWith('n-tostaduria-volcan');
+    const panel = pagina.querySelector('.panel-negocio')!;
+    expect(panel.textContent).toContain('Fincas con las que trabaja');
+    expect(panel.textContent).toContain('Dónde comprar su café');
+    expect(panel.textContent).toContain('Claro y Medio');
+
+    const navegar = espiarNavegacion();
+    botonConTexto('Finca El Roble').click();
+    navegoCon(navegar, { seleccionado: 'finca-el-roble', tipo: 'finca', menu: null });
+
+    botonConTexto('Café Brumas').click();
+    navegoCon(navegar, { seleccionado: 'c-cafe-brumas', tipo: 'cafeteria', menu: null });
+
+    botonConTexto('Ver fincas con las que trabaja').click();
+    navegoCon(navegar, { resaltar: 'finca-la-catalina,finca-el-roble', centrar: null });
+  }));
+
+  it('un tostador sin fincas no ofrece resaltarlas', fakeAsync(() => {
+    obtenerTostador.and.returnValue(of({ ...PERFIL_TOSTADOR_PRUEBA, fincas: [] }));
+    abrir('tostador', 'n-tostaduria-volcan');
+
+    expect(pagina.querySelector('.panel-negocio__accion')).toBeNull();
+    expect(pagina.querySelector('.panel-negocio')!.textContent).not.toContain(
+      'Fincas con las que trabaja',
+    );
+  }));
+
+  it('la cafetería navega a sus fincas y tostadores', fakeAsync(() => {
+    abrir('cafeteria', 'c-cafe-brumas');
+    const navegar = espiarNavegacion();
+
+    botonConTexto('Finca El Roble').click();
+    navegoCon(navegar, { seleccionado: 'finca-el-roble', tipo: 'finca', menu: null });
+
+    botonConTexto('Tostaduría Volcán').click();
+    navegoCon(navegar, { seleccionado: 'n-tostaduria-volcan', tipo: 'tostador', menu: null });
+  }));
+
+  it('en cafetería muestra el menú colapsado y se abre con menu=1', fakeAsync(() => {
+    abrir('cafeteria', 'c-cafe-brumas');
+
+    expect(obtenerCafeteria).toHaveBeenCalledWith('c-cafe-brumas');
+    expect(obtenerMenu).toHaveBeenCalledWith('c-cafe-brumas');
 
     const toggle = pagina.querySelector<HTMLButtonElement>('.panel-menu__toggle');
-    expect(toggle).toBeTruthy();
     expect(toggle!.textContent).toContain('Ver menú');
     expect(toggle!.getAttribute('aria-expanded')).toBe('false');
     expect(pagina.querySelector('#panel-menu-contenido')).toBeNull();
 
-    queryParams$.next(convertToParamMap({ seleccionado: cafeteria.id, menu: '1' }));
+    abrir('cafeteria', 'c-cafe-brumas', { menu: '1' });
+
+    expect(obtenerCafeteria).toHaveBeenCalledTimes(1);
+    expect(pagina.querySelector('.panel-menu__toggle')!.textContent).toContain('Ocultar menú');
+    expect(pagina.querySelector('.panel-menu__contenido')!.textContent).toContain(
+      'Espresso Finca La Catalina',
+    );
+  }));
+
+  it('"Ver origen" abre la finca de origen en el panel', fakeAsync(() => {
+    abrir('cafeteria', 'c-cafe-brumas', { menu: '1' });
+    const navegar = espiarNavegacion();
+
+    pagina.querySelector<HTMLButtonElement>('.panel-menu__origen')!.click();
+    navegoCon(navegar, { seleccionado: 'finca-la-catalina', tipo: 'finca', menu: null });
+  }));
+
+  it('muestra vacío cuando la cafetería no tiene ítems en el menú', fakeAsync(() => {
+    obtenerMenu.and.returnValue(of({ ...MENU_CAFETERIA_PRUEBA, cafes: [], otrasComidas: [] }));
+
+    abrir('cafeteria', 'c-cafe-brumas', { menu: '1' });
+
+    expect(pagina.querySelector('.panel-menu__vacio')?.textContent).toContain(
+      'Esta cafetería aún no tiene ítems en el menú.',
+    );
+  }));
+
+  it('muestra carga mientras llega el perfil', fakeAsync(() => {
+    const perfil$ = new Subject<PerfilFincaPublico | null>();
+    obtenerFinca.and.returnValue(perfil$.asObservable());
+
+    abrir('finca', 'finca-la-catalina');
+
+    expect(pagina.querySelector('[role="status"]')?.textContent).toContain('Cargando…');
+    expect(pagina.querySelector('#panel-negocio-titulo')).toBeNull();
+
+    perfil$.next(PERFIL_FINCA_PRUEBA);
+    perfil$.complete();
     fixture.detectChanges();
 
-    expect(pagina.querySelector('.panel-menu__toggle')!.textContent).toContain('Ocultar menú');
-    expect(pagina.querySelector('#panel-menu-contenido')).toBeTruthy();
-    expect(pagina.querySelector('.panel-menu__contenido')!.textContent).toContain('Cafés');
-  });
+    expect(pagina.querySelector('[role="status"]')).toBeNull();
+    expect(pagina.querySelector('.panel-negocio__desc')?.textContent).toContain('Café de altura.');
+  }));
+
+  it('muestra error si falla la carga y permite reintentar', fakeAsync(() => {
+    obtenerCafeteria.and.returnValue(throwError(() => new Error('falló')));
+
+    abrir('cafeteria', 'c-cafe-brumas');
+
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(
+      'No pudimos cargar este negocio',
+    );
+    expect(pagina.querySelector('.panel-menu__toggle')).toBeNull();
+
+    obtenerCafeteria.and.returnValue(of(PERFIL_CAFETERIA_PRUEBA));
+    botonConTexto('Reintentar').click();
+    fixture.detectChanges();
+    tick();
+    fixture.detectChanges();
+
+    expect(obtenerCafeteria).toHaveBeenCalledTimes(2);
+    expect(pagina.querySelector('#panel-negocio-titulo')!.textContent).toContain('Café Brumas');
+  }));
+
+  it('un negocio inexistente o eliminado muestra no encontrado', fakeAsync(() => {
+    obtenerTostador.and.returnValue(of(null));
+
+    abrir('tostador', 'tostador-eliminado');
+
+    expect(pagina.querySelector('.panel-negocio')!.textContent).toContain(
+      'No encontramos este negocio',
+    );
+    expect(pagina.querySelector('#panel-negocio-titulo')).toBeNull();
+  }));
+
+  it('cerrar el panel limpia la selección', fakeAsync(() => {
+    abrir('finca', 'finca-la-catalina');
+    const navegar = espiarNavegacion();
+
+    pagina.querySelector<HTMLButtonElement>('.panel-negocio__cerrar')!.click();
+    navegoCon(navegar, { seleccionado: null, tipo: null, cosecha: null, menu: null });
+  }));
 
   it('con código válido abre el panel de la finca con query cosecha', () => {
-    const router = TestBed.inject(Router);
-    const navegar = spyOn(router, 'navigate').and.resolveTo(true);
+    const navegar = espiarNavegacion();
 
     buscarCodigo('CRH-2026-0103');
 
     expect(pagina.querySelector('.barra-busqueda__error')).toBeNull();
-    expect(navegar).toHaveBeenCalledWith([], {
-      relativeTo: TestBed.inject(ActivatedRoute),
-      queryParams: {
-        seleccionado: 'finca-el-roble',
-        resaltar: 'finca-el-roble',
-        cosecha: 'cosecha-catuai-el-roble',
-        menu: null,
-      },
-      queryParamsHandling: 'merge',
+    navegoCon(navegar, {
+      seleccionado: 'finca-el-roble',
+      tipo: 'finca',
+      resaltar: 'finca-el-roble',
+      cosecha: 'cosecha-catuai-el-roble',
+      menu: null,
     });
   });
 
   it('con código inválido muestra el mensaje de error', () => {
-    const router = TestBed.inject(Router);
-    const navegar = spyOn(router, 'navigate').and.resolveTo(true);
+    const navegar = espiarNavegacion();
 
     buscarCodigo('CODIGO-FALSO');
 
@@ -221,7 +478,7 @@ describe('DashboardConsumidorComponent', () => {
     const punto = PUNTOS_PRUEBA[2];
     const centroInicial = componente['centro']();
     const zoomInicial = componente['zoom']();
-    queryParams$.next(convertToParamMap({ seleccionado: punto.id }));
+    queryParams$.next(convertToParamMap({ seleccionado: punto.id, tipo: punto.tipo }));
     fixture.detectChanges();
 
     expect(componente['idsResaltados']()).toEqual(new Set([punto.id]));

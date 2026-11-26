@@ -17,7 +17,7 @@
     (change)="elegirZona($event)"
   >
     <option value="" [selected]="!filtros().zona">Zona</option>
-    @for (zona of zonas(); track zona) {
+    @for (zona of zonas; track zona) {
       <option [value]="zona" [selected]="zona === filtros().zona">{{ zona }}</option>
     }
   </select>
@@ -65,4 +65,18 @@
   </button>
 </div>
 
-<app-cuadricula-cosechas [cosechas]="cosechasFiltradas()" />
+@if (cargando()) {
+  <p class="estado" role="status">Cargando cosechas…</p>
+} @else if (error()) {
+  <p class="estado" role="alert">{{ error() }}</p>
+} @else if (cosechasFiltradas().length === 0) {
+  <p class="estado vacio">
+    {{
+      sinFiltros()
+        ? 'No hay cosechas disponibles por ahora.'
+        : 'Ninguna cosecha coincide con los filtros.'
+    }}
+  </p>
+} @else {
+  <app-cuadricula-cosechas [cosechas]="cosechasFiltradas()" />
+}

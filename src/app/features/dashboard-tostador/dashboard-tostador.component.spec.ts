@@ -1,18 +1,28 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, RouterLink } from '@angular/router';
 
+import { environment } from '../../../environments/environment';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
-import { DashboardTostadorComponent } from './dashboard-tostador.component';
+import {
+  COSECHAS_DISPONIBLES_FIXTURE,
+  cosechaDisponibleAApi,
+} from '../../core/testing/cosechas-disponibles.fixture';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
+import { formatearKg } from '../../shared/utils/formato';
+import { DashboardTostadorComponent } from './dashboard-tostador.component';
+
+const BASE = `${environment.apiUrl}/api/cosechas/disponibles`;
+const INDICADORES = `${environment.apiUrl}/api/tostador/dashboard`;
 
 describe('DashboardTostadorComponent', () => {
   let fixture: ComponentFixture<DashboardTostadorComponent>;
   let pagina: HTMLElement;
+  let http: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -21,8 +31,11 @@ describe('DashboardTostadorComponent', () => {
     }).compileComponents();
 
     conSesionDeEjemplo();
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(DashboardTostadorComponent);
     pagina = fixture.nativeElement;
+    fixture.detectChanges();
+    http.expectOne(BASE).flush(COSECHAS_DISPONIBLES_FIXTURE.map(cosechaDisponibleAApi));
     fixture.detectChanges();
   });
 
@@ -47,6 +60,10 @@ describe('DashboardTostadorComponent', () => {
     return [...pagina.querySelectorAll('.tarjeta h3')].map((h) => h.textContent!.trim());
   }
 
+  function valores(): string[] {
+    return [...pagina.querySelectorAll('.indicadores strong')].map((e) => e.textContent!.trim());
+  }
+
   function rutasDe(selector: string): string[] {
     return fixture.debugElement
       .queryAll(By.css(selector))
@@ -63,13 +80,20 @@ describe('DashboardTostadorComponent', () => {
     expect(pagina.querySelector('h1')?.textContent?.trim()).toBe('Hola, María');
   });
 
-  it('muestra los 3 indicadores con datos de ejemplo', () => {
+  it('muestra los 3 indicadores del backend', () => {
+    expect(valores()).toEqual(['—', '—', '—']);
+
+    const peticion = http.expectOne(INDICADORES);
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush({ solicitudesActivas: 2, kgCompradosMes: 85.5, lotesConCodigo: 6 });
+    fixture.detectChanges();
+    expect(valores()).toEqual(['2', formatearKg(85.5), '6']);
+
     const articulos = pagina.querySelectorAll('.indicadores .tarjeta-enlace');
     expect(articulos).toHaveSize(3);
 
     const texto = pagina.querySelector('.indicadores')!.textContent!;
     expect(texto).toContain('Solicitudes activas');
-    expect(texto).toContain('120 kg');
     expect(texto).toContain('Comprados este mes');
     expect(texto).toContain('Lotes con código');
     expect(texto).not.toContain('favoritas');
@@ -80,12 +104,25 @@ describe('DashboardTostadorComponent', () => {
     ]);
   });
 
+  it('avisa si no pudo cargar los indicadores', () => {
+    http
+      .expectOne(INDICADORES)
+      .flush({ mensaje: 'Servicio caído.' }, { status: 500, statusText: 'Error' });
+    fixture.detectChanges();
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain('Servicio caído.');
+    expect(valores()).toEqual(['—', '—', '—']);
+  });
+
   it('reutiliza el explorador de cosechas con sus filtros', () => {
     expect(pagina.querySelector('.cosechas app-explorador-cosechas')).not.toBeNull();
     expect(fincasVisibles().length).toBeGreaterThanOrEqual(6);
     expect(chip('Todas').getAttribute('aria-pressed')).toBe('true');
 
+    const honey = COSECHAS_DISPONIBLES_FIXTURE.filter((c) => /honey/i.test(c.proceso));
     clic(chip('Proceso honey'));
+    const peticion = http.expectOne((r) => r.url === BASE && r.params.get('honey') === 'true');
+    peticion.flush(honey.map(cosechaDisponibleAApi));
+    fixture.detectChanges();
     expect(fincasVisibles()).toHaveSize(3);
   });
 

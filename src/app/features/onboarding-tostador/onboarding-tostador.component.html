@@ -8,15 +8,22 @@
       height="117"
     />
 
-    <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
-      @for (p of pasos; track p) {
-        <li
-          class="pasos__punto"
-          [class.pasos__punto--activo]="$index === indicePaso()"
-          [attr.aria-current]="$index === indicePaso() ? 'step' : null"
-        ></li>
+    <div class="onboarding__pasos">
+      @if (hayCadena()) {
+        <p class="onboarding__progreso-roles">
+          Rol {{ progreso().actual }} de {{ progreso().total }}
+        </p>
       }
-    </ol>
+      <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
+        @for (p of pasos; track p) {
+          <li
+            class="pasos__punto"
+            [class.pasos__punto--activo]="$index === indicePaso()"
+            [attr.aria-current]="$index === indicePaso() ? 'step' : null"
+          ></li>
+        }
+      </ol>
+    </div>
 
     <button type="button" class="onboarding__volver" (click)="volver()">
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -38,6 +45,8 @@
           [canton]="canton()"
           [intentoGuardar]="intentoGuardar()"
           [editando]="registrado() !== null"
+          [guardando]="guardando()"
+          [error]="error()"
           (guardar)="guardar()"
           (cancelar)="cancelar()"
         />
@@ -45,6 +54,7 @@
       @case ('confirmacion') {
         <app-confirmacion-tostador
           [negocio]="registrado()!"
+          [etiquetaContinuar]="etiquetaContinuar()"
           (irAlDashboard)="irAlDashboard()"
           (editar)="editar()"
         />

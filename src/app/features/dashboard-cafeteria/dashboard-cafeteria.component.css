@@ -8,7 +8,6 @@
   --radius-card: 0.75rem;
   --radius-control: 999px;
 
-  /* Fondo blanco, paneles crema (mismo shell que dashboard-tostador) */
   --page-bg: var(--brand-surface);
   --card-bg: var(--brand-bg);
   --card-outline: color-mix(in srgb, var(--brand-nav) 10%, transparent);
@@ -198,6 +197,43 @@ tbody tr:last-child td {
 .pill-en-camino {
   background: var(--pill-en-camino-bg);
   color: var(--pill-en-camino-text);
+}
+
+.pill-cancelado {
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  color: var(--text-muted);
+}
+
+.estado {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 1.1rem 1.35rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.estado p {
+  margin: 0;
+}
+
+.reintentar {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius-control);
+  background: var(--brand-button);
+  color: var(--brand-bg);
+  cursor: pointer;
+}
+
+.vacio {
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 @media (max-width: 900px) {

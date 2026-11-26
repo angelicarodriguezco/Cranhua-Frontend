@@ -1,43 +1,55 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
-import { NEGOCIO_EJEMPLO } from '../mocks/negocio-tueste.mock';
-import { NegocioTueste, NuevoNegocioTueste } from '../models/negocio-tueste.model';
-import { SesionService } from './sesion.service';
+import { environment } from '../../../environments/environment';
+import { cuerpoNegocioTueste, negocioTuesteDesdeApi } from '../mappers/negocio-tueste.mapper';
+import {
+  DatosNegocioTueste,
+  NegocioTueste,
+  NegocioTuesteApi,
+} from '../models/negocio-tueste.model';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 @Injectable({ providedIn: 'root' })
 export class NegocioTuesteService {
-  private readonly sesion = inject(SesionService);
-  private negocios: NegocioTueste[] = [
-    { ...NEGOCIO_EJEMPLO, estilos: [...NEGOCIO_EJEMPLO.estilos] },
-  ];
+  private readonly http = inject(HttpClient);
 
-  registrar(nuevo: NuevoNegocioTueste): Observable<NegocioTueste> {
-    const negocio = { ...nuevo, id: `t-${Date.now()}` };
-    this.negocios.push(negocio);
-    return of(negocio);
+  private get base(): string {
+    return `${environment.apiUrl}/api/tostadores`;
   }
 
-  actualizar(negocio: NegocioTueste): Observable<NegocioTueste> {
-    this.negocios = this.negocios.map((n) => (n.id === negocio.id ? negocio : n));
-    return of(negocio);
+  registrar(datos: DatosNegocioTueste): Observable<NegocioTueste> {
+    return this.http
+      .post<NegocioTuesteApi>(this.base, cuerpoNegocioTueste(datos), opcionesCredenciales)
+      .pipe(map(negocioTuesteDesdeApi));
   }
 
-  obtenerPorPropietario(propietarioId: string): Observable<NegocioTueste | undefined> {
-    return of(this.negocios.find((n) => n.propietarioId === propietarioId));
+  actualizar(id: string, datos: DatosNegocioTueste): Observable<NegocioTueste> {
+    return this.http
+      .patch<NegocioTuesteApi>(
+        `${this.base}/${id}`,
+        cuerpoNegocioTueste(datos),
+        opcionesCredenciales,
+      )
+      .pipe(map(negocioTuesteDesdeApi));
+  }
+
+  actualizarPortada(id: string, archivo: File): Observable<NegocioTueste> {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    return this.http
+      .post<NegocioTuesteApi>(`${this.base}/${id}/portada`, formData, opcionesCredenciales)
+      .pipe(map(negocioTuesteDesdeApi));
   }
 
   obtenerActual(): Observable<NegocioTueste | undefined> {
-    const propietarioId = this.sesion.usuario()?.id;
-    return propietarioId ? this.obtenerPorPropietario(propietarioId) : of(undefined);
-  }
-
-  eliminar(id: string): Observable<boolean> {
-    const existia = this.negocios.some((n) => n.id === id);
-    if (!existia) {
-      return of(false);
-    }
-    this.negocios = this.negocios.filter((n) => n.id !== id);
-    return of(true);
+    return this.http.get<NegocioTuesteApi>(`${this.base}/actual`, opcionesCredenciales).pipe(
+      map(negocioTuesteDesdeApi),
+      catchError((error: HttpErrorResponse) =>
+        error.status === 404 ? of(undefined) : throwError(() => error),
+      ),
+    );
   }
 }

@@ -1,3 +1,5 @@
+import { NivelTuesteApi } from './tueste.model';
+
 export interface Coordenada {
   lat: number;
   lng: number;
@@ -6,13 +8,6 @@ export interface Coordenada {
 export const ESTILOS_TUESTE = ['Claro', 'Medio', 'Oscuro'] as const;
 
 export type EstiloTueste = (typeof ESTILOS_TUESTE)[number];
-
-export interface Tostador {
-  id: string;
-  nombre: string;
-  apellidos: string;
-  correo: string;
-}
 
 export interface Canton {
   nombre: string;
@@ -27,11 +22,29 @@ export interface NegocioTueste {
   contacto: string;
   telefono: string;
   correo: string;
-  ubicacion: Coordenada;
-  canton: Canton;
+  // El backend guarda el cantón, no el punto exacto del pin
+  canton: Pick<Canton, 'nombre' | 'provincia'>;
   estilos: EstiloTueste[];
-  propietarioId: string;
-  portadaUrl?: string | null;
+  portadaUrl: string | null;
 }
 
-export type NuevoNegocioTueste = Omit<NegocioTueste, 'id'>;
+export type DatosNegocioTueste = Omit<NegocioTueste, 'id' | 'portadaUrl'>;
+
+export interface NegocioTuesteApi {
+  id: string;
+  cuentaId: string;
+  nombre: string;
+  nombreContacto: string;
+  telefono: string;
+  correo: string;
+  descripcion: string | null;
+  canton: string;
+  provincia: string;
+  estilos: NivelTuesteApi[];
+  portadaUrl: string | null;
+}
+
+export type NegocioTuesteRequestApi = Omit<
+  NegocioTuesteApi,
+  'id' | 'cuentaId' | 'portadaUrl' | 'descripcion'
+> & { descripcion: string };

@@ -19,6 +19,7 @@ export interface DatosPasoSeleccion {
   pesoCaracolilloKg: number | null;
   puntajeSca: number | null;
   notasCatacion: string | null;
+  precioKg: number;
 }
 
 export type FormularioSeleccionCatacion = FormGroup<{
@@ -28,6 +29,7 @@ export type FormularioSeleccionCatacion = FormGroup<{
   pesoCaracolilloKg: FormControl<number | null>;
   puntajeSca: FormControl<number | null>;
   notasCatacion: FormControl<string>;
+  precioKg: FormControl<number | null>;
 }>;
 
 const pesoCaracolilloCondicionalValidator: ValidatorFn = (
@@ -45,7 +47,7 @@ const pesoCaracolilloCondicionalValidator: ValidatorFn = (
   if (valor === null || valor === undefined || Number.isNaN(Number(valor))) {
     return { pesoCaracolilloRequerido: true };
   }
-  if (Number(valor) < 0) {
+  if (Number(valor) < 0.01) {
     return { pesoCaracolilloInvalido: true };
   }
   return null;
@@ -64,10 +66,10 @@ export function crearFormularioSeleccionCatacion(
   return new FormGroup(
     {
       pesoAntesKg: new FormControl<number | null>(inicial?.pesoAntesKg ?? null, {
-        validators: [Validators.required, Validators.min(0)],
+        validators: [Validators.required, Validators.min(0.01)],
       }),
       pesoTrasSeleccionKg: new FormControl<number | null>(inicial?.pesoTrasSeleccionKg ?? null, {
-        validators: [Validators.required, Validators.min(0)],
+        validators: [Validators.required, Validators.min(0.01)],
       }),
       separoCaracolillo: new FormControl<'' | 'si' | 'no'>(separo, {
         nonNullable: true,
@@ -78,6 +80,13 @@ export function crearFormularioSeleccionCatacion(
       }),
       notasCatacion: new FormControl(inicial?.notasCatacion ?? '', {
         nonNullable: true,
+      }),
+      precioKg: new FormControl<number | null>(inicial?.precioKg ?? null, {
+        validators: [
+          Validators.required,
+          Validators.min(0.01),
+          Validators.pattern(/^\d+(\.\d{1,2})?$/),
+        ],
       }),
     },
     { validators: [pesoCaracolilloCondicionalValidator] },
@@ -103,6 +112,8 @@ export function calcularMermaPorcentaje(antes: number, despues: number): number 
 export class PasoSeleccionCatacionComponent {
   readonly valorInicial = input<Partial<DatosPasoSeleccion> | null>(null);
   readonly pesoAntesSugerido = input<number | null>(null);
+  readonly erroresServidor = input<Record<string, string>>({});
+  readonly guardando = input(false);
 
   readonly guardar = output<DatosPasoSeleccion>();
   readonly atras = output<void>();
@@ -163,7 +174,7 @@ export class PasoSeleccionCatacionComponent {
   }
 
   protected campoInvalido(
-    nombre: 'pesoAntesKg' | 'pesoTrasSeleccionKg' | 'pesoCaracolilloKg' | 'puntajeSca',
+    nombre: 'pesoAntesKg' | 'pesoTrasSeleccionKg' | 'pesoCaracolilloKg' | 'puntajeSca' | 'precioKg',
   ): boolean {
     const control = this.formulario.controls[nombre];
     const tocado = control.touched || this.intentoGuardar();
@@ -184,7 +195,7 @@ export class PasoSeleccionCatacionComponent {
   protected enviar(): void {
     this.intentoGuardar.set(true);
     this.formulario.markAllAsTouched();
-    if (this.formulario.invalid) {
+    if (this.formulario.invalid || this.guardando()) {
       return;
     }
 
@@ -208,6 +219,7 @@ export class PasoSeleccionCatacionComponent {
           : null,
       puntajeSca: valor.puntajeSca !== null ? Number(valor.puntajeSca) : null,
       notasCatacion: notas.length > 0 ? notas : null,
+      precioKg: Number(valor.precioKg),
     });
   }
 
@@ -230,6 +242,7 @@ export class PasoSeleccionCatacionComponent {
       pesoCaracolilloKg: inicial.pesoCaracolilloKg ?? null,
       puntajeSca: inicial.puntajeSca ?? null,
       notasCatacion: inicial.notasCatacion ?? '',
+      precioKg: inicial.precioKg ?? null,
     });
   }
 }

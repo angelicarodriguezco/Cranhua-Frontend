@@ -1,9 +1,8 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 
 import { Cosecha } from '../../../../core/models/cosecha.model';
-import { CosechaService } from '../../../../core/services/cosecha.service';
-import { calcularMermaPorcentaje } from '../paso-seleccion-catacion/paso-seleccion-catacion.component';
+import { etiquetaFinca, formatearColones } from '../../../../shared/utils/formato';
 
 @Component({
   selector: 'app-resumen-cosecha',
@@ -12,28 +11,19 @@ import { calcularMermaPorcentaje } from '../paso-seleccion-catacion/paso-selecci
   styleUrl: './resumen-cosecha.component.css',
 })
 export class ResumenCosechaComponent {
-  private readonly cosechaService = inject(CosechaService);
-
   readonly cosecha = input.required<Cosecha>();
   readonly modoEdicion = input(false);
+  readonly publicando = input(false);
 
   readonly registrarOtra = output<void>();
   readonly verCosecha = output<string>();
+  readonly publicar = output<string>();
 
-  protected readonly nombreFinca = computed(() => {
-    const id = this.cosecha().fincaId;
-    return this.cosechaService.fincas.find((f) => f.id === id)?.nombre ?? id;
-  });
+  protected readonly etiquetaFinca = computed(() =>
+    etiquetaFinca(this.cosecha().fincaNombre ?? ''),
+  );
 
-  protected readonly etiquetaFinca = computed(() => {
-    const nombre = this.nombreFinca();
-    return /^finca\b/i.test(nombre) ? nombre : `Finca ${nombre}`;
-  });
-
-  protected readonly mermaPorcentaje = computed(() => {
-    const c = this.cosecha();
-    return calcularMermaPorcentaje(c.pesoAntesKg, c.pesoTrasSeleccionKg);
-  });
+  protected readonly precioKg = computed(() => formatearColones(this.cosecha().precioKg));
 
   protected readonly procesosResumen = computed(() => {
     const c = this.cosecha();
@@ -49,11 +39,14 @@ export class ResumenCosechaComponent {
     this.modoEdicion() ? '¡Cosecha actualizada!' : '¡Cosecha registrada!',
   );
 
-  protected readonly mensaje = computed(() =>
-    this.modoEdicion()
-      ? 'Los cambios se guardaron correctamente.'
-      : `Ya quedó disponible en ${this.etiquetaFinca()}. En cuanto termine el beneficiado, los tostadores van a poder solicitarla.`,
-  );
+  protected readonly mensaje = computed(() => {
+    if (this.modoEdicion()) {
+      return 'Los cambios se guardaron correctamente.';
+    }
+    return this.cosecha().estado === 'Borrador'
+      ? `Quedó como borrador en ${this.etiquetaFinca()}. Publicala para que los tostadores la puedan solicitar.`
+      : `Ya está publicada en ${this.etiquetaFinca()}. Los tostadores ya la pueden solicitar.`;
+  });
 
   protected readonly textoCaracolillo = computed(() => {
     const c = this.cosecha();

@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 import { CuentaResponseApi } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleIdentityService } from '../../core/services/google-identity.service';
+import { OnboardingRolesService } from '../../core/services/onboarding-roles.service';
 import { RegistroComponent } from './registro.component';
 
 describe('RegistroComponent', () => {
@@ -14,6 +15,7 @@ describe('RegistroComponent', () => {
   let pagina: HTMLElement;
   let auth: jasmine.SpyObj<AuthService>;
   let googleIdentity: jasmine.SpyObj<GoogleIdentityService>;
+  let onboardingRoles: jasmine.SpyObj<OnboardingRolesService>;
 
   const cuentaApi: CuentaResponseApi = {
     id: 'uuid-1',
@@ -31,6 +33,9 @@ describe('RegistroComponent', () => {
     googleIdentity = jasmine.createSpyObj<GoogleIdentityService>('GoogleIdentityService', [
       'obtenerCredencial',
     ]);
+    onboardingRoles = jasmine.createSpyObj<OnboardingRolesService>('OnboardingRolesService', [
+      'iniciar',
+    ]);
     auth.registrar.and.returnValue(of(cuentaApi));
     auth.registrarConGoogle.and.returnValue(of(cuentaApi));
     googleIdentity.obtenerCredencial.and.resolveTo('token-google');
@@ -41,6 +46,7 @@ describe('RegistroComponent', () => {
         provideRouter([]),
         { provide: AuthService, useValue: auth },
         { provide: GoogleIdentityService, useValue: googleIdentity },
+        { provide: OnboardingRolesService, useValue: onboardingRoles },
       ],
     }).compileComponents();
 
@@ -129,10 +135,10 @@ describe('RegistroComponent', () => {
     expect(contrasena.valid).toBeTrue();
   });
 
-  for (const [etiqueta, ruta, rolApi] of [
-    ['Cafetalero', '/onboarding-finca', 'CAFETALERO'],
-    ['Tostador', '/onboarding-tostador', 'TOSTADOR'],
-    ['Cafetería', '/onboarding-cafeteria', 'CAFETERIA'],
+  for (const [etiqueta, ruta, rolApi, rol] of [
+    ['Cafetalero', '/onboarding-finca', 'CAFETALERO', 'cafetalero'],
+    ['Tostador', '/onboarding-tostador', 'TOSTADOR', 'tostador'],
+    ['Cafetería', '/onboarding-cafeteria', 'CAFETERIA', 'cafeteria'],
   ] as const) {
     it(`con el rol ${etiqueta} registra y navega a ${ruta}`, () => {
       const router = TestBed.inject(Router);
@@ -154,11 +160,12 @@ describe('RegistroComponent', () => {
         null,
       );
       expect(auth.aplicarSesion).toHaveBeenCalledWith(cuentaApi);
-      expect(router.navigateByUrl).toHaveBeenCalledWith(ruta, jasmine.anything());
+      expect(onboardingRoles.iniciar).toHaveBeenCalledWith([rol]);
+      expect(router.navigateByUrl).toHaveBeenCalledWith(ruta);
     });
   }
 
-  it('con varios roles va al primero y pasa los demás como pendientes', () => {
+  it('con varios roles inicia la cola ordenada y va al primer onboarding', () => {
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
 
@@ -172,9 +179,8 @@ describe('RegistroComponent', () => {
       jasmine.objectContaining({ roles: ['CAFETERIA', 'CAFETALERO'] }),
       null,
     );
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-finca', {
-      state: { nombre: 'Rodrigo Vargas Mora', rolesPendientes: ['cafeteria'] },
-    });
+    expect(onboardingRoles.iniciar).toHaveBeenCalledWith(['cafetalero', 'cafeteria']);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-finca');
   });
 
   function seleccionarFoto(archivo: File): void {
@@ -276,8 +282,7 @@ describe('RegistroComponent', () => {
       roles: ['TOSTADOR'],
     });
     expect(auth.aplicarSesion).toHaveBeenCalledWith(cuentaApi);
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-tostador', {
-      state: { nombre: 'Rodrigo Vargas Mora', rolesPendientes: [] },
-    });
+    expect(onboardingRoles.iniciar).toHaveBeenCalledWith(['tostador']);
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-tostador');
   }));
 });

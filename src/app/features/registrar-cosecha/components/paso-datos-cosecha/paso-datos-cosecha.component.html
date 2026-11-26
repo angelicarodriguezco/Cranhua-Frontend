@@ -12,12 +12,14 @@
           [attr.aria-invalid]="campoInvalido('fincaId')"
         >
           <option value="" disabled>Seleccioná una finca</option>
-          @for (finca of fincas; track finca.id) {
+          @for (finca of fincas(); track finca.id) {
             <option [value]="finca.id">{{ finca.nombre }}</option>
           }
         </select>
         @if (campoInvalido('fincaId')) {
           <p class="campo__error">Elegí la finca de esta cosecha.</p>
+        } @else if (erroresServidor()['fincaId']) {
+          <p class="campo__error">{{ erroresServidor()['fincaId'] }}</p>
         }
       </div>
 
@@ -36,6 +38,8 @@
         </select>
         @if (campoInvalido('variedad')) {
           <p class="campo__error">Elegí la variedad.</p>
+        } @else if (erroresServidor()['variedad']) {
+          <p class="campo__error">{{ erroresServidor()['variedad'] }}</p>
         }
       </div>
 
@@ -52,7 +56,9 @@
           [attr.aria-invalid]="campoInvalido('alturaMsnm')"
         />
         @if (campoInvalido('alturaMsnm')) {
-          <p class="campo__error">Indicá la altura en metros sobre el nivel del mar.</p>
+          <p class="campo__error">Indicá una altura mayor a 0 msnm.</p>
+        } @else if (erroresServidor()['alturaMsnm']) {
+          <p class="campo__error">{{ erroresServidor()['alturaMsnm'] }}</p>
         }
       </div>
 
@@ -70,6 +76,8 @@
         />
         @if (campoInvalido('cantidadTotalKg')) {
           <p class="campo__error">Indicá la cantidad total en kilogramos.</p>
+        } @else if (erroresServidor()['cantidadTotalKg']) {
+          <p class="campo__error">{{ erroresServidor()['cantidadTotalKg'] }}</p>
         }
       </div>
 
@@ -84,6 +92,8 @@
         />
         @if (campoInvalido('fechaInicio')) {
           <p class="campo__error">Indicá la fecha de inicio.</p>
+        } @else if (erroresServidor()['fechaInicio']) {
+          <p class="campo__error">{{ erroresServidor()['fechaInicio'] }}</p>
         }
       </div>
 
@@ -100,6 +110,8 @@
           <p class="campo__error">Indicá la fecha de fin.</p>
         } @else if (fechasInconsistentes()) {
           <p class="campo__error">La fecha de fin debe ser igual o posterior al inicio.</p>
+        } @else if (erroresServidor()['fechaFin']) {
+          <p class="campo__error">{{ erroresServidor()['fechaFin'] }}</p>
         }
       </div>
     </div>
@@ -139,6 +151,9 @@
       }
       <p class="barra__meta">{{ sumaPorcentaje() }}% asignado</p>
     </div>
+    @if (erroresServidor()['procesos']; as error) {
+      <p class="campo__error" role="alert">{{ error }}</p>
+    }
 
     <ul class="reparto__lista">
       @for (grupo of procesos.controls; track $index; let i = $index) {
@@ -181,7 +196,7 @@
             />
             <span class="reparto__pct-simbolo" aria-hidden="true">%</span>
             @if (porcentajeInvalido(i)) {
-              <p class="campo__error">0–100</p>
+              <p class="campo__error">Entre 1 y 100</p>
             }
           </div>
 

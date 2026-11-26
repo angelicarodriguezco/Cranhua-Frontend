@@ -91,6 +91,12 @@
   font-weight: 500;
 }
 
+.error {
+  margin: 0;
+  color: var(--text-heading);
+  font-size: 0.9rem;
+}
+
 .glass {
   background: var(--card-bg);
   border: 1px solid var(--card-outline);

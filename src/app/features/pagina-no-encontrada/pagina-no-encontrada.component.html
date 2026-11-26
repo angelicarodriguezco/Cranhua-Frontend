@@ -1,0 +1,10 @@
+<main class="no-encontrada">
+  <img class="no-encontrada__logo" [src]="logo()" alt="Crán̈hua" />
+  <p class="no-encontrada__codigo" aria-hidden="true">404</p>
+  <h1 class="no-encontrada__titulo">Esta página no existe</h1>
+  <p class="no-encontrada__texto">
+    La dirección que abriste no lleva a ninguna parte de Crán̈hua. Revisá que esté bien escrita o
+    volvé para seguir navegando.
+  </p>
+  <a class="no-encontrada__boton" [routerLink]="destino().ruta">{{ destino().texto }}</a>
+</main>

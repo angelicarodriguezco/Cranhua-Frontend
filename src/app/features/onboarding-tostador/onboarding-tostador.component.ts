@@ -5,7 +5,9 @@ import { Router } from '@angular/router';
 import { Coordenada, NegocioTueste } from '../../core/models/negocio-tueste.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
+import { OnboardingRolesService } from '../../core/services/onboarding-roles.service';
 import { SesionService } from '../../core/services/sesion.service';
+import { mensajeDeError } from '../../core/utils/auth-error';
 import { BienvenidaTostadorComponent } from './components/bienvenida-tostador/bienvenida-tostador.component';
 import { ConfirmacionTostadorComponent } from './components/confirmacion-tostador/confirmacion-tostador.component';
 import {
@@ -18,6 +20,9 @@ type Paso = 'bienvenida' | 'formulario' | 'confirmacion';
 const PASOS: Paso[] = ['bienvenida', 'formulario', 'confirmacion'];
 
 export const RUTA_DASHBOARD_TOSTADOR = '/tostador/dashboard';
+
+const ETIQUETA_SIGUIENTE_ROL = 'Continuar con el siguiente rol';
+const ETIQUETA_DASHBOARD = 'Ir a mi dashboard';
 
 function formatearTelefono(telefono: string): string {
   const digitos = telefono.replace(/\D/g, '').slice(-8);
@@ -33,6 +38,7 @@ function formatearTelefono(telefono: string): string {
 export class OnboardingTostadorComponent {
   private negocioService = inject(NegocioTuesteService);
   private readonly cantones = injectCantones();
+  private readonly onboardingRoles = inject(OnboardingRolesService);
   private router = inject(Router);
   private location = inject(Location);
 
@@ -49,12 +55,16 @@ export class OnboardingTostadorComponent {
     return pin ? this.cantones.cantonDe(pin) : null;
   });
   protected readonly intentoGuardar = signal(false);
+  protected readonly guardando = signal(false);
+  protected readonly error = signal<string | null>(null);
 
   protected readonly registrado = signal<NegocioTueste | null>(null);
+  private pinGuardado: Coordenada | null = null;
 
   protected volver(): void {
     switch (this.paso()) {
       case 'bienvenida':
+        this.onboardingRoles.limpiar();
         this.location.back();
         break;
       case 'formulario':
@@ -85,7 +95,7 @@ export class OnboardingTostadorComponent {
     this.intentoGuardar.set(true);
     const canton = this.canton();
     const pin = this.pin();
-    if (this.formulario.invalid || !canton || !pin) {
+    if (this.formulario.invalid || !canton || this.guardando()) {
       return;
     }
     const { nombre, descripcion, contacto, telefono, correo, estilos } =
@@ -96,19 +106,27 @@ export class OnboardingTostadorComponent {
       contacto: contacto.trim(),
       telefono: formatearTelefono(telefono),
       correo: correo.trim(),
-      ubicacion: pin,
       canton,
       estilos,
-      propietarioId: this.usuario()!.id,
     };
+    this.guardando.set(true);
+    this.error.set(null);
     const registrado = this.registrado();
-    const guardado = registrado
-      ? this.negocioService.actualizar({ ...datos, id: registrado.id })
+    const peticion = registrado
+      ? this.negocioService.actualizar(registrado.id, datos)
       : this.negocioService.registrar(datos);
-    guardado.subscribe((negocio) => {
-      this.registrado.set(negocio);
-      this.cargar(negocio);
-      this.paso.set('confirmacion');
+    peticion.subscribe({
+      next: (negocio) => {
+        this.guardando.set(false);
+        this.registrado.set(negocio);
+        this.pinGuardado = pin;
+        this.cargar(negocio);
+        this.paso.set('confirmacion');
+      },
+      error: (error: unknown) => {
+        this.guardando.set(false);
+        this.error.set(mensajeDeError(error));
+      },
     });
   }
 
@@ -116,8 +134,22 @@ export class OnboardingTostadorComponent {
     this.paso.set('formulario');
   }
 
+  protected hayCadena(): boolean {
+    return this.onboardingRoles.hayCadena();
+  }
+
+  protected progreso(): { actual: number; total: number } {
+    return this.onboardingRoles.progreso();
+  }
+
+  protected etiquetaContinuar(): string {
+    return this.onboardingRoles.siguienteRuta() ? ETIQUETA_SIGUIENTE_ROL : ETIQUETA_DASHBOARD;
+  }
+
   protected irAlDashboard(): void {
-    this.router.navigateByUrl(RUTA_DASHBOARD_TOSTADOR);
+    const destino = this.onboardingRoles.destinoTrasCompletar('tostador');
+    this.onboardingRoles.completarRolActual();
+    void this.router.navigateByUrl(destino);
   }
 
   private cargar(negocio: NegocioTueste): void {
@@ -129,7 +161,8 @@ export class OnboardingTostadorComponent {
       correo: negocio.correo,
       estilos: negocio.estilos,
     });
-    this.pin.set(negocio.ubicacion);
+    this.pin.set(this.pinGuardado);
     this.intentoGuardar.set(false);
+    this.error.set(null);
   }
 }

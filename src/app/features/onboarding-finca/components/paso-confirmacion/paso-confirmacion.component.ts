@@ -12,6 +12,7 @@ export class PasoConfirmacionComponent {
   readonly finca = input.required<Finca>();
   readonly nombrePropietario = input.required<string>();
   readonly duenosFallidos = input<DuenoFallido[]>([]);
+  readonly etiquetaContinuar = input('Ir a mi dashboard');
   readonly irAlDashboard = output();
   readonly registrarOtra = output();
 

@@ -58,7 +58,16 @@
           <h2 id="titulo-cosechas">Cosechas</h2>
           <a routerLink="/cafetalero/registrar-cosecha">+ Registrar cosecha</a>
         </div>
-        <app-tabla-cosechas [cosechas]="cosechas()" />
+        @if (errorCosecha()) {
+          <p class="error-cosecha" role="alert">{{ errorCosecha() }}</p>
+        }
+        <app-tabla-cosechas
+          [cosechas]="cosechas()"
+          [resaltada]="cosechaResaltada()"
+          [procesando]="cosechaProcesando()"
+          (publicar)="cambiarEstadoCosecha($event, 'PUBLICADA')"
+          (retirar)="cambiarEstadoCosecha($event, 'BORRADOR')"
+        />
       </section>
 
       <app-zona-peligro

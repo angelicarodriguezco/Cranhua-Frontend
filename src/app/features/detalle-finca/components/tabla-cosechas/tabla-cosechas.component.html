@@ -6,6 +6,7 @@
           <th>Variedad</th>
           <th>Proceso</th>
           <th>Lote</th>
+          <th>Precio/kg</th>
           <th>Disponible</th>
           <th>Estado</th>
           <th aria-label="Acciones"></th>
@@ -13,23 +14,43 @@
       </thead>
       <tbody>
         @for (cosecha of cosechas(); track cosecha.id) {
-          <tr class="fila-enlace">
+          <tr class="fila-enlace" [class.fila-resaltada]="cosecha.id === resaltada()">
             <td>{{ cosecha.variedad }}</td>
             <td>{{ cosecha.proceso }}</td>
-            <td class="lote">{{ cosecha.codigoLote }}</td>
+            <td class="lote">{{ cosecha.codigoLote ?? '—' }}</td>
+            <td class="precio">{{ colones(cosecha.precioKg) }}</td>
             <td>{{ cosecha.kgDisponibles === null ? '—' : cosecha.kgDisponibles + ' kg' }}</td>
             <td>
               <span
                 class="pill"
-                [class.pill-disponible]="cosecha.estado === 'Disponible'"
-                [class.pill-beneficiado]="cosecha.estado === 'En beneficiado'"
-                [class.pill-catacion]="cosecha.estado === 'En catación'"
-                [class.pill-vendida]="cosecha.estado === 'Vendida'"
+                [class.pill-borrador]="cosecha.estado === 'Borrador'"
+                [class.pill-publicada]="cosecha.estado === 'Publicada'"
+                [class.pill-agotada]="cosecha.estado === 'Agotada'"
               >
                 {{ cosecha.estado }}
               </span>
             </td>
             <td class="accion">
+              @if (cosecha.estado === 'Borrador') {
+                <button
+                  type="button"
+                  [disabled]="!cosecha.kgDisponibles || procesando() === cosecha.id"
+                  (click)="publicar.emit(cosecha.id)"
+                >
+                  Publicar
+                </button>
+                @if (!cosecha.kgDisponibles) {
+                  <span class="falta-peso">Falta el peso tras selección</span>
+                }
+              } @else if (cosecha.estado === 'Publicada') {
+                <button
+                  type="button"
+                  [disabled]="procesando() === cosecha.id"
+                  (click)="porRetirar.set(cosecha.id)"
+                >
+                  Retirar
+                </button>
+              }
               <a
                 [routerLink]="['/cafetalero/cosechas', cosecha.id, 'editar']"
                 [attr.aria-label]="'Editar cosecha ' + cosecha.variedad"
@@ -42,6 +63,16 @@
       </tbody>
     </table>
   </div>
+
+  @if (porRetirar()) {
+    <app-modal-confirmacion
+      titulo="Retirar cosecha"
+      mensaje="La cosecha deja de aparecer para los tostadores. Podés volver a publicarla cuando quieras."
+      etiquetaConfirmar="Sí, retirar"
+      (confirmar)="confirmarRetiro()"
+      (cancelar)="porRetirar.set(null)"
+    />
+  }
 } @else {
   <p class="vacio">
     Esta finca todavía no tiene cosechas.

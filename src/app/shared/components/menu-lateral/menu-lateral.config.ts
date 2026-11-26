@@ -1,4 +1,6 @@
-import { RolCuenta } from '../../../core/models/cuenta.model';
+import { ORDEN_ROLES, RolCuenta } from '../../../core/models/cuenta.model';
+
+export { ORDEN_ROLES };
 
 export type IconoNav =
   | 'home'
@@ -29,8 +31,6 @@ export interface BloqueRol {
   titulo: string;
   items: ItemNav[];
 }
-
-export const ORDEN_ROLES: RolCuenta[] = ['cafetalero', 'tostador', 'cafeteria'];
 
 export const TITULO_ROL: Record<RolCuenta, string> = {
   cafetalero: 'Cafetalero',

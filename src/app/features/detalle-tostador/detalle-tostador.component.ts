@@ -1,5 +1,6 @@
-import { Component, computed, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   AbstractControl,
   FormControl,
@@ -9,12 +10,14 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { switchMap } from 'rxjs';
+import { catchError, finalize, map, merge, of, switchMap } from 'rxjs';
 
-import { TuesteDisponible } from '../../core/models/detalle-tostador.model';
+import { DetalleTostador, TuesteDisponible } from '../../core/models/detalle-tostador.model';
+import { ErrorPedido } from '../../core/models/pedido.model';
 import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeteria.service';
 import { DetalleTostadorService } from '../../core/services/detalle-tostador.service';
 import { PedidosService } from '../../core/services/pedidos.service';
+import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { formatearKg } from '../../shared/utils/formato';
 import { RUTA_EXPLORAR_TOSTADORES } from '../mis-pedidos/mis-pedidos.component';
 import { MenuLateralComponent } from '../../shared/components/menu-lateral/menu-lateral.component';
@@ -32,18 +35,18 @@ export class DetalleTostadorComponent {
   private readonly servicio = inject(DetalleTostadorService);
   private readonly pedidos = inject(PedidosService);
   private readonly router = inject(Router);
-  // El tema y el perfil del menú se comparten con el resto del panel de cafetería
+  private readonly ruta = inject(ActivatedRoute);
   private readonly panel = inject(DashboardCafeteriaService);
 
   protected readonly tema = this.panel.tema;
   protected readonly rutaExplorar = RUTA_EXPLORAR_TOSTADORES;
   protected readonly kg = formatearKg;
 
-  protected readonly tostador = toSignal(
-    inject(ActivatedRoute).paramMap.pipe(
-      switchMap((params) => this.servicio.obtener(params.get('id') ?? '')),
-    ),
-  );
+  protected readonly cargando = signal(true);
+  protected readonly errorCarga = signal<string | null>(null);
+  protected readonly tostador = signal<DetalleTostador | undefined>(undefined);
+  protected readonly enviando = signal(false);
+  protected readonly errorPedido = signal<string | null>(null);
 
   protected readonly formulario = new FormGroup({
     tuesteId: new FormControl<string | null>(null, Validators.required),
@@ -69,7 +72,31 @@ export class DetalleTostadorComponent {
   );
 
   constructor() {
-    this.tuesteId.valueChanges.subscribe(() => this.cantidad.updateValueAndValidity());
+    this.ruta.paramMap
+      .pipe(
+        map((params) => params.get('id') ?? ''),
+        switchMap((id) => this.cargar(id)),
+        takeUntilDestroyed(),
+      )
+      .subscribe((detalle) => {
+        this.tostador.set(detalle);
+        this.cargando.set(false);
+      });
+
+    this.tuesteId.valueChanges
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.cantidad.updateValueAndValidity());
+    merge(this.tuesteId.valueChanges, this.cantidad.valueChanges)
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => this.errorPedido.set(null));
+  }
+
+  protected reintentar(): void {
+    const id = this.ruta.snapshot.paramMap.get('id') ?? '';
+    this.cargar(id).subscribe((detalle) => {
+      this.tostador.set(detalle);
+      this.cargando.set(false);
+    });
   }
 
   protected elegir(tueste: TuesteDisponible): void {
@@ -78,15 +105,40 @@ export class DetalleTostadorComponent {
   }
 
   protected enviar(): void {
-    const tostador = this.tostador();
     const tueste = this.tuesteElegido();
-    if (!tostador || !tueste || this.formulario.invalid) {
+    if (!this.tostador() || !tueste || this.formulario.invalid || this.enviando()) {
       this.formulario.markAllAsTouched();
       return;
     }
+
+    this.enviando.set(true);
+    this.errorPedido.set(null);
     this.pedidos
-      .crear(tostador.nombre, this.cantidad.value ?? 0)
-      .subscribe(() => this.router.navigate([RUTA_MIS_PEDIDOS]));
+      .crear({ tuesteId: tueste.id, kilos: this.cantidad.value ?? 0 })
+      .pipe(finalize(() => this.enviando.set(false)))
+      .subscribe({
+        next: () => void this.router.navigate([RUTA_MIS_PEDIDOS]),
+        error: (err: ErrorPedido) => {
+          this.errorPedido.set(err.errores?.['cantidadKg'] ?? err.mensaje);
+        },
+      });
+  }
+
+  private cargar(id: string) {
+    this.cargando.set(true);
+    this.errorCarga.set(null);
+    this.tostador.set(undefined);
+    this.formulario.reset();
+    return this.servicio.obtener(id).pipe(
+      catchError((err: unknown) => {
+        this.errorCarga.set(
+          err instanceof HttpErrorResponse && err.error?.mensaje
+            ? String(err.error.mensaje)
+            : parsearErrorAuth(err).mensaje,
+        );
+        return of(undefined);
+      }),
+    );
   }
 
   private buscarTueste(id: string | null): TuesteDisponible | undefined {

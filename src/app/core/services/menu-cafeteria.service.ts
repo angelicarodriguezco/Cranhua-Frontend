@@ -1,27 +1,57 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, map, switchMap, throwError } from 'rxjs';
 
-import { MENU_CAFETERIA } from '../mocks/menu-cafeteria.mock';
-import { ItemMenu, NuevoItemMenu } from '../models/menu-cafeteria.model';
+import { environment } from '../../../environments/environment';
+import { cuerpoPublicarItemMenu, itemMenuDesdeApi } from '../mappers/menu-cafeteria.mapper';
+import { ItemMenu, ItemMenuResponseApi, NuevoItemMenu } from '../models/menu-cafeteria.model';
+import { CafeteriaService } from './cafeteria.service';
 
-// Simula el backend con datos en memoria; las firmas devuelven Observable para cambiarlo por HTTP
+const opcionesCredenciales = { withCredentials: true as const };
+
 @Injectable({ providedIn: 'root' })
 export class MenuCafeteriaService {
-  private items: ItemMenu[] = MENU_CAFETERIA.map((i) => ({ ...i }));
-  private siguienteId = this.items.length + 1;
+  private readonly http = inject(HttpClient);
+  private readonly cafeterias = inject(CafeteriaService);
+
+  private get base(): string {
+    return `${environment.apiUrl}/api/cafeterias`;
+  }
 
   listar(): Observable<ItemMenu[]> {
-    return of([...this.items]);
+    return this.conCafeteriaId((id) =>
+      this.http
+        .get<ItemMenuResponseApi[]>(`${this.base}/${id}/menu`, opcionesCredenciales)
+        .pipe(map((items) => items.map(itemMenuDesdeApi))),
+    );
   }
 
   publicar(nuevo: NuevoItemMenu): Observable<ItemMenu> {
-    const item: ItemMenu = { ...nuevo, id: `menu-${this.siguienteId++}` };
-    this.items = [item, ...this.items];
-    return of(item);
+    return this.conCafeteriaId((id) =>
+      this.http
+        .post<ItemMenuResponseApi>(
+          `${this.base}/${id}/menu`,
+          cuerpoPublicarItemMenu(nuevo),
+          opcionesCredenciales,
+        )
+        .pipe(map(itemMenuDesdeApi)),
+    );
   }
 
-  quitar(id: string): Observable<void> {
-    this.items = this.items.filter((i) => i.id !== id);
-    return of(undefined);
+  quitar(itemId: string): Observable<void> {
+    return this.conCafeteriaId((id) =>
+      this.http.delete<void>(`${this.base}/${id}/menu/${itemId}`, opcionesCredenciales),
+    );
+  }
+
+  private conCafeteriaId<T>(operacion: (cafeteriaId: string) => Observable<T>): Observable<T> {
+    return this.cafeterias.obtenerActual().pipe(
+      switchMap((cafeteria) => {
+        if (!cafeteria) {
+          return throwError(() => new Error('No hay una cafetería registrada.'));
+        }
+        return operacion(cafeteria.id);
+      }),
+    );
   }
 }

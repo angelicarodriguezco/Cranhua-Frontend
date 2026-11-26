@@ -7,17 +7,27 @@
       <p>Esto es lo que está pasando con tus compras y las cosechas disponibles.</p>
     </header>
 
+    @if (error(); as mensaje) {
+      <p class="error" role="alert">{{ mensaje }}</p>
+    }
+
     <section class="indicadores" aria-label="Indicadores">
       <a class="glass tarjeta-enlace" routerLink="/tostador/solicitudes">
-        <strong>{{ indicadores.solicitudesActivas }}</strong>
+        <strong>{{ indicadores()?.solicitudesActivas ?? '—' }}</strong>
         <span>Solicitudes activas</span>
       </a>
       <a class="glass tarjeta-enlace" routerLink="/tostador/tostados">
-        <strong>{{ indicadores.kgCompradosMes }} kg</strong>
+        <strong>
+          @if (indicadores(); as datos) {
+            {{ kg(datos.kgCompradosMes) }}
+          } @else {
+            —
+          }
+        </strong>
         <span>Comprados este mes</span>
       </a>
       <a class="glass tarjeta-enlace" routerLink="/tostador/tostados">
-        <strong>{{ indicadores.lotesConCodigo }}</strong>
+        <strong>{{ indicadores()?.lotesConCodigo ?? '—' }}</strong>
         <span>Lotes con código</span>
       </a>
     </section>
