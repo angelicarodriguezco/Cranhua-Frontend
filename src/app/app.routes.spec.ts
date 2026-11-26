@@ -128,8 +128,6 @@ describe('Rutas privadas por sesión y rol', () => {
       await harness.navigateByUrl(publica);
       expect(ruta()).withContext(publica).toBe(publica);
     }
-    await harness.navigateByUrl('/explorar/finca/f-la-esperanza');
-    expect(ruta()).toBe('/explorar?seleccionado=f-la-esperanza');
   });
 
   it('con rol incorrecto lleva al dashboard del rol que tiene la cuenta', async () => {

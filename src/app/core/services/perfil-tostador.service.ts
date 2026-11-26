@@ -1,11 +1,31 @@
-import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
-import { PERFILES_TOSTADOR } from '../mocks/perfil-tostador.mock';
-import { PerfilTostador } from '../models/perfil-tostador.model';
+import { environment } from '../../../environments/environment';
+import { perfilTostadorDesdeApi } from '../mappers/perfil-tostador.mapper';
+import { PerfilTostador, PerfilTostadorResponseApi } from '../models/perfil-tostador.model';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 @Injectable({ providedIn: 'root' })
 export class PerfilTostadorService {
-  obtener(id: string): PerfilTostador | null {
-    return PERFILES_TOSTADOR.find((perfil) => perfil.id === id) ?? null;
+  private readonly http = inject(HttpClient);
+
+  obtener(id: string): Observable<PerfilTostador | null> {
+    return this.http
+      .get<PerfilTostadorResponseApi>(
+        `${environment.apiUrl}/api/publico/tostadores/${id}`,
+        opcionesCredenciales,
+      )
+      .pipe(
+        map(perfilTostadorDesdeApi),
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            return of(null);
+          }
+          return throwError(() => error);
+        }),
+      );
   }
 }
