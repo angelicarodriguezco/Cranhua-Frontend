@@ -1,16 +1,34 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
-import { PERFILES_FINCA_PUBLICO } from '../mocks/perfil-finca-publico.mock';
-import { PerfilFincaPublico } from '../models/perfil-finca-publico.model';
+import { environment } from '../../../environments/environment';
+import { perfilFincaPublicoDesdeApi } from '../mappers/perfil-finca-publico.mapper';
+import {
+  PerfilFincaPublico,
+  PerfilFincaPublicoResponseApi,
+} from '../models/perfil-finca-publico.model';
+
+const opcionesCredenciales = { withCredentials: true as const };
 
 @Injectable({ providedIn: 'root' })
 export class PerfilFincaPublicoService {
-  obtener(id: string): Observable<PerfilFincaPublico | undefined> {
-    return of(this.obtenerSync(id));
-  }
+  private readonly http = inject(HttpClient);
 
-  obtenerSync(id: string): PerfilFincaPublico | undefined {
-    return PERFILES_FINCA_PUBLICO.find((f) => f.id === id);
+  obtener(id: string): Observable<PerfilFincaPublico | null> {
+    return this.http
+      .get<PerfilFincaPublicoResponseApi>(
+        `${environment.apiUrl}/api/publico/fincas/${id}`,
+        opcionesCredenciales,
+      )
+      .pipe(
+        map(perfilFincaPublicoDesdeApi),
+        catchError((error: HttpErrorResponse) => {
+          if (error.status === 404) {
+            return of(null);
+          }
+          return throwError(() => error);
+        }),
+      );
   }
 }
