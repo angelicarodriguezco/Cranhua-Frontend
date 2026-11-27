@@ -1,4 +1,5 @@
 import { Canton, Coordenada } from './finca.model';
+import { HistorialTrazabilidad } from './historial-trazabilidad.model';
 
 export const VOLUMENES_MENSUALES = [
   'Menos de 10 kg',
@@ -30,6 +31,7 @@ export interface Cafeteria {
   estilos: EstiloCafe[];
   propietarioId: string;
   portadaUrl?: string | null;
+  historialTrazabilidad?: HistorialTrazabilidad | null;
 }
 
 export type NuevaCafeteria = Omit<Cafeteria, 'id'>;
@@ -58,6 +60,7 @@ export interface CafeteriaResponseApi {
   estilos: EstiloCafeApi[];
   volumenMensual: VolumenMensualApi | null;
   portadaUrl: string | null;
+  historialTrazabilidad?: HistorialTrazabilidad;
 }
 
 export interface CafeteriaRegistroApi {

@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
@@ -222,25 +222,47 @@ describe('CafeteriaService', () => {
       );
     });
 
-    it('deja la cafetería con portada en caché para obtenerActual', () => {
+    it('limpia la caché para que obtenerActual vuelva a traer el detalle con historial', () => {
       const archivo = new File(['x'], 'portada.png', { type: 'image/png' });
       servicio.actualizarPortada(CAFETERIA_EJEMPLO.id, archivo).subscribe();
       http
         .expectOne(`${BASE}/${CAFETERIA_EJEMPLO.id}/portada`)
         .flush(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' }));
 
+      const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0101-T01' };
       let actual: Cafeteria | undefined;
       servicio.obtenerActual().subscribe((cafeteria) => (actual = cafeteria));
-      http.expectNone(`${BASE}/actual`);
-      expect(actual).toEqual(
-        cafeteriaDesdeApi(cafeteriaApi({ portadaUrl: 'https://cdn.ejemplo.cr/nueva.jpg' })),
-      );
+      http.expectOne(`${BASE}/actual`).flush(cafeteriaApi({ historialTrazabilidad: historial }));
+      expect(actual?.historialTrazabilidad).toEqual(historial);
     });
   });
 
-  it('eliminar responde false porque no hay endpoint todavía', () => {
-    let ok: boolean | undefined;
-    servicio.eliminar(CAFETERIA_EJEMPLO.id).subscribe((resultado) => (ok = resultado));
-    expect(ok).toBeFalse();
+  describe('eliminar', () => {
+    it('hace DELETE /{id} y limpia la caché', () => {
+      servicio.obtenerActual().subscribe();
+      http.expectOne(`${BASE}/actual`).flush(cafeteriaApi());
+
+      let completado = false;
+      servicio.eliminar(CAFETERIA_EJEMPLO.id).subscribe({ complete: () => (completado = true) });
+      const req = http.expectOne(`${BASE}/${CAFETERIA_EJEMPLO.id}`);
+      expect(req.request.method).toBe('DELETE');
+      expect(req.request.withCredentials).toBeTrue();
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      expect(completado).toBeTrue();
+
+      let actual: Cafeteria | undefined = CAFETERIA_EJEMPLO;
+      servicio.obtenerActual().subscribe((cafeteria) => (actual = cafeteria));
+      http.expectOne(`${BASE}/actual`).flush(null, { status: 404, statusText: 'Not Found' });
+      expect(actual).toBeUndefined();
+    });
+
+    it('propaga el error del backend', () => {
+      let error: HttpErrorResponse | undefined;
+      servicio.eliminar(CAFETERIA_EJEMPLO.id).subscribe({ error: (e) => (error = e) });
+      http
+        .expectOne(`${BASE}/${CAFETERIA_EJEMPLO.id}`)
+        .flush({ message: 'No encontrada' }, { status: 404, statusText: 'Not Found' });
+      expect(error?.status).toBe(404);
+    });
   });
 });

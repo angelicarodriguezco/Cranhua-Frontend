@@ -12,6 +12,7 @@ import { PerfilService } from '../../core/services/perfil.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { CLAVE_TEMA } from '../../core/services/tema.service';
 import {
+  avisoEliminarCuenta,
   DESCRIPCION_ELIMINAR_CUENTA,
   enlaceRedSocial,
   inicialesPerfil,
@@ -408,7 +409,7 @@ describe('PerfilUsuarioComponent', () => {
     expect(campo('#error-red-sitio').textContent).toContain('Ingresá un enlace válido');
   });
 
-  it('eliminar cuenta: cancelar cierra el modal y confirmar limpia sesión y navega a iniciar sesión', () => {
+  it('eliminar cuenta: cancelar cierra el modal y confirmar limpia sesión y vuelve a la Landing', () => {
     const router = TestBed.inject(Router);
     const cuentaService = TestBed.inject(CuentaService);
     const sesionService = TestBed.inject(SesionService);
@@ -421,7 +422,7 @@ describe('PerfilUsuarioComponent', () => {
     clic('Eliminar mi cuenta');
     expect(campo('.modal__titulo').textContent).toBe('¿Eliminar tu cuenta?');
     expect(campo('.modal__mensaje').textContent).toBe('Esta acción no se puede deshacer.');
-    expect(campo('.modal__aviso').textContent).toContain(DESCRIPCION_ELIMINAR_CUENTA);
+    expect(pagina.querySelector('.modal__aviso')).toBeNull();
     campo<HTMLButtonElement>('.modal__btn--secundario').click();
     fixture.detectChanges();
     expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
@@ -435,7 +436,47 @@ describe('PerfilUsuarioComponent', () => {
     expect(eliminar).toHaveBeenCalled();
     expect(cuentaService.cuenta()).toBeNull();
     expect(sesionService.usuario()).toBeNull();
-    expect(navegar).toHaveBeenCalledWith('/iniciar-sesion');
+    expect(navegar).toHaveBeenCalledWith('/');
+  });
+
+  it('eliminar cuenta con historial: el modal avisa antes de confirmar', () => {
+    const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0103' };
+    (perfilService.obtener as jasmine.Spy).and.returnValue(
+      of({ ...PERFIL_EJEMPLO, historialTrazabilidad: historial }),
+    );
+    fixture = TestBed.createComponent(PerfilUsuarioComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+
+    clic('Editar perfil');
+    clic('Eliminar mi cuenta');
+
+    expect(campo('.modal__aviso').textContent).toContain(avisoEliminarCuenta(historial)!);
+    expect(campo('.modal__aviso').textContent).toContain('CRH-2026-0103');
+  });
+
+  it('eliminar cuenta: si el backend falla muestra el error y mantiene la sesión', () => {
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    const limpiar = spyOn(TestBed.inject(CuentaService), 'limpiarCuenta');
+    spyOn(perfilService, 'eliminarCuenta').and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 500,
+            error: { mensaje: 'No se pudo eliminar la cuenta.' },
+          }),
+      ),
+    );
+
+    clic('Editar perfil');
+    clic('Eliminar mi cuenta');
+    campo<HTMLButtonElement>('.modal__btn--peligro').click();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
+    expect(campo('[role="alert"]').textContent).toContain('No se pudo eliminar la cuenta.');
+    expect(limpiar).not.toHaveBeenCalled();
+    expect(navegar).not.toHaveBeenCalled();
   });
 
   it('el modal de eliminar cuenta usa el fondo claro de marca', () => {

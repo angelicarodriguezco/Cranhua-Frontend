@@ -12,6 +12,7 @@ import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { map, of, startWith, switchMap, tap } from 'rxjs';
 
+import { RUTA_REGISTRAR_CAFETERIA } from '../../core/guards/cafeteria.guard';
 import {
   CantonReferencia,
   ESTILOS_CAFE,
@@ -19,6 +20,7 @@ import {
   Cafeteria,
 } from '../../core/models/cafeteria.model';
 import { Coordenada } from '../../core/models/finca.model';
+import { HistorialTrazabilidad } from '../../core/models/historial-trazabilidad.model';
 import { ItemMenu } from '../../core/models/menu-cafeteria.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { CafeteriaService } from '../../core/services/cafeteria.service';
@@ -43,8 +45,12 @@ export const RUTA_PUBLICAR_MENU = '/cafeteria/menu';
 export const DESCRIPCION_ELIMINAR_CAFETERIA =
   'Eliminar tu cafetería borra su perfil público y su menú. Tu cuenta de Cránhua sigue activa.';
 
-export const AVISO_ELIMINAR_CAFETERIA =
-  'Esta cafetería ya vendió bebidas con código de trazabilidad visible para consumidores (por ejemplo CRH-2026-0103). Eliminar tu cafetería no borra esos códigos, pero ya no vas a poder editar tu menú ni recibir nuevos pedidos.';
+export function avisoEliminarCafeteria(historial?: HistorialTrazabilidad | null): string | null {
+  if (!historial?.tieneHistorial) {
+    return null;
+  }
+  return `Esta cafetería ya vendió bebidas con código de trazabilidad visible para consumidores (por ejemplo ${historial.codigoEjemplo}). Eliminar tu cafetería no borra esos códigos, pero ya no vas a poder editar tu menú ni recibir nuevos pedidos.`;
+}
 
 type Campo = keyof FormularioDatos['controls'];
 type Modo = 'vista' | 'edicion';
@@ -95,7 +101,6 @@ export class MiCafeteriaComponent implements OnDestroy {
   protected readonly tema = this.dashboard.tema;
   protected readonly estilosDisponibles = ESTILOS_CAFE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_CAFETERIA;
-  protected readonly avisoEliminar = AVISO_ELIMINAR_CAFETERIA;
   protected readonly colones = formatearColones;
   protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
 
@@ -120,6 +125,7 @@ export class MiCafeteriaComponent implements OnDestroy {
   protected readonly noEncontrado = signal(false);
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
+  protected readonly avisoEliminar = signal<string | null>(null);
   protected readonly portadaUrl = signal<string | null>(null);
   protected readonly errorPortada = signal<string | null>(null);
   protected readonly guardando = signal(false);
@@ -163,6 +169,7 @@ export class MiCafeteriaComponent implements OnDestroy {
           return;
         }
         this.aplicar(cafeteria);
+        this.avisoEliminar.set(avisoEliminarCafeteria(cafeteria.historialTrazabilidad));
         this.modo.set('vista');
       },
       error: (error: unknown) => this.error.set(mensajeDeError(error)),
@@ -337,16 +344,15 @@ export class MiCafeteriaComponent implements OnDestroy {
   }
 
   protected confirmarEliminar(): void {
+    this.modalEliminarAbierto.set(false);
     const actual = this.cafeteria();
     if (!actual) {
-      this.modalEliminarAbierto.set(false);
       return;
     }
-    this.cafeteriaService.eliminar(actual.id).subscribe((ok) => {
-      this.modalEliminarAbierto.set(false);
-      if (ok) {
-        void this.router.navigateByUrl(RUTA_DASHBOARD_CAFETERIA);
-      }
+    this.error.set(null);
+    this.cafeteriaService.eliminar(actual.id).subscribe({
+      next: () => void this.router.navigateByUrl(RUTA_REGISTRAR_CAFETERIA),
+      error: (error: unknown) => this.error.set(mensajeDeError(error)),
     });
   }
 
