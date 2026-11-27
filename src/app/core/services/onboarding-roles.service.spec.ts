@@ -1,9 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 
-import {
-  CLAVE_ONBOARDING_ROLES,
-  OnboardingRolesService,
-} from './onboarding-roles.service';
+import { CLAVE_ONBOARDING_ROLES, OnboardingRolesService } from './onboarding-roles.service';
 
 describe('OnboardingRolesService', () => {
   function crear(): OnboardingRolesService {
