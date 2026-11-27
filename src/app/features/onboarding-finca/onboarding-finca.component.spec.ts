@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -6,6 +7,10 @@ import { NEVER } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
+import {
+  CLAVE_ONBOARDING_ROLES,
+  OnboardingRolesService,
+} from '../../core/services/onboarding-roles.service';
 import { SesionService } from '../../core/services/sesion.service';
 import { USUARIOS } from '../../core/mocks/finca.mock';
 import { Coordenada, DuenoApi, FincaResponseApi } from '../../core/models/finca.model';
@@ -67,7 +72,11 @@ describe('OnboardingFincaComponent', () => {
     fixture.detectChanges();
   });
 
-  afterEach(() => http.verify());
+  afterEach(() => {
+    http.verify();
+    sessionStorage.removeItem(CLAVE_ONBOARDING_ROLES);
+    TestBed.inject(OnboardingRolesService).limpiar();
+  });
 
   function boton(texto: string): HTMLButtonElement {
     const encontrado = [...pagina.querySelectorAll('button')].find((b) =>
@@ -128,6 +137,38 @@ describe('OnboardingFincaComponent', () => {
     boton('Volver').click();
     fixture.detectChanges();
     expect(pasoActual()).toBe('Paso 1 de 4');
+  });
+
+  it('al salir desde la bienvenida limpia la cola de roles', () => {
+    const roles = TestBed.inject(OnboardingRolesService);
+    roles.iniciar(['cafetalero', 'tostador', 'cafeteria']);
+    fixture.detectChanges();
+    expect(roles.hayCadena()).toBeTrue();
+    expect(pagina.querySelector('.onboarding__progreso-roles')).not.toBeNull();
+
+    const location = TestBed.inject(Location);
+    spyOn(location, 'back');
+    boton('Volver').click();
+
+    expect(location.back).toHaveBeenCalled();
+    expect(roles.hayCadena()).toBeFalse();
+    expect(roles.siguienteRuta()).toBeNull();
+    expect(sessionStorage.getItem(CLAVE_ONBOARDING_ROLES)).toBeNull();
+  });
+
+  it('volver al paso anterior no limpia la cola de roles', () => {
+    const roles = TestBed.inject(OnboardingRolesService);
+    roles.iniciar(['cafetalero', 'tostador']);
+    fixture.detectChanges();
+
+    boton('Empezar a dibujar').click();
+    fixture.detectChanges();
+    boton('Volver').click();
+    fixture.detectChanges();
+
+    expect(pasoActual()).toBe('Paso 1 de 4');
+    expect(roles.hayCadena()).toBeTrue();
+    expect(roles.siguienteRuta()).toBe('/onboarding-tostador');
   });
 
   it('no guarda sin nombre ni perímetro', () => {
@@ -321,11 +362,44 @@ describe('OnboardingFincaComponent', () => {
     expect(resumen).toContain('Tarrazú');
     expect(resumen).toContain('hectáreas');
     expect(pagina.querySelector('.fallidos')).toBeNull();
+    expect(boton('Ir a mi dashboard')).toBeTruthy();
 
     const router = TestBed.inject(Router);
     spyOn(router, 'navigateByUrl');
     boton('Ir a mi dashboard').click();
     expect(router.navigateByUrl).toHaveBeenCalledWith(RUTA_DASHBOARD);
+  });
+
+  it('con un solo rol no muestra progreso de cadena', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['cafetalero']);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')).toBeNull();
+    expect(pagina.textContent).not.toContain('Rol 1 de');
+  });
+
+  it('con roles pendientes continúa al siguiente onboarding', () => {
+    TestBed.inject(OnboardingRolesService).iniciar(['cafetalero', 'tostador', 'cafeteria']);
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.onboarding__progreso-roles')!.textContent).toContain(
+      'Rol 1 de 3',
+    );
+
+    boton('Empezar a dibujar').click();
+    fixture.detectChanges();
+    componente['formulario'].controls.zona.setValue('Tarrazú');
+    llenarYGuardar(LIBRE);
+    responder(fincaApi());
+
+    expect(boton('Continuar con el siguiente rol')).toBeTruthy();
+
+    const router = TestBed.inject(Router);
+    spyOn(router, 'navigateByUrl');
+    boton('Continuar con el siguiente rol').click();
+
+    expect(router.navigateByUrl).toHaveBeenCalledWith('/onboarding-tostador');
+    expect(TestBed.inject(OnboardingRolesService).siguienteRuta()).toBe('/onboarding-cafeteria');
   });
 
   it('reinicia el flujo para registrar otra finca', () => {

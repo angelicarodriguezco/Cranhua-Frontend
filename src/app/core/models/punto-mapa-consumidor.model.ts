@@ -10,7 +10,6 @@ export interface PuntoMapaConsumidor {
   nombre: string;
   ubicacionLabel: string;
   coordenada: Coordenada;
-  rutaPerfil: string;
 }
 
 export interface PuntoMapaResponseApi {

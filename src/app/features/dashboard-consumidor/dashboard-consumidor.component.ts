@@ -9,6 +9,11 @@ import { Observable, catchError, forkJoin, map, of, startWith, switchMap } from 
 import { MenuPublico } from '../../core/models/menu-publico.model';
 import { PerfilCafeteria } from '../../core/models/perfil-cafeteria.model';
 import {
+  CosechaActivaPublica,
+  PerfilFincaPublico,
+} from '../../core/models/perfil-finca-publico.model';
+import { EnlacePerfilPublico, PerfilTostador } from '../../core/models/perfil-tostador.model';
+import {
   PuntoMapaConsumidor,
   TipoPuntoMapaConsumidor,
 } from '../../core/models/punto-mapa-consumidor.model';
@@ -41,34 +46,120 @@ const CENTRO_COSTA_RICA: google.maps.LatLngLiteral = { lat: 9.92, lng: -84.12 };
 const ZOOM_PAIS = 9;
 const ZOOM_LOCAL = 12;
 
-export interface DatoPanelExplorar {
+interface SeleccionPanel {
+  id: string;
+  tipo: TipoPuntoMapaConsumidor;
+}
+
+interface DatoPanel {
   etiqueta: string;
   valor: string;
 }
 
-export interface EnlacePanelExplorar {
-  id: string;
+interface SeccionPanel {
+  titulo: string;
+  tipo: TipoPuntoMapaConsumidor;
+  enlaces: EnlacePerfilPublico[];
+}
+
+interface AccionMapaPanel {
+  etiqueta: string;
+  resaltar: string[];
+  centrar: string | null;
+}
+
+interface ResumenPanel {
   nombre: string;
-  detalle: string;
-}
-
-export interface ResumenPanelExplorar {
-  punto: PuntoMapaConsumidor;
-  rol: string;
+  ubicacion: string;
   descripcion: string;
-  datos: DatoPanelExplorar[];
-  enlaces: EnlacePanelExplorar[];
-  tituloEnlaces: string;
+  datos: DatoPanel[];
+  secciones: SeccionPanel[];
+  lotes: CosechaActivaPublica[];
+  accionMapa: AccionMapaPanel | null;
   menu: MenuPublico | null;
-  imagenPortada?: string;
-  codigoResaltado?: string;
+  portadaUrl: string | null;
 }
 
-type CargaPanelCafeteria =
-  | { estado: 'idle' }
-  | { estado: 'cargando' }
-  | { estado: 'error'; mensaje: string }
-  | { estado: 'ok'; perfil: PerfilCafeteria | null; menu: MenuPublico | null };
+type EstadoPanel =
+  | { estado: 'cargando' | 'error' | 'no-encontrado' }
+  | { estado: 'ok'; resumen: ResumenPanel };
+
+function esTipoPunto(valor: string | null): valor is TipoPuntoMapaConsumidor {
+  return valor === 'finca' || valor === 'tostador' || valor === 'cafeteria';
+}
+
+function conValor(datos: DatoPanel[]): DatoPanel[] {
+  return datos.filter((dato) => dato.valor);
+}
+
+function resumenFinca(perfil: PerfilFincaPublico): ResumenPanel {
+  return {
+    nombre: perfil.nombre,
+    ubicacion: perfil.ubicacion,
+    descripcion: perfil.descripcion,
+    datos: conValor([
+      { etiqueta: 'Propietarios', valor: listar(perfil.propietarios) },
+      { etiqueta: 'Zona cafetalera', valor: perfil.zona ?? '' },
+      { etiqueta: 'Variedades', valor: listar(perfil.variedades) },
+      { etiqueta: 'Procesos', valor: listar(perfil.procesos) },
+      { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.enCranhuaDesde) },
+    ]),
+    secciones: [
+      { titulo: 'Cafeterías que sirven este café', tipo: 'cafeteria', enlaces: perfil.cafeterias },
+    ],
+    lotes: perfil.cosechasActivas,
+    accionMapa: { etiqueta: 'Ver lotes trazables', resaltar: [perfil.id], centrar: perfil.id },
+    menu: null,
+    portadaUrl: null,
+  };
+}
+
+function resumenTostador(perfil: PerfilTostador): ResumenPanel {
+  return {
+    nombre: perfil.nombre,
+    ubicacion: perfil.ubicacion,
+    descripcion: perfil.descripcion,
+    datos: conValor([
+      { etiqueta: 'Estilos de tueste', valor: listar(perfil.estilos) },
+      { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.miembroDesde) },
+    ]),
+    secciones: [
+      { titulo: 'Fincas con las que trabaja', tipo: 'finca', enlaces: perfil.fincas },
+      { titulo: 'Dónde comprar su café', tipo: 'cafeteria', enlaces: perfil.puntosVenta },
+    ],
+    lotes: [],
+    accionMapa: perfil.fincas.length
+      ? {
+          etiqueta: 'Ver fincas con las que trabaja',
+          resaltar: perfil.fincas.map((finca) => finca.id),
+          centrar: null,
+        }
+      : null,
+    menu: null,
+    portadaUrl: perfil.portadaUrl,
+  };
+}
+
+function resumenCafeteria(perfil: PerfilCafeteria, menu: MenuPublico | null): ResumenPanel {
+  return {
+    nombre: perfil.nombre,
+    ubicacion: perfil.ubicacion,
+    descripcion: perfil.descripcion,
+    datos: conValor([
+      { etiqueta: 'Cafés trazables', valor: String(perfil.cafesTrazables) },
+      { etiqueta: 'Horario', valor: perfil.horario },
+      { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.miembroDesde) },
+    ]),
+    secciones: [
+      { titulo: 'Fincas de origen de sus cafés', tipo: 'finca', enlaces: perfil.fincas },
+      { titulo: 'Tostadores de sus cafés', tipo: 'tostador', enlaces: perfil.tostadores },
+    ],
+    lotes: [],
+    accionMapa: null,
+    menu,
+    portadaUrl: perfil.portadaUrl ?? null,
+  };
+}
 
 function parseListaIds(valor: string | null): string[] {
   if (!valor) {
@@ -114,6 +205,7 @@ export class DashboardConsumidorComponent {
   protected readonly errorBusqueda = signal<string | null>(null);
   protected readonly idsResaltados = signal<ReadonlySet<string>>(new Set());
   protected readonly precio = formatearColones;
+  protected readonly kg = formatearKg;
 
   protected readonly logoSrc = computed(() =>
     this.tema() === 'claro' ? '/images/logo-cranhua-negro.png' : '/images/logo-cranhua.png',
@@ -143,136 +235,55 @@ export class DashboardConsumidorComponent {
 
   private readonly contenidosPin = new Map<string, HTMLElement>();
 
-  protected readonly puntoSeleccionado = computed(() => {
-    const id = this.queryParams().get('seleccionado')?.trim();
-    if (!id) {
-      return null;
-    }
-    return this.puntoPorId(id) ?? null;
-  });
+  protected readonly seleccion = computed<SeleccionPanel | null>(
+    () => {
+      const params = this.queryParams();
+      const id = params.get('seleccionado')?.trim();
+      const tipo = params.get('tipo');
+      return id && esTipoPunto(tipo) ? { id, tipo } : null;
+    },
+    { equal: (a, b) => a?.id === b?.id && a?.tipo === b?.tipo },
+  );
 
-  protected readonly panelAbierto = computed(() => this.puntoSeleccionado() !== null);
+  protected readonly panelAbierto = computed(() => this.seleccion() !== null);
 
   protected readonly menuAbierto = computed(() => this.queryParams().get('menu') === '1');
 
-  private readonly cafeteriaIdSeleccionada = computed(() => {
-    const punto = this.puntoSeleccionado();
-    return punto?.tipo === 'cafeteria' ? punto.id : null;
-  });
+  protected readonly cosechaBuscada = computed(() => this.queryParams().get('cosecha'));
 
-  private readonly cargaCafeteria = toSignal(
-    toObservable(this.cafeteriaIdSeleccionada).pipe(
-      switchMap((id): Observable<CargaPanelCafeteria> => {
-        if (!id) {
-          return of({ estado: 'idle' });
+  private readonly intento = signal(0);
+
+  private readonly carga = toSignal(
+    toObservable(computed(() => ({ seleccion: this.seleccion(), intento: this.intento() }))).pipe(
+      switchMap(({ seleccion }) => {
+        if (!seleccion) {
+          return of(null);
         }
-        return forkJoin({
-          perfil: this.cafeterias.obtener(id),
-          menu: this.menus.obtener(id),
-        }).pipe(
+        return this.cargarResumen(seleccion).pipe(
           map(
-            ({ perfil, menu }): CargaPanelCafeteria => ({
-              estado: 'ok',
-              perfil,
-              menu,
-            }),
+            (resumen): EstadoPanel =>
+              resumen ? { estado: 'ok', resumen } : { estado: 'no-encontrado' },
           ),
-          catchError(() =>
-            of({
-              estado: 'error' as const,
-              mensaje: 'No se pudo cargar el perfil de esta cafetería.',
-            }),
-          ),
-          startWith({ estado: 'cargando' as const }),
+          catchError(() => of<EstadoPanel>({ estado: 'error' })),
+          startWith<EstadoPanel>({ estado: 'cargando' }),
+          map((estado) => ({ id: seleccion.id, estado })),
         );
       }),
     ),
-    { initialValue: { estado: 'idle' } as CargaPanelCafeteria },
   );
 
-  protected readonly cargandoPanel = computed(() => this.cargaCafeteria().estado === 'cargando');
-
-  protected readonly errorPanel = computed(() => {
-    const carga = this.cargaCafeteria();
-    return carga.estado === 'error' ? carga.mensaje : null;
-  });
-
-  protected readonly resumenPanel = computed((): ResumenPanelExplorar | null => {
-    const punto = this.puntoSeleccionado();
-    if (!punto) {
+  protected readonly panel = computed((): EstadoPanel | null => {
+    const seleccion = this.seleccion();
+    if (!seleccion) {
       return null;
     }
+    const carga = this.carga();
+    return carga?.id === seleccion.id ? carga.estado : { estado: 'cargando' };
+  });
 
-    const cosechaQuery = this.queryParams().get('cosecha')?.trim() || undefined;
-
-    if (punto.tipo === 'finca') {
-      const perfil = this.fincas.obtenerSync(punto.id);
-      if (!perfil) {
-        return this.resumenBasico(punto);
-      }
-      const codigoResaltado =
-        cosechaQuery && perfil.cosechaActiva.id === cosechaQuery
-          ? perfil.cosechaActiva.codigo
-          : undefined;
-      return {
-        punto,
-        rol: perfil.etiqueta,
-        descripcion: perfil.descripcion,
-        datos: [
-          { etiqueta: 'Propietario', valor: perfil.propietario },
-          { etiqueta: 'Altitud', valor: `${perfil.altitudMsnm} msnm` },
-          { etiqueta: 'Variedades', valor: listar(perfil.variedades) },
-          { etiqueta: 'Procesos', valor: listar(perfil.procesos) },
-          {
-            etiqueta: 'Cosecha activa',
-            valor: `${perfil.cosechaActiva.variedad} · ${perfil.cosechaActiva.proceso} · ${formatearKg(perfil.cosechaActiva.kilos)}`,
-          },
-          { etiqueta: 'En Cránhua desde', valor: perfil.enCranhuaDesde },
-        ],
-        enlaces: perfil.cafeterias.map((c) => ({
-          id: c.id,
-          nombre: c.nombre,
-          detalle: c.ubicacionLabel,
-        })),
-        tituloEnlaces: 'Cafeterías que sirven este café',
-        menu: null,
-        imagenPortada: perfil.imagenPortada,
-        codigoResaltado,
-      };
-    }
-
-    if (punto.tipo === 'tostador') {
-      const perfil = this.tostadores.obtener(punto.id);
-      if (!perfil) {
-        return this.resumenBasico(punto);
-      }
-      return {
-        punto,
-        rol: ETIQUETAS_TIPO.tostador,
-        descripcion: perfil.descripcion,
-        datos: [
-          { etiqueta: 'Estilos de tueste', valor: listar(perfil.estilosTueste) },
-          { etiqueta: 'Café tostado este año', valor: formatearKg(perfil.kgTostadosAnio) },
-          { etiqueta: 'En Cránhua desde', valor: formatearMesAnio(perfil.miembroDesde) },
-        ],
-        enlaces: [
-          ...perfil.fincas.map((f) => ({
-            id: f.id,
-            nombre: f.nombre,
-            detalle: f.ubicacion,
-          })),
-          ...perfil.puntosVenta.map((p) => ({
-            id: p.id,
-            nombre: p.nombre,
-            detalle: p.ubicacion,
-          })),
-        ],
-        tituloEnlaces: 'También en la cadena',
-        menu: null,
-      };
-    }
-
-    return this.resumenCafeteria(punto);
+  protected readonly resumen = computed(() => {
+    const panel = this.panel();
+    return panel?.estado === 'ok' ? panel.resumen : null;
   });
 
   constructor() {
@@ -338,44 +349,27 @@ export class DashboardConsumidorComponent {
   }
 
   protected abrirPerfil(punto: PuntoMapaConsumidor): void {
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        seleccionado: punto.id,
-        menu: null,
-      },
-      queryParamsHandling: 'merge',
-    });
+    this.abrirNegocio(punto.tipo, punto.id);
   }
 
-  protected abrirDesdePanel(id: string): void {
-    const punto = this.puntoPorId(id);
-    if (!punto) {
-      return;
-    }
-    this.abrirPerfil(punto);
+  protected abrirNegocio(tipo: TipoPuntoMapaConsumidor, id: string): void {
+    this.navegar({ seleccionado: id, tipo, menu: null });
   }
 
   protected cerrarPanel(): void {
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        seleccionado: null,
-        cosecha: null,
-        menu: null,
-      },
-      queryParamsHandling: 'merge',
-    });
+    this.navegar({ seleccionado: null, tipo: null, cosecha: null, menu: null });
   }
 
   protected alternarMenu(): void {
-    void this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: {
-        menu: this.menuAbierto() ? null : '1',
-      },
-      queryParamsHandling: 'merge',
-    });
+    this.navegar({ menu: this.menuAbierto() ? null : '1' });
+  }
+
+  protected verEnMapa(accion: AccionMapaPanel): void {
+    this.navegar({ resaltar: accion.resaltar.join(','), centrar: accion.centrar });
+  }
+
+  protected reintentar(): void {
+    this.intento.update((n) => n + 1);
   }
 
   protected buscar(): void {
@@ -388,71 +382,35 @@ export class DashboardConsumidorComponent {
       return;
     }
     this.errorBusqueda.set(null);
+    this.navegar({
+      seleccionado: hallado.fincaId,
+      tipo: 'finca',
+      resaltar: hallado.fincaId,
+      cosecha: hallado.cosechaId,
+      menu: null,
+    });
+  }
+
+  private navegar(queryParams: Record<string, string | null>): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        seleccionado: hallado.fincaId,
-        resaltar: hallado.fincaId,
-        cosecha: hallado.cosechaId,
-        menu: null,
-      },
+      queryParams,
       queryParamsHandling: 'merge',
     });
   }
 
-  private resumenCafeteria(punto: PuntoMapaConsumidor): ResumenPanelExplorar {
-    const carga = this.cargaCafeteria();
-    if (carga.estado === 'cargando' || carga.estado === 'idle') {
-      return {
-        ...this.resumenBasico(punto),
-        descripcion: 'Cargando perfil…',
-        datos: [],
-      };
+  private cargarResumen({ id, tipo }: SeleccionPanel): Observable<ResumenPanel | null> {
+    switch (tipo) {
+      case 'finca':
+        return this.fincas.obtener(id).pipe(map((perfil) => perfil && resumenFinca(perfil)));
+      case 'tostador':
+        return this.tostadores.obtener(id).pipe(map((perfil) => perfil && resumenTostador(perfil)));
+      case 'cafeteria':
+        return forkJoin({
+          perfil: this.cafeterias.obtener(id),
+          menu: this.menus.obtener(id),
+        }).pipe(map(({ perfil, menu }) => perfil && resumenCafeteria(perfil, menu)));
     }
-
-    if (carga.estado === 'error' || !carga.perfil) {
-      return this.resumenBasico(punto);
-    }
-
-    const perfil = carga.perfil;
-    return {
-      punto,
-      rol: ETIQUETAS_TIPO.cafeteria,
-      descripcion:
-        perfil.descripcion || 'Todavía no hay más detalles publicados para este negocio.',
-      datos: [
-        { etiqueta: 'Cafés trazables', valor: String(perfil.cafesTrazables) },
-        ...(perfil.horario ? [{ etiqueta: 'Horario', valor: perfil.horario }] : []),
-        {
-          etiqueta: 'En Cránhua desde',
-          valor: formatearMesAnio(perfil.miembroDesde),
-        },
-      ],
-      enlaces: perfil.fincas.map((f) => ({
-        id: f.id,
-        nombre: f.nombre,
-        detalle: f.ubicacion,
-      })),
-      tituloEnlaces: 'Fincas de origen de sus cafés',
-      menu: carga.menu,
-      imagenPortada: perfil.portadaUrl ?? undefined,
-    };
-  }
-
-  private resumenBasico(punto: PuntoMapaConsumidor): ResumenPanelExplorar {
-    return {
-      punto,
-      rol: ETIQUETAS_TIPO[punto.tipo],
-      descripcion: 'Todavía no hay más detalles publicados para este negocio.',
-      datos: [{ etiqueta: 'Ubicación', valor: punto.ubicacionLabel }],
-      enlaces: [],
-      tituloEnlaces: 'También en la cadena',
-      menu: null,
-    };
-  }
-
-  private puntoPorId(id: string): PuntoMapaConsumidor | undefined {
-    return this.puntos().find((punto) => punto.id === id);
   }
 
   private sincronizarContenidosPin(puntos: PuntoMapaConsumidor[]): void {
