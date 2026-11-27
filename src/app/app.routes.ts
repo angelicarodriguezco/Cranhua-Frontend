@@ -15,7 +15,6 @@ import { FormularioTuesteComponent } from './features/formulario-tueste/formular
 import { HistorialCafetaleroComponent } from './features/historial-cafetalero/historial-cafetalero.component';
 import { IniciarSesionComponent } from './features/iniciar-sesion/iniciar-sesion.component';
 import { InicioComponent } from './features/inicio/inicio.component';
-import { MapaPruebaComponent } from './features/mapa-prueba/mapa-prueba.component';
 import { MiCafeteriaComponent } from './features/mi-cafeteria/mi-cafeteria.component';
 import { MiNegocioComponent } from './features/mi-negocio/mi-negocio.component';
 import { MisFincasComponent } from './features/mis-fincas/mis-fincas.component';
@@ -25,6 +24,7 @@ import { MisTostadosComponent } from './features/mis-tostados/mis-tostados.compo
 import { OnboardingCafeteriaComponent } from './features/onboarding-cafeteria/onboarding-cafeteria.component';
 import { OnboardingFincaComponent } from './features/onboarding-finca/onboarding-finca.component';
 import { OnboardingTostadorComponent } from './features/onboarding-tostador/onboarding-tostador.component';
+import { PaginaNoEncontradaComponent } from './features/pagina-no-encontrada/pagina-no-encontrada.component';
 import { PerfilUsuarioComponent } from './features/perfil-usuario/perfil-usuario.component';
 import { PublicarMenuComponent } from './features/publicar-menu/publicar-menu.component';
 import { RecuperarContrasenaComponent } from './features/recuperar-contrasena/recuperar-contrasena.component';
@@ -39,22 +39,6 @@ export const routes: Routes = [
   { path: 'registro', component: RegistroComponent },
   { path: 'explorar', component: DashboardConsumidorComponent },
   {
-    path: 'explorar/finca/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
-    path: 'explorar/tostador/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
-    path: 'explorar/cafeteria/:id/menu',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}&menu=1`,
-  },
-  {
-    path: 'explorar/cafeteria/:id',
-    redirectTo: ({ params }) => `/explorar?seleccionado=${params['id']}`,
-  },
-  {
     path: 'iniciar-sesion',
     component: IniciarSesionComponent,
     data: { title: 'Iniciar Sesión' },
@@ -64,7 +48,6 @@ export const routes: Routes = [
     component: RecuperarContrasenaComponent,
     data: { title: 'Recuperar contraseña' },
   },
-  { path: 'mapa-prueba', component: MapaPruebaComponent },
   { path: 'dashboard', redirectTo: 'cafetalero/dashboard', pathMatch: 'full' },
   { path: 'mis-fincas', redirectTo: 'cafetalero/fincas', pathMatch: 'full' },
   { path: 'mis-fincas/registrar', redirectTo: 'cafetalero/fincas/registrar', pathMatch: 'full' },
@@ -150,4 +133,5 @@ export const routes: Routes = [
       },
     ],
   },
+  { path: '**', component: PaginaNoEncontradaComponent },
 ];

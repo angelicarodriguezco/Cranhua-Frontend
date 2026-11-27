@@ -35,33 +35,6 @@ describe('punto-mapa-consumidor.mapper', () => {
       nombre: 'Finca La Catalina',
       ubicacionLabel: 'Tarrazú, San José',
       coordenada: { lat: 9.6612, lng: -84.031 },
-      rutaPerfil: '/explorar/finca/a1b2c3d4-e5f6-7890-abcd-ef1234567890',
     });
-  });
-
-  it('arma rutaPerfil según tipo e id UUID', () => {
-    const tostador: PuntoMapaResponseApi = {
-      tipo: 'TOSTADOR',
-      id: '11111111-2222-3333-4444-555555555555',
-      nombre: 'Tostaduría Volcán',
-      canton: 'San José',
-      provincia: 'San José',
-      coordenada: { lat: 9.9335, lng: -84.0775 },
-    };
-    const cafeteria: PuntoMapaResponseApi = {
-      tipo: 'CAFETERIA',
-      id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-      nombre: 'Café Brumas',
-      canton: 'Escazú',
-      provincia: 'San José',
-      coordenada: { lat: 9.9205, lng: -84.137 },
-    };
-
-    expect(mapearPuntoMapaResponseAConsumidor(tostador).rutaPerfil).toBe(
-      '/explorar/tostador/11111111-2222-3333-4444-555555555555',
-    );
-    expect(mapearPuntoMapaResponseAConsumidor(cafeteria).rutaPerfil).toBe(
-      '/explorar/cafeteria/aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-    );
   });
 });

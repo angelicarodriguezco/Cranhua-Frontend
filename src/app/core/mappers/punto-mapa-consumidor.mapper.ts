@@ -25,13 +25,11 @@ export function ubicacionLabelDesdeApi(canton: string, provincia: string): strin
 }
 
 export function mapearPuntoMapaResponseAConsumidor(api: PuntoMapaResponseApi): PuntoMapaConsumidor {
-  const tipo = mapearTipoPuntoMapaDesdeApi(api.tipo);
   return {
     id: api.id,
-    tipo,
+    tipo: mapearTipoPuntoMapaDesdeApi(api.tipo),
     nombre: api.nombre,
     ubicacionLabel: ubicacionLabelDesdeApi(api.canton, api.provincia),
     coordenada: api.coordenada,
-    rutaPerfil: `/explorar/${tipo}/${api.id}`,
   };
 }
