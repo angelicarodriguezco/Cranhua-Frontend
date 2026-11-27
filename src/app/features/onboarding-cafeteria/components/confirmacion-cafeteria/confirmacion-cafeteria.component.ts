@@ -9,6 +9,7 @@ import { Cafeteria } from '../../../../core/models/cafeteria.model';
 })
 export class ConfirmacionCafeteriaComponent {
   readonly cafeteria = input.required<Cafeteria>();
+  readonly etiquetaContinuar = input('Ir a mi dashboard');
   readonly irAlDashboard = output();
   readonly editar = output();
 

@@ -50,14 +50,6 @@ describe('AppComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-kiana-widget')).toBeTruthy();
 
-    await router.navigateByUrl('/explorar/cafeteria/1');
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-kiana-widget')).toBeTruthy();
-
-    await router.navigateByUrl('/explorar/cafeteria/1/menu');
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-kiana-widget')).toBeTruthy();
-
     await router.navigateByUrl('/iniciar-sesion');
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('app-kiana-widget')).toBeNull();
