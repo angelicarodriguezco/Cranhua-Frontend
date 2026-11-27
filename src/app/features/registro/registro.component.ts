@@ -10,13 +10,15 @@ import {
 import { Router, RouterLink } from '@angular/router';
 
 import { ROL_A_API } from '../../core/models/auth.model';
+import { RolCuenta, RUTA_ONBOARDING_POR_ROL } from '../../core/models/cuenta.model';
 import { AuthService } from '../../core/services/auth.service';
 import { GoogleIdentityService } from '../../core/services/google-identity.service';
+import { OnboardingRolesService } from '../../core/services/onboarding-roles.service';
 import { parsearErrorAuth } from '../../core/utils/auth-error';
 import { ACCEPT_IMAGEN_PERFIL, validarImagenPerfil } from '../../shared/utils/imagen';
 import { contrasenaConLetraYNumero } from '../../shared/validators/contrasena.validator';
 
-export type Rol = 'cafetalero' | 'tostador' | 'cafeteria';
+export type Rol = RolCuenta;
 
 interface OpcionRol {
   valor: Rol;
@@ -25,9 +27,21 @@ interface OpcionRol {
 }
 
 export const ROLES: OpcionRol[] = [
-  { valor: 'cafetalero', etiqueta: 'Cafetalero', rutaOnboarding: '/onboarding-finca' },
-  { valor: 'tostador', etiqueta: 'Tostador', rutaOnboarding: '/onboarding-tostador' },
-  { valor: 'cafeteria', etiqueta: 'Cafetería', rutaOnboarding: '/onboarding-cafeteria' },
+  {
+    valor: 'cafetalero',
+    etiqueta: 'Cafetalero',
+    rutaOnboarding: RUTA_ONBOARDING_POR_ROL.cafetalero,
+  },
+  {
+    valor: 'tostador',
+    etiqueta: 'Tostador',
+    rutaOnboarding: RUTA_ONBOARDING_POR_ROL.tostador,
+  },
+  {
+    valor: 'cafeteria',
+    etiqueta: 'Cafetería',
+    rutaOnboarding: RUTA_ONBOARDING_POR_ROL.cafeteria,
+  },
 ];
 
 type CampoRegistro = 'roles' | 'nombre' | 'correo' | 'telefono' | 'contrasena';
@@ -54,6 +68,7 @@ export class RegistroComponent implements OnDestroy {
   private readonly router = inject(Router);
   private readonly auth = inject(AuthService);
   private readonly googleIdentity = inject(GoogleIdentityService);
+  private readonly onboardingRoles = inject(OnboardingRolesService);
 
   protected readonly roles = ROLES;
   protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
@@ -183,7 +198,7 @@ export class RegistroComponent implements OnDestroy {
         next: (cuenta) => {
           this.auth.aplicarSesion(cuenta);
           this.enviando.set(false);
-          this.irAlOnboarding(this.form.controls.nombre.value.trim());
+          this.irAlOnboarding();
         },
         error: (error: unknown) => {
           this.enviando.set(false);
@@ -212,7 +227,7 @@ export class RegistroComponent implements OnDestroy {
           next: (cuenta) => {
             this.auth.aplicarSesion(cuenta);
             this.enviando.set(false);
-            this.irAlOnboarding(cuenta.nombreCompleto);
+            this.irAlOnboarding();
           },
           error: (error: unknown) => {
             this.enviando.set(false);
@@ -227,14 +242,10 @@ export class RegistroComponent implements OnDestroy {
     }
   }
 
-  private irAlOnboarding(nombre: string): void {
-    const [primero, ...pendientes] = ROLES.filter((r) => this.estaSeleccionado(r.valor));
-    void this.router.navigateByUrl(primero.rutaOnboarding, {
-      state: {
-        nombre,
-        rolesPendientes: pendientes.map((r) => r.valor),
-      },
-    });
+  private irAlOnboarding(): void {
+    const seleccionados = ROLES.filter((r) => this.estaSeleccionado(r.valor));
+    this.onboardingRoles.iniciar(seleccionados.map((r) => r.valor));
+    void this.router.navigateByUrl(seleccionados[0].rutaOnboarding);
   }
 
   private limpiarErrores(): void {

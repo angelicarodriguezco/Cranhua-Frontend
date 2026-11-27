@@ -10,15 +10,22 @@
   </header>
 
   <main class="onboarding__contenido">
-    <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
-      @for (p of pasos; track p) {
-        <li
-          class="pasos__punto"
-          [class.pasos__punto--activo]="$index === indicePaso()"
-          [attr.aria-current]="$index === indicePaso() ? 'step' : null"
-        ></li>
+    <div class="onboarding__pasos">
+      @if (hayCadena()) {
+        <p class="onboarding__progreso-roles">
+          Rol {{ progreso().actual }} de {{ progreso().total }}
+        </p>
       }
-    </ol>
+      <ol class="pasos" [attr.aria-label]="'Paso ' + (indicePaso() + 1) + ' de ' + pasos.length">
+        @for (p of pasos; track p) {
+          <li
+            class="pasos__punto"
+            [class.pasos__punto--activo]="$index === indicePaso()"
+            [attr.aria-current]="$index === indicePaso() ? 'step' : null"
+          ></li>
+        }
+      </ol>
+    </div>
 
     @switch (paso()) {
       @case ('bienvenida') {
@@ -51,6 +58,7 @@
       @case ('confirmacion') {
         <app-confirmacion-cafeteria
           [cafeteria]="registrada()!"
+          [etiquetaContinuar]="etiquetaContinuar()"
           (irAlDashboard)="irAlDashboard()"
           (editar)="paso.set('datos')"
         />

@@ -18,6 +18,7 @@ import { Cuenta } from '../models/cuenta.model';
 import { usuarioDesdeNombreCompleto } from '../utils/nombre-usuario';
 import { CafeteriaService } from './cafeteria.service';
 import { CuentaService } from './cuenta.service';
+import { OnboardingRolesService } from './onboarding-roles.service';
 import { SesionService } from './sesion.service';
 
 const opcionesCredenciales = { withCredentials: true as const };
@@ -28,6 +29,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly cafeteriaService = inject(CafeteriaService);
   private readonly cuentaService = inject(CuentaService);
+  private readonly onboardingRolesService = inject(OnboardingRolesService);
   private readonly sesionService = inject(SesionService);
 
   private get base(): string {
@@ -120,7 +122,6 @@ export class AuthService {
     );
   }
 
-  // Sin red o con timeout se arranca igual; solo un 401/403 confirma que no hay sesión
   async restaurarSesion(): Promise<void> {
     try {
       const cuenta = await firstValueFrom(this.cuentaActual().pipe(timeout(ESPERA_RESTAURAR_MS)));
@@ -135,6 +136,7 @@ export class AuthService {
   limpiarSesion(): void {
     this.cafeteriaService.limpiarCache();
     this.cuentaService.limpiarCuenta();
+    this.onboardingRolesService.limpiar();
     this.sesionService.cerrarSesion();
   }
 
