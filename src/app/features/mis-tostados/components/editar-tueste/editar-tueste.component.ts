@@ -5,7 +5,11 @@ import { map } from 'rxjs';
 
 import { ESTILOS_TUESTE } from '../../../../core/models/negocio-tueste.model';
 import { ErrorTueste, LoteComprado, Tueste } from '../../../../core/models/tueste.model';
-import { TuesteService, calcularMerma } from '../../../../core/services/tueste.service';
+import {
+  TuesteService,
+  calcularMerma,
+  kgPorTostar,
+} from '../../../../core/services/tueste.service';
 import {
   crearFormularioTueste,
   errorPesoTostado,
@@ -33,9 +37,12 @@ export class EditarTuesteComponent {
   private readonly dialogo = viewChild.required<ElementRef<HTMLDialogElement>>('dialogo');
   private readonly errorApiPesoVerde = signal<string | null>(null);
   private readonly errorApiPesoTostado = signal<string | null>(null);
+  protected readonly errorApi = signal<string | null>(null);
 
   protected readonly niveles = ESTILOS_TUESTE;
-  protected readonly formulario = crearFormularioTueste(() => this.lote()?.kg ?? null);
+  // Kg del lote sin contar este tueste, igual que la pantalla de edición
+  private readonly kgDisponible = signal<number | null>(null);
+  protected readonly formulario = crearFormularioTueste(() => this.kgDisponible());
 
   private readonly valores = toSignal(
     this.formulario.valueChanges.pipe(map(() => this.formulario.getRawValue())),
@@ -50,11 +57,18 @@ export class EditarTuesteComponent {
   protected readonly hoy = hoy();
   protected readonly porcentaje = porcentaje;
 
-  abrir(tueste: Tueste, lote: LoteComprado): void {
+  abrir(tueste: Tueste, lote: LoteComprado, tuestesDelLote: Tueste[]): void {
     this.tueste.set(tueste);
     this.lote.set(lote);
+    this.kgDisponible.set(
+      kgPorTostar(
+        lote,
+        tuestesDelLote.filter((t) => t.id !== tueste.id),
+      ),
+    );
     this.errorApiPesoVerde.set(null);
     this.errorApiPesoTostado.set(null);
+    this.errorApi.set(null);
     this.formulario.reset({
       loteId: tueste.loteId,
       nivel: tueste.nivel,
@@ -86,6 +100,7 @@ export class EditarTuesteComponent {
     }
     this.errorApiPesoVerde.set(null);
     this.errorApiPesoTostado.set(null);
+    this.errorApi.set(null);
     const { nivel, pesoVerdeKg, pesoTostadoKg, fecha, notas } = this.formulario.getRawValue();
     this.tuesteService
       .actualizar(this.tueste()!.id, {
@@ -103,6 +118,7 @@ export class EditarTuesteComponent {
         error: (error: ErrorTueste) => {
           this.errorApiPesoVerde.set(error.errores['pesoVerdeKg'] ?? null);
           this.errorApiPesoTostado.set(error.errores['pesoTostadoKg'] ?? null);
+          this.errorApi.set(Object.keys(error.errores).length ? null : error.mensaje);
         },
       });
   }

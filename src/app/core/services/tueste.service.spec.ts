@@ -178,10 +178,33 @@ describe('TuesteService', () => {
     ]);
   });
 
-  it('obtener sin endpoint devuelve null', () => {
-    let tueste: unknown = 'pendiente';
-    servicio.obtener('t-1').subscribe((t) => (tueste = t));
-    expect(tueste).toBeNull();
+  describe('obtener', () => {
+    function responderLotes(tuestesL1: TuesteApi[]): void {
+      http.expectOne(BASE_LOTES).flush({
+        indicadores: { lotesComprados: 2, kgComprados: 100, lotesConCodigo: 1 },
+        lotes: [LOTE_ACTIVO, LOTE_PENDIENTE],
+      } satisfies LotesCompradosResponseApi);
+      http.expectOne(`${BASE_LOTES}/l-1/tuestes`).flush(tuestesL1);
+      http.expectOne(`${BASE_LOTES}/l-2/tuestes`).flush([]);
+    }
+
+    it('busca el tueste en los lotes y descuenta solo los otros tuestes del lote', () => {
+      let encontrado: { tueste: { id: string }; lote: { id: string; kgPorTostar: number } } | null =
+        null;
+      servicio.obtener('t-1').subscribe((e) => (encontrado = e));
+      responderLotes([TUESTE_API, { ...TUESTE_API, id: 't-2', pesoVerdeKg: 20 }]);
+
+      expect(encontrado!.tueste.id).toBe('t-1');
+      expect(encontrado!.lote.id).toBe('l-1');
+      expect(encontrado!.lote.kgPorTostar).toBe(40);
+    });
+
+    it('devuelve null si ningún lote tiene ese tueste', () => {
+      let encontrado: unknown = 'pendiente';
+      servicio.obtener('no-existe').subscribe((e) => (encontrado = e));
+      responderLotes([TUESTE_API]);
+      expect(encontrado).toBeNull();
+    });
   });
 
   it('registra un tueste con POST /api/tuestes', () => {
@@ -313,6 +336,27 @@ describe('TuesteService', () => {
         pesoTostadoKg: 'Debe ser menor que el peso verde.',
       },
     });
+  });
+
+  it('propaga el mensaje del 409 por pedidos de cafeterías al actualizar', () => {
+    let error: ErrorTueste | undefined;
+    const mensaje = 'El peso tostado no puede ser menor a los kg ya pedidos por cafeterías.';
+
+    servicio
+      .actualizar('t-1', {
+        nivel: 'Medio',
+        pesoVerdeKg: 12,
+        pesoTostadoKg: 2,
+        fecha: '2026-10-21',
+        notas: null,
+      })
+      .subscribe({ error: (e: ErrorTueste) => (error = e) });
+
+    http
+      .expectOne(`${BASE_TUESTES}/t-1`)
+      .flush({ mensaje, errores: null }, { status: 409, statusText: 'Conflict' });
+
+    expect(error).toEqual({ mensaje, errores: {} });
   });
 
   it('lotesConKgPorTostar filtra lotes sin kg restante', () => {
