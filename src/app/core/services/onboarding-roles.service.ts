@@ -93,6 +93,7 @@ export class OnboardingRolesService {
     try {
       sessionStorage.removeItem(CLAVE_ONBOARDING_ROLES);
     } catch {
+      // sessionStorage puede fallar en modo privado
     }
   }
 
@@ -108,6 +109,7 @@ export class OnboardingRolesService {
       };
       sessionStorage.setItem(CLAVE_ONBOARDING_ROLES, JSON.stringify(estado));
     } catch {
+      // Sin sessionStorage la cola solo dura en memoria
     }
   }
 }
