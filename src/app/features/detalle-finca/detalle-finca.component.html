@@ -86,6 +86,7 @@
       @if (modalEliminarAbierto()) {
         <app-modal-confirmacion
           [nombre]="finca.nombre"
+          [aviso]="avisoEliminar()"
           [procesando]="eliminando()"
           (confirmar)="confirmarEliminar()"
           (cancelar)="cerrarModalEliminar()"

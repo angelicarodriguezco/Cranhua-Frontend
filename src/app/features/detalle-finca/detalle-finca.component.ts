@@ -57,6 +57,16 @@ export class DetalleFincaComponent {
       : 'La finca y sus cosechas dejan de aparecer en tu cuenta, en el mapa y en Explorar. Los códigos de lotes ya vendidos siguen consultables.',
   );
 
+  // Con otros dueños la finca sigue existiendo, así que no hace falta avisar
+  protected readonly avisoEliminar = computed(() => {
+    const finca = this.finca();
+    const historial = finca?.historialTrazabilidad;
+    if (!finca || finca.duenosAdicionales.length || !historial?.tieneHistorial) {
+      return null;
+    }
+    return `Esta finca tiene lotes con código de trazabilidad, como ${historial.codigoEjemplo}, que ya están en bolsas de café. Eliminarla no borra esos códigos: van a seguir consultables para tostadores y consumidores.`;
+  });
+
   protected readonly ubicacion = computed(() => {
     const canton = this.finca()?.canton;
     return canton ? `${canton.nombre}, ${canton.provincia}` : 'Sin cantón de referencia';

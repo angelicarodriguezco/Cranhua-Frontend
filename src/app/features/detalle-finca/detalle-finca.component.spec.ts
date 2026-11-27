@@ -264,6 +264,53 @@ describe('DetalleFincaComponent', () => {
     expect(navegar).toHaveBeenCalledWith('/cafetalero/fincas');
   });
 
+  describe('aviso de historial al eliminar', () => {
+    async function abrirModal(
+      id: string,
+      historialTrazabilidad: { tieneHistorial: boolean; codigoEjemplo: string | null },
+    ): Promise<HTMLElement> {
+      const finca = FINCAS_REGISTRADAS.find((f) => f.id === id)!;
+      spyOn(TestBed.inject(FincaService), 'obtener').and.returnValue(
+        of({ ...finca, historialTrazabilidad }),
+      );
+      const pagina = await abrir(id);
+      pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+      harness.detectChanges();
+      return pagina;
+    }
+
+    it('como único dueño y con historial muestra el código que manda el backend', async () => {
+      const pagina = await abrirModal('f-el-mirador', {
+        tieneHistorial: true,
+        codigoEjemplo: 'CRH-2026-0413',
+      });
+
+      expect(pagina.querySelector('.modal__aviso')?.textContent?.trim()).toBe(
+        'Esta finca tiene lotes con código de trazabilidad, como CRH-2026-0413, que ya están en bolsas de café. Eliminarla no borra esos códigos: van a seguir consultables para tostadores y consumidores.',
+      );
+    });
+
+    it('con otros dueños no avisa aunque haya historial', async () => {
+      const pagina = await abrirModal('f-la-esperanza', {
+        tieneHistorial: true,
+        codigoEjemplo: 'CRH-2026-0413',
+      });
+
+      expect(pagina.querySelector('app-modal-confirmacion')).not.toBeNull();
+      expect(pagina.querySelector('.modal__aviso')).toBeNull();
+    });
+
+    it('sin historial muestra el modal normal', async () => {
+      const pagina = await abrirModal('f-el-mirador', {
+        tieneHistorial: false,
+        codigoEjemplo: null,
+      });
+
+      expect(pagina.querySelector('app-modal-confirmacion')).not.toBeNull();
+      expect(pagina.querySelector('.modal__aviso')).toBeNull();
+    });
+  });
+
   it('si el backend no deja eliminar muestra su mensaje y no navega', async () => {
     const pagina = await abrir('f-la-esperanza');
     spyOn(TestBed.inject(FincaService), 'eliminar').and.returnValue(

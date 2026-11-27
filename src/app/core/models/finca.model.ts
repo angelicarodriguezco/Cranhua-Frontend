@@ -51,6 +51,12 @@ export interface Finca {
   duenosAdicionales: Usuario[];
   cosechasActivas?: number;
   kgDisponibles?: number;
+  historialTrazabilidad?: HistorialTrazabilidad;
+}
+
+export interface HistorialTrazabilidad {
+  tieneHistorial: boolean;
+  codigoEjemplo: string | null;
 }
 
 export type NuevaFinca = Pick<
@@ -76,6 +82,8 @@ export interface FincaResponseApi {
   duenos: DuenoApi[];
   cosechasActivas?: number;
   kgDisponibles?: number;
+  // Solo viene en GET /api/fincas/{id}
+  historialTrazabilidad?: HistorialTrazabilidad;
 }
 
 export interface ConflictoFinca {

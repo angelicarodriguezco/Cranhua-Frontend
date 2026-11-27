@@ -7,6 +7,7 @@ import { USUARIO_ACTUAL } from '../mocks/finca.mock';
 import {
   Canton,
   ErrorRegistroFinca,
+  Finca,
   FincaResponseApi,
   NuevaFinca,
   ResultadoAgregarDueno,
@@ -123,6 +124,21 @@ describe('FincaService', () => {
     expect(req.request.withCredentials).toBeTrue();
     req.flush(fincaApi());
     expect(id).toBe('f-1');
+  });
+
+  it('obtener trae el historial de trazabilidad del detalle', () => {
+    let finca: Finca | undefined;
+    servicio.obtener('f-1').subscribe((f) => (finca = f));
+
+    http.expectOne(`${BASE}/f-1`).flush(
+      fincaApi({
+        historialTrazabilidad: { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0413' },
+      }),
+    );
+    expect(finca?.historialTrazabilidad).toEqual({
+      tieneHistorial: true,
+      codigoEjemplo: 'CRH-2026-0413',
+    });
   });
 
   describe('registrar', () => {
