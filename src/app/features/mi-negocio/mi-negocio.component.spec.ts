@@ -9,9 +9,8 @@ import { DashboardTostadorService } from '../../core/services/dashboard-tostador
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import {
-  AVISO_ELIMINAR_NEGOCIO,
+  avisoEliminarNegocio,
   DESCRIPCION_ELIMINAR_NEGOCIO,
-  ELIMINAR_NO_DISPONIBLE,
   inicialesNegocio,
   MiNegocioComponent,
   RUTA_ONBOARDING_TOSTADOR,
@@ -208,8 +207,17 @@ describe('MiNegocioComponent', () => {
     expect(campo<HTMLInputElement>('#ubicacion-negocio').value).toBe('');
   });
 
-  it('muestra la zona de peligro y avisa que eliminar no está disponible', () => {
+  function confirmarEliminar() {
+    boton('Eliminar negocio').click();
+    fixture.detectChanges();
+    campo<HTMLButtonElement>('.modal__btn--peligro').click();
+    fixture.detectChanges();
+    return http.expectOne(`${URL_TOSTADORES}/${NEGOCIO_API.id}`);
+  }
+
+  it('sin historial confirma un borrado normal y vuelve al onboarding', () => {
     entrarAEdicion();
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
 
     expect(pagina.querySelector('app-zona-peligro')).toBeTruthy();
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_NEGOCIO);
@@ -217,13 +225,45 @@ describe('MiNegocioComponent', () => {
     boton('Eliminar negocio').click();
     fixture.detectChanges();
     expect(campo('.modal__titulo').textContent).toBe(`¿Eliminar ${NEGOCIO_API.nombre}?`);
-    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_NEGOCIO);
+    expect(pagina.querySelector('.modal__aviso')).toBeNull();
 
     campo<HTMLButtonElement>('.modal__btn--peligro').click();
     fixture.detectChanges();
+    const peticion = http.expectOne(`${URL_TOSTADORES}/${NEGOCIO_API.id}`);
+    expect(peticion.request.method).toBe('DELETE');
+    peticion.flush(null, { status: 204, statusText: 'No Content' });
 
     expect(pagina.querySelector('.modal__titulo')).toBeNull();
-    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(ELIMINAR_NO_DISPONIBLE);
+    expect(navegar).toHaveBeenCalledWith(RUTA_ONBOARDING_TOSTADOR);
+  });
+
+  it('con historial el modal avisa con el código del backend', () => {
+    const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0101' };
+    cargar({ ...NEGOCIO_API, historialTrazabilidad: historial });
+    boton('Editar negocio').click();
+    fixture.detectChanges();
+
+    boton('Eliminar negocio').click();
+    fixture.detectChanges();
+
+    expect(campo('.modal__aviso').textContent).toContain(avisoEliminarNegocio(historial)!);
+    expect(campo('.modal__aviso').textContent).toContain('CRH-2026-0101');
+  });
+
+  it('si el backend rechaza la eliminación muestra su mensaje y no navega', () => {
+    entrarAEdicion();
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+
+    confirmarEliminar().flush(
+      { mensaje: 'Solo el dueño del negocio puede editarlo o eliminarlo.' },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(
+      'Solo el dueño del negocio puede editarlo o eliminarlo.',
+    );
+    expect(navegar).not.toHaveBeenCalled();
   });
 
   it('guarda cambios y vuelve a la vista', () => {

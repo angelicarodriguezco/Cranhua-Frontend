@@ -44,6 +44,10 @@ export class NegocioTuesteService {
       .pipe(map(negocioTuesteDesdeApi));
   }
 
+  eliminar(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, opcionesCredenciales);
+  }
+
   obtenerActual(): Observable<NegocioTueste | undefined> {
     return this.http.get<NegocioTuesteApi>(`${this.base}/actual`, opcionesCredenciales).pipe(
       map(negocioTuesteDesdeApi),

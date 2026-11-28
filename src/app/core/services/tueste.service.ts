@@ -86,10 +86,21 @@ export class TuesteService {
       .pipe(map((tuestes) => tuestes.map((t) => tuesteDesdeApi(t))));
   }
 
-  // Sin GET /api/tuestes/{id} en el backend todavía
-  obtener(id: string): Observable<Tueste | null> {
-    void id;
-    return of(null);
+  // No hay GET /api/tuestes/{id}: se busca entre los tuestes de cada lote del tostador.
+  // El lote trae los kg por tostar sin contar este tueste, para validar la edición.
+  obtener(id: string): Observable<{ tueste: Tueste; lote: LoteConKgPorTostar } | null> {
+    return this.lotesConTuestes().pipe(
+      map((lotes) => {
+        for (const { lote, tuestes } of lotes) {
+          const tueste = tuestes.find((t) => t.id === id);
+          if (tueste) {
+            const otros = tuestes.filter((t) => t.id !== id);
+            return { tueste, lote: { ...lote, kgPorTostar: kgPorTostar(lote, otros) } };
+          }
+        }
+        return null;
+      }),
+    );
   }
 
   registrar(nuevo: NuevoTueste): Observable<Tueste> {
@@ -115,24 +126,32 @@ export class TuesteService {
   }
 
   lotesConKgPorTostar(): Observable<LoteConKgPorTostar[]> {
-    return this.lotesComprados().pipe(
-      switchMap(({ lotes }) => {
-        if (lotes.length === 0) {
-          return of([]);
-        }
-        return forkJoin(
-          lotes.map((lote) =>
-            this.tuestesDelLote(lote.id).pipe(
-              map((tuestes) => ({ ...lote, kgPorTostar: kgPorTostar(lote, tuestes) })),
-            ),
-          ),
-        ).pipe(map((conKg) => conKg.filter((lote) => lote.kgPorTostar > 0)));
-      }),
+    return this.lotesConTuestes().pipe(
+      map((lotes) =>
+        lotes
+          .map(({ lote, tuestes }) => ({ ...lote, kgPorTostar: kgPorTostar(lote, tuestes) }))
+          .filter((lote) => lote.kgPorTostar > 0),
+      ),
     );
   }
 
+  private lotesConTuestes(): Observable<{ lote: LoteComprado; tuestes: Tueste[] }[]> {
+    return this.lotesComprados().pipe(
+      switchMap(({ lotes }) =>
+        lotes.length === 0
+          ? of([])
+          : forkJoin(
+              lotes.map((lote) =>
+                this.tuestesDelLote(lote.id).pipe(map((tuestes) => ({ lote, tuestes }))),
+              ),
+            ),
+      ),
+    );
+  }
+
+  // 400: errores por campo; 409: el backend rechaza el cambio por pedidos de cafeterías
   private errorTueste(error: HttpErrorResponse): ErrorTueste {
-    if (error.status === 400) {
+    if (error.status === 400 || error.status === 409) {
       return {
         mensaje: error.error?.mensaje ?? ERROR_TUESTE,
         errores: error.error?.errores ?? {},

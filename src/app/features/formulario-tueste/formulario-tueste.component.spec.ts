@@ -75,6 +75,7 @@ describe('FormularioTuesteComponent', () => {
     id: string | null,
     lote: string | null = null,
     lotes: LoteConKgPorTostar[] = LOTES,
+    encontrado: { tueste: Tueste; lote: LoteConKgPorTostar } | null = null,
   ): Promise<void> {
     tuesteService = jasmine.createSpyObj<TuesteService>('TuesteService', [
       'lotesConKgPorTostar',
@@ -85,7 +86,7 @@ describe('FormularioTuesteComponent', () => {
     tuesteService.lotesConKgPorTostar.and.returnValue(of(lotes));
     tuesteService.registrar.and.returnValue(of(TUESTE_GUARDADO));
     tuesteService.actualizar.and.returnValue(of(TUESTE_GUARDADO));
-    tuesteService.obtener.and.returnValue(of(null));
+    tuesteService.obtener.and.returnValue(of(encontrado));
 
     await TestBed.configureTestingModule({
       imports: [FormularioTuesteComponent],
@@ -316,5 +317,41 @@ describe('FormularioTuesteComponent', () => {
     await crear('no-existe');
     expect(pagina.querySelector('form')).toBeNull();
     expect(pagina.textContent).toContain('No encontramos ese tueste');
+  });
+
+  describe('al editar', () => {
+    beforeEach(() => crear('tu-nuevo', null, LOTES, { tueste: TUESTE_GUARDADO, lote: LOTES[0] }));
+
+    it('reutiliza el formulario de registro con los datos reales del tueste', () => {
+      expect(campo('h1').textContent).toBe('Editar tueste');
+      const lote = campo<HTMLSelectElement>('#lote-tueste');
+      expect(lote.disabled).toBeTrue();
+      expect(lote.selectedOptions[0].textContent).toContain('CRH-2026-0101');
+      expect(nivelElegido()).toBe('Oscuro');
+      expect(tuesteService.lotesConKgPorTostar).not.toHaveBeenCalled();
+    });
+
+    it('valida el peso verde contra los kg del lote sin contar este tueste', () => {
+      escribir('#peso-verde', '34');
+      enviar();
+
+      expect(errores()).toContain('El lote tiene 33 kg; el peso verde no puede ser mayor.');
+      expect(tuesteService.actualizar).not.toHaveBeenCalled();
+    });
+
+    it('muestra el rechazo del backend por pedidos de cafeterías', () => {
+      const mensaje = 'El peso tostado no puede ser menor a los kg ya pedidos por cafeterías.';
+      tuesteService.actualizar.and.returnValue(throwError(() => ({ mensaje, errores: {} })));
+
+      escribir('#peso-tostado', '1');
+      enviar();
+
+      expect(tuesteService.actualizar).toHaveBeenCalledWith(
+        'tu-nuevo',
+        jasmine.objectContaining({ pesoTostadoKg: 1 }),
+      );
+      expect(campo('[role="alert"]').textContent!.trim()).toBe(mensaje);
+      expect(dialogo().open).toBeFalse();
+    });
   });
 });

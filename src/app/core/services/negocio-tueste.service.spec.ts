@@ -56,6 +56,7 @@ describe('NegocioTuesteService', () => {
       id: 'n-volcan',
       descripcion: 'Perfiles claros y medios.',
       portadaUrl: null,
+      historialTrazabilidad: null,
     });
   });
 
@@ -76,6 +77,27 @@ describe('NegocioTuesteService', () => {
     expect(request.method).toBe('POST');
     expect(request.withCredentials).toBeTrue();
     expect((request.body as FormData).get('archivo')).toEqual(archivo);
+  });
+
+  it('elimina el negocio con DELETE', () => {
+    let completado = false;
+    servicio.eliminar('n-volcan').subscribe({ complete: () => (completado = true) });
+
+    const peticion = http.expectOne(`${URL_TOSTADORES}/n-volcan`);
+    expect(peticion.request.method).toBe('DELETE');
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush(null, { status: 204, statusText: 'No Content' });
+    expect(completado).toBeTrue();
+  });
+
+  it('trae el historial de trazabilidad del negocio actual', () => {
+    const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0101' };
+    let actual: NegocioTueste | undefined;
+    servicio.obtenerActual().subscribe((negocio) => (actual = negocio));
+    http
+      .expectOne(`${URL_TOSTADORES}/actual`)
+      .flush({ ...NEGOCIO_API, historialTrazabilidad: historial });
+    expect(actual?.historialTrazabilidad).toEqual(historial);
   });
 
   it('con 404 devuelve undefined y propaga los demás errores', () => {

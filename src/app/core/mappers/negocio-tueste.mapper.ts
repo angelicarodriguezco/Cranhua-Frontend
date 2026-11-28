@@ -17,6 +17,7 @@ export function negocioTuesteDesdeApi(api: NegocioTuesteApi): NegocioTueste {
     canton: { nombre: api.canton, provincia: api.provincia },
     estilos: api.estilos.map(nivelTuesteDesdeApi),
     portadaUrl: api.portadaUrl,
+    historialTrazabilidad: api.historialTrazabilidad ?? null,
   };
 }
 

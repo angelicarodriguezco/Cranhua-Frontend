@@ -20,6 +20,7 @@ import {
   EstiloTueste,
   NegocioTueste,
 } from '../../core/models/negocio-tueste.model';
+import { HistorialTrazabilidad } from '../../core/models/historial-trazabilidad.model';
 import { injectCantones } from '../../core/services/canton.service';
 import { DashboardTostadorService } from '../../core/services/dashboard-tostador.service';
 import { NegocioTuesteService } from '../../core/services/negocio-tueste.service';
@@ -40,10 +41,12 @@ export const RUTA_ONBOARDING_TOSTADOR = '/onboarding-tostador';
 export const DESCRIPCION_ELIMINAR_NEGOCIO =
   'Eliminar tu negocio borra su perfil público. Tu cuenta de Cránhua sigue activa.';
 
-export const AVISO_ELIMINAR_NEGOCIO =
-  'Eliminar tu negocio no borra los códigos de trazabilidad de los lotes que ya tostaste, pero ya no vas a poder editar tu información ni generar nuevos tuestes.';
-
-export const ELIMINAR_NO_DISPONIBLE = 'Todavía no se puede eliminar el negocio desde acá.';
+export function avisoEliminarNegocio(historial?: HistorialTrazabilidad | null): string | null {
+  if (!historial?.tieneHistorial) {
+    return null;
+  }
+  return `Este negocio ya tiene lotes con código de trazabilidad visible para consumidores (por ejemplo ${historial.codigoEjemplo}). Eliminar tu negocio no borra esos códigos, pero ya no vas a poder editar tu información ni registrar nuevos tuestes.`;
+}
 
 type Campo = keyof FormularioNegocio['controls'];
 type Modo = 'vista' | 'edicion';
@@ -87,7 +90,6 @@ export class MiNegocioComponent implements OnDestroy {
   protected readonly tema = this.dashboard.tema;
   protected readonly estilos = ESTILOS_TUESTE;
   protected readonly descripcionEliminar = DESCRIPCION_ELIMINAR_NEGOCIO;
-  protected readonly avisoEliminar = AVISO_ELIMINAR_NEGOCIO;
   protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
 
   protected readonly formulario = crearFormularioNegocio();
@@ -111,6 +113,8 @@ export class MiNegocioComponent implements OnDestroy {
   protected readonly noEncontrado = signal(false);
   protected readonly intentoGuardar = signal(false);
   protected readonly modalEliminarAbierto = signal(false);
+  // Solo GET /actual trae el historial; el PATCH no, así que se fija al cargar
+  protected readonly avisoEliminar = signal<string | null>(null);
   protected readonly portadaUrl = signal<string | null>(null);
   protected readonly errorPortada = signal<string | null>(null);
   protected readonly guardando = signal(false);
@@ -143,6 +147,7 @@ export class MiNegocioComponent implements OnDestroy {
           return;
         }
         this.aplicar(negocio);
+        this.avisoEliminar.set(avisoEliminarNegocio(negocio.historialTrazabilidad));
       },
       error: (error: unknown) => this.error.set(mensajeDeError(error)),
     });
@@ -272,10 +277,17 @@ export class MiNegocioComponent implements OnDestroy {
     this.modalEliminarAbierto.set(false);
   }
 
-  // El backend todavía no tiene endpoint para eliminar el negocio
   protected confirmarEliminar(): void {
     this.modalEliminarAbierto.set(false);
-    this.error.set(ELIMINAR_NO_DISPONIBLE);
+    const actual = this.negocio();
+    if (!actual) {
+      return;
+    }
+    this.error.set(null);
+    this.negocioService.eliminar(actual.id).subscribe({
+      next: () => this.irAlRegistro(),
+      error: (error: unknown) => this.error.set(mensajeDeError(error)),
+    });
   }
 
   protected irAlRegistro(): void {

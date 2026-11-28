@@ -1,3 +1,4 @@
+import { HistorialTrazabilidad } from './historial-trazabilidad.model';
 import { NivelTuesteApi } from './tueste.model';
 
 export interface Coordenada {
@@ -26,9 +27,10 @@ export interface NegocioTueste {
   canton: Pick<Canton, 'nombre' | 'provincia'>;
   estilos: EstiloTueste[];
   portadaUrl: string | null;
+  historialTrazabilidad?: HistorialTrazabilidad | null;
 }
 
-export type DatosNegocioTueste = Omit<NegocioTueste, 'id' | 'portadaUrl'>;
+export type DatosNegocioTueste = Omit<NegocioTueste, 'id' | 'portadaUrl' | 'historialTrazabilidad'>;
 
 export interface NegocioTuesteApi {
   id: string;
@@ -42,9 +44,10 @@ export interface NegocioTuesteApi {
   provincia: string;
   estilos: NivelTuesteApi[];
   portadaUrl: string | null;
+  historialTrazabilidad?: HistorialTrazabilidad;
 }
 
 export type NegocioTuesteRequestApi = Omit<
   NegocioTuesteApi,
-  'id' | 'cuentaId' | 'portadaUrl' | 'descripcion'
+  'id' | 'cuentaId' | 'portadaUrl' | 'descripcion' | 'historialTrazabilidad'
 > & { descripcion: string };

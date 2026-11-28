@@ -132,6 +132,7 @@ export class FormularioTuesteComponent {
   protected readonly lotes = signal<LoteConKgPorTostar[]>([]);
   private readonly errorApiPesoVerde = signal<string | null>(null);
   private readonly errorApiPesoTostado = signal<string | null>(null);
+  protected readonly errorApi = signal<string | null>(null);
 
   protected readonly formulario = crearFormularioTueste(
     (loteId) => this.lotes().find((l) => l.id === loteId)?.kgPorTostar ?? null,
@@ -157,11 +158,13 @@ export class FormularioTuesteComponent {
 
   constructor() {
     if (this.tuesteId) {
-      this.tuesteService.obtener(this.tuesteId).subscribe((tueste) => {
-        if (!tueste) {
+      this.tuesteService.obtener(this.tuesteId).subscribe((encontrado) => {
+        if (!encontrado) {
           this.noEncontrado.set(true);
           return;
         }
+        const { tueste, lote } = encontrado;
+        this.lotes.set([lote]);
         this.formulario.setValue({
           loteId: tueste.loteId,
           nivel: tueste.nivel,
@@ -206,6 +209,7 @@ export class FormularioTuesteComponent {
     }
     this.errorApiPesoVerde.set(null);
     this.errorApiPesoTostado.set(null);
+    this.errorApi.set(null);
     const { loteId, nivel, pesoVerdeKg, pesoTostadoKg, fecha, notas } =
       this.formulario.getRawValue();
     const datos = {
@@ -226,6 +230,7 @@ export class FormularioTuesteComponent {
       error: (error: ErrorTueste) => {
         this.errorApiPesoVerde.set(error.errores['pesoVerdeKg'] ?? null);
         this.errorApiPesoTostado.set(error.errores['pesoTostadoKg'] ?? null);
+        this.errorApi.set(Object.keys(error.errores).length ? null : error.mensaje);
       },
     });
   }

@@ -320,14 +320,16 @@ describe('MisTostadosComponent', () => {
         expect(editor().querySelector('#editar-merma')!.textContent!.trim()).toBe('15%');
       });
 
-      it('valida los pesos contra el lote', () => {
-        escribir('#editar-peso-verde', '61');
+      it('valida el peso verde contra el lote sin contar este tueste', () => {
+        // 60 kg del lote menos los 15 kg del otro tueste
+        escribir('#editar-peso-verde', '46');
         guardar();
 
         expect(editor().open).toBeTrue();
         expect(editor().querySelector('.campo__error')!.textContent!.trim()).toBe(
-          'El lote tiene 60 kg; el peso verde no puede ser mayor.',
+          'El lote tiene 45 kg; el peso verde no puede ser mayor.',
         );
+        expect(tuesteService.actualizar).not.toHaveBeenCalled();
       });
 
       it('muestra errores de peso del API al guardar', () => {
@@ -349,6 +351,17 @@ describe('MisTostadosComponent', () => {
         );
         expect(mensajes).toContain('El peso verde supera el disponible del lote.');
         expect(mensajes).toContain('El peso tostado no puede superar el verde.');
+      });
+
+      it('muestra en el formulario el rechazo del backend por pedidos de cafeterías', () => {
+        const mensaje = 'El peso tostado no puede ser menor a los kg ya pedidos por cafeterías.';
+        tuesteService.actualizar.and.returnValue(throwError(() => ({ mensaje, errores: {} })));
+
+        escribir('#editar-peso-tostado', '1');
+        guardar();
+
+        expect(editor().open).toBeTrue();
+        expect(editor().querySelector('[role="alert"]')!.textContent!.trim()).toBe(mensaje);
       });
 
       it('guarda, cierra el popup y actualiza la fila', () => {

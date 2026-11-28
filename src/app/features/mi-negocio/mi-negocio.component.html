@@ -335,7 +335,7 @@
 @if (modalEliminarAbierto()) {
   <app-modal-confirmacion
     [nombre]="negocio()?.nombre"
-    [aviso]="avisoEliminar"
+    [aviso]="avisoEliminar()"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />
