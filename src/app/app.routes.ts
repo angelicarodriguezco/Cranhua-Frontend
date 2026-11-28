@@ -32,7 +32,6 @@ import { RegistrarCafeteriaComponent } from './features/registrar-cafeteria/regi
 import { RegistrarCosechaComponent } from './features/registrar-cosecha/registrar-cosecha.component';
 import { RegistrarFincaComponent } from './features/registrar-finca/registrar-finca.component';
 import { RegistroComponent } from './features/registro/registro.component';
-import { PaginaMockComponent } from './shared/components/pagina-mock/pagina-mock.component';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -84,11 +83,7 @@ export const routes: Routes = [
           { path: 'fincas', component: MisFincasComponent },
           { path: 'fincas/registrar', component: RegistrarFincaComponent },
           { path: 'fincas/:id', component: DetalleFincaComponent },
-          {
-            path: 'fincas/:id/editar',
-            component: PaginaMockComponent,
-            data: { title: 'Editar finca' },
-          },
+          { path: 'fincas/:id/editar', component: RegistrarFincaComponent },
           { path: 'registrar-cosecha', component: RegistrarCosechaComponent },
           { path: 'cosechas/:id/editar', component: RegistrarCosechaComponent },
           { path: 'historial', component: HistorialCafetaleroComponent },

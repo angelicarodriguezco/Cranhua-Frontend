@@ -103,6 +103,8 @@ export function crearFormularioDatosCosecha(
 export class PasoDatosCosechaComponent {
   readonly valorInicial = input<Partial<DatosPasoCosecha> | null>(null);
   readonly erroresServidor = input<Record<string, string>>({});
+  /** Al editar, la cosecha no cambia de finca. */
+  readonly fincaBloqueada = input(false);
 
   readonly continuar = output<DatosPasoCosecha>();
   readonly cancelar = output<void>();
@@ -166,6 +168,15 @@ export class PasoDatosCosechaComponent {
 
   constructor() {
     this.precargarProcesoPorDefecto();
+
+    effect(() => {
+      const finca = this.formulario.controls.fincaId;
+      if (this.fincaBloqueada()) {
+        finca.disable();
+      } else {
+        finca.enable();
+      }
+    });
 
     effect(() => {
       const inicial = this.valorInicial();

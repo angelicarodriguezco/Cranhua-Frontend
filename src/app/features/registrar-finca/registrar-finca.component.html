@@ -3,9 +3,15 @@
 <main class="contenido">
   <header class="encabezado">
     <div>
-      <h1 class="encabezado__titulo">Registrar finca</h1>
-      @if (paso() !== 'confirmacion') {
-        <p class="encabezado__texto">Dibujá el perímetro de tu nueva finca sobre el mapa.</p>
+      <h1 class="encabezado__titulo">{{ modoEdicion ? 'Editar finca' : 'Registrar finca' }}</h1>
+      @if (paso() !== 'confirmacion' && !errorAcceso()) {
+        <p class="encabezado__texto">
+          {{
+            modoEdicion
+              ? 'Cambiá los datos o ajustá el perímetro de tu finca sobre el mapa.'
+              : 'Dibujá el perímetro de tu nueva finca sobre el mapa.'
+          }}
+        </p>
       }
     </div>
 
@@ -17,7 +23,14 @@
     </button>
   </header>
 
-  @if (paso() === 'confirmacion') {
+  @if (errorAcceso(); as error) {
+    <section class="vidrio sin-acceso" role="alert">
+      <p>{{ error }}</p>
+      <a routerLink="/cafetalero/fincas" class="sin-acceso__enlace">Volver a Mis fincas</a>
+    </section>
+  } @else if (cargando()) {
+    <p class="encabezado__texto">Cargando la finca…</p>
+  } @else if (paso() === 'confirmacion') {
     <app-confirmacion-finca
       class="vidrio confirmacion"
       [finca]="registrada()!"
@@ -47,10 +60,12 @@
     <!-- Dibujo y conflicto comparten el mapa para no perder el zoom al corregir -->
     <section class="editor">
       <app-mapa-finca
+        #mapa
         class="editor__mapa"
         [(perimetro)]="perimetro"
         [(pin)]="pin"
         [conflicto]="conflicto()"
+        [encuadre]="original()?.perimetro ?? null"
       />
 
       @if (conflicto(); as finca) {
@@ -59,7 +74,7 @@
             <svg class="icono-alerta" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M12 3 1.5 21h21L12 3Zm-1 6h2v6h-2V9Zm0 8h2v2h-2v-2Z" />
             </svg>
-            No pudimos registrar la finca
+            {{ modoEdicion ? 'No pudimos guardar los cambios' : 'No pudimos registrar la finca' }}
           </h2>
           <p>
             Tu dibujo se cruza con <strong>{{ finca.nombre }}</strong
@@ -87,6 +102,9 @@
           [intentoGuardar]="intentoGuardar()"
           [guardando]="guardando()"
           [erroresServidor]="erroresServidor()"
+          [erroresCampo]="erroresCampo()"
+          [conDuenos]="!modoEdicion"
+          [etiquetaGuardar]="modoEdicion ? 'Guardar cambios' : 'Guardar finca'"
           (guardar)="guardar()"
         />
       }

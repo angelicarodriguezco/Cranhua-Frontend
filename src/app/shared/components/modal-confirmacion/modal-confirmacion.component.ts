@@ -29,6 +29,7 @@ export class ModalConfirmacionComponent implements OnDestroy {
   readonly aviso = input<string | null>(null);
   readonly etiquetaCancelar = input('Cancelar');
   readonly etiquetaConfirmar = input('Sí, entiendo. Eliminar');
+  readonly procesando = input(false);
 
   protected readonly tituloFinal = computed(() => {
     const titulo = this.titulo();

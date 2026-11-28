@@ -1,7 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { NEVER, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
@@ -264,5 +264,200 @@ describe('RegistrarFincaComponent', () => {
     expect(componente['perimetro']()).toEqual([]);
     expect(componente['formulario'].controls.nombre.value).toBe('');
     expect(pagina.textContent).toContain('Detalles de tu finca');
+  });
+});
+
+describe('RegistrarFincaComponent en edición', () => {
+  let fixture: ComponentFixture<RegistrarFincaComponent>;
+  let componente: RegistrarFincaComponent;
+  let pagina: HTMLElement;
+  let http: HttpTestingController;
+
+  const GUARDADA: FincaResponseApi = {
+    id: 'f-1',
+    nombre: 'Finca La Catalina',
+    descripcion: 'Café de altura',
+    zonaCafetalera: 'Tarrazú',
+    perimetro: LIBRE,
+    ubicacion: { lat: 9.6705, lng: -84.0395 },
+    canton: 'Tarrazú',
+    provincia: 'San José',
+    areaHectareas: 1.2,
+    duenos: [RODRIGO],
+  };
+
+  async function abrir(seccion: string | null = null): Promise<void> {
+    await TestBed.configureTestingModule({
+      imports: [RegistrarFincaComponent],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: GoogleMapsService, useValue: { apiCargada: NEVER } },
+        { provide: CafeteriaService, useValue: { obtenerActual: () => of(undefined) } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: convertToParamMap({ id: 'f-1' }),
+              queryParamMap: convertToParamMap(seccion ? { seccion } : {}),
+            },
+          },
+        },
+      ],
+    }).compileComponents();
+
+    conSesionDeEjemplo();
+    http = TestBed.inject(HttpTestingController);
+    fixture = TestBed.createComponent(RegistrarFincaComponent);
+    responderCantones();
+    componente = fixture.componentInstance;
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+  }
+
+  function cargar() {
+    http.expectOne({ method: 'GET', url: `${BASE}/f-1` }).flush(GUARDADA);
+    fixture.detectChanges();
+  }
+
+  function guardar() {
+    [...pagina.querySelectorAll('button')]
+      .find((b) => b.textContent?.includes('Guardar cambios'))!
+      .click();
+    fixture.detectChanges();
+  }
+
+  afterEach(() => {
+    http.verify();
+    localStorage.removeItem(CLAVE_TEMA);
+  });
+
+  it('carga la finca real en el formulario y no muestra el paso de dueños', async () => {
+    await abrir();
+    cargar();
+
+    expect(pagina.querySelector('.encabezado__titulo')?.textContent).toBe('Editar finca');
+    expect(pagina.querySelector<HTMLInputElement>('#nombre-finca')?.value).toBe(
+      'Finca La Catalina',
+    );
+    expect(pagina.querySelector<HTMLTextAreaElement>('#descripcion-finca')?.value).toBe(
+      'Café de altura',
+    );
+    expect(componente['perimetro']()).toEqual(LIBRE);
+    expect(pagina.textContent).not.toContain('Dueños adicionales');
+    expect(pagina.textContent).toContain('Guardar cambios');
+  });
+
+  it('con ?seccion=perimetro baja hasta el mapa', async () => {
+    const scroll = spyOn(Element.prototype, 'scrollIntoView');
+    await abrir('perimetro');
+    cargar();
+    await fixture.whenStable();
+
+    expect(scroll).toHaveBeenCalled();
+  });
+
+  it('manda solo los campos cambiados y vuelve al detalle', async () => {
+    await abrir();
+    cargar();
+    const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    componente['formulario'].controls.nombre.setValue('Finca La Catalina Alta');
+    fixture.detectChanges();
+    guardar();
+
+    const peticion = http.expectOne({ method: 'PATCH', url: `${BASE}/f-1` });
+    expect(peticion.request.withCredentials).toBeTrue();
+    expect(peticion.request.body).toEqual({ nombre: 'Finca La Catalina Alta' });
+    peticion.flush({ ...GUARDADA, nombre: 'Finca La Catalina Alta' });
+
+    expect(navegar).toHaveBeenCalledWith(['/cafetalero/fincas', 'f-1']);
+  });
+
+  it('al cambiar el perímetro lo manda en el PATCH', async () => {
+    await abrir();
+    cargar();
+    spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    const nuevo = LIBRE.map((p) => ({ lat: p.lat + 0.001, lng: p.lng }));
+    componente['perimetro'].set(nuevo);
+    fixture.detectChanges();
+    guardar();
+
+    const peticion = http.expectOne(`${BASE}/f-1`);
+    expect(peticion.request.body).toEqual({ perimetro: nuevo });
+    peticion.flush(GUARDADA);
+  });
+
+  it('muestra la superposición con los dueños de la otra finca', async () => {
+    await abrir();
+    cargar();
+    const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    componente['perimetro'].set(LIBRE.map((p) => ({ lat: p.lat, lng: p.lng + 0.001 })));
+    fixture.detectChanges();
+    guardar();
+    http.expectOne(`${BASE}/f-1`).flush(
+      {
+        mensaje: 'El terreno se sobrepone con la finca "Finca El Tucán".',
+        conflicto: {
+          fincaId: 'f-tucan',
+          nombre: 'Finca El Tucán',
+          duenos: [ANDRES],
+          perimetro: LIBRE,
+        },
+      },
+      { status: 409, statusText: 'Conflict' },
+    );
+    fixture.detectChanges();
+
+    expect(navegar).not.toHaveBeenCalled();
+    expect(pagina.querySelector('.aviso')?.textContent).toContain('se sobrepone');
+    expect(pagina.querySelector('.conflicto')?.textContent?.replace(/\s+/g, ' ')).toContain(
+      'Tu dibujo se cruza con Finca El Tucán, de Andrés Vargas Quesada.',
+    );
+  });
+
+  it('pone los errores 400 bajo su campo y el resto como mensaje general', async () => {
+    await abrir();
+    cargar();
+
+    componente['formulario'].controls.nombre.setValue('Otra');
+    fixture.detectChanges();
+    guardar();
+    http.expectOne(`${BASE}/f-1`).flush(
+      {
+        mensaje: 'Revisá los datos ingresados.',
+        errores: { nombre: 'Ese nombre ya lo usás.', canton: 'Ingresá el cantón.' },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    fixture.detectChanges();
+
+    const campoNombre = pagina.querySelector('#nombre-finca')!.parentElement!;
+    expect(campoNombre.querySelector('.campo__error')?.textContent).toContain(
+      'Ese nombre ya lo usás.',
+    );
+    const generales = pagina.querySelector('ul.campo__error')?.textContent;
+    expect(generales).toContain('Ingresá el cantón.');
+    expect(generales).not.toContain('Ese nombre ya lo usás.');
+  });
+
+  it('si no es dueño muestra el mensaje y el enlace a Mis fincas', async () => {
+    await abrir();
+    http
+      .expectOne(`${BASE}/f-1`)
+      .flush(
+        { mensaje: 'Solo un dueño de la finca puede verla.' },
+        { status: 403, statusText: 'Forbidden' },
+      );
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('.sin-acceso')?.textContent).toContain(
+      'Solo un dueño de la finca puede verla.',
+    );
+    expect(pagina.querySelector('.sin-acceso a')?.getAttribute('href')).toBe('/cafetalero/fincas');
+    expect(pagina.querySelector('app-formulario-finca')).toBeNull();
   });
 });

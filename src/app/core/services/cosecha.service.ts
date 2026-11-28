@@ -10,14 +10,37 @@ import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
 const ERROR_REGISTRO = 'No pudimos registrar la cosecha. Intentá de nuevo.';
 const ERROR_CARGA = 'No pudimos cargar la cosecha. Intentá de nuevo.';
 const ERROR_ESTADO = 'No pudimos cambiar el estado de la cosecha. Intentá de nuevo.';
-export const EDICION_NO_DISPONIBLE = 'Editar y eliminar cosechas todavía no está disponible.';
+const ERROR_ACTUALIZAR = 'No pudimos guardar los cambios de la cosecha. Intentá de nuevo.';
+const ERROR_ELIMINAR = 'No pudimos eliminar la cosecha. Intentá de nuevo.';
 
 const opcionesCredenciales = { withCredentials: true as const };
 
-function errorCosecha(error: HttpErrorResponse, porDefecto: string): ErrorCosecha {
-  return {
+function errorCosecha(
+  error: HttpErrorResponse,
+  porDefecto: string,
+  conEstado = false,
+): ErrorCosecha {
+  const fallo: ErrorCosecha = {
     mensaje: error.error?.mensaje ?? porDefecto,
     errores: error.error?.errores ?? {},
+  };
+  return conEstado ? { ...fallo, estado: error.status } : fallo;
+}
+
+function cuerpoCosecha(datos: Omit<NuevaCosecha, 'fincaId'>) {
+  return {
+    variedad: datos.variedad,
+    alturaMsnm: datos.alturaMsnm,
+    fechaInicio: datos.fechaInicio,
+    fechaFin: datos.fechaFin,
+    procesos: datos.procesos,
+    cantidadCosechadaKg: datos.cantidadTotalKg,
+    pesoTrasBeneficiadoKg: datos.pesoAntesKg,
+    pesoTrasSeleccionKg: datos.pesoTrasSeleccionKg,
+    caracolilloKg: datos.separoCaracolillo === true ? datos.pesoCaracolilloKg : null,
+    notasSabor: datos.notasCatacion,
+    puntajeSca: datos.puntajeSca,
+    precioKg: datos.precioKg,
   };
 }
 
@@ -31,26 +54,34 @@ export class CosechaService {
   }
 
   registrar(datos: NuevaCosecha): Observable<Cosecha> {
-    const cuerpo = {
-      fincaId: datos.fincaId,
-      variedad: datos.variedad,
-      alturaMsnm: datos.alturaMsnm,
-      fechaInicio: datos.fechaInicio,
-      fechaFin: datos.fechaFin,
-      procesos: datos.procesos,
-      cantidadCosechadaKg: datos.cantidadTotalKg,
-      pesoTrasBeneficiadoKg: datos.pesoAntesKg,
-      pesoTrasSeleccionKg: datos.pesoTrasSeleccionKg,
-      caracolilloKg: datos.separoCaracolillo === true ? datos.pesoCaracolilloKg : null,
-      notasSabor: datos.notasCatacion,
-      puntajeSca: datos.puntajeSca,
-      precioKg: datos.precioKg,
-    };
+    const cuerpo = { fincaId: datos.fincaId, ...cuerpoCosecha(datos) };
     return this.http.post<CosechaResponseApi>(this.base, cuerpo, opcionesCredenciales).pipe(
       map(cosechaDesdeApi),
       tap((cosecha) => this.sincronizarDashboard(cosecha)),
       catchError((error: HttpErrorResponse) =>
         throwError(() => errorCosecha(error, ERROR_REGISTRO)),
+      ),
+    );
+  }
+
+  // Reemplazo completo: el backend no deja cambiar la finca de una cosecha
+  actualizar(id: string, datos: Omit<NuevaCosecha, 'fincaId'>): Observable<Cosecha> {
+    return this.http
+      .patch<CosechaResponseApi>(`${this.base}/${id}`, cuerpoCosecha(datos), opcionesCredenciales)
+      .pipe(
+        map(cosechaDesdeApi),
+        tap((cosecha) => this.sincronizarDashboard(cosecha)),
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => errorCosecha(error, ERROR_ACTUALIZAR, true)),
+        ),
+      );
+  }
+
+  eliminar(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`, opcionesCredenciales).pipe(
+      tap(() => this.dashboard.eliminarCosechaReciente(id)),
+      catchError((error: HttpErrorResponse) =>
+        throwError(() => errorCosecha(error, ERROR_ELIMINAR, true)),
       ),
     );
   }
@@ -80,15 +111,6 @@ export class CosechaService {
         CosechaResponseApi[]
       >(`${environment.apiUrl}/api/fincas/${fincaId}/cosechas`, opcionesCredenciales)
       .pipe(map((cosechas) => cosechas.map(cosechaDesdeApi)));
-  }
-
-  // Pendiente: el backend todavía no tiene PATCH ni DELETE de cosechas (CP3-114); se conectan en CP3-75
-  actualizar(): Observable<Cosecha> {
-    return throwError((): ErrorCosecha => ({ mensaje: EDICION_NO_DISPONIBLE, errores: {} }));
-  }
-
-  eliminar(): Observable<void> {
-    return throwError((): ErrorCosecha => ({ mensaje: EDICION_NO_DISPONIBLE, errores: {} }));
   }
 
   private sincronizarDashboard(cosecha: Cosecha): void {

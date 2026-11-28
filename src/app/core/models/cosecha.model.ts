@@ -100,4 +100,5 @@ export interface CosechaResponseApi {
 export interface ErrorCosecha {
   mensaje: string;
   errores: Record<string, string>;
+  estado?: number;
 }

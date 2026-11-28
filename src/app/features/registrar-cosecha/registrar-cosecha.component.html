@@ -25,6 +25,7 @@
         <app-paso-datos-cosecha
           [valorInicial]="valorInicialPaso1()"
           [erroresServidor]="erroresServidor()"
+          [fincaBloqueada]="modoEdicion()"
           (continuar)="onContinuarPaso1($event)"
           (cancelar)="onCancelarPaso1()"
         />
@@ -43,7 +44,7 @@
         <section class="panel zona-edicion">
           <app-zona-peligro
             accion="Eliminar cosecha"
-            descripcion="Al eliminar esta cosecha se perderá el registro de forma permanente. Esta acción no se puede deshacer."
+            descripcion="La cosecha deja de aparecer en tu finca y en Explorar, y se rechazan sus solicitudes pendientes. Si ya tiene lotes comprados no se puede eliminar, pero podés retirarla."
             (confirmar)="abrirModalEliminar()"
           />
         </section>
@@ -72,7 +73,7 @@
   <app-modal-confirmacion
     tipo="cosecha"
     [nombre]="nombreAEliminar()"
-    [aviso]="avisoEliminar()"
+    [procesando]="eliminando()"
     (confirmar)="onConfirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

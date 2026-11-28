@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { provideRouter, Router, RouterLink } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { FINCAS_REGISTRADAS, USUARIOS } from '../../core/mocks/finca.mock';
 import { Cosecha } from '../../core/models/cosecha.model';
@@ -12,7 +12,7 @@ import { CosechaService } from '../../core/services/cosecha.service';
 import { FincaService } from '../../core/services/finca.service';
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { cosechaDePrueba } from '../../core/testing/cosechas-de-prueba';
-import { AVISO_ELIMINAR_FINCA, DetalleFincaComponent } from './detalle-finca.component';
+import { DetalleFincaComponent } from './detalle-finca.component';
 import { conSesionDeEjemplo } from '../../core/testing/sesion-de-ejemplo';
 
 const SIN_CUENTA = 'No encontramos una cuenta de cafetalero con ese correo.';
@@ -38,7 +38,7 @@ const fincaServiceFalso = {
       finca: { ...finca, duenosAdicionales: [...finca.duenosAdicionales, usuario] },
     });
   },
-  eliminar: () => of(true),
+  eliminar: () => of(undefined),
 };
 
 const COSECHAS_ESPERANZA: Cosecha[] = [
@@ -202,7 +202,7 @@ describe('DetalleFincaComponent', () => {
       .map((el) => el.injector.get(RouterLink).href);
     expect(rutas).toEqual([
       '/cafetalero/fincas/f-la-esperanza/editar',
-      '/cafetalero/fincas/f-la-esperanza/editar',
+      '/cafetalero/fincas/f-la-esperanza/editar?seccion=perimetro',
       '/cafetalero/cosechas/c-le-caturra/editar',
       '/cafetalero/cosechas/c-le-catuai/editar',
     ]);
@@ -215,10 +215,23 @@ describe('DetalleFincaComponent', () => {
     );
   });
 
+  it('la zona de peligro explica qué pasa según la cantidad de dueños', async () => {
+    let pagina = await abrir('f-la-esperanza');
+    expect(pagina.querySelector('app-zona-peligro')?.textContent).toContain(
+      'Vas a dejar de ser dueño de esta finca. Los demás dueños la conservan.',
+    );
+
+    pagina = await abrir('f-el-mirador');
+    expect(pagina.querySelector('app-zona-peligro')?.textContent).toContain(
+      'La finca y sus cosechas dejan de aparecer en tu cuenta, en el mapa y en Explorar. Los códigos de lotes ya vendidos siguen consultables.',
+    );
+  });
+
   it('"Eliminar finca" abre el modal; cancelar lo cierra y confirmar elimina y vuelve a Mis fincas', async () => {
     const pagina = await abrir('f-la-esperanza');
     const fincaService = TestBed.inject(FincaService);
-    const eliminar = spyOn(fincaService, 'eliminar').and.callThrough();
+    const respuesta = new Subject<void>();
+    const eliminar = spyOn(fincaService, 'eliminar').and.returnValue(respuesta);
     const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
 
     pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
@@ -226,7 +239,7 @@ describe('DetalleFincaComponent', () => {
     expect(pagina.querySelector('.modal__titulo')?.textContent).toBe(
       '¿Eliminar Finca La Esperanza?',
     );
-    expect(pagina.querySelector('.modal__aviso')?.textContent).toContain(AVISO_ELIMINAR_FINCA);
+    expect(pagina.querySelector('.modal__aviso')).toBeNull();
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
       'rgb(255, 255, 255)',
     );
@@ -242,7 +255,83 @@ describe('DetalleFincaComponent', () => {
     harness.detectChanges();
 
     expect(eliminar).toHaveBeenCalledWith('f-la-esperanza');
+    expect(pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')?.disabled).toBeTrue();
+    expect(navegar).not.toHaveBeenCalled();
+
+    respuesta.next();
+    respuesta.complete();
+    harness.detectChanges();
     expect(navegar).toHaveBeenCalledWith('/cafetalero/fincas');
+  });
+
+  describe('aviso de historial al eliminar', () => {
+    async function abrirModal(
+      id: string,
+      historialTrazabilidad: { tieneHistorial: boolean; codigoEjemplo: string | null },
+    ): Promise<HTMLElement> {
+      const finca = FINCAS_REGISTRADAS.find((f) => f.id === id)!;
+      spyOn(TestBed.inject(FincaService), 'obtener').and.returnValue(
+        of({ ...finca, historialTrazabilidad }),
+      );
+      const pagina = await abrir(id);
+      pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+      harness.detectChanges();
+      return pagina;
+    }
+
+    it('como único dueño y con historial muestra el código que manda el backend', async () => {
+      const pagina = await abrirModal('f-el-mirador', {
+        tieneHistorial: true,
+        codigoEjemplo: 'CRH-2026-0413',
+      });
+
+      expect(pagina.querySelector('.modal__aviso')?.textContent?.trim()).toBe(
+        'Esta finca tiene lotes con código de trazabilidad, como CRH-2026-0413, que ya están en bolsas de café. Eliminarla no borra esos códigos: van a seguir consultables para tostadores y consumidores.',
+      );
+    });
+
+    it('con otros dueños no avisa aunque haya historial', async () => {
+      const pagina = await abrirModal('f-la-esperanza', {
+        tieneHistorial: true,
+        codigoEjemplo: 'CRH-2026-0413',
+      });
+
+      expect(pagina.querySelector('app-modal-confirmacion')).not.toBeNull();
+      expect(pagina.querySelector('.modal__aviso')).toBeNull();
+    });
+
+    it('sin historial muestra el modal normal', async () => {
+      const pagina = await abrirModal('f-el-mirador', {
+        tieneHistorial: false,
+        codigoEjemplo: null,
+      });
+
+      expect(pagina.querySelector('app-modal-confirmacion')).not.toBeNull();
+      expect(pagina.querySelector('.modal__aviso')).toBeNull();
+    });
+  });
+
+  it('si el backend no deja eliminar muestra su mensaje y no navega', async () => {
+    const pagina = await abrir('f-la-esperanza');
+    spyOn(TestBed.inject(FincaService), 'eliminar').and.returnValue(
+      throwError(() => ({
+        mensaje: 'Solo un dueño de la finca puede editarla o administrarla.',
+        errores: {},
+        estado: 403,
+      })),
+    );
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+
+    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+    harness.detectChanges();
+    pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
+    harness.detectChanges();
+
+    expect(navegar).not.toHaveBeenCalled();
+    expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
+    expect(pagina.querySelector('[role="alert"]')?.textContent).toContain(
+      'Solo un dueño de la finca puede editarla o administrarla.',
+    );
   });
 
   it('avisa cuando la finca no existe', async () => {

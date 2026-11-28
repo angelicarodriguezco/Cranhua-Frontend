@@ -6,7 +6,6 @@ import { convertToParamMap, provideRouter, ActivatedRoute, Router } from '@angul
 import { of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { EDICION_NO_DISPONIBLE } from '../../core/services/cosecha.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
 import { cosechaApi } from '../../core/testing/cosechas-de-prueba';
 import { PasoDatosCosechaComponent } from './components/paso-datos-cosecha/paso-datos-cosecha.component';
@@ -299,37 +298,119 @@ describe('RegistrarCosechaComponent', () => {
     expect(pagina.querySelector('app-zona-peligro')).toBeTruthy();
   });
 
-  it('en edición, guardar avisa que todavía no está disponible', async () => {
-    await crearComponente('c-1');
-    http.expectOne(`${COSECHAS}/c-1`).flush(cosechaApi());
-    fixture.detectChanges();
+  describe('en edición', () => {
+    const BLOQUEADO = 'No se puede cambiar porque ya está en códigos impresos.';
+    const CON_LOTES =
+      'Esta cosecha ya tiene lotes comprados. Solo podés cambiar el precio y las notas de sabor.';
 
-    guardarBoton().click();
-    fixture.detectChanges();
-    guardarBoton().click();
-    fixture.detectChanges();
+    async function editar(): Promise<void> {
+      await crearComponente('c-1');
+      http.expectOne(`${COSECHAS}/c-1`).flush(cosechaApi());
+      fixture.detectChanges();
+    }
 
-    expect(pagina.querySelector('.error-general')?.textContent).toContain(EDICION_NO_DISPONIBLE);
-    expect(fixture.componentInstance['paso']()).toBe('seleccion');
-  });
+    function guardarAmbosPasos(): void {
+      guardarBoton().click();
+      fixture.detectChanges();
+      guardarBoton().click();
+      fixture.detectChanges();
+    }
 
-  it('en edición, eliminar avisa que todavía no está disponible y no navega', async () => {
-    await crearComponente('c-1');
-    http.expectOne(`${COSECHAS}/c-1`).flush(cosechaApi({ codigoLote: 'CRH-2026-0007' }));
-    fixture.detectChanges();
-    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    function abrirYConfirmarEliminar(): void {
+      pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+      fixture.detectChanges();
+      pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
+      fixture.detectChanges();
+    }
 
-    pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
-    fixture.detectChanges();
-    expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha Geisha?');
-    expect(pagina.querySelector('.modal__aviso')?.textContent).toContain('CRH-2026-0007');
+    it('deja el selector de finca deshabilitado', async () => {
+      await editar();
+      expect(pagina.querySelector<HTMLSelectElement>('#cosecha-finca')?.disabled).toBeTrue();
+    });
 
-    pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
-    fixture.detectChanges();
+    it('guarda con PATCH sin fincaId y vuelve a la finca resaltando la cosecha', async () => {
+      await editar();
+      const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
 
-    expect(navegar).not.toHaveBeenCalled();
-    expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
-    expect(pagina.querySelector('.error-general')?.textContent).toContain(EDICION_NO_DISPONIBLE);
+      guardarAmbosPasos();
+      const peticion = http.expectOne({ method: 'PATCH', url: `${COSECHAS}/c-1` });
+      expect(peticion.request.body.fincaId).toBeUndefined();
+      expect(peticion.request.body.variedad).toBe('Geisha');
+      peticion.flush(cosechaApi());
+
+      expect(navegar).toHaveBeenCalledWith(['/cafetalero/fincas', 'f-1'], {
+        queryParams: { cosecha: 'c-1' },
+      });
+    });
+
+    it('con lotes muestra el mensaje general y el error bajo el campo bloqueado', async () => {
+      await editar();
+      const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+      guardarAmbosPasos();
+      http
+        .expectOne(`${COSECHAS}/c-1`)
+        .flush(
+          { mensaje: CON_LOTES, errores: { variedad: BLOQUEADO } },
+          { status: 409, statusText: 'Conflict' },
+        );
+      fixture.detectChanges();
+
+      expect(navegar).not.toHaveBeenCalled();
+      expect(fixture.componentInstance['paso']()).toBe('datos');
+      expect(pagina.querySelector('.error-general')?.textContent).toContain(CON_LOTES);
+      expect(pagina.querySelector('app-paso-datos-cosecha')?.textContent).toContain(BLOQUEADO);
+    });
+
+    it('si no es dueño muestra el mensaje general', async () => {
+      await editar();
+      guardarAmbosPasos();
+      http
+        .expectOne(`${COSECHAS}/c-1`)
+        .flush(
+          { mensaje: 'Solo un dueño de la finca puede editar esta cosecha.' },
+          { status: 403, statusText: 'Forbidden' },
+        );
+      fixture.detectChanges();
+
+      expect(pagina.querySelector('.error-general')?.textContent).toContain(
+        'Solo un dueño de la finca puede editar esta cosecha.',
+      );
+    });
+
+    it('eliminar usa el modal normal y vuelve al detalle de la finca', async () => {
+      await editar();
+      const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+      pagina.querySelector<HTMLButtonElement>('app-zona-peligro button')!.click();
+      fixture.detectChanges();
+      expect(pagina.querySelector('.modal__titulo')?.textContent).toBe('¿Eliminar cosecha Geisha?');
+      expect(pagina.querySelector('.modal__aviso')).toBeNull();
+
+      pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')!.click();
+      fixture.detectChanges();
+      const peticion = http.expectOne({ method: 'DELETE', url: `${COSECHAS}/c-1` });
+      expect(pagina.querySelector<HTMLButtonElement>('.modal__btn--peligro')?.disabled).toBeTrue();
+      peticion.flush(null, { status: 204, statusText: 'No Content' });
+      fixture.detectChanges();
+
+      expect(navegar).toHaveBeenCalledWith(['/cafetalero/fincas', 'f-1']);
+    });
+
+    it('eliminar con lotes cierra el modal y muestra el mensaje sin navegar', async () => {
+      await editar();
+      const navegar = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+      const mensaje =
+        'No podés eliminar esta cosecha porque ya tiene lotes comprados con código de trazabilidad. Si no querés recibir más solicitudes, retirala.';
+
+      abrirYConfirmarEliminar();
+      http.expectOne(`${COSECHAS}/c-1`).flush({ mensaje }, { status: 409, statusText: 'Conflict' });
+      fixture.detectChanges();
+
+      expect(navegar).not.toHaveBeenCalled();
+      expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
+      expect(pagina.querySelector('.error-general')?.textContent).toContain(mensaje);
+    });
   });
 
   it('si la cosecha a editar no existe muestra el mensaje del backend', async () => {

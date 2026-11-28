@@ -38,8 +38,13 @@
     >
       {{ etiquetaCancelar() }}
     </button>
-    <button type="button" class="modal__btn modal__btn--peligro" (click)="onConfirmar()">
-      {{ etiquetaConfirmar() }}
+    <button
+      type="button"
+      class="modal__btn modal__btn--peligro"
+      [disabled]="procesando()"
+      (click)="onConfirmar()"
+    >
+      {{ procesando() ? 'Eliminando…' : etiquetaConfirmar() }}
     </button>
   </div>
 </div>

@@ -84,6 +84,7 @@ export class RegistrarCosechaComponent {
   protected readonly datosPaso2 = signal<DatosPasoSeleccion | null>(null);
   protected readonly cosechaGuardada = signal<Cosecha | null>(null);
   protected readonly modalEliminarAbierto = signal(false);
+  protected readonly eliminando = signal(false);
   protected readonly guardando = signal(false);
   protected readonly publicando = signal(false);
   protected readonly erroresServidor = signal<Record<string, string>>({});
@@ -105,13 +106,6 @@ export class RegistrarCosechaComponent {
     ),
     { initialValue: null },
   );
-
-  protected readonly avisoEliminar = computed(() => {
-    const codigo = this.cosechaCargada()?.codigoLote;
-    return codigo
-      ? `Esta cosecha ya tiene el lote ${codigo}, con código de trazabilidad visible para tostadores y consumidores. Eliminar la cosecha no borra ese código, pero ya no vas a poder editar su información.`
-      : null;
-  });
 
   protected readonly nombreAEliminar = computed(() => this.cosechaCargada()?.variedad);
 
@@ -223,32 +217,43 @@ export class RegistrarCosechaComponent {
     this.erroresServidor.set({});
     this.errorGeneral.set(null);
 
-    const guardar = this.modoEdicion()
-      ? this.cosechaService.actualizar()
-      : this.cosechaService.registrar(payload);
+    const id = this.cosechaId();
+    if (id) {
+      const { fincaId, ...cambios } = payload;
+      this.cosechaService.actualizar(id, cambios).subscribe({
+        next: () =>
+          void this.router.navigate(['/cafetalero/fincas', fincaId], {
+            queryParams: { cosecha: id },
+          }),
+        error: (error: ErrorCosecha) => this.mostrarErrores(error),
+      });
+      return;
+    }
 
-    guardar.subscribe({
+    this.cosechaService.registrar(payload).subscribe({
       next: (guardada) => {
         this.guardando.set(false);
         this.cosechaGuardada.set(guardada);
         this.paso.set('exito');
         this.scrollAlInicio();
       },
-      error: (error: ErrorCosecha) => {
-        this.guardando.set(false);
-        const errores = erroresEnFormulario(error.errores);
-        const campos = Object.keys(errores);
-        if (campos.length === 0) {
-          this.errorGeneral.set(error.mensaje);
-          return;
-        }
-        this.erroresServidor.set(errores);
-        if (campos.some((campo) => CAMPOS_PASO_DATOS.includes(campo))) {
-          this.paso.set('datos');
-          this.scrollAlInicio();
-        }
-      },
+      error: (error: ErrorCosecha) => this.mostrarErrores(error),
     });
+  }
+
+  // El 409 de una cosecha con lotes trae un mensaje general y los campos bloqueados
+  private mostrarErrores(error: ErrorCosecha): void {
+    this.guardando.set(false);
+    const errores = erroresEnFormulario(error.errores);
+    const campos = Object.keys(errores);
+    if (campos.length === 0 || error.estado === 409) {
+      this.errorGeneral.set(error.mensaje);
+    }
+    this.erroresServidor.set(errores);
+    if (campos.some((campo) => CAMPOS_PASO_DATOS.includes(campo))) {
+      this.paso.set('datos');
+    }
+    this.scrollAlInicio();
   }
 
   protected onRegistrarOtra(): void {
@@ -296,14 +301,30 @@ export class RegistrarCosechaComponent {
   }
 
   protected cerrarModalEliminar(): void {
-    this.modalEliminarAbierto.set(false);
+    if (!this.eliminando()) {
+      this.modalEliminarAbierto.set(false);
+    }
   }
 
   protected onConfirmarEliminar(): void {
-    this.modalEliminarAbierto.set(false);
-    this.cosechaService.eliminar().subscribe({
-      next: () => void this.router.navigateByUrl('/cafetalero/historial'),
-      error: (error: ErrorCosecha) => this.errorGeneral.set(error.mensaje),
+    const cosecha = this.cosechaCargada();
+    if (!cosecha || this.eliminando()) {
+      return;
+    }
+    this.eliminando.set(true);
+    this.errorGeneral.set(null);
+    this.cosechaService.eliminar(cosecha.id).subscribe({
+      next: () => {
+        this.eliminando.set(false);
+        this.modalEliminarAbierto.set(false);
+        void this.router.navigate(['/cafetalero/fincas', cosecha.fincaId]);
+      },
+      error: (error: ErrorCosecha) => {
+        this.eliminando.set(false);
+        this.modalEliminarAbierto.set(false);
+        this.errorGeneral.set(error.mensaje);
+        this.scrollAlInicio();
+      },
     });
   }
 }

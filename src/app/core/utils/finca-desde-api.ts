@@ -23,5 +23,6 @@ export function fincaDesdeApi(api: FincaResponseApi, usuarioId: string): Finca {
       .map((d) => usuarioDesdeNombreCompleto(d.id, d.nombreCompleto, '')),
     cosechasActivas: api.cosechasActivas,
     kgDisponibles: api.kgDisponibles == null ? undefined : Number(api.kgDisponibles),
+    historialTrazabilidad: api.historialTrazabilidad,
   };
 }

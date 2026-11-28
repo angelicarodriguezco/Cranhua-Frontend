@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 import { Cosecha, ErrorCosecha, NuevaCosecha } from '../models/cosecha.model';
 import { cosechaApi } from '../testing/cosechas-de-prueba';
 import { cosechaDesdeApi, erroresEnFormulario } from '../utils/cosecha-desde-api';
-import { CosechaService, EDICION_NO_DISPONIBLE } from './cosecha.service';
+import { CosechaService } from './cosecha.service';
 import { DashboardCafetaleroService } from './dashboard-cafetalero.service';
 
 const BASE = `${environment.apiUrl}/api/cosechas`;
@@ -29,6 +29,12 @@ function datosNueva(cambios: Partial<NuevaCosecha> = {}): NuevaCosecha {
     precioKg: 4500,
     ...cambios,
   };
+}
+
+function datosEdicion(): Omit<NuevaCosecha, 'fincaId'> {
+  const datos: Partial<NuevaCosecha> = datosNueva();
+  delete datos.fincaId;
+  return datos as Omit<NuevaCosecha, 'fincaId'>;
 }
 
 describe('CosechaService', () => {
@@ -224,12 +230,91 @@ describe('CosechaService', () => {
     ]);
   });
 
-  it('editar y eliminar todavía no están disponibles', () => {
-    const errores: ErrorCosecha[] = [];
-    servicio.actualizar().subscribe({ error: (e) => errores.push(e) });
-    servicio.eliminar().subscribe({ error: (e) => errores.push(e) });
+  it('actualizar hace PATCH con el mismo cuerpo de registrar pero sin fincaId', () => {
+    const datos = datosEdicion();
+    let guardada: Cosecha | undefined;
+    servicio.actualizar('c-1', datos).subscribe((c) => (guardada = c));
 
-    expect(errores.map((e) => e.mensaje)).toEqual([EDICION_NO_DISPONIBLE, EDICION_NO_DISPONIBLE]);
+    const peticion = http.expectOne(`${BASE}/c-1`);
+    expect(peticion.request.method).toBe('PATCH');
+    expect(peticion.request.withCredentials).toBeTrue();
+    expect(peticion.request.body).toEqual({
+      variedad: 'Geisha',
+      alturaMsnm: 1650,
+      fechaInicio: '2026-01-10',
+      fechaFin: '2026-03-15',
+      procesos: [{ proceso: 'Lavado', porcentaje: 100 }],
+      cantidadCosechadaKg: 1000,
+      pesoTrasBeneficiadoKg: 800,
+      pesoTrasSeleccionKg: 720,
+      caracolilloKg: 40,
+      notasSabor: 'Jazmín y durazno',
+      puntajeSca: 88.25,
+      precioKg: 4500,
+    });
+    peticion.flush(cosechaApi({ id: 'c-1' }));
+    expect(guardada?.id).toBe('c-1');
+  });
+
+  it('actualizar devuelve los errores 400, 409 y 404 con su estado', () => {
+    const datos = datosEdicion();
+    const errores: ErrorCosecha[] = [];
+    const fallar = (status: number, cuerpo: object) => {
+      servicio.actualizar('c-1', datos).subscribe({ error: (e) => errores.push(e) });
+      http.expectOne(`${BASE}/c-1`).flush(cuerpo, { status, statusText: '' });
+    };
+    const bloqueado = 'No se puede cambiar porque ya está en códigos impresos.';
+    fallar(400, {
+      mensaje: 'Revisá los datos ingresados.',
+      errores: { precioKg: 'El precio debe ser mayor a 0.' },
+    });
+    fallar(409, {
+      mensaje:
+        'Esta cosecha ya tiene lotes comprados. Solo podés cambiar el precio y las notas de sabor.',
+      errores: { variedad: bloqueado },
+    });
+    fallar(404, { mensaje: 'No encontramos esa cosecha.' });
+
+    expect(errores).toEqual([
+      {
+        mensaje: 'Revisá los datos ingresados.',
+        errores: { precioKg: 'El precio debe ser mayor a 0.' },
+        estado: 400,
+      },
+      {
+        mensaje:
+          'Esta cosecha ya tiene lotes comprados. Solo podés cambiar el precio y las notas de sabor.',
+        errores: { variedad: bloqueado },
+        estado: 409,
+      },
+      { mensaje: 'No encontramos esa cosecha.', errores: {}, estado: 404 },
+    ]);
+  });
+
+  it('eliminar hace DELETE y la saca del dashboard', () => {
+    const dashboard = TestBed.inject(DashboardCafetaleroService);
+    servicio.cambiarEstado('c-1', 'PUBLICADA').subscribe();
+    http.expectOne(`${BASE}/c-1/estado`).flush(cosechaApi({ id: 'c-1' }));
+
+    let terminado = false;
+    servicio.eliminar('c-1').subscribe(() => (terminado = true));
+    const peticion = http.expectOne(`${BASE}/c-1`);
+    expect(peticion.request.method).toBe('DELETE');
+    expect(peticion.request.withCredentials).toBeTrue();
+    peticion.flush(null, { status: 204, statusText: 'No Content' });
+
+    expect(terminado).toBeTrue();
+    expect(dashboard.cosechasRecientes().some((c) => c.id === 'c-1')).toBeFalse();
+  });
+
+  it('eliminar con lotes devuelve el 409 del backend', () => {
+    const mensaje =
+      'No podés eliminar esta cosecha porque ya tiene lotes comprados con código de trazabilidad. Si no querés recibir más solicitudes, retirala.';
+    let error: ErrorCosecha | undefined;
+    servicio.eliminar('c-1').subscribe({ error: (e) => (error = e) });
+    http.expectOne(`${BASE}/c-1`).flush({ mensaje }, { status: 409, statusText: 'Conflict' });
+
+    expect(error).toEqual({ mensaje, errores: {}, estado: 409 });
   });
 
   it('erroresEnFormulario pasa los campos del backend a los del formulario', () => {

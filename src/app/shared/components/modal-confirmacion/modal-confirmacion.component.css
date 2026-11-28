@@ -192,8 +192,13 @@
   font-weight: 600;
 }
 
-.modal__btn--peligro:hover {
+.modal__btn--peligro:hover:not(:disabled) {
   filter: brightness(1.12);
+}
+
+.modal__btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 @media (max-width: 480px) {

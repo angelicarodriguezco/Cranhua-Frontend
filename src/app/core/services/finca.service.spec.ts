@@ -7,6 +7,7 @@ import { USUARIO_ACTUAL } from '../mocks/finca.mock';
 import {
   Canton,
   ErrorRegistroFinca,
+  Finca,
   FincaResponseApi,
   NuevaFinca,
   ResultadoAgregarDueno,
@@ -125,6 +126,21 @@ describe('FincaService', () => {
     expect(id).toBe('f-1');
   });
 
+  it('obtener trae el historial de trazabilidad del detalle', () => {
+    let finca: Finca | undefined;
+    servicio.obtener('f-1').subscribe((f) => (finca = f));
+
+    http.expectOne(`${BASE}/f-1`).flush(
+      fincaApi({
+        historialTrazabilidad: { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0413' },
+      }),
+    );
+    expect(finca?.historialTrazabilidad).toEqual({
+      tieneHistorial: true,
+      codigoEjemplo: 'CRH-2026-0413',
+    });
+  });
+
   describe('registrar', () => {
     let resultado: ResultadoRegistro | undefined;
     let error: ErrorRegistroFinca | undefined;
@@ -182,6 +198,7 @@ describe('FincaService', () => {
       expect(error).toEqual({
         mensaje: 'Revisá los datos ingresados.',
         errores: { canton: 'Ingresá el cantón.' },
+        estado: 400,
       });
     });
 
@@ -190,7 +207,76 @@ describe('FincaService', () => {
       expect(error).toEqual({
         mensaje: 'No pudimos registrar la finca. Intentá de nuevo.',
         errores: {},
+        estado: 0,
       });
+    });
+  });
+
+  describe('actualizar', () => {
+    let resultado: ResultadoRegistro | undefined;
+    let error: ErrorRegistroFinca | undefined;
+
+    beforeEach(() => {
+      resultado = undefined;
+      error = undefined;
+      servicio.actualizar('f-1', { nombre: 'Finca La Catalina Alta' }).subscribe({
+        next: (r) => (resultado = r),
+        error: (e) => (error = e),
+      });
+    });
+
+    it('hace PATCH solo con los cambios y credenciales', () => {
+      const req = http.expectOne(`${BASE}/f-1`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.withCredentials).toBeTrue();
+      expect(req.request.body).toEqual({ nombre: 'Finca La Catalina Alta' });
+      req.flush(fincaApi({ nombre: 'Finca La Catalina Alta' }));
+      expect(resultado).toEqual({
+        registrada: true,
+        finca: fincaDesdeApi(fincaApi({ nombre: 'Finca La Catalina Alta' }), USUARIO_ACTUAL.id),
+      });
+    });
+
+    it('con 409 devuelve la finca en conflicto como al registrar', () => {
+      const conflicto = {
+        fincaId: 'f-tucan',
+        nombre: 'Finca El Tucán',
+        duenos: [{ id: 'u-andres', nombreCompleto: 'Andrés Vargas Quesada' }],
+        perimetro: PERIMETRO,
+      };
+      const mensaje = 'El terreno se sobrepone con la finca "Finca El Tucán".';
+      http
+        .expectOne(`${BASE}/f-1`)
+        .flush({ mensaje, conflicto }, { status: 409, statusText: 'Conflict' });
+      expect(resultado).toEqual({ registrada: false, conflicto, mensaje });
+    });
+
+    it('con 403 devuelve el mensaje del backend', () => {
+      const mensaje = 'Solo un dueño de la finca puede editarla o administrarla.';
+      http.expectOne(`${BASE}/f-1`).flush({ mensaje }, { status: 403, statusText: 'Forbidden' });
+      expect(error).toEqual({ mensaje, errores: {}, estado: 403 });
+    });
+  });
+
+  describe('eliminar', () => {
+    it('hace DELETE con credenciales', () => {
+      let terminado = false;
+      servicio.eliminar('f-1').subscribe(() => (terminado = true));
+
+      const req = http.expectOne(`${BASE}/f-1`);
+      expect(req.request.method).toBe('DELETE');
+      expect(req.request.withCredentials).toBeTrue();
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      expect(terminado).toBeTrue();
+    });
+
+    it('con 404 devuelve el mensaje del backend', () => {
+      let error: ErrorRegistroFinca | undefined;
+      servicio.eliminar('f-x').subscribe({ error: (e) => (error = e) });
+      http
+        .expectOne(`${BASE}/f-x`)
+        .flush({ mensaje: 'No encontramos esa finca.' }, { status: 404, statusText: 'Not Found' });
+      expect(error).toEqual({ mensaje: 'No encontramos esa finca.', errores: {}, estado: 404 });
     });
   });
 
