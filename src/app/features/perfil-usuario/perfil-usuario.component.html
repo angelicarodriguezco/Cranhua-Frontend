@@ -303,6 +303,9 @@
           accion="Eliminar mi cuenta"
           (confirmar)="abrirModalEliminar()"
         />
+        @if (errorEliminar(); as mensajeEliminar) {
+          <p class="campo__error" role="alert">{{ mensajeEliminar }}</p>
+        }
       </div>
 
       <div class="acciones">
@@ -320,7 +323,7 @@
   <app-modal-confirmacion
     tipo="cuenta"
     titulo="¿Eliminar tu cuenta?"
-    [aviso]="descripcionEliminar"
+    [aviso]="avisoEliminar()"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

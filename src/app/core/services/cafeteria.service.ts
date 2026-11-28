@@ -42,11 +42,12 @@ export class CafeteriaService {
     void portadaUrl;
     const { portadaUrl: _omitida, ...cuerpo } = cuerpoRegistro({ ...datos, portadaUrl: null });
     void _omitida;
+    // PATCH y portada no devuelven el historial: se limpia la caché para que el detalle lo traiga
     return this.http
       .patch<CafeteriaResponseApi>(`${this.base}/${id}`, cuerpo, opcionesCredenciales)
       .pipe(
         map(cafeteriaDesdeApi),
-        tap((guardada) => this.guardarCache(guardada)),
+        tap(() => this.limpiarCache()),
       );
   }
 
@@ -57,7 +58,7 @@ export class CafeteriaService {
       .post<CafeteriaResponseApi>(`${this.base}/${id}/portada`, formData, opcionesCredenciales)
       .pipe(
         map(cafeteriaDesdeApi),
-        tap((guardada) => this.guardarCache(guardada)),
+        tap(() => this.limpiarCache()),
       );
   }
 
@@ -88,8 +89,9 @@ export class CafeteriaService {
     this.actual$ = of(cafeteria).pipe(shareReplay({ bufferSize: 1, refCount: false }));
   }
 
-  eliminar(id: string): Observable<boolean> {
-    void id;
-    return of(false);
+  eliminar(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.base}/${id}`, opcionesCredenciales)
+      .pipe(tap(() => this.limpiarCache()));
   }
 }

@@ -36,6 +36,7 @@ describe('PerfilService', () => {
     ],
     portadaUrl: null,
     avatarUrl: null,
+    historialTrazabilidad: null,
   };
 
   beforeEach(() => {

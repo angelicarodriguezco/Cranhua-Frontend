@@ -64,6 +64,7 @@ export function mapearCuentaResponseAPerfil(cuenta: CuentaResponseApi): PerfilUs
     redes: mapearRedesDesdeApi(cuenta.redes ?? []),
     portadaUrl: cuenta.bannerUrl ?? null,
     avatarUrl: cuenta.fotoUrl ?? null,
+    historialTrazabilidad: cuenta.historialTrazabilidad ?? null,
   };
 }
 

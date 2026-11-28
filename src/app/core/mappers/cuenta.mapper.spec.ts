@@ -73,7 +73,14 @@ describe('cuenta.mapper', () => {
       redes: [{ tipo: 'sitio', valor: 'https://finca.cr' }],
       portadaUrl: 'https://cdn.ejemplo/banner.jpg',
       avatarUrl: 'https://cdn.ejemplo/foto.jpg',
+      historialTrazabilidad: null,
     });
+
+    const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0103' };
+    expect(
+      mapearCuentaResponseAPerfil({ ...respuesta, historialTrazabilidad: historial })
+        .historialTrazabilidad,
+    ).toEqual(historial);
 
     expect(mapearCuentaResponseACuenta(respuesta)).toEqual({
       id: respuesta.id,
