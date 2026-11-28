@@ -444,7 +444,7 @@
   <app-modal-confirmacion
     tipo="Cafetería"
     [nombre]="cafeteria()?.nombre"
-    [aviso]="avisoEliminar"
+    [aviso]="avisoEliminar()"
     (confirmar)="confirmarEliminar()"
     (cancelar)="cerrarModalEliminar()"
   />

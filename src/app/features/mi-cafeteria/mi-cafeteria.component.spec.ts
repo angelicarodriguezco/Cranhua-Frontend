@@ -13,12 +13,12 @@ import { DashboardCafeteriaService } from '../../core/services/dashboard-cafeter
 import { GoogleMapsService } from '../../core/services/google-maps.service';
 import { MenuCafeteriaService } from '../../core/services/menu-cafeteria.service';
 import { CLAVE_TEMA, TemaService } from '../../core/services/tema.service';
+import { RUTA_REGISTRAR_CAFETERIA } from '../../core/guards/cafeteria.guard';
 import {
-  AVISO_ELIMINAR_CAFETERIA,
+  avisoEliminarCafeteria,
   DESCRIPCION_ELIMINAR_CAFETERIA,
   inicialesCafeteria,
   MiCafeteriaComponent,
-  RUTA_DASHBOARD_CAFETERIA,
   RUTA_PUBLICAR_MENU,
 } from './mi-cafeteria.component';
 import { responderCantones } from '../../core/testing/cantones-de-prueba';
@@ -301,11 +301,11 @@ describe('MiCafeteriaComponent', () => {
     expect(navegar).toHaveBeenCalledWith(RUTA_PUBLICAR_MENU);
   });
 
-  it('muestra la zona de peligro y confirma la eliminación', () => {
+  it('sin historial confirma un borrado normal y lleva a Registrar cafetería', () => {
     entrarAEdicion();
     const router = TestBed.inject(Router);
     const navegar = spyOn(router, 'navigateByUrl').and.resolveTo(true);
-    const eliminar = spyOn(cafeteriaService, 'eliminar').and.returnValue(of(true));
+    const eliminar = spyOn(cafeteriaService, 'eliminar').and.returnValue(of(undefined));
 
     expect(pagina.querySelector('app-zona-peligro')).toBeTruthy();
     expect(pagina.textContent).toContain(DESCRIPCION_ELIMINAR_CAFETERIA);
@@ -313,7 +313,7 @@ describe('MiCafeteriaComponent', () => {
     boton('Eliminar cafetería').click();
     fixture.detectChanges();
     expect(campo('.modal__titulo').textContent).toBe('¿Eliminar Cafetería Café Brumas?');
-    expect(campo('.modal__aviso').textContent).toContain(AVISO_ELIMINAR_CAFETERIA);
+    expect(pagina.querySelector('.modal__aviso')).toBeNull();
     expect(getComputedStyle(pagina.querySelector('.modal__dialogo')!).backgroundColor).toBe(
       'rgb(255, 255, 255)',
     );
@@ -322,7 +322,47 @@ describe('MiCafeteriaComponent', () => {
     fixture.detectChanges();
 
     expect(eliminar).toHaveBeenCalledWith(CAFETERIA_EJEMPLO.id);
-    expect(navegar).toHaveBeenCalledWith(RUTA_DASHBOARD_CAFETERIA);
+    expect(navegar).toHaveBeenCalledWith(RUTA_REGISTRAR_CAFETERIA);
+  });
+
+  it('con historial el modal avisa con el código del detalle', () => {
+    const historial = { tieneHistorial: true, codigoEjemplo: 'CRH-2026-0101-T01' };
+    (cafeteriaService.obtenerActual as jasmine.Spy).and.returnValue(
+      of({ ...CAFETERIA_EJEMPLO, historialTrazabilidad: historial }),
+    );
+    fixture = TestBed.createComponent(MiCafeteriaComponent);
+    pagina = fixture.nativeElement;
+    fixture.detectChanges();
+
+    entrarAEdicion();
+    boton('Eliminar cafetería').click();
+    fixture.detectChanges();
+
+    expect(campo('.modal__aviso').textContent).toContain(avisoEliminarCafeteria(historial)!);
+    expect(campo('.modal__aviso').textContent).toContain('CRH-2026-0101-T01');
+  });
+
+  it('si el backend rechaza la eliminación muestra su mensaje y no navega', () => {
+    entrarAEdicion();
+    const navegar = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
+    spyOn(cafeteriaService, 'eliminar').and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 409,
+            error: { mensaje: 'No se pudo eliminar la cafetería.' },
+          }),
+      ),
+    );
+
+    boton('Eliminar cafetería').click();
+    fixture.detectChanges();
+    campo<HTMLButtonElement>('.modal__btn--peligro').click();
+    fixture.detectChanges();
+
+    expect(pagina.querySelector('app-modal-confirmacion')).toBeNull();
+    expect(campo('[role="alert"]').textContent).toContain('No se pudo eliminar la cafetería.');
+    expect(navegar).not.toHaveBeenCalled();
   });
 
   it('guarda cambios y vuelve a la vista', () => {

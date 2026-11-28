@@ -23,6 +23,7 @@ import { Router } from '@angular/router';
 import { Observable, concat, last } from 'rxjs';
 
 import { ActualizarPerfilDatos, etiquetaRoles } from '../../core/mappers/cuenta.mapper';
+import { HistorialTrazabilidad } from '../../core/models/historial-trazabilidad.model';
 import {
   PerfilUsuario,
   RedSocial,
@@ -41,6 +42,13 @@ const TELEFONO = /^(\+506[\s-]?)?\d{4}[\s-]?\d{4}$/;
 
 export const DESCRIPCION_ELIMINAR_CUENTA =
   'Al eliminar tu cuenta se borran permanentemente tu perfil y tu acceso a Crán̈hua. Las fincas y cosechas ya publicadas se conservan de forma anónima para no romper la trazabilidad de otros usuarios.';
+
+export function avisoEliminarCuenta(historial?: HistorialTrazabilidad | null): string | null {
+  if (!historial?.tieneHistorial) {
+    return null;
+  }
+  return `Tu cuenta tiene historial de trazabilidad visible para consumidores (por ejemplo ${historial.codigoEjemplo}). Eliminarla no borra esos códigos: se conservan de forma anónima, pero ya no vas a poder editarlos.`;
+}
 
 export const NOMBRES_RED_SOCIAL: Record<TipoRedSocial, string> = {
   instagram: 'Instagram',
@@ -179,6 +187,8 @@ export class PerfilUsuarioComponent implements OnDestroy {
   protected readonly errorGuardar = signal<string | null>(null);
   protected readonly acceptImagen = ACCEPT_IMAGEN_PERFIL;
   protected readonly modalEliminarAbierto = signal(false);
+  protected readonly avisoEliminar = signal<string | null>(null);
+  protected readonly errorEliminar = signal<string | null>(null);
 
   protected readonly iniciales = computed(() =>
     inicialesPerfil(this.perfil()?.nombreCompleto ?? ''),
@@ -188,7 +198,10 @@ export class PerfilUsuarioComponent implements OnDestroy {
   private readonly inputAvatar = viewChild<ElementRef<HTMLInputElement>>('inputAvatar');
 
   constructor() {
-    this.perfilService.obtener().subscribe((perfil) => this.perfil.set(perfil));
+    this.perfilService.obtener().subscribe((perfil) => {
+      this.perfil.set(perfil);
+      this.avisoEliminar.set(avisoEliminarCuenta(perfil.historialTrazabilidad));
+    });
   }
 
   ngOnDestroy(): void {
@@ -333,10 +346,14 @@ export class PerfilUsuarioComponent implements OnDestroy {
   }
 
   protected confirmarEliminar(): void {
-    this.perfilService.eliminarCuenta().subscribe(() => {
-      this.auth.limpiarSesion();
-      this.modalEliminarAbierto.set(false);
-      void this.router.navigateByUrl('/iniciar-sesion');
+    this.modalEliminarAbierto.set(false);
+    this.errorEliminar.set(null);
+    this.perfilService.eliminarCuenta().subscribe({
+      next: () => {
+        this.auth.limpiarSesion();
+        void this.router.navigateByUrl('/');
+      },
+      error: (error: unknown) => this.errorEliminar.set(parsearErrorAuth(error).mensaje),
     });
   }
 

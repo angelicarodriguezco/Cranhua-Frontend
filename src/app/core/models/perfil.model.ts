@@ -1,4 +1,5 @@
 import { RolCuenta } from './cuenta.model';
+import { HistorialTrazabilidad } from './historial-trazabilidad.model';
 
 export type TipoRedSocial = 'instagram' | 'whatsapp' | 'facebook' | 'sitio';
 
@@ -18,4 +19,5 @@ export interface PerfilUsuario {
   redes: RedSocial[];
   portadaUrl: string | null;
   avatarUrl: string | null;
+  historialTrazabilidad?: HistorialTrazabilidad | null;
 }

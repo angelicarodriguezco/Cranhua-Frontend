@@ -52,6 +52,7 @@ export function cafeteriaDesdeApi(api: CafeteriaResponseApi): Cafeteria {
     estilos: api.estilos.map((estilo) => ESTILO_DESDE_API[estilo]),
     propietarioId: api.cuentaId,
     portadaUrl: api.portadaUrl,
+    historialTrazabilidad: api.historialTrazabilidad ?? null,
   };
 }
 

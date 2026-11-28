@@ -1,4 +1,5 @@
 import { RolCuenta } from './cuenta.model';
+import { HistorialTrazabilidad } from './historial-trazabilidad.model';
 
 export type RolApi = 'CAFETALERO' | 'TOSTADOR' | 'CAFETERIA';
 
@@ -18,6 +19,7 @@ export interface CuentaResponseApi {
   fotoUrl?: string | null;
   bannerUrl?: string | null;
   redes?: RedSocialApi[];
+  historialTrazabilidad?: HistorialTrazabilidad;
 }
 
 export interface ActualizarCuentaRequest {
